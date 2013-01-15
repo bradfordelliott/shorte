@@ -1,0 +1,58 @@
+set tags=./tags,../tags,../../tags,../../../tags,../../../../tags,../../../../../tags,verif/tags
+
+" Avoid vim inserting tabs into file (both of these two)
+set expandtab
+set autoindent
+set tabstop=4
+set shiftwidth=4
+set smarttab
+"set cindent
+
+" Allow backspacing over everything in insert mode
+set backspace=indent,eol,start
+
+" Enable Syntax Highlighting
+syntax enable
+colo zellner
+
+
+set mouse=a
+set ttymouse=xterm2
+set list
+set lcs=tab:>-
+set nu
+set nowrap
+
+" Set the current directory to the active file
+set autochdir
+
+" Detect if files have changed externally
+set autoread
+
+set nofoldenable
+
+set fo=croq
+
+function! CleverTab()
+    if strpart( getline('.'), 0, col('.') - 1 ) =~ '^\s*$'
+        return "\<Tab>"
+    else
+        return "\<C-N>"
+endfunction
+
+inoremap <Tab> <C-R>=CleverTab()<CR>
+
+" ==================================================================
+" VIM 7 built-in spell check
+" ==================================================================
+if has ("spell")
+   " Set the dictionary
+   setlocal spelllang=en_ca
+   " Uncomment following line to turn on spellcheck by default
+   " setlocal spell 
+   " Use following command to toggle the spellcheck on and off
+   map _s :set spell!<bar>set spell?<CR>
+endif
+
+source ~/.vim/filetype.vim
+
