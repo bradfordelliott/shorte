@@ -1,0 +1,140 @@
+@media screen
+{
+  body { margin: 0px;padding: 0px; background: #666;font-size:100%;}
+
+  div.container
+  {
+      postion: relative;
+      width: 90%;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      margin: 0 auto;
+      margin-top: 20px;
+      background: #fff;
+      border-right: 2px solid white;
+      border-left: 0px solid white;
+      height: 100%;
+      z-index: 100;
+      min-height: 500px;
+  }
+  
+  * html div.container
+  {
+      height: 500px;
+      min-height: 500px;
+  }
+  
+  div.header
+  {
+     width:      100%;
+     border:     1px solid #fff;
+     padding:    0px;
+     background: white url(images/head_1024.gif) no-repeat;
+     color:      white;
+  }
+  
+  
+  div.footer
+  {
+     color: #666;
+     clear:      both;
+     width:      100%;
+     font-size:  0.9em;
+     border:     1px solid #fff;
+     height:     40px;
+     background: #ccc url(images/foot_1024.gif);
+  }
+  
+  #menu_div
+  {
+     width:          100%;
+     margin:         0px;
+     height:         40px;
+     font-size:      0.9em;
+     padding:        0px;
+     background:     url(images/menu.gif);
+     line-height:    normal;
+  }
+  
+  #right_menu
+  {
+      width: 208px;
+      float: left;
+      height: 100%;
+      margin: 0;
+      margin-left: 5px;
+      border: 0px solid black;
+      z-index: 100;
+  }
+  
+  /*
+  +-------------------------------------------------------------
+  |
+  | Styling of the Menu Tabs
+  |
+  +-------------------------------------------------------------
+  */
+  #menu_div ul
+  {
+     margin:     0;
+     padding:    6px 8px 0 20px;
+     list-style: none;
+  }
+   
+  #menu_div li
+  {
+     display: inline;
+     margin:  0;
+     padding: 5;
+  }
+   
+  #menu_div a
+  {
+     font-size: 1.0em;
+     color:           #005CDB;
+     float:           left;
+     margin:          0;
+     text-decoration: none;
+  }
+   
+  #menu_div a div
+  {
+     display: block;
+     color:      #005CDB;
+     margin: 0px;
+     padding-top: 4px;
+     padding-right: 20px;
+  }
+   
+  #menu_div a div
+  {
+     float: none;
+  }
+  
+  #menu_div a:hover
+  {
+     color: black;
+  }
+   
+  #menu_div a:hover div
+  {
+     color: black;
+  }
+
+}
+
+
+/* Common elements */
+@media screen,print {
+  $common
+}
+
+@media screen {
+  $screen_only
+}
+
+@media print {
+  $print_only
+}
+
