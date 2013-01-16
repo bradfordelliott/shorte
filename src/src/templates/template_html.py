@@ -346,7 +346,7 @@ class template_html_t(template_t):
         if(self.m_include_pdf):
             img_src = ''
             if(self.is_inline() == True):
-                handle = open("templates/shared/pdf.png", "rb")
+                handle = open(g_startup_path + "/templates/shared/pdf.png", "rb")
                 img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
                 handle.close()
             else:
