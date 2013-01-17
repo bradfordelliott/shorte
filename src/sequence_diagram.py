@@ -21,11 +21,11 @@ def min(one, two):
     if(one < two):
         return one
     return two
-
-
+        
 def generate_diagram(events, title, description, target_width, target_height, base_file_name):
 
-    BATIK = "%s/3rdparty/batik/batik-rasterizer.jar" % g_startup_path
+    # Read the configuration file
+    BATIK = shorte_get_config("paths", "path.batik")
     RIGHT_BREAK = 0x01
     LEFT_BREAK  = 0x02
     RESERVED    = 0x04

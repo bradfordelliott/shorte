@@ -1,6 +1,7 @@
 import platform
 import os
 import sys
+import ConfigParser
 
 if(platform.system() == "Linux"):
     python = "python"
@@ -323,6 +324,21 @@ def unescape_string(source):
     source = source.replace("<br/>", '\n')
     return source
 
+def shorte_get_config(section, key):
+
+    config = ConfigParser.ConfigParser()
+    config.read(g_startup_path + "/shorte.cfg")
+
+    # If searching for a path then make sure
+    # to append the OS to get the correct
+    # path
+    if(section == "paths"):
+        if(platform.system == "Linux"):
+            key += ".linux"
+        else:
+            key += ".win32"
+        
+    return config.get(section, key)
         
 
 STATE_NORMAL   = 1

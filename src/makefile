@@ -10,7 +10,7 @@ all:
 	make package
 
 cairo_plugin:
-	cd ../shorte_libs/unix && make
+	cd libs/unix && make
 
 package: cairo_plugin
 	rm -rf ../build-output

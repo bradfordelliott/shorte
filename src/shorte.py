@@ -632,10 +632,11 @@ class engine_t:
         # First evaluate any code snippets
         pages = self.m_parser.get_pages()
 
+        version = options.version
+
         for page in pages:
 
             #print "NAME: %s" % page["source_file"]
-            
             tags = page["tags"]
 
             for tag in tags:
@@ -647,8 +648,14 @@ class engine_t:
 
                     executor = code_executor_t()
                     tag["result"] = executor.execute(tag["name"], tag["source"], tag["modifiers"])
+                
+        # If the version number was not specified on the command
+        # line then use any @docversion one specified in one of
+        # the source files.
+        if(version == None):
+            version = self.m_docversion
 
-        self.m_template.generate(options.theme, options.version, package)
+        self.m_template.generate(options.theme, version, package)
 
 
 parser = OptionParser()
@@ -676,7 +683,7 @@ parser.add_option("-p", "--package",
 parser.add_option("-b", "--output_format",
                   action="store",dest="output_format",default="bitfields",
                   help="Set the output format in C generated code: bitfields, byte_array, or defines")
-parser.add_option("-d", "--diagnostic_code",
+parser.add_option("-y", "--diagnostic_code",
                   action="store_true",dest="allow_diagnostic_code",default=False,
                   help="Generate diagnostic code in generate code")
 parser.add_option("-c", "--config",
@@ -693,6 +700,9 @@ parser.add_option("-a", "--about",
                   help="About this program")
 parser.add_option("-m", "--macros",
                   action="store",type="string",dest="macros",
+                  help="Macro substitution")
+parser.add_option("-d", "--define",
+                  action="store",type="string",dest="define",
                   help="Macro substitution")
 parser.add_option("-r", "--search_and_replace",
                   action="store",type="string",dest="replace",
@@ -743,7 +753,9 @@ if(options.settings):
             shorte.set_config(sect, key, val)
 
 # Setup any macros the user specified
-#    -s "macro1=1;macro2=2"
+#    -m "macro1=1;macro2=2"
+# or
+#    -d "macro1=2;macro2=2"
 if(options.macros):
     fields = options.macros.split(";")
     macros = {}
@@ -757,8 +769,21 @@ if(options.macros):
            
             macros[key] = val
 
-    #print macros
     shorte.set_macros(macros)
+if(options.define):
+    fields = options.define.split(";")
+    defines = {}
+
+    for field in fields:
+        matches = re.search("(.*?)=(.*)", field)
+
+        if(matches != None):
+            key = matches.groups()[0]
+            val = matches.groups()[1]
+           
+            defines[key] = val
+
+    shorte.set_macros(defines)
 
 
 scratchdir = shorte.get_config("shorte", "scratchdir")
