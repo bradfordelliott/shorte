@@ -3,8 +3,9 @@ include version.inc
 help:
 	@echo "Available Targets"
 	@echo "================="
-	@echo " package = build shorte and generate the tarball"
-	@echo " install = install shorte over the network"
+	@echo " cairo_plugin = build the cairo plugin"
+	@echo " package      = build shorte and generate the tarball"
+	@echo " install      = install shorte over the network"
 
 all:
 	make package
