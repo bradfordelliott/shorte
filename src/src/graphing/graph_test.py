@@ -2,6 +2,7 @@
 import sys
 import re
 sys.path.append("../../libs")
+sys.path.append("../..")
 sys.path.append("libs")
 import cairo_access
 from cairo_access import *
@@ -9,6 +10,7 @@ import math
 
 import linegraph
 import bargraph
+import sequence_diagram
 
 lgraph = linegraph.line_graph_t(800,600)
 lgraph.set_title("This is a test graph", "A test line graph with some data")
@@ -24,7 +26,7 @@ lgraph.add_data_set(d2, "two", color="blue")
 lgraph.draw_graph("line.png")
 
 
-bgraph = bargraph.bar_graph_t(800,600)
+bgraph = bargraph.bar_graph_t(1600,1200)
 bgraph.set_title("This is a test graph", "A test bar graph with some data")
 bgraph.set_xaxis("X-Axis", "red", 0, 10, 1)
 bgraph.set_yaxis("Y-Axis", "red", 0, 10, 1)
@@ -35,4 +37,49 @@ d2 = {2:1, 3:3, 4:8, 6:7, 7:9, 8:2, 9:1}
 bgraph.add_data_set(d2, "two", color="blue")
 
 bgraph.draw_graph("bar.png")
+
+events = []
+title = "test"
+desc = "test"
+imagemap = "test"
+output = "test.svg"
+
+event = {}
+event["type"] = "message"
+event["from"] = "a"
+event["to"] = "b"
+event["name"] = "one"
+event["desc"] = "Test"
+events.append(event)
+
+event = {}
+event["type"] = "message"
+event["from"] = "b"
+event["to"] = "a"
+event["name"] = "two"
+event["desc"] = "test"
+events.append(event)
+
+event = {}
+event["type"] = "message"
+event["from"] = "b"
+event["to"] = "c"
+event["name"] = "three"
+event["desc"] = "test"
+events.append(event)
+
+event = {}
+event["type"] = "message"
+event["from"] = "c"
+event["to"] = "d"
+event["name"] = "four"
+event["desc"] = "test"
+events.append(event)
+
+sequence_diagram.generate_diagram(events=events,
+    title=title, description=desc,
+    target_width=1600,
+    target_height=1200,
+    #imagemap_name="test",
+    base_file_name="test")
 

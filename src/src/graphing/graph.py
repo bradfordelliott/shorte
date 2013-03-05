@@ -11,12 +11,14 @@ class cairo_t():
     def __init__(self, width, height):
         self.image = cairo(5000, 5000)
 
-    def draw_text(self, x, y, text, font_color="black", text_anchor="start", angle=0, font_size=10, text_orientation="horizontal"):
+    def draw_text(self, x, y, text, font_color="black", text_anchor="start", angle=0, font_size=10, text_orientation="horizontal", font_family="Verdana"):
         font_color = self.translate_color(font_color)
     
         width = 0
     
         font_size += 3
+
+        self.image.select_font_face(font_family, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     
         #$self->drawRect({"x" => $propsRef->{"x"},
         #                 "y" => $propsRef->{"y"},
@@ -49,11 +51,18 @@ class cairo_t():
         self.image.stroke()
         self.image.restore()
 
-    def draw_rect(self, x, y, width, height, text=None, background_color="white", line_color="black"):
+    def draw_rect(self,
+                  x,
+                  y,
+                  width,
+                  height,
+                  text=None,
+                  background_color="white",
+                  line_color="black",
+                  line_weight=1):
 
-        self.image.set_line_width(1);
+        self.image.set_line_width(line_weight);
         rounding=0
-        text="test"
 
         background_color = self.translate_color(background_color)
         line_color = self.translate_color(line_color)
@@ -63,65 +72,52 @@ class cairo_t():
         text_orientation="horizontal"
         
         if(rounding):
-            pass
-            #my $radius = $propsRef->{"rounding"};
-            #my $x0 = $propsRef->{"x"};
-            #my $y0 = $propsRef->{"y"};
-            #my $x1 = $x0 + $propsRef->{"width"};
-            #my $y1 = $y0 + $propsRef->{"height"};
-            #my $rect_width = $propsRef->{"width"};
-            #my $rect_height = $propsRef->{"height"};
-            #
-            #if ($rect_width/2<$radius)
-            #{
-            #    if ($rect_height/2<$radius)
-            #    {
-            #        $im->move_to  ($x0, ($y0 + $y1)/2);
-            #        $im->curve_to ($x0 ,$y0, $x0, $y0, ($x0 + $x1)/2, $y0);
-            #        $im->curve_to ($x1, $y0, $x1, $y0, $x1, ($y0 + $y1)/2);
-            #        $im->curve_to ($x1, $y1, $x1, $y1, ($x1 + $x0)/2, $y1);
-            #        $im->curve_to ($x0, $y1, $x0, $y1, $x0, ($y0 + $y1)/2);
-            #    }
-            #    else
-            #    {
-            #        $im->move_to  ($x0, $y0 + $radius);
-            #        $im->curve_to ($x0 ,$y0, $x0, $y0, ($x0 + $x1)/2, $y0);
-            #        $im->curve_to ($x1, $y0, $x1, $y0, $x1, $y0 + $radius);
-            #        $im->line_to ($x1 , $y1 - $radius);
-            #        $im->curve_to ($x1, $y1, $x1, $y1, ($x1 + $x0)/2, $y1);
-            #        $im->curve_to ($x0, $y1, $x0, $y1, $x0, $y1- $radius);
-            #    }
-            #}
-            #else
-            #{
-            #    if ($rect_height/2<$radius)
-            #    {
-            #        $im->move_to  ($x0, ($y0 + $y1)/2);
-            #        $im->curve_to ($x0 , $y0, $x0 , $y0, $x0 + $radius, $y0);
-            #        $im->line_to ($x1 - $radius, $y0);
-            #        $im->curve_to ($x1, $y0, $x1, $y0, $x1, ($y0 + $y1)/2);
-            #        $im->curve_to ($x1, $y1, $x1, $y1, $x1 - $radius, $y1);
-            #        $im->line_to ($x0 + $radius, $y1);
-            #        $im->curve_to ($x0, $y1, $x0, $y1, $x0, ($y0 + $y1)/2);
-            #    }
-            #    else
-            #    {
-            #        $im->move_to  ($x0, $y0 + $radius);
-            #        $im->curve_to ($x0 , $y0, $x0 , $y0, $x0 + $radius, $y0);
-            #        $im->line_to ($x1 - $radius, $y0);
-            #        $im->curve_to ($x1, $y0, $x1, $y0, $x1, $y0 + $radius);
-            #        $im->line_to ($x1 , $y1 - $radius);
-            #        $im->curve_to ($x1, $y1, $x1, $y1, $x1 - $radius, $y1);
-            #        $im->line_to ($x0 + $radius, $y1);
-            #        $im->curve_to ($x0, $y1, $x0, $y1, $x0, $y1- $radius);
-            #    }
-            #}
-            #$im->close_path ();
+            radius = rounding
+            x0 = x
+            y0 = y
+            x1 = x0 + width
+            y1 = y0 + height
+            rect_width = width
+            rect_height = height
+            
+            if (rect_width/2<radius):
+                if (rect_height/2<radius):
+                    self.image.move_to  (x0, (y0 + y1)/2);
+                    self.image.curve_to (x0 ,y0, x0, y0, (x0 + x1)/2, y0);
+                    self.image.curve_to (x1, y0, x1, y0, x1, (y0 + y1)/2);
+                    self.image.curve_to (x1, y1, x1, y1, (x1 + x0)/2, y1);
+                    self.image.curve_to (x0, y1, x0, y1, x0, (y0 + y1)/2);
+                else:
+                    self.image.move_to  (x0, y0 + radius);
+                    self.image.curve_to (x0 ,y0, x0, y0, (x0 + x1)/2, y0);
+                    self.image.curve_to (x1, y0, x1, y0, x1, y0 + radius);
+                    self.image.line_to (x1 , y1 - radius);
+                    self.image.curve_to (x1, y1, x1, y1, (x1 + x0)/2, y1);
+                    self.image.curve_to (x0, y1, x0, y1, x0, y1- radius);
+            else:
+                if (rect_height/2<radius):
+                    self.image.move_to  (x0, (y0 + y1)/2);
+                    self.image.curve_to (x0 , y0, x0 , y0, x0 + radius, y0);
+                    self.image.line_to (x1 - radius, y0);
+                    self.image.curve_to (x1, y0, x1, y0, x1, (y0 + y1)/2);
+                    self.image.curve_to (x1, y1, x1, y1, x1 - radius, y1);
+                    self.image.line_to (x0 + radius, y1);
+                    self.image.curve_to (x0, y1, x0, y1, x0, (y0 + y1)/2);
+                else:
+                    self.image.move_to  (x0, y0 + radius);
+                    self.image.curve_to (x0 , y0, x0 , y0, x0 + radius, y0);
+                    self.image.line_to (x1 - radius, y0);
+                    self.image.curve_to (x1, y0, x1, y0, x1, y0 + radius);
+                    self.image.line_to (x1 , y1 - radius);
+                    self.image.curve_to (x1, y1, x1, y1, x1 - radius, y1);
+                    self.image.line_to (x0 + radius, y1);
+                    self.image.curve_to (x0, y1, x0, y1, x0, y1- radius);
+            self.image.close_path();
 
-            #$im->set_source_rgb ($propsRef->{"background-color"}->[0], $propsRef->{"background-color"}->[1], $propsRef->{"background-color"}->[2]);
-            #$im->fill_preserve ();
-            #$im->set_source_rgb ($propsRef->{"line-color"}->[0], $propsRef->{"line-color"}->[1], $propsRef->{"line-color"}->[2]);
-            #$im->stroke ();
+            self.image.set_source_rgb (background_color[0], background_color[1], background_color[2]);
+            self.image.fill_preserve ();
+            self.image.set_source_rgb (line_color[0], line_color[1], line_color[2]);
+            self.image.stroke ();
         else:
             self.image.set_source_rgb(background_color[0], background_color[1], background_color[2])
             self.image.rectangle(x,y,width,height)
@@ -151,14 +147,15 @@ class cairo_t():
                     font_size=10,
                     text=None,
                     line_color="#000000",
-                    background_color="#ffffff"):
+                    background_color="#ffffff",
+                    line_weight=0.6):
         im = self.image
         
         line_color = self.translate_color(line_color)
         background_color = self.translate_color(background_color)
         font_color = self.translate_color(font_color)
         
-        im.set_line_width(0.6);
+        im.set_line_width(line_weight);
         
         im.save();
         im.translate(x + width / 2.,
@@ -248,18 +245,19 @@ class cairo_t():
         
         alpha = 90 + angle
         beta = 90 - angle
-        
+
+        arrow_size = 3
+
         if(arrow_type == 2):
-            print "Do I get here?"
             self.image.new_path();
-            xoff = 4 * (arrow_size) * math.sin((beta-35)/57.2957795);
-            yoff = 4 * (arrow_size) * math.cos((beta-35)/57.2957795);
+            xoff = 3 * (arrow_size) * math.sin((beta-45)/57.2957795);
+            yoff = 3 * (arrow_size) * math.cos((beta-45)/57.2957795);
             
             self.image.move_to(x, y);
-            self.image.line_to(x + xoff, y + yoff);
+            self.image.line_to(x + xoff, y - yoff);
                 
-            xoff = 4 * (arrow_size) * math.cos((alpha-35)/57.2957795);
-            yoff = 4 * (arrow_size) * math.sin((alpha-35)/57.2957795);
+            xoff = 3 * (arrow_size) * math.cos((alpha-45)/57.2957795);
+            yoff = 3 * (arrow_size) * math.sin((alpha-45)/57.2957795);
             
             self.image.line_to(x + xoff, y + yoff);
             self.image.line_to(x, y);
@@ -268,18 +266,30 @@ class cairo_t():
             self.image.fill_preserve();
             self.image.stroke();
             
-    def draw_line(self, x1, y1, x2, y2, text="", line_color="black", background_color="white", line_weight=1, line_pattern=1):
+    def draw_line(self,
+            x1,
+            y1,
+            x2,
+            y2,
+            text="",
+            line_color="black",
+            background_color="white",
+            line_weight=1,
+            line_pattern=0,
+            arrow_begin=0,
+            arrow_end=0):
         
         line_color = self.translate_color(line_color)
         font_color = self.translate_color(background_color)
 
         id = 0
     
-        arrow_begin = 0
-        arrow_begin_size = 1
+        #arrow_begin = 2
+        arrow_begin_size = 4
         arrow_begin_color = line_color
-        arrow_end = 0
-        arrow_end_size = 1
+        #arrow_end = 0
+        arrow_end_size = 4
+        arrow_end_color = line_color
         
         if(line_pattern == 1):
             a = cairo_access.new_doubleArray(2)
@@ -302,10 +312,16 @@ class cairo_t():
             cairo_access.delete_doubleArray(a);
 
         elif(line_pattern == 4):
-            a = cairo_access.new_doubleArray(2);
-            cairo_access.doubleArray_setitem(a, 0, 4);
-            cairo_access.doubleArray_setitem(a, 1, 4);
-            self.image.set_dash(a, 2, 0.0);
+            a = cairo_access.new_doubleArray(4);
+            cairo_access.doubleArray_setitem(a, 0, 9);
+            cairo_access.doubleArray_setitem(a, 1, 3);
+            cairo_access.doubleArray_setitem(a, 2, 4);
+            cairo_access.doubleArray_setitem(a, 3, 3);
+            self.image.set_dash(a, 4, 0.0);
+            cairo_access.delete_doubleArray(a);
+        else:
+            a = cairo_access.new_doubleArray(0);
+            self.image.set_dash(a, 0, 0.0);
             cairo_access.delete_doubleArray(a);
 
         # Now calculate the position of any arrows if it is necessary
@@ -319,16 +335,19 @@ class cairo_t():
         beta = 90 - alpha;
         
         if(x1 > x2):
-            tmp = x1
-            x1 = x2
-            x2 = x1;
+            #tmp = x1
+            #x1 = x2
+            #x2 = tmp;
             beta = -beta;
             alpha = 360 - alpha;
         
-        if(y1 > y2):
-            tmp = y1;
-            y1 = y2;
-            y2 = y1;
+        #if(y1 > y2):
+        #    tmp = y1;
+        #    y1 = y2;
+        #    y2 = tmp;
+
+        #print "x1 = %d, x2 = %d" % (x1,x2)
+        #print "y1 = %d, y2 = %d" % (y1,y2)
         
         self.image.move_to(x1, y1)
         
@@ -351,17 +370,11 @@ class cairo_t():
                                 arrow_type = arrow_begin,
                                 arrow_size = arrow_begin_size,
                                 arrow_color = arrow_begin_color)
-
-        #
-        #if($propsRef->{"arrow-end"} > 0)
-        #{
-        #    $self->drawArrowHead({"x" => $propsRef->{"x2"},
-        #                          "y" => $propsRef->{"y2"},
-        #                          "arrow-type" => $propsRef->{"arrow-end"},
-        #                          "angle" => 180 - $beta,
-        #                          "arrow-size" => $propsRef->{"arrow-end-size"},
-        #                          "arrow-color" => $propsRef->{"arrow-end-color"}});
-        #}
+        if(arrow_end):
+            self.draw_arrow_head(x = x2, y = y2, angle = 180-beta,
+                                arrow_type = arrow_end,
+                                arrow_size = arrow_end_size,
+                                arrow_color = arrow_end_color)
 
 #=pod    
 #
