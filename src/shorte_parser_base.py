@@ -1,3 +1,4 @@
+from shorte_defines import *
 
 class parser_t:
 
@@ -175,6 +176,10 @@ class parser_t:
         return list
 
     def parse_textblock(self, data):
+        
+        #print "DATA: [%s]" % data
+
+        data = trim_leading_indent(data)
 
         STATE_NORMAL = 0
         STATE_LIST = 1

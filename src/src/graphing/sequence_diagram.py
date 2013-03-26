@@ -29,7 +29,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     cairo = cairo_t(5000, 5000)
 
     # Read the configuration file
-    #BATIK = shorte_get_config("paths", "path.batik")
     RIGHT_BREAK = 0x01
     LEFT_BREAK  = 0x02
     RESERVED    = 0x04
@@ -136,7 +135,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 keys[event["to"]] = {}
                 keys[event["to"]]["set"] = 1
                 keys[event["to"]]["x"] = x
-                x += gap_between_actors
+                x += gap_between_actors + 50
                 sources.append(event["to"])
     
     num_events = len(events)
@@ -224,13 +223,17 @@ def generate_diagram(events, title, description, target_width, target_height, ba
       stroke-width="3"/>
 ''' % (keys[source]["x"] - 10, y - gap_between_events/2, gap_between_events - 10)
 
-            cairo.draw_text(
+            cairo.draw_rect(
                 x=keys[source]["x"] - 10,
-                y=y-gap_between_events/2,
+                y=y-(gap_between_events/2),
                 width=20,
                 height=gap_between_events - 10,
                 background_color="#f0f0f0",
-                line_color="#c0c0c0")
+                line_color="#c0c0c0",
+                rounding=5,
+                line_weight=3,
+                text="%s" % event_count,
+                )
             
             text_position = keys[source]["x"]
     
@@ -273,12 +276,12 @@ def generate_diagram(events, title, description, target_width, target_height, ba
 </text>
 ''' % (text_position, y - 5, event_count)
 
-            cairo.draw_text(
-                x=text_position,
-                y=y-5,
-                font_color="#000000",
-                text="%s" % event_count,
-                text_anchor="middle")
+            #cairo.draw_text(
+            #    x=text_position,
+            #    y=y-5,
+            #    font_color="#000000",
+            #    text="WTF%s" % event_count,
+            #    text_anchor="middle")
         
             y += gap_between_events
             continue
@@ -402,7 +405,9 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 height=25,
                 background_color="#f0f0f0",
                 line_color="#c0c0c0",
-                line_weight=3.0)
+                line_weight=3.0,
+                text="%s" % event_count,
+                font_color="#a0a0a0")
             
             xml += '''
 <text text-anchor="middle" font-family="Courier New" 
@@ -411,14 +416,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
 </text>
 ''' % (text_position, (y - (gap_between_events - 34)), event_count)
 
-            cairo.draw_text(
-                x=text_position,
-                y=(y - (gap_between_events - 25)),
-                text="%s" % event_count,
-                font_color="#a0a0a0",
-                text_anchor="middle")
-
-           
             color = "black"
             if(event.has_key("link")):
                 color = "blue"
@@ -432,8 +429,8 @@ def generate_diagram(events, title, description, target_width, target_height, ba
 
             cairo.draw_text(
                 x=text_position,
-                y=y-10,
-                font_color=color,
+                y=y-18,
+                font_color="#808080",
                 text=name,
                 text_anchor="middle")
            
@@ -526,6 +523,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
 
                     cairo.draw_text(
                         x = keys[target]["x"] + markerx + arcpointoffsetx,
+                        font_color="#00ff00",
                         y = abs(y - ((y-markery)/2)),
                         text_anchor = "middle")
                     
@@ -555,20 +553,24 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     
     xml_header = xml_header.replace("680", "%d" % width)
     xml_header = xml_header.replace("300", "%d" % height)
-    
-    hdiagram = open(base_file_name + ".svg", "wb")
+            
+    scratch_dir = shorte_get_config("shorte", "scratchdir")
+    image_name = scratch_dir + "/" + base_file_name
+
+    hdiagram = open(image_name + ".svg", "wb")
     hdiagram.write(xml_header)
     hdiagram.write(xml)
     hdiagram.close()
     
     # Convert the result into a PNG file
-    output_file = base_file_name + ".png"
+    output_file = image_name + ".png"
     
     #cmd = 'java -Djava.awt.headless=true -jar %s -bg 1.255.255.255 -w %d -h %d -m image/png %s' % (BATIK, width, height, base_file_name + ".svg")
     #print "CMD: [%s]" % cmd
     #result = os.popen(cmd)
         
-    cairo.image.write_to_png("test2.png", width, height)
+    #cairo.image.write_to_png("test2.png", width, height)
+    cairo.image.write_to_png(output_file, width, height)
     
     return (output_file, image_map, events_table)
     

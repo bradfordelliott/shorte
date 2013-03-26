@@ -765,12 +765,16 @@ class template_odt_t(template_t):
         '''This method is called to format a wikiword. It is called by
            the wikify method in the template base class'''
 
+        #if("width" in label):
+        #print "WIKIWORD: [%s]" % label
+
         if(is_bookmark):
             tmp = '''<text:a xlink:type="simple" xlink:href="#%s" office:name="%s">%s</text:a>''' % (link_word, label, label)
         else:
             tmp = '''<text:a xlink:type="simple" xlink:href="#%s|outline" office:name="%s">%s</text:a>''' % (link_word, label, label)
-        output = '''<text:span text:style-name="hyperlink">%s</text:span>''' % tmp
 
+        output = '''<text:span text:style-name="hyperlink">%s</text:span>''' % tmp
+        
         return output
 
 
@@ -807,7 +811,7 @@ class template_odt_t(template_t):
         if(tag.has_key("break_before")):
             break_before = tag["break_before"]
         elif(tag.has_key("is_prototype")):
-            break_before = int(self.m_engine.get_config("odt", "prototype_break_before"))
+            break_before = int(shorte_get_config("odt", "prototype_break_before"))
 
         data = self.format_text(data, False)
 
@@ -1400,7 +1404,6 @@ class template_odt_t(template_t):
 
 
             xml += "</table:table-row>\n"
-
         xml += "</table:table>"
 
         # If the table has a caption then output the caption
@@ -1415,7 +1418,7 @@ class template_odt_t(template_t):
         table = tag["contents"]
         
         
-        if(self.m_engine.get_config("html", "show_enum_values") == "1"):
+        if(shorte_get_config("html", "show_enum_values") == "1"):
             show_enum_vals = True
             max_cols = table["max_cols"]
         else:
@@ -1608,10 +1611,10 @@ class template_odt_t(template_t):
             elif(is_list):
                 xml += self.format_list(p["text"], False)
             elif(indent > 0):
-                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (self.m_styles["para"]["indent"][0], self.format_text(text.strip()))
+                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (self.m_styles["para"]["indent"][0], self.format_text(text.strip(), expand_equals_block=True))
                 xml += '<text:p text:style-name="shorte_spacer"></text:p>'
             else:
-                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (style, self.format_text(text.strip()))
+                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (style, self.format_text(text.strip(),expand_equals_block=True))
        
         return xml
     
@@ -1997,6 +2000,7 @@ class template_odt_t(template_t):
                     desc = obj["caption"]
                 text_style = self.m_styles["para"]["fdesc"]
                 cols.append({"span":1, 'text':self.xmlize(desc), "style": style, "text-style": text_style})
+
             elif(summary_type == "testcases"):
 
                 name = obj["name"]
@@ -2113,11 +2117,39 @@ class template_odt_t(template_t):
         function["function_params"] = ''
         function["function_returns"] = ''
         function["function_see_also"] = ''
+        function["function_deprecated"] = ''
+
+        is_deprecated = False
+
         wikiwords = []
         wikiwords.append(function["function_name"])
 
+        # Lookup the styles for formatting a prototypes
+        function["style_table"] = self.m_styles["table"]["styles"]["prototype"]
+        function["style_row"] = self.m_styles["table"]["row"]["prototype"]
+        function["style_section"] = self.m_styles["table"]["cell"]["prototype_section"]
+        function["style_section_name"] = self.m_styles["table"]["cell"]["prototype_name"]
+        function["style_section_data"] = self.m_styles["table"]["cell"]["prototype"]
+        function["style_para_name"] = self.m_styles["para"]["prototype"]["param_name2"]
+        function["style_para_text"] = self.m_styles["para"]["prototype"]["text"]
+        function["style_para_section"] = self.m_styles["para"]["prototype"]["section"]
+        function["style_para_normal"] = self.m_styles["para"]["normal"]
+        function["style_col0"] = self.m_styles["table"]["columns"]["prototype"][0]
+        function["style_col1"] = self.m_styles["table"]["columns"]["prototype"][1]
+        function["style_col2"] = self.m_styles["table"]["columns"]["prototype"][2]
+        function["style_col3"] = self.m_styles["table"]["columns"]["prototype"][3]
+
+
         if(prototype.has_key("function_desc")):
-            function["function_desc"] = self.format_text(prototype["function_desc"],expand_equals_block=True)
+            tmp = '''<text:p text:style-name="%s">''' % self.m_styles["para"]["prototype"]["text"]
+            tmp += self.format_text(prototype["function_desc"],expand_equals_block=True)
+            tmp += "</text:p>"
+            function["function_desc"] = tmp
+
+        if(prototype.has_key("function_desc2")):
+            tag = {}
+            tag["contents"] = prototype["function_desc2"]
+            function["function_desc"] = self.format_textblock(tag)
 
         if(prototype.has_key("function_prototype")):
             language = prototype["function_prototype"]["language"]
@@ -2131,7 +2163,6 @@ class template_odt_t(template_t):
             table["max_cols"] = 4 
             table["rows"] = []
 
-
             param_template = string.Template("""
         <table:table-row table:style-name="$table_row_prototype">
           <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
@@ -2143,9 +2174,7 @@ class template_odt_t(template_t):
           <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
             <text:p text:style-name="$para_prototype_param">[${param_io}]</text:p>
           </table:table-cell>
-          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
-            <text:p text:style-name="$para_prototype_param">${param_desc}</text:p>
-          </table:table-cell>
+          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">${param_desc}</table:table-cell>
         </table:table-row>
                         """)
 
@@ -2162,20 +2191,33 @@ class template_odt_t(template_t):
 
                 table["rows"].append(row)
 
+                #print "Param: %s" % param["param_name"]
+                #print "Desc:  " , param["param_desc"]
+
                 tmp = ''
-                for val in param["param_desc"]:
-                    if(len(val) == 2):
-                        tmp += '''
-                            <text:span text:style-name="%s">%s</text:span>
-                            <text:span>%s</text:span>
-                            <text:line-break/>
-                        ''' % (self.m_styles["span"]["prototype"]["param_name"],
-                               val[0],
-                               self.format_text(val[1]))
-                    else:
-                        tmp += self.format_text(val)
+                desc = param["param_desc"]
+
+                if(isinstance(desc, str) or isinstance(desc, unicode)):
+                    tmp += desc # self.format_text(desc)
+                else:
+                    for val in param["param_desc"]:
+                        if(len(val) == 2):
+                            tmp += '''
+                                <text:span text:style-name="%s">%s</text:span>
+                                <text:span>%s</text:span>
+                                <text:line-break/>
+                            ''' % (self.m_styles["span"]["prototype"]["param_name"],
+                                   val[0],
+                                   self.format_text(val[1]))
+                        else:
+                            tmp += self.format_text(val)
 
                 param["param_desc"] = tmp
+                
+                if(param.has_key("param_desc2")):
+                    tag = {}
+                    tag["contents"] = param["param_desc2"]
+                    param["param_desc"] = self.format_textblock(tag, style=self.m_styles["para"]["prototype"]["param"])
 
                 param["table_row_prototype"] = self.m_styles["table"]["row"]["prototype"]
                 param["table_cell_prototype"] = self.m_styles["table"]["cell"]["prototype"]
@@ -2184,12 +2226,20 @@ class template_odt_t(template_t):
 
                 output += param_template.substitute(param)
 
-            function["function_params"] = output
-            #function["function_params"] = self.__format_table("", table)
-            
-            #print "output = %s" % output
+            if(len(output) > 0):
+                function["function_params"] = string.Template('''<table:table-row table:style-name="${style_row}">
+          <table:table-cell table:style-name="${style_section}" table:number-columns-spanned="4" office:value-type="string">
+            <text:p text:style-name="${style_para_section}">Parameters:</text:p>
+          </table:table-cell>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+        </table:table-row>${params}''').substitute({"style_section" : function["style_section"],
+                                           "style_row"              : function["style_row"],
+                                           "style_para_section"     : function["style_para_section"],
+                                           "params"                 : output})
 
-        if(prototype.has_key("function_returns")):
+        if(prototype.has_key("function_returns") and len(prototype["function_returns"]) > 0):
         
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
@@ -2209,7 +2259,7 @@ class template_odt_t(template_t):
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "function_returns" : prototype["function_returns"],
+    "function_returns" : self.format_text(prototype["function_returns"]),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2247,6 +2297,38 @@ class template_odt_t(template_t):
     })
 
             function["function_see_also"] = xml
+        
+        
+        if(prototype.has_key("function_deprecated")):
+            is_deprecated = True
+
+            xml = string.Template('''
+        <table:table-row table:style-name="${row_style}">
+          <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
+            <text:p text:style-name="${section_style}">Deprecated:</text:p>
+          </table:table-cell>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+        </table:table-row>
+        <table:table-row table:style-name="${row_style}">
+          <table:table-cell table:style-name="${cell_style2}" table:number-columns-spanned="4" office:value-type="string">
+            <text:p text:style-name="${param_style}">${deprecated}</text:p>
+          </table:table-cell>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+        </table:table-row>
+''').substitute({
+    "deprecated" : self.format_text(prototype["function_deprecated"]),
+    "row_style" : self.m_styles["table"]["row"]["prototype_section"],
+    "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
+    "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
+    "cell_style2" : self.m_styles["table"]["cell"]["prototype"],
+    "param_style" : self.m_styles["para"]["prototype"]["param"]
+    })
+
+            function["function_deprecated"] = xml
 
         if(prototype.has_key("function_example")):
 
@@ -2348,7 +2430,7 @@ class template_odt_t(template_t):
 
         <table:table-row table:style-name="${style_row}">
           <table:table-cell table:style-name="${style_section_data}" table:number-columns-spanned="4" office:value-type="string">
-            <text:p text:style-name="${style_para_text}">${function_desc}</text:p>
+            ${function_desc}
           </table:table-cell>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
@@ -2373,42 +2455,22 @@ class template_odt_t(template_t):
           <table:covered-table-cell/>
         </table:table-row>
 
-        <table:table-row table:style-name="${style_row}">
-          <table:table-cell table:style-name="${style_section}" table:number-columns-spanned="4" office:value-type="string">
-            <text:p text:style-name="${style_para_section}">Parameters:</text:p>
-          </table:table-cell>
-          <table:covered-table-cell/>
-          <table:covered-table-cell/>
-          <table:covered-table-cell/>
-        </table:table-row>
 
         ${function_params}
         ${function_returns}
         ${function_example}
         ${function_pseudocode}
         ${function_see_also}
+        ${function_deprecated}
 </table:table>
 <text:p text:style-name="${style_para_normal}"></text:p>
 """)
 
-        function["style_table"] = self.m_styles["table"]["styles"]["prototype"]
-
-        function["style_row"] = self.m_styles["table"]["row"]["prototype"]
-        function["style_section"] = self.m_styles["table"]["cell"]["prototype_section"]
-        function["style_section_name"] = self.m_styles["table"]["cell"]["prototype_name"]
-        function["style_section_data"] = self.m_styles["table"]["cell"]["prototype"]
-
-        function["style_para_name"] = self.m_styles["para"]["prototype"]["param_name2"]
-        function["style_para_text"] = self.m_styles["para"]["prototype"]["text"]
-        function["style_para_section"] = self.m_styles["para"]["prototype"]["section"]
-        function["style_para_normal"] = self.m_styles["para"]["normal"]
-        
-        function["style_col0"] = self.m_styles["table"]["columns"]["prototype"][0]
-        function["style_col1"] = self.m_styles["table"]["columns"]["prototype"][1]
-        function["style_col2"] = self.m_styles["table"]["columns"]["prototype"][2]
-        function["style_col3"] = self.m_styles["table"]["columns"]["prototype"][3]
         function["id"] = self.m_table_id
         self.m_table_id += 1
+
+        if(is_deprecated):
+            function["function_name"] += " (DEPRECATED)"
 
         xml = template.substitute(function)
 
@@ -2579,7 +2641,7 @@ class template_odt_t(template_t):
 
     def generate_index(self, title, theme, version):
 
-        scratchdir = self.m_engine.get_config("shorte", "scratchdir")
+        scratchdir = shorte_get_config("shorte", "scratchdir")
 
         #print "Theme: %s" % self.m_engine.m_theme
 
@@ -2687,7 +2749,7 @@ class template_odt_t(template_t):
     def generate(self, theme, version, package):
         global g_startup_path
 
-        scratchdir = self.m_engine.get_config("shorte", "scratchdir")
+        scratchdir = shorte_get_config("shorte", "scratchdir")
         
         try:
             shutil.rmtree(scratchdir + os.path.sep + 'odt')
@@ -2724,23 +2786,38 @@ class template_odt_t(template_t):
         if(sys.platform == "cygwin" or sys.platform == "win32"):
             startup_path = g_startup_path.replace("/cygdrive/c/", "C:\\")
             startup_path = startup_path.replace("/", "\\")
-            path_oowriter = self.m_engine.get_config("shorte", "path.oowriter.win32")
+            path_oowriter = shorte_get_config("shorte", "path.oowriter.win32")
         else:
             startup_path = g_startup_path
-            path_oowriter = self.m_engine.get_config("shorte", "path.oowriter.linux")
+            path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
 
         if(package == PACKAGE_TYPE_ODT):
             input = "%s" % (self.m_engine.get_output_dir() + "/" + self.get_index_name())
             input_path = input.replace("/cygdrive/c/", "C:\\")
-            output = "%s.copy" % (input)
-            cmd = "%s -nologo -nofirststartwizard -norestore -nodefault -headless -hidden -invisible -nolockcheck \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (path_oowriter, startup_path, input_path)
-            print "output = %s, input = %s" % (input, output)
+            input_path = input_path.replace("\\", "/")
+            startup_path = startup_path.replace("\\", "/")
+
+            output = input
+            output = output.replace(".odt", "")
+
+            output = output + "_copy.odt"
+
+            if(sys.platform in ("cygwin","win32")):
+                #print "DO I get here?"
+                #sys.exit(0)
+                cmd = "%s \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (path_oowriter, startup_path, input_path)
+            else:
+                cmd = "%s -nologo -nofirststartwizard -norestore -nodefault -headless -invisible -nolockcheck \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (path_oowriter, startup_path, input_path)
 
             for i in range(0, 5):
                 try:
-                    rc = os.system(cmd)
+                    os.popen(cmd).read()
+                    rc = 0
+
+                    #rc = os.system(cmd)
                     if(rc != 0):
                         print "Failed converting document, retrying"
+                        break
                     else:
                         break
                 except:
@@ -2755,8 +2832,10 @@ class template_odt_t(template_t):
 
             #print "INPUT = %s" % input
 
-            params = "-nologo -nofirststartwizard -norestore -nodefault -headless -hidden -invisible -nolockcheck"
-            params = "-nologo -nofirststartwizard -norestore -nodefault -headless -nolockcheck"
+            if(sys.platform in ("cygwin","win32")):
+                params = ""
+            else:
+                params = "-nologo -nofirststartwizard -norestore -nodefault -headless -hidden -invisible -nolockcheck"
 
             cmd = "%s %s \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\", \\\"1.0\\\", \\\"blah\\\")\"" % (path_oowriter, params, startup_path, input)
             print cmd

@@ -21,10 +21,12 @@ from shorte_source_code import *
 import platform
 import time
 from shorte_parser_base import parser_t
-import sequence_diagram
 
 startup_path = os.path.dirname(sys.argv[0])
 sys.path.append(startup_path + "/libs")
+
+sys.path.append(startup_path + "/src/graphing")
+import sequence_diagram
 
 #print platform.system()
 if("Windows" == platform.system()):
@@ -127,14 +129,14 @@ class shorte_parser_t(parser_t):
         # are automatically excluded if a parent tag
         # is excluded.
         self.m_tag_hierarchy = {
-            "body"   : 0,
-            "include" : 1,
-            "h1"     : 2,
-            "h2"     : 3,
-            "h3"     : 4,
-            "h4"     : 5,
-            "h5"     : 6,
-            "least"  : 100
+            "body"    : 0,
+            "h1"      : 1,
+            "h2"      : 2,
+            "h3"      : 3,
+            "h4"      : 4,
+            "h5"      : 5,
+            "include" : 6,
+            "least"   : 100
         }
 
         self.m_include_queue = []
@@ -1331,6 +1333,8 @@ class shorte_parser_t(parser_t):
                 
                 elif(section.startswith("description:")):
                     vars["function_desc"] = section[12:len(section)].strip()
+                    tmp = section[12:len(section)]
+                    vars["function_desc2"] = self.parse_textblock(tmp)
                 
                 elif(section.startswith("prototype:")):
                     vars["function_prototype"] = section[10:len(section)].strip()
@@ -1358,12 +1362,12 @@ class shorte_parser_t(parser_t):
                 
                     #print "Parsing [%s] = [%s]" % (vars["function_name"], params)
                     
-                    rows = re.split("\n *-", params);
+                    rows = re.split("\n *--", params);
                     for row in rows:
 
                         matches = re.search("(.*?)\|(.*?)\|.*{(.*?)}", row, re.DOTALL)
 
-                        if(matches != None):
+                        if(0): #matches != None):
                             param_name = matches.groups()[0].strip()
                             param_io   = matches.groups()[1].strip()
                             param_value = matches.groups()[2]
@@ -1374,38 +1378,47 @@ class shorte_parser_t(parser_t):
                             fields["param_name"] = param_name
                             fields["param_io"]   = param_io
 
-                            desc = []
-                            cols = re.split(";", param_value)
-                            for col in cols:
-                                #print "COL: %s" % col
+                            #desc = []
+                            #cols = re.split(";", param_value)
+                            #for col in cols:
+                            #    #print "COL: %s" % col
 
-                                parts = re.split("=", col)
+                            #    parts = re.split("=", col)
 
-                                name = parts[0].strip()
-                                val  = parts[1].strip()
+                            #    name = parts[0].strip()
+                            #    val  = parts[1].strip()
 
-                                desc.append((name, val))
+                            #    desc.append((name, val))
 
-                            fields["param_desc"] = desc
+                            fields["param_desc"] = param_value
+                            fields["param_desc2"] = self.parse_textblock(trim_leading_blank_lines(desc))
+
                             vars["function_params"].append(fields)
 
 
                         else:
-                            row = re.sub('\n', ' ', row).strip()
+                            #row = re.sub('\n', ' ', row).strip()
 
                             if(row != ""):
                             
                                 #print "PARAM: [%s]" % row
 
                                 cols = row.split("|")
-                                fields = {}
-                                
-                                fields["param_name"] = cols[0]
-                                fields["param_io"]   = cols[1].strip()
-                                desc = []
-                                desc.append((cols[2]))
-                                fields["param_desc"] = desc
-                                vars["function_params"].append(fields)
+
+                                if(len(cols) > 1):
+                                    fields = {}
+                                    
+                                    fields["param_name"] = cols[0]
+                                    fields["param_io"]   = cols[1].strip()
+                                    desc = []
+                                    desc.append((cols[2]))
+                                    #print "DESC2: [%s]" % trim_leading_blank_lines(trim_leading_indent(cols[2]))
+                                    desc2 = cols[2]
+                                    fields["param_desc"] = desc
+                                    fields["param_desc2"] = self.parse_textblock(trim_leading_blank_lines(trim_leading_indent(cols[2])))
+                                    fields["param_desc2"] = self.parse_textblock(cols[2]) 
+
+                                    vars["function_params"].append(fields)
                 
                 elif(section.startswith("returns:")):
                     vars["function_returns"] = section[8:len(section)].strip()
@@ -1438,6 +1451,9 @@ class shorte_parser_t(parser_t):
 
                 elif(section.startswith("see also:")):
                     vars["function_see_also"] = section[9:len(section)].strip()
+                
+                elif(section.startswith("deprecated:")):
+                    vars["function_deprecated"] = section[11:len(section)].strip()
 
 
         return vars

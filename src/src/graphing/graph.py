@@ -11,7 +11,9 @@ class cairo_t():
     def __init__(self, width, height):
         self.image = cairo(5000, 5000)
 
-    def draw_text(self, x, y, text, font_color="black", text_anchor="start", angle=0, font_size=10, text_orientation="horizontal", font_family="Verdana"):
+    def draw_text(self, x, y, text, font_color="black", text_anchor="start", angle=0, font_size=10, text_orientation="horizontal", font_family="Verdana",
+        line_color="black",
+        background_color="white"):
         font_color = self.translate_color(font_color)
     
         width = 0
@@ -59,10 +61,10 @@ class cairo_t():
                   text=None,
                   background_color="white",
                   line_color="black",
-                  line_weight=1):
+                  line_weight=1,
+                  rounding=0):
 
         self.image.set_line_width(line_weight);
-        rounding=0
 
         background_color = self.translate_color(background_color)
         line_color = self.translate_color(line_color)
@@ -128,17 +130,18 @@ class cairo_t():
             self.image.stroke()
         
         if(text != None):
-           self.draw_text(
-                   x = x + width/2,
-                   y = y + height/3,
-                   text = text,
-                   font_color = font_color,
-                   font_size = font_size,
-                   angle = angle,
-                   #width = width,
-                   #height = height,
-                   text_anchor = "middle",
-                   text_orientation = text_orientation)
+            (text_width, text_height) = self.image.text_extents("%s" % text)
+            self.draw_text(
+                    x = x + width/2 - text_width/2 + line_weight/2,
+                    y = y + height/2 - text_height/2,
+                    text = text,
+                    font_color = font_color,
+                    font_size = font_size,
+                    angle = angle,
+                    #width = width,
+                    #height = height,
+                    text_anchor = "middle",
+                    text_orientation = text_orientation)
                
 
     def draw_ellipse(self, x, y, width, height,
@@ -150,7 +153,9 @@ class cairo_t():
                     background_color="#ffffff",
                     line_weight=0.6):
         im = self.image
-        
+        angle = 0
+        text_orientation="horizontal"
+
         line_color = self.translate_color(line_color)
         background_color = self.translate_color(background_color)
         font_color = self.translate_color(font_color)
@@ -171,15 +176,16 @@ class cairo_t():
         im.stroke();
         
         if(text != None):
+           (text_width, text_height) = self.image.text_extents("%s" % text)
            self.draw_text(
-               x = x,
-               y = y + height/3,
+               x = x + (width - text_width)/2 + line_weight/2,
+               y = y + height/2 - text_height/2,
                text = text,
                font_color = font_color,
                font_size = font_size,
                angle = angle,
-               width = width,
-               height = height,
+               #width = width,
+               #height = height,
                text_anchor = "middle",
                text_orientation = text_orientation)
     
@@ -250,14 +256,16 @@ class cairo_t():
 
         if(arrow_type == 2):
             self.image.new_path();
-            xoff = 3 * (arrow_size) * math.sin((beta-45)/57.2957795);
-            yoff = 3 * (arrow_size) * math.cos((beta-45)/57.2957795);
+            ang1 = 65
+            ang2 = 90 - ang1
+            xoff = 3 * (arrow_size) * math.sin((beta-ang1)/57.2957795);
+            yoff = 3 * (arrow_size) * math.cos((beta-ang1)/57.2957795);
             
             self.image.move_to(x, y);
             self.image.line_to(x + xoff, y - yoff);
                 
-            xoff = 3 * (arrow_size) * math.cos((alpha-45)/57.2957795);
-            yoff = 3 * (arrow_size) * math.sin((alpha-45)/57.2957795);
+            xoff = 3 * (arrow_size) * math.cos((alpha-ang2)/57.2957795);
+            yoff = 3 * (arrow_size) * math.sin((alpha-ang2)/57.2957795);
             
             self.image.line_to(x + xoff, y + yoff);
             self.image.line_to(x, y);

@@ -55,6 +55,15 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.52
+- Removed requirement for batik for generating diagrams
+- Source code cleanup
+
+@h3 Version 1.0.51
+- Added support for parsing prototypes in C++ header files
+- Added support for the @deprecated tag in C++ files
+- Some patches to the HTML and ODT templates
+
 @h3 Version 1.0.50
 - Added a cortina_no_background template (HTML only) that has
   no border. This is used for generating documents like the release

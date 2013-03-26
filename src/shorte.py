@@ -332,6 +332,7 @@ class engine_t:
 
         scratchdir = self.get_config("shorte", "scratchdir")
         output = scratchdir + os.path.sep + filename + ".png"
+        #output = filename + ".png"
         #print "OUTPUT: %s" % output
         
         if(sys.platform == "cygwin" or sys.platform == "win32"):

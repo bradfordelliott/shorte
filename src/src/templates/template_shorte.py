@@ -184,8 +184,6 @@ $values
 
         template = string.Template('''
 @h4 $name
-@text
-$caption
 
 @struct: name="$name" title="$title" caption="$caption"
 - Type | Name | Description
@@ -213,19 +211,20 @@ $values
     $function_name
 $prototype
 - description:
-    $function_desc
+$function_desc
 $params
 - returns:
     $function_returns
 $function_example
 $pseudocode
 $seealso
+$deprecated
 ''')
         function = {}
         function["function_name"] = prototype["function_name"]
         function["function_example"] = ''
         function["prototype"] = ''
-        function["function_desc"] = prototype["function_desc"]
+        function["function_desc"] = trim_blank_lines(prototype["function_desc"])
         function["function_params"] = ''
         function["function_returns"] = prototype["function_returns"]
         function["pseudocode"] = ''
@@ -242,7 +241,7 @@ $seealso
             
             for param in params:
 
-                output += '''- %s | %s | %s\n    ''' % (param["param_name"], param["param_io"], param["param_desc"])
+                output += '''-- %s | %s | %s\n    ''' % (param["param_name"], param["param_io"], param["param_desc"])
 
 
             function["params"] = '''
@@ -271,6 +270,14 @@ $seealso
 ''' % (prototype["function_see_also"])
         else:
             function["seealso"] = ''
+        
+        if(prototype.has_key("function_deprecated") and prototype["function_deprecated"] != None):
+            function["deprecated"] = '''
+- deprecated:
+%s
+''' % (prototype["function_deprecated"])
+        else:
+            function["deprecated"] = ''
 
         topic = topic_t({"name"   : prototype["function_name"],
                          "file"   : file,
@@ -381,7 +388,10 @@ exported by this module in greater detail.
 
             # Strip off the extension
             title = os.path.basename(source_file)
+
+            # DEBUG BRAD: Rolling back this change for now
             output_file = re.sub("\.c", "", source_file)
+            #output_file = source_file
             output_file = os.path.basename(output_file)
 
             base = output_file

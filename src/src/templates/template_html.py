@@ -80,20 +80,16 @@ $result
 
 note_template = string.Template(
 """
-    <div style='margin-left: 30px; margin-top:10px; margin-bottom:10px;color: red; border-left: 1px solid #C0C0C0;width:100%;'>
-    <div style='float:left;position:relative;top:-10px;'><img style="height:50px;" src="$image"/></div>
-    <div style='float:left;'>
-    <table>
-        <tr valign="top">
-            <td>
-                <div style='font-weight:bold;color:black;text-decoration:underline;'>$title:</div>
-                <div style="margin-left:10px;">$contents</div>
-            </td>
-        </tr>
-    </table>
-    </div>
-    <div style='clear:both;'></div>
-    </div>
+<div style='margin-left: 30px; margin-top:10px; margin-bottom:10px;color: red; border-left: 1px solid #C0C0C0;width:100%;'>
+  <table>
+    <tr valign="top">
+        <td>
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="$image"/>$title:</div>
+            <div style="margin-left:10px;">$contents</div>
+        </td>
+    </tr>
+  </table>
+</div>
 """)
 
 question_template = string.Template(
@@ -1005,7 +1001,7 @@ class template_html_t(template_t):
 
         
         template = string.Template("""
-        <div class="bordered" style="margin-top:10px;">
+        <div class="bordered" style="margin-top:10px;${background}">
         <div style='background-color:#ccc;padding:10px;'><b>Function:</b> ${function_name}</div>
         <div>
             <div style="margin-left: 10px;">
@@ -1026,6 +1022,7 @@ class template_html_t(template_t):
                 ${function_calls}
                 ${function_pseudocode}
                 ${function_see_also}
+                ${function_deprecated}
                 
             </div>
             
@@ -1079,6 +1076,13 @@ class template_html_t(template_t):
             </div>
         ''')
         
+        template_deprecated = string.Template('''
+            <div>
+                <div style="color: #396592; font-weight: bold;">Deprecated:</div>
+                <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${deprecated}</p>
+            </div>
+        ''')
+        
         template_called_by = string.Template('''
             <div>
                 <div style="color: #396592; font-weight: bold;">Called By:</div>
@@ -1116,11 +1120,18 @@ class template_html_t(template_t):
         function["function_returns"] = ''
         function["function_pseudocode"] = ''
         function["function_see_also"] = ''
+        function["function_deprecated"] = ''
         function["function_calls"] = ''
         function["function_called_by"] = ''
 
         if(prototype.has_key("function_desc")):
             function["function_desc"] = self.format_text(prototype["function_desc"], expand_equals_block=True)
+        if(prototype.has_key("function_desc2")):
+            #print "Do I get here?"
+            tag = {}
+            tag["contents"] = prototype["function_desc2"]
+            #print "CONTENTS [%s]" % tag["contents"]
+            function["function_desc"] = self.format_textblock(tag)
         
         exclude_wikiwords = []
         exclude_wikiwords.append(function["function_name"])
@@ -1136,7 +1147,7 @@ class template_html_t(template_t):
             params = prototype["function_params"]
             
             param_template = string.Template("""
-                        <tr>
+                        <tr style='border-bottom:1px solid #ccc;'>
                             ${type}
                             <td style="vertical-align:text-top;border: 0px;"><b>${param_name}</b></td>
                             <td style="vertical-align:text-top;font-family: courier new; border: 0px;">(${param_io})</td>
@@ -1155,6 +1166,14 @@ class template_html_t(template_t):
                         html_tmp += self.format_text(val)
 
                 param["param_desc"] = html_tmp
+
+                if(param.has_key("param_desc2")):
+                    tag = {}
+                    tag["contents"] = param["param_desc2"]
+                    param["param_desc"] = self.format_textblock(tag)
+                else:
+                    print "WTF?"
+                    sys.exit(-1)
 
                 if(param.has_key("param_type")):
                     param["type"] = '''<td style="vertical-align:text-top;border: 0px;">%s</td>''' % param["param_type"]
@@ -1234,6 +1253,13 @@ class template_html_t(template_t):
             params["see_also"] = self.format_text(prototype["function_see_also"])
             function["function_see_also"] = template_see_also.substitute(params)
         
+        is_deprecated = False
+        if(prototype.has_key("function_deprecated")):
+            params = {}
+            params["deprecated"] = self.format_text(prototype["function_deprecated"])
+            function["function_deprecated"] = template_deprecated.substitute(params)
+            is_deprecated = True
+        
         if(prototype.has_key("function_called_by")):
             params = {}
             params["called_by"] = self.format_text(prototype["function_called_by"])
@@ -1244,12 +1270,17 @@ class template_html_t(template_t):
             params["calls"] = self.format_text(prototype["function_calls"])
             function["function_calls"] = template_calls.substitute(params)
 
-
+        function["background"] = '';
+        
+        if(is_deprecated):
+            function["function_name"] += " (THIS METHOD IS DEPRECATED)"
+            function["background"] = "background: url('css/images/deprecated.png') center;";
             
         topic = topic_t({"name"   : prototype["function_name"],
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
+
         
         return template.substitute(function)
     
@@ -1433,9 +1464,9 @@ table.inline tr.alternaterow
                 elif(is_list):
                     html += self.format_list(p["text"], False, indent)
                 else:
-                    html += "<p style=\"%s\">" % style + self.format_text(text) + "</p>\n"
+                    html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;%s'>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
         else:
-            html += "<p>" + self.format_text(paragraphs) + "</p>\n"
+            html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
 
         return html
 
@@ -1564,6 +1595,9 @@ table.inline tr.alternaterow
 
         
         html = ''
+        
+        # Append the caption
+        html += "<p>%s</p>\n" % (table["caption"])
 
         html += "<table class='bordered'>\n"
 
@@ -1573,6 +1607,11 @@ table.inline tr.alternaterow
 
         i = 0
 
+#        html += '''
+#<tr class='header'>
+#  <td>Value</td>
+#  <td>Description</td>
+#  </tr>'''
 
         for row in table["rows"]:
             
@@ -1628,9 +1667,9 @@ table.inline tr.alternaterow
 
             i+=1
 
-        if(self.m_engine.get_config("html", "caption_enum") == "1"):
-            if("caption" in table):
-                html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
+        #if(self.m_engine.get_config("html", "caption_enum") == "1"):
+        #    if("caption" in table):
+        #        html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
 
         html += "</table><br/>"
         
@@ -1647,7 +1686,9 @@ table.inline tr.alternaterow
     # Called for format a structure for HTML output 
     def format_struct(self, source, struct):
         
-        html = "<table class='bordered'>\n"
+        html = "<p>%s</p>\n" % (struct["caption"])
+        
+        html += "<table class='bordered'>\n"
         
         if("title" in struct):
             html += "<tr><th colspan='%d'>%s</th></tr>\n" % (struct["max_cols"], struct["title"])
@@ -1718,9 +1759,10 @@ table.inline tr.alternaterow
 
             i+=1
        
-        if(self.m_engine.get_config("html", "caption_struct") == "1"):
-            if("caption" in struct):
-                html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
+        #if(self.m_engine.get_config("html", "caption_struct") == "1"):
+        #    if("caption" in struct):
+        #        html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
+        
 
         html += "</table><br/>"
 
@@ -2087,7 +2129,7 @@ $href_end
         data = re.sub("\\\\n", "<br/>", data)
 
         if(expand_equals_block):
-            data = re.sub("==+", "<div style='width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
+            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
         
         # Hilite any text between **** ****
         hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
@@ -2350,8 +2392,10 @@ $href_end
 
         self.m_theme = self.m_engine.get_theme()
 
-        vars["title"] = page["title"]
-        vars["subtitle"] = page["subtitle"]
+        vars["title"]    = page["title"]
+        vars["subtitle"] = ""
+        if(page.has_key("subtitle")):
+            vars["subtitle"] = page["subtitle"]
         vars["contents"] = self.get_contents()
 
         # Reset the page contents cache if we're inlining the document
@@ -2607,6 +2651,7 @@ $cnts
   }
   
   .bordered {
+      margin:10px;
       margin-left:20px;
       background-color:white;
       border: solid #ccc 4px;

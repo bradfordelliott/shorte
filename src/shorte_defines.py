@@ -255,6 +255,35 @@ HEADER_STYLE_DEFAULT = HEADER_STYLE_DOXYGEN
 is_array = lambda var: isinstance(var, (list, tuple))
 is_dict  = lambda var: isinstance(var, (dict))
 
+def trim_leading_blank_lines(source):
+    lines = source.split("\n")
+
+    if(len(lines) == 1):
+        return source
+
+    output = ''
+
+    # Find the index of first non-blank line
+    start = 0
+    for i in range(0, len(lines)):
+        tmp = lines[i].strip()
+        if(tmp != ""):
+            break
+        start += 1
+
+    #print "Start = %d" % start
+
+    # Find the index of the last non-blank line
+    end = len(lines)-1
+
+    #print "End = %d" % end
+
+    for i in range(start, end+1):
+        output += lines[i] + "\n"
+
+    return output
+
+
 def trim_blank_lines(source):
     
     lines = source.split("\n")
@@ -328,6 +357,7 @@ def shorte_get_config(section, key):
 
     config = ConfigParser.ConfigParser()
     config.read(g_startup_path + "/shorte.cfg")
+    #config.read("../../shorte.cfg")
 
     # If searching for a path then make sure
     # to append the OS to get the correct
