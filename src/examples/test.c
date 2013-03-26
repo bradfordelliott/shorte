@@ -41,6 +41,9 @@ typedef enum
  *
  * @see
  *     my_test21
+ *
+ * @deprecated This method has been deprecated. Please
+ *             refer to my_test21 for future use.
  */
 int my_test(int blah, bool* dummy)
 {
