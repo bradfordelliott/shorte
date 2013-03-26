@@ -22,7 +22,7 @@
 @text
 This is a test of my_function2() with some more info about my_function. With some more text here
 
-@embed: src="swish_test.swf" width="480"
+@embed: src="examples/swish_test.swf" width="480"
 
 @h2 A Test of Columns
 @columns
@@ -195,7 +195,7 @@ data and     a     few *spaces*
     print "Hello world!\n";
     print "Hello world2!\n";
 
-@inkscape: src="temp.svg"
+@inkscape: src="examples/temp.svg"
 
 @h3 A Sequence Diagram
 @sequence: title="Sequence Diagram" caption="This is a test description"
@@ -468,4 +468,4 @@ A: This is the answer to that question
 - x | y | Label     | Description
 - 0 | 0 | 1         | Blah blah blah
 
-@image: map="one" src="test.png"
+@image: map="one" src="examples/test.png"
