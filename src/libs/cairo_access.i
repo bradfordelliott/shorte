@@ -115,6 +115,7 @@
             unsigned char* data_source;
             unsigned char* data_destination;
             int            row;
+            cairo_status_t status;
     
             cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width_destination, height_destination);
             
@@ -144,7 +145,7 @@
             
             // Flush the output surface since we've modified it
             cairo_surface_flush(new_surface);
-            cairo_surface_write_to_png(new_surface, file);
+            status = cairo_surface_write_to_png(new_surface, file);
         }
         
         void set_source_rgb(double red, double green, double blue)
@@ -354,6 +355,7 @@ class cairo{
             unsigned char* data_source;
             unsigned char* data_destination;
             int            row;
+            cairo_status_t status;
     
             cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width_destination, height_destination);
             
@@ -383,7 +385,7 @@ class cairo{
             
             // Flush the output surface since we've modified it
             cairo_surface_flush(new_surface);
-            cairo_surface_write_to_png(new_surface, file);
+            status = cairo_surface_write_to_png(new_surface, file);
         }
         
         void set_source_rgb(double red, double green, double blue)

@@ -3,9 +3,9 @@ include os.inc
 
 # Display a list of available targets
 help:
-	@${echo} "${uname}"
 	@${echo} "Available Targets:"
 	@${echo} "=================="
+	@${echo} " cairo_plugin = build the cairo plugin"
 	@${echo} " package = build shorte and generate the tarball"
 	@${echo} " install = install shorte over the network"
 
