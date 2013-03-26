@@ -172,6 +172,7 @@ class cpp_parser_t(shorte_parser_t):
             extract_private = True
         else:
             extract_private = False
+
         if(not extract_private and True == comment["private"]):
             raise Exception("Not outputting private structures")
 
@@ -554,6 +555,7 @@ class cpp_parser_t(shorte_parser_t):
         comment["example"] = ""
         comment["private"] = False
         comment["see_also"] = None
+        comment["deprecated"] = None
 
         # If there is no description assume the type is private
         if(len(text) == 0):
@@ -610,6 +612,11 @@ class cpp_parser_t(shorte_parser_t):
         matches = expr_see_also.search(text)
         if(matches != None):
             comment["see_also"] = matches.groups()[0]
+
+        expr_deprecated = re.compile("@deprecated *([^@]*)", re.DOTALL)
+        matches = expr_deprecated.search(text)
+        if(matches != None):
+            comment["deprecated"] = matches.groups()[0]
         
         return comment
 
@@ -886,7 +893,7 @@ class cpp_parser_t(shorte_parser_t):
 
 
     # Parse a C++ function and turn it into a prototype definition
-    def parse_cpp_function(self, tokens, i, source):
+    def parse_cpp_function(self, tokens, i, source, is_prototype=False):
         token = tokens[i]
         end = False
         brace_cnt = 0
@@ -961,9 +968,15 @@ class cpp_parser_t(shorte_parser_t):
         desc.reverse()
         desc = " ".join(desc)
 
+        if(not desc.startswith("/**")):
+            return None
+        
         func_comment = self.parse_cpp_func_comment(desc)
 
         function["function_see_also"] = func_comment["see_also"]
+
+        if(func_comment["deprecated"] != None):
+            function["function_deprecated"] = func_comment["deprecated"]
 
         extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
         if(extract_private == "1"):
@@ -1005,25 +1018,39 @@ class cpp_parser_t(shorte_parser_t):
         #print "TOKEN: [%s]" % token["data"]
         pseudocode_start = token["pos"]+1
 
-        # Now search forward until the closing brace is found
-        while(i < len(tokens) and not end):
+        # Now search forward until the closing brace is found if it
+        # is a definition or a semicolon if it is a prototype
+        if(is_prototype):
+            while(i < len(tokens) and not end):
 
-            #print "    FUNC: %s" % token["data"]
-            
-            if(token["type"][0] == TOKEN_OPEN_BRACE[0]):
-                brace_cnt += 1
-
-            elif(token["type"][0] == TOKEN_CLOSE_BRACE[0]):
-                brace_cnt -= 1
-
-                if(brace_cnt == 0):
+                if(token["type"][0] == TOKEN_SEMICOLON[0]):
                     end = True
                     break
 
-            i += 1
+                i += 1
 
-            if(i < len(tokens)):
-                token = tokens[i]
+                if(i < len(tokens)):
+                    token = tokens[i]
+        
+        else:
+            while(i < len(tokens) and not end):
+
+                #print "    FUNC: %s" % token["data"]
+                
+                if(token["type"][0] == TOKEN_OPEN_BRACE[0]):
+                    brace_cnt += 1
+
+                elif(token["type"][0] == TOKEN_CLOSE_BRACE[0]):
+                    brace_cnt -= 1
+
+                    if(brace_cnt == 0):
+                        end = True
+                        break
+
+                i += 1
+
+                if(i < len(tokens)):
+                    token = tokens[i]
 
         pseudocode_end = token["pos"]
 
@@ -1069,7 +1096,9 @@ class cpp_parser_t(shorte_parser_t):
 
             for p in params:
                 if(p["param_name"] == param):
-                    p["param_desc"] = func_comment["params"][param]["desc"]
+                    desc = func_comment["params"][param]["desc"]
+                    p["param_desc"] = desc
+                    p["param_desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
                     p["param_io"] = func_comment["params"][param]["io"]
 
 
@@ -1182,14 +1211,18 @@ class cpp_parser_t(shorte_parser_t):
                     tag["modifiers"] = {}
                     page["tags"].append(tag)
 
-            elif(self.match_token(token, TOKEN_OPEN_BRACE, "{")):
+            elif(self.match_token(token, TOKEN_OPEN_BRACE, "{") or self.match_token(token, TOKEN_SEMICOLON, ";")):
                 #print "Found possible function"
                 saved_i = i
                 pos = tokens[i]["pos"]
 
                 char = source[pos]
+
+                is_prototype = False
+                if(char == ";"):
+                    is_prototype = True
                 
-                if("{" != char):
+                if(("{" != char) and (";" != char)):
                     print "{ != [%s]" % char
                     sys.exit(-1)
 
@@ -1211,7 +1244,7 @@ class cpp_parser_t(shorte_parser_t):
                     do_nothing=1
 
                 try:
-                    (i, function) = self.parse_cpp_function(tokens, i, source)
+                    (i, function) = self.parse_cpp_function(tokens, i, source, is_prototype)
                 except:
                     #import traceback
                     #tb = sys.exc_info()[2]
@@ -1230,18 +1263,26 @@ class cpp_parser_t(shorte_parser_t):
 
                         token = tokens[i]
 
-                        #print "TOKEN: %s" % (token["type"][1])
-
-                        if(token["type"][0] == TOKEN_OPEN_BRACE[0]):
-                            cnt_brace += 1
-                        elif(token["type"][0] == TOKEN_CLOSE_BRACE[0]):
-                            cnt_brace -= 1
-                            
-                            if(cnt_brace == 0):
+                        # If it is a prototype then the end is a semicolon.
+                        if(is_prototype):
+                            if(token["type"][0] == TOKEN_SEMICOLON[0]):
                                 break
-                            
-                            #print "CLOSE_BRACE: %d" % cnt_brace
-                            #sys.exit(-1)
+                        # If it isn't a prototype then we're looking for
+                        # a closing brace on the same level as the opening
+                        # brace.
+                        else:
+                            #print "TOKEN: %s" % (token["type"][1])
+
+                            if(token["type"][0] == TOKEN_OPEN_BRACE[0]):
+                                cnt_brace += 1
+                            elif(token["type"][0] == TOKEN_CLOSE_BRACE[0]):
+                                cnt_brace -= 1
+                                
+                                if(cnt_brace == 0):
+                                    break
+                                
+                                #print "CLOSE_BRACE: %d" % cnt_brace
+                                #sys.exit(-1)
                         i += 1
                 else:
                     tag = {}
@@ -1257,8 +1298,6 @@ class cpp_parser_t(shorte_parser_t):
                     tag["source"] = ""
                     tag["modifiers"] = {}
                     page["tags"].append(tag)
-
-                
 
             i += 1
        
