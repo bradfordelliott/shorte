@@ -78,7 +78,10 @@
     void cairo_new_path(cairo_t* c){}
     void cairo_close_path(cairo_t* c){}
     void cairo_set_antialias(cairo_t* c, cairo_antialias_t f){}
-
+    void cairo_select_font_face(cairo_t *cr,
+                                const char *family,
+                                cairo_font_slant_t slant,
+                                cairo_font_weight_t weight){}
     
 
 #endif // HAS_CAIRO
@@ -214,6 +217,14 @@
             *width = extents.width;
             *height = extents.height;
         }
+
+        void select_font_face(
+            const char*         family,
+            cairo_font_slant_t  slant,
+            cairo_font_weight_t weight)
+        {
+            cairo_select_font_face(m_cairo_image, family, slant, weight);
+        }
                                              
         void line_to(double x, double y)
         {
@@ -293,7 +304,18 @@
     CAIRO_ANTIALIAS_GRAY,
     CAIRO_ANTIALIAS_SUBPIXEL
 } cairo_antialias_t;
-    
+
+%typedef enum {
+    CAIRO_FONT_SLANT_NORMAL,
+    CAIRO_FONT_SLANT_ITALIC,
+    CAIRO_FONT_SLANT_OBLIQUE
+} cairo_font_slant_t;
+
+%typedef enum {
+    CAIRO_FONT_WEIGHT_NORMAL,
+    CAIRO_FONT_WEIGHT_BOLD
+} cairo_font_weight_t;
+
 #define min(a,b) (((a)<(b))?(a):(b))
 
 class cairo{
@@ -433,6 +455,14 @@ class cairo{
             
             *width = extents.width;
             *height = extents.height;
+        }
+        
+        void select_font_face(
+            const char*         family,
+            cairo_font_slant_t  slant,
+            cairo_font_weight_t weight)
+        {
+            cairo_select_font_face(m_cairo_image, family, slant, weight);
         }
         
         void line_to(double x, double y)
