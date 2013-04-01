@@ -55,6 +55,9 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.53
+- Attempt at fixing permissions issue in the installed files
+
 @h3 Version 1.0.52
 - Removed requirement for batik for generating diagrams
 - Source code cleanup

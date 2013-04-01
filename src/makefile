@@ -36,10 +36,10 @@ package: cairo_plugin
 	cd ../build-output && cat shorte.py | sed "s/<<VERSION>>/${version}/" > shorte2.py
 	cd ../build-output && mv shorte2.py shorte.py && chmod 755 shorte.py
 	cd ../build-output && rm -rf *.pyc
-	cd ../build-output && chmod o+x *.py
-	cd ../build-output && chmod o+r *
-	cd ../build-output && chmod g+x *.py
-	cd ../build-output && chmod g+r *
+	cd ../build-output && chmod -R o+x *.py
+	cd ../build-output && chmod -R o+r *
+	cd ../build-output && chmod -R g+x *.py
+	cd ../build-output && chmod -R g+r *
 	cd ../build-output && chmod 755 .
 	cd ../build-output && ${archive}
 
