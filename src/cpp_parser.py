@@ -570,7 +570,7 @@ class cpp_parser_t(shorte_parser_t):
         matches = expr_ingroup.search(text)
         if(matches != None):
             comment["ingroup"] = matches.groups()[1]
-            print "INGROUP: %s" % comment["ingroup"]
+            #print "INGROUP: %s" % comment["ingroup"]
             text = text.replace(matches.groups()[0], "")
         
         # If there is no description assume the type is private
