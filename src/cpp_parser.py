@@ -9,6 +9,9 @@
 #|   function definitions that can be used to generate Shorte
 #|   documents.
 #|
+#|   At some point this should be replaced with a proper C/C++
+#|   parser.
+#|
 #+----------------------------------------------------------------------------
 #|
 #| Copyright (c) 2010 Brad Elliott
@@ -557,11 +560,24 @@ class cpp_parser_t(shorte_parser_t):
         comment["see_also"] = None
         comment["deprecated"] = None
 
+        # Strip off any \ref sequences since shorte doesn't use them
+        expr_ref = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
+        text = expr_ref.sub("", text)
+        
+        # Strip off any leading ingroup tag before the description
+        # since shorte doesn't support that right now.
+        expr_ingroup = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
+        matches = expr_ingroup.search(text)
+        if(matches != None):
+            comment["ingroup"] = matches.groups()[1]
+            print "INGROUP: %s" % comment["ingroup"]
+            text = text.replace(matches.groups()[0], "")
+        
         # If there is no description assume the type is private
         if(len(text) == 0):
             comment["private"] = True
 
-        matches = re.search("(.*?)@", text, re.DOTALL)
+        matches = re.search("(.*?)[@\\\]", text, re.DOTALL)
 
         if(matches != None):
             comment["desc"] = self.format_text(matches.groups()[0])
@@ -571,11 +587,11 @@ class cpp_parser_t(shorte_parser_t):
         #print "COMMENT:"
         #print comment["desc"]
 
-        matches = re.search("@private", text, re.DOTALL)
+        matches = re.search("[@\\\]private", text, re.DOTALL)
         if(matches != None):
             comment["private"] = True
 
-        expr_param = re.compile("@param *([^ ]*) *([^@]*)", re.DOTALL)
+        expr_param = re.compile("[@\\\]param *([^ ]*) *([^@]*)", re.DOTALL)
 
         matches = expr_param.search(text)
         while(matches != None):
@@ -595,25 +611,25 @@ class cpp_parser_t(shorte_parser_t):
             #print "name = %s (%s)" % (name, desc)
             matches = expr_param.search(text, matches.end())
         
-        expr_return = re.compile("@return *([^@]*)", re.DOTALL)
+        expr_return = re.compile("[@\\\]return *([^@]*)", re.DOTALL)
 
         matches = expr_return.search(text)
         if(matches != None):
             desc = self.format_text(matches.groups()[0])
             comment["returns"] = desc
         
-        expr_example = re.compile("@example *([^@]*)", re.DOTALL)
+        expr_example = re.compile("[@\\\]example *([^@]*)", re.DOTALL)
         matches = expr_example.search(text)
         if(matches != None):
             desc = matches.groups()[0]
             comment["example"] = desc
         
-        expr_see_also = re.compile("@see *([^@]*)", re.DOTALL)
+        expr_see_also = re.compile("[@\\\]see *([^@]*)", re.DOTALL)
         matches = expr_see_also.search(text)
         if(matches != None):
             comment["see_also"] = matches.groups()[0]
 
-        expr_deprecated = re.compile("@deprecated *([^@]*)", re.DOTALL)
+        expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
         matches = expr_deprecated.search(text)
         if(matches != None):
             comment["deprecated"] = matches.groups()[0]
