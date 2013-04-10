@@ -41,6 +41,7 @@ package: cairo_plugin
 	cd ../build-output && chmod -R g+x *.py
 	cd ../build-output && chmod -R g+r *
 	cd ../build-output && chmod 755 .
+	cd ../build-output && find . -type d -exec chmod "o+x" {} \;
 	cd ../build-output && ${archive}
 
 win32:
