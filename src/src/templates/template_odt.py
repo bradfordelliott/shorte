@@ -2786,7 +2786,13 @@ class template_odt_t(template_t):
         if(sys.platform == "cygwin" or sys.platform == "win32"):
             startup_path = g_startup_path.replace("/cygdrive/c/", "C:\\")
             startup_path = startup_path.replace("/", "\\")
-            path_oowriter = shorte_get_config("shorte", "path.oowriter.win32")
+                
+            if(sys.platform == "win32"):
+                # This is to workaround a path problem with spaces in windows
+                path_oowriter = "\"\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
+            else:
+                path_oowriter = "\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
+
         else:
             startup_path = g_startup_path
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")

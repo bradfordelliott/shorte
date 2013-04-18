@@ -13,7 +13,8 @@
 
 @body
 
-@h1 Test Results
+@h1: if="1"
+Test Results
 
 @input: label="Name" type="text" name="my_field" form="review_form" caption="Enter your name"
 @input: label="Comments" type="textarea" name="my_field2" form="review_form" caption="Some other caption"
@@ -24,7 +25,8 @@ This is a test of my_function2() with some more info about my_function. With som
 
 @embed: src="examples/swish_test.swf" width="480"
 
-@h2 A Test of Columns
+@h2: if="2"
+A Test of Columns
 @columns
 @column
 @text
@@ -75,7 +77,7 @@ traffic is looped across the line interface using the line serial loopback
 @h2: if="TEST"
 Other tests
 
-@testcase: category="two"
+@testcase: category="two" cascade="false"
 :name: Blah2
 :desc:
 This test is used to verify the operation of the device in

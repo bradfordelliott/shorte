@@ -90,6 +90,7 @@ class shorte_parser_t(parser_t):
             "d"               : True,
             "bash"            : True,
             "include"         : True,
+            "include_child"   : True,
 
             "checklist"       : True,
             "enum"            : True,
@@ -130,12 +131,13 @@ class shorte_parser_t(parser_t):
         # is excluded.
         self.m_tag_hierarchy = {
             "body"    : 0,
-            "h1"      : 1,
-            "h2"      : 2,
-            "h3"      : 3,
-            "h4"      : 4,
-            "h5"      : 5,
-            "include" : 6,
+            "include" : 1,
+            "h1"      : 2,
+            "h2"      : 3,
+            "h3"      : 4,
+            "h4"      : 5,
+            "h5"      : 6,
+            "include_child" : 7,
             "least"   : 100
         }
 
@@ -1780,7 +1782,7 @@ else:
         elif(name == "table"):
             tag["contents"] = self.parse_table(data, modifiers)
 
-        elif(name == "include"):
+        elif(name == "include" or name == "include_child"):
             print "Parsing include(s) [%s]" % data
             data = data.replace("\"", "")
 
@@ -1989,7 +1991,7 @@ else:
            topics'''
         rank_tag         = self.m_tag_hierarchy["least"]
         rank_predecessor = self.m_tag_hierarchy["least"]
-        
+
         if(self.m_tag_hierarchy.has_key(predecessor)):
             rank_predecessor = self.m_tag_hierarchy[predecessor]
 
@@ -2019,6 +2021,7 @@ else:
             excluded = tag_name
         else:
             if(excluded != None):
+
                 if(self.__is_child_tag(tag_name, excluded)):
                     #print "TAG %s EXCLUDED" % tag_name
                     pass

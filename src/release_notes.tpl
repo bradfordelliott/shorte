@@ -55,6 +55,13 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.54
+- Added new tag @include_child to support includes which
+  are conditionally included based on the header hierachy.
+  The old tag @include ignores the conditional inclusion
+- Fixed a path problem related to finding Libre Office under
+  Windows
+
 @h3 Version 1.0.53
 - Attempt at fixing permissions issue in the installed files
 
