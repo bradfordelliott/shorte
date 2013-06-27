@@ -102,6 +102,7 @@ class engine_t:
             self.m_parser = cpp_parser_t(self)
         else:
             self.m_parser = shorte_parser_t(self)
+            self.m_parser.set_cpp_parser(cpp_parser_t(self))
 
         # Read the configuration file
         self.m_config = ConfigParser.ConfigParser()

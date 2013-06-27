@@ -55,6 +55,15 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.55
+- Added support for @sql tag
+- Fixed a parsing issue with spanned columns in table headers
+- Added the ability to @include a .c or .h file
+- Fixed styling of keywords in HTML
+- Changed style of @note tag in HTML template
+
+
+
 @h3 Version 1.0.54
 - Added new tag @include_child to support includes which
   are conditionally included based on the header hierachy.

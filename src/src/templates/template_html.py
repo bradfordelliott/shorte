@@ -80,7 +80,7 @@ $result
 
 note_template = string.Template(
 """
-<div style='margin-left: 30px; margin-top:10px; margin-bottom:10px;color: red; border-left: 1px solid #C0C0C0;width:100%;'>
+<div style='margin-left: 20px; margin-top:10px; margin-bottom:10px; margin-right:30px;border:1px solid #ccc;background:#f8f7cf;border-radius:6px;-moz-border-radius:6px;-webkit-border-radius:6px;'>
   <table>
     <tr valign="top">
         <td>
@@ -2658,9 +2658,6 @@ $cnts
       -moz-border-radius: 6px;
       -webkit-border-radius: 6px;
       border-radius: 6px;
-      -webkit-box-shadow: 0 1px 1px #ccc; 
-      -moz-box-shadow: 0 1px 1px #ccc; 
-      box-shadow: 0 1px 1px #ccc;         
   }
   
   .bordered td, .bordered th {
@@ -2890,6 +2887,7 @@ div.snippet span.ln {color: #C0C0C0;}
   /* Styling of code segments */
   div.snippet span.operator {color: purple;}
   div.snippet span.keyword {color: blue;}
+  div.snippet span.kw {color: blue;}
   div.snippet span.str {color: #9933CC;}
   div.snippet span.mstring {color: #9933CC;}
   div.snippet span.cmt {color: green;}

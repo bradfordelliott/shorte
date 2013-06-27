@@ -248,6 +248,12 @@ const    float       native       super       while
             keyword_str = '''
 puts
 '''
+        
+        elif(language == "sql"):
+            keyword_str = '''
+CREATE TABLE INTEGER AUTO_INCREMENT
+TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
+'''
 
 
         keyword_list = re.split(r'\n| +', keyword_str)
@@ -271,6 +277,8 @@ puts
         tags = []
         #print "source = %s" % source
 
+        source_lang = type
+
         source = trim_blank_lines(source)
         source = source.rstrip()
         source = trim_leading_indent(source)
@@ -290,6 +298,12 @@ puts
         while i < end:
 
             state = states[-1]
+
+            # If we hit an escape sequence then skip it
+            # and move to the next character.
+            if(source[i] == '\\' and source[i+1] != '\\'):
+                i+=1
+                continue
 
             if(not (state in (STATE_MCOMMENT, STATE_COMMENT, STATE_INLINE_STYLING)) and (source[i] in (' ', '(', ')', ','))):
                 type = tag["type"]
@@ -345,6 +359,13 @@ puts
 
                     tag = {}
                     tag["data"] = '/'
+                    tag["type"] = TAG_TYPE_COMMENT
+                # Handle SQL comments
+                elif(source_lang == "sql" and (source[i] == '-' and source[i+1] == '-')):
+                    states.append(STATE_COMMENT)
+                    tags.append(tag)
+                    tag = {}
+                    tag["data"] = '-'
                     tag["type"] = TAG_TYPE_COMMENT
                     
                 elif(source[i] == '/' and source[i+1] == '*'):

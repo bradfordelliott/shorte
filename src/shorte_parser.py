@@ -21,11 +21,14 @@ from shorte_source_code import *
 import platform
 import time
 from shorte_parser_base import parser_t
+    
+from template_shorte import template_shorte_t
 
 startup_path = os.path.dirname(sys.argv[0])
 sys.path.append(startup_path + "/libs")
 
 sys.path.append(startup_path + "/src/graphing")
+sys.path.append(startup_path + "/src/templates")
 import sequence_diagram
 
 #print platform.system()
@@ -85,6 +88,7 @@ class shorte_parser_t(parser_t):
             "vera"            : True,
             "python"          : True,
             "c"               : True,
+            "sql"             : True,
             "perl"            : True,
             "code"            : True,
             "d"               : True,
@@ -131,8 +135,8 @@ class shorte_parser_t(parser_t):
         # is excluded.
         self.m_tag_hierarchy = {
             "body"    : 0,
-            "include" : 1,
-            "h1"      : 2,
+            "include" : 1, # @include and @h1 should have same include priority
+            "h1"      : 1,
             "h2"      : 3,
             "h3"      : 4,
             "h4"      : 5,
@@ -269,7 +273,7 @@ class shorte_parser_t(parser_t):
     
     def tag_is_source_code(self, tag_name):
 
-        if(tag_name in ("python", "perl", "shell", "d", "c", "code", "vera", "bash", "java", "verilog", "tcl")):
+        if(tag_name in ("python", "perl", "shell", "d", "c", "sql", "code", "vera", "bash", "java", "verilog", "tcl")):
            return True
 
         return False
@@ -788,6 +792,8 @@ class shorte_parser_t(parser_t):
                             i += 1
 
                         text = col.strip()
+                        #print "text = %s" % text
+                        #print "colspan = %d" % colspan
 
                         if(mark_reserved and self.is_reserved_text(text)):
                             table_row["is_reserved"] = True
@@ -799,14 +805,14 @@ class shorte_parser_t(parser_t):
                         table_row["cols"].append(tmp)
                         col = ""
 
-                        # If we've hit a || to span a column we need
-                        # to skip forward to find the next | which starts
-                        # the next column
-                        if(colspan > 1):
-                            #print "Skipping stuff after %s" % text
-                            while(row[i+1] != '|'):
-                                i += 1
-                            i += 1
+                        ## If we've hit a || to span a column we need
+                        ## to skip forward to find the next | which starts
+                        ## the next column
+                        #if(colspan > 1):
+                        #    #print "Skipping stuff after %s" % text
+                        #    while(row[i+1] != '|'):
+                        #        i += 1
+                        #    i += 1
 
                     else:
                         col += row[i]
@@ -2033,13 +2039,23 @@ else:
 
         return excluded
 
-    
+    def set_cpp_parser(self, cpp_parser):
+        self.m_cpp_parser = cpp_parser
+
     def parse_include(self, source_file):
 
         source = open(source_file, "r")
         input = source.read()
         source.close()
+        
+        if(source_file.endswith(".c") or source_file.endswith(".h")):
+            page = self.m_cpp_parser.parse_buffer(input, source_file)
 
+            indexer = indexer_t()
+            template = template_shorte_t(self.m_engine, indexer)
+            input = template.generate_buffer(page)
+            #return page["tags"]
+        
         # DEBUG BRAD: Removed this line since it breaks
         #             links within included files
         #self.m_current_file = source_file
@@ -2056,7 +2072,7 @@ else:
         
         expr = re.compile("<\?(.*?)\?>", re.DOTALL)
         input = expr.sub(self._evaluate_macros, input)
-
+        
         try:
 
             # Strip any \r characters

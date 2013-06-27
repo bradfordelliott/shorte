@@ -419,4 +419,29 @@ exported by this module in greater detail.
             output = open(path, "w")
             output.write(self.format_page(title, output_file, file_brief, file_author))
             output.close
+    
+    def generate_buffer(self, page):
+
+        self.m_package = "tpl"
+        self.m_inline = True
+        
+        page_names = {}
+        
+        # Format the output pages
+        self.m_contents = ""
+
+        tags = page["tags"]
+        source_file = page["source_file"]
+        file_brief = page["file_brief"]
+        file_author = page["file_author"]
+
+        # Strip off the extension
+        title = os.path.basename(source_file)
+
+        for tag in tags:
+            self.append(tag)
+
+        output_file = "tbd"
+
+        return self.format_page(title, output_file, file_brief, file_author)
 

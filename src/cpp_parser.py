@@ -787,6 +787,7 @@ class cpp_parser_t(shorte_parser_t):
             field["param_io"] = ""
             field["param_type"] = ptype
             field["param_desc"] = ("")
+            field["param_desc2"] = self.parse_textblock("")
 
             return field
 
@@ -1316,12 +1317,11 @@ class cpp_parser_t(shorte_parser_t):
                     page["tags"].append(tag)
 
             i += 1
+
        
     # Parse the input file and turn it into
     # structures understood by shorte. 
-    def parse(self, source_file):
-
-        input = self.load_source_file(source_file)
+    def parse_buffer(self, input, source_file):
 
         self.m_current_file = source_file
 
@@ -1592,3 +1592,10 @@ class cpp_parser_t(shorte_parser_t):
 
         self.m_pages.append(page)
 
+        return page
+
+    def parse(self, source_file):
+
+        input = self.load_source_file(source_file)
+
+        return self.parse_buffer(input, source_file)
