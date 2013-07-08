@@ -14,6 +14,11 @@
 # A number to assign to the document
 @docnumber 34567
 
+@docrevisions:
+- Revision | Date          | Description
+- 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
+
+
 # Shorte documents are split into a header and a body
 # similar to an HTML document. The body tag defines
 # the start of the body of the document.
@@ -27,6 +32,14 @@ to writing source code. It supports:
 - conditional includes and conditional text
 - easy revision control and diffing of documentation
 - cross referencing of C source code 
+
+@h2 Why another Language?
+I wasn't happy with other markups like reStructuredText since I didn't
+find it all that extensible and wanted something similar
+to HTML that allowed attributes on tags without having
+to go as far as XML.
+
+
 
 @h2 Document Structure
 Shorte documents generally end with a .tpl extension and follow the format
@@ -115,12 +128,12 @@ supported by Shorte:
 - @shorte | A block of shorte code
 
 -& Includes
-- @include       | 
-- @include_child |
+- @include       | This tag is used to include another file (breaks conditional cascade)
+- @include_child | This tag is used to include a child file (supports conditional cascade)
 
 -& Other Tags
-- @inkscape  |
-- @imagemap  |
+- @inkscape  | Include an SVG created in Inkscape
+- @imagemap  | Include an HTML image map
 - @sequence  | Generate a sequence diagram
 
 
@@ -135,13 +148,14 @@ The @docsubtitle defines a subtitle for the document. Only the first instance of
 tag is used. If a second instance is encountered it will be ignored.
 
 @h3 @docversion
-TBD
+The @docversion tag defines a version number for the document. This can be overridden
+at the command line.
 
 @h3 @docnumber
-TBD
+The @docnumber tag defines a number to associate with the document.
 
 @h3 @docrevisions
-TBD
+The @docrevisions tag defines a revision history for the document.
 
 
 @h1 The Document Body
@@ -275,6 +289,9 @@ This is a test
     this is also a test
 
 @h3 @image
+The @image tag is used to include an image. Recommended image formats
+currently included .jpg or .png.
+
 @h3 @ul
 @h3 @ol
 @h3 @table
@@ -290,20 +307,66 @@ This is a test
 
 
 @h2 Source Code Tags
+Shorte was built with technical documentation in mind so it supports
+including a variety of source code snippets. These are described in the
+following section.
 
 @h3 @c
-@h3 @d
-@h3 @bash
-@h3 @python
-@h3 @sql
-@h3 @java
-@h3 @tcl
-@h3 @vera
-@h3 @perl
-@h3 @code
-@h3 @shorte
+This tag is used to embed C code directly into the document and
+highlight it appropriately.
 
-@h2 Includes
+@shorte
+\@c
+#define XYZ "xyz"
+printf("Hello world!\n");
+
+@c
+#define XYZ "xyz"
+printf("Hello world!\n");
+
+@h3 @python
+This tag is used to embed Python code directly into the document and
+highlight it appropriately.
+
+@h3 @d
+This tag is used to embed D code directly into the document and
+highlight it appropriately.
+
+@h3 @bash
+This tag is used to embed bash code directly into the document and
+highlight it appropriately.
+
+@h3 @sql
+This tag is used to embed SQL code directly into the document and
+highlight it appropriately.
+
+@h3 @java
+This tag is used to embed Java code directly into the document and
+highlight it appropriately.
+
+@h3 @tcl
+This tag is used to embed TCL code directly into the document and
+highlight it appropriately.
+
+@h3 @vera
+This tag is used to embed Vera code directly into the document and
+highlight it appropriately.
+
+@h3 @perl
+This tag is used to embed Perl code directly into the document and
+highlight it appropriately.
+
+@h3 @shorte
+This tag is used to embed Shorte code directly into the document and
+highlight it appropriately.
+
+@h3 @code
+If the language is not supported by Shorte the @code tag can be
+used to at least mark it as a block of code even if it can't properly
+support syntax highlighting.
+
+
+@h2 Include Files
 Shorte supports include files using either of the following tags:
 
 @table
@@ -312,11 +375,51 @@ Shorte supports include files using either of the following tags:
 - @include_child | A child include - obeys conditional text flow cascading rules
 
 @h3 @include
+The @include tag is used to include another file. This is to allow breaking
+a document up into multiple modules. The @include will break any cascading of
+conditional statements in the document hierarchy. To cascade conditional
+text in the document hierarcy use the @include_child tag instead.
+
+@shorte
+\@include "chapters/my_chapter.tpl" 
+
+@text
+Includes also support conditionals in order to
+support generating multiple documents from the same source. The example
+below uses a command line conditional called *VARIABLE* to include
+or exclude the file.
+
+@shorte
+\@include: if="VARIABLE == 'xyz'"
+chapters/my_chapter.tpl
+chapters/my_chapter2.tpl
+
 @h3 @include_child
+The @include_child tag is an alternative to the @child tag. It behaves
+slightly differently in that it does not break the cascase of conditional
+text but continues the current cascade.
+
+@shorte
+\@h1 My Title
+This section will continue inside the my_chapter.tpl file.
+
+\@include_child: if="VARIABLE == 'xyz'"
+chapters/my_chapter.tpl
 
 @h2 Other Tags
+The following section describes some of the other more obscure
+tags that Shorte supports.
 
 @h3 @inkscape
+This allows including SVG files from Inkscape direction in the document. It
+requires Inkscape to be installed and the path properly configured. SVG files
+are automatically converted to .png files for inclusion since SVG files aren't
+widely supported.
+
 @h3 @imagemap
+This tag is used to generate an Image map. It currently only works in the
+HTML output template.
+
 @h3 @sequence
+This tag is used to generate a sequence diagram.
 
