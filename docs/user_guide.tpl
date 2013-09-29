@@ -34,11 +34,18 @@ to writing source code. It supports:
 - cross referencing of C source code 
 
 @h2 Why another Language?
-I wasn't happy with other markups like reStructuredText since I didn't
-find it all that extensible and wanted something similar
-to HTML that allowed attributes on tags without having
-to go as far as XML.
+I started this project about two years ago because I wasn't happy
+with other markups like reStructuredText. There are a lot of really
+good markup tools out there but I decided to try my hand and creating
+my own since I could easily extend it and make it do what I wanted.
 
+I wanted a markup language similar to HTML but not as verbose
+where I could sections within a document and have optional modifiers
+or attributes on tags to have more control over the document.
+
+I also wanted the tool to be able to automatically cross reference
+my source code and pull it in similar to Doxygen but I found doxygen
+hard to format quite like I wanted.
 
 
 @h2 Document Structure
@@ -69,6 +76,103 @@ This is not a comment
 If you want to use the \# character elsewhere in the document it should normally
 be escaped with a \\ character. This is not necessary inside source code blocks
 such as @c, @java, @python, etc.
+
+@h2 Conditional Text
+The Shorte language supports two types of conditional text
+- PHY style inline blocks
+- conditionals using the if="xxx" attribute on tags
+
+@h3 PHY Style Code Blocks
+These blocks of code are similar to the inline PHY syntax. You use
+the \<\? ... \?\> syntax to inline a block of Python code. Any output
+must get assigned to a variable called *result* which gets return in
+its expanded form. In this way you can conditionally generate text
+or use Python to create documentation.
+
+Variables can be passed to the interpreter using the *-m* command
+line parameter.
+
+@shorte
+\<\?
+result = ''
+if(1):
+    result += 'This is some *bold text* here'
+if(0):
+    result += 'But this line is not included' 
+\?\>
+
+@text
+When output you will see something like:
+
+<?
+result = ''
+if(1):
+    result += 'This is some *bold text* here'
+if(0):
+    result += 'But this line is not included' 
+?>
+
+@h3 Conditional Attributes
+Conditional test is also supported using the *if=* attribute on a tag.
+For example:
+
+@shorte
+# Include this table
+\@table: if="1"
+- Col 1 | Col2
+- Data1 | Data 2
+
+# But not this table
+\@table: if="0"
+- Col 3  | col 4
+- Data 3 | Data 4
+
+@text
+will expand to:
+
+# Include this table
+@table: if="1"
+- Col 1 | Col2
+- Data1 | Data 2
+
+# But not this table
+@table: if="0"
+- Col 3  | col 4
+- Data 3 | Data 4
+
+@text
+As will the inline code blocks you can specify variables to pass
+to the *if* text to evaluate using the *-m* command line paramter.
+
+
+@h2 Include Files
+Shorte supports include files. There are two tags, @include and @include_child
+which are used to include files.
+
+They can be included anywhere in the body of the document.
+
+@shorte
+\@body
+\@include "chapters/chapter_one.tpl"
+\@include "chapters/chapter_two.tpl"
+
+\@include: if="ALLOW_CHAPTER3 == True"
+chapters/chapter_three.tpl
+
+# Here we'll use the @include_child tag since
+# the @include tag normally breaks the flow of
+# conditional statements. By using @include_child
+# this file will only be included if ALLOW_CHAPTER3 == True
+\@include_child "chapters/child_of_chapter_three.tpl"
+
+@note
+Shorte currently can't handle include paths. The include path has to
+be a sub-directory where the top level file is included. Eventually
+support for include paths will be added.
+
+@h2 Inline Formatting
+TBD: Add description of this section
+
 
 @h2 Shorte Tags
 Shorte uses the @ character as a simple markup
@@ -101,18 +205,34 @@ supported by Shorte:
 - @text      | A document text block
 - @p         | A paragraph similar to the *P* tag from HTML
 - @pre       | A block of unformatted test similar to the *PRE* tag from HTML
+
+-& Includes
+- @include       | This tag is used to include another file (breaks conditional cascade)
+- @include_child | This tag is used to include a child file (supports conditional cascade)
+
+-& Images and Image Maps 
 - @image     | An inline image
+- @imagemap  | Include an HTML image map
+
+-& Lists and Tables
 - @ul        | An un-ordered list
 - @ol        | An ordered list
 - @table     | A table
+
+-& Notes, TBDs and Questions
 - @note      | A note
 - @question  | A question
 - @tbd       | A To Be Determined block
-- @struct    | A structure
-- @define    | A \#define
-- @vector    |
-- @shell     |
-- @prototype |
+- @questions | A list of questions
+
+-& Structures and Functions
+- @define    | A C style \#define
+- @enum      | An enumeration
+- @vector    | Similar to @struct but generates a bitfield
+- @struct    | A C style structure
+- @prototype | C function prototypes
+- @functionsummary | A function summary
+- @typesummary     | A type summary
 
 -& Source Code Tags
 - @c      | A block of C code
@@ -127,17 +247,52 @@ supported by Shorte:
 - @code   | A block of unknown source code
 - @shorte | A block of shorte code
 
--& Includes
-- @include       | This tag is used to include another file (breaks conditional cascade)
-- @include_child | This tag is used to include a child file (supports conditional cascade)
 
 -& Other Tags
-- @inkscape  | Include an SVG created in Inkscape
-- @imagemap  | Include an HTML image map
-- @sequence  | Generate a sequence diagram
+- @shell           | TBD
+- @inkscape        | Include an SVG created in Inkscape
+- @checklist       | Generate a checklist
+- @acronyms        | A list of acronyms
+- @embed           | An embedded object (HTML only)
+
+-& Sequence Diagrams
+- @sequence        | Generate a sequence diagram
+
+-& Test Case Definitions
+- @testcase        | A test case description
+- @testcasesummary | A test case summary
+
+@include "chapters/installation_instructions.tpl"
+
+@include "chapters/command_line.tpl"
 
 
 @h1 The Document Header
+The first part of any Shorte document is the document header. It is
+structured like HTML but isn't a strict. It is basically anything
+in the document before the @body tag. An example document header looks like:
+
+@shorte
+# The beginning of the document is assumed to be the document
+# header. As a convention normally the top level file will
+# contain metadata about the document.
+
+# The title of the document
+\@doctitle The Shorte Language
+
+# The subtitle of the document
+\@docsubtitle Reference Manual
+
+# A version number (can be overwritten from the command line)
+\@docversion 1.0
+
+# A number to assign to the document
+\@docnumber 34567
+
+\@docrevisions:
+- Revision | Date          | Description
+- 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
+
 
 @h3 @doctitle
 The @doctitle defines the title associated with the document. Only the first instance of this
@@ -259,7 +414,7 @@ blah blah blah
   - A second level in the list
     - A third level in the list
 
-Another paragraph with @{hl, With some inlined styling} and
+Another paragraph with @{hl, some inlined styling} and
 
 - A second list
 
@@ -270,10 +425,21 @@ and a block of code
 
 @h3 @p
 The @p tag is used to create a paragraph. It is similar to the *P* tag
-in HTML.
+in HTML. It does not attempt to parse the text block like the @text
+tag does in order to extract lists or indented code.
+
+@shorte
+\@p This is a paragraph in my document
+\@p This is another paragraph in my document
+
+@text
+This creates a two paragraphs that looks like:
+
+@p This is a paragraph in my document
+@p This is another paragraph in my document
 
 @h3 @pre
-The @pre tag creates a block of unformatted text
+The @pre tag creates a block of unformatted text:
 
 @shorte
 \@pre
@@ -288,22 +454,153 @@ This is a test
   this is a test
     this is also a test
 
-@h3 @image
-The @image tag is used to include an image. Recommended image formats
-currently included .jpg or .png.
+@include "chapters/includes.tpl"
 
-@h3 @ul
-@h3 @ol
-@h3 @table
+@include "chapters/images.tpl"
+
+@h2 Lists and Tables
+@include "chapters/lists.tpl"
+@include "chapters/tables.tpl"
+
+@h2 Notes, TBD and Questions
+
 @h3 @note
+The @note tag is used to create notes within a section. Here is an
+example:
+
+@shorte
+\@note
+This is a note here that I want to display
+
+- It has a list
+  - With some data
+
+And another paragraph.
+
+@text
+This renders to something like this:
+
+@note
+This is a note here that I want to display
+
+- It has a list
+  - With some data
+
+And another paragraph.
+
+
 @h3 @tbd
+The @tbd tag is used to highlight sections of a document
+that are still *To Be Determined*. They are similar in
+syntax to the @note tag
+
+@shorte
+\@tbd
+This is a block of code that is to be determined. It
+works just like a textblock and supports
+
+- lists
+    - indented data
+    - another item
+- second item in list
+
+Another paragraph
+
+    some indented text here
+    that wraps to a new line
+
+A final paragraph
+
+@tbd
+This is a block of code that is to be determined. It
+works just like a textblock and supports
+
+- lists
+    - indented data
+    - another item
+- second item in list
+
+Another paragraph
+
+    some indented text here
+    that wraps to a new line
+
+A final paragraph
+
 @h3 @question
-@h3 @tbd
-@h3 @struct
+The @question tag is used to mark a question to the reader
+or mark anything that might still need to be answered
+
+@shorte
+\@question
+This is a question
+
+with another paragraph. It should eventually be switched
+to the same syntax as the @note and @tbd tag.
+
+@text
+When rendered this looks like:
+
+@question
+This is a question
+
+with another paragraph. It should eventually be switched
+to the same syntax as the @note and @tbd tag.
+
+@h3 @questions
+The @questions tag is used to create a Q and A type section.
+For example,
+
+@shorte
+\@questions
+Q: This is a question with some more info
+A: This is the answer to the question with a lot
+   of detail that wraps across multiple lines and
+   hopefully it will make the HTML look interesting
+   but I'm not sure we'll just have to see what
+   happens when it's rendered
+
+Q: This is another question with some more information
+A: This is the answer to that question
+
+@text
+Will render to:
+
+@questions
+Q: This is a question with some more info
+A: This is the answer to the question with a lot
+   of detail that wraps across multiple lines and
+   hopefully it will make the HTML look interesting
+   but I'm not sure we'll just have to see what
+   happens when it's rendered
+
+Q: This is another question with some more information
+A: This is the answer to that question
+
+@h2 Structures and Functions
+
+@include "chapters/structs_and_vectors.tpl"
+
 @h3 @define
-@h3 @vector
-@h3 @shell
-@h3 @prototype
+The @define is used to document a \#define structure in C.
+
+@h3 @enum
+The @enum tag is used to define an enumeration.
+
+@enum: name="e_my_test" caption="This is a test enum"
+- Name | Value | Description
+- LEEDS_VLT_SUPPLY_1V_TX | 0x0 |  1V supply TX 
+- LEEDS_VLT_SUPPLY_1V_RX | 0x1 |  1V supply RX 
+- LEEDS_VLT_SUPPLY_1V_CRE | 0x2 |  1V supply digital core 
+- LEEDS_VLT_SUPPLY_1V_DIG_RX | 0x3 |  1V supply digital RX 
+- LEEDS_VLT_SUPPLY_1p8V_RX | 0x4 |  1.8V supply RX 
+- LEEDS_VLT_SUPPLY_1p8V_TX | 0x5 |  1.8V supply TX 
+- LEEDS_VLT_SUPPLY_2p5V | 0xf |  2.5V supply 
+- LEEDS_VLT_SUPPLY_TP_P | 0x9 |  Test point P 
+- LEEDS_VLT_SUPPLY_TP_N | 0x8 |  Test point N 
+
+
+@include "chapters/functions.tpl"
 
 
 @h2 Source Code Tags
@@ -311,29 +608,75 @@ Shorte was built with technical documentation in mind so it supports
 including a variety of source code snippets. These are described in the
 following section.
 
+@h3 Executing Snippets
+In many cases the code within these tags can be executed and the results captured
+within the document itself. This is useful for validating example code.
+Execution is done bu adding the following attribute:
+
+    exec="1"
+
+to the tag. Remote execution is also possible if SSH keys are setup by
+adding the machine="xxx" and port="xxx" parameters.
+
 @h3 @c
-This tag is used to embed C code directly into the document and
-highlight it appropriately.
+The @c tag is used to embed C code directly into the document and
+highlight it appropriately. For example, the following block of code
+inlines a C snippet. The code can also be run locally using g++ by
+passing the exec="1" attribute. See [[->Executing Snippets]] for
+more information on setting up Shorte to execute code snippets.
 
 @shorte
-\@c
-#define XYZ "xyz"
-printf("Hello world!\n");
+\@c: exec="0"
+#include <stdio.h>
+#include <stdlib.h>
+int main(void)
+{
+    printf("hello world!\n");
+    return EXIT_SUCCESS;
+}
 
-@c
-#define XYZ "xyz"
-printf("Hello world!\n");
+@text
+This renders the following output:
+
+@c: exec="0"
+#include <stdio.h>
+#include <stdlib.h>
+int main(void)
+{
+    printf("hello world!\n");
+    return EXIT_SUCCESS;
+}
 
 @h3 @python
 This tag is used to embed Python code directly into the document and
+highlight it appropriately. If the code is a complete snippet it can
+also be executed on the local machine and the results returned. See [[->Executing Snippets]]
+for more information on setting up Shorte to execute code snippets.
+
+@shorte
+\@python: exec="1"
+print "Hello world!"
+
+@text
+This will execute the code on the local machine and return the output:
+
+@python: exec="1"
+print "Hello world!"
+
+@h3 @bash
+This tag is used to embed bash code directly into the document and
+highlight it appropriately.
+
+@h3 @perl
+This tag is used to embed Perl code directly into the document and
+highlight it appropriately.
+
+@h3 @shorte
+This tag is used to embed Shorte code directly into the document and
 highlight it appropriately.
 
 @h3 @d
 This tag is used to embed D code directly into the document and
-highlight it appropriately.
-
-@h3 @bash
-This tag is used to embed bash code directly into the document and
 highlight it appropriately.
 
 @h3 @sql
@@ -352,59 +695,25 @@ highlight it appropriately.
 This tag is used to embed Vera code directly into the document and
 highlight it appropriately.
 
-@h3 @perl
-This tag is used to embed Perl code directly into the document and
-highlight it appropriately.
-
-@h3 @shorte
-This tag is used to embed Shorte code directly into the document and
-highlight it appropriately.
-
 @h3 @code
 If the language is not supported by Shorte the @code tag can be
 used to at least mark it as a block of code even if it can't properly
 support syntax highlighting.
 
-
-@h2 Include Files
-Shorte supports include files using either of the following tags:
-
-@table
-- Include        | Description
-- @include       | A normal include - interrupts any conditional text flow
-- @include_child | A child include - obeys conditional text flow cascading rules
-
-@h3 @include
-The @include tag is used to include another file. This is to allow breaking
-a document up into multiple modules. The @include will break any cascading of
-conditional statements in the document hierarchy. To cascade conditional
-text in the document hierarcy use the @include_child tag instead.
-
 @shorte
-\@include "chapters/my_chapter.tpl" 
+\@code
+This is a test of a language that isn't supported by
+Shorte.
 
-@text
-Includes also support conditionals in order to
-support generating multiple documents from the same source. The example
-below uses a command line conditional called *VARIABLE* to include
-or exclude the file.
+@code
+This is a test of a language that isn't supported by
+Shorte.
 
-@shorte
-\@include: if="VARIABLE == 'xyz'"
-chapters/my_chapter.tpl
-chapters/my_chapter2.tpl
+@h3 @shell
+TBD: add description of this tag.
 
-@h3 @include_child
-The @include_child tag is an alternative to the @child tag. It behaves
-slightly differently in that it does not break the cascase of conditional
-text but continues the current cascade.
 
-@shorte
-\@h1 My Title
-This section will continue inside the my_chapter.tpl file.
 
-\@include_child: if="VARIABLE == 'xyz'"
-chapters/my_chapter.tpl
 
 @h2 Other Tags
 The following section describes some of the other more obscure
@@ -416,10 +725,31 @@ requires Inkscape to be installed and the path properly configured. SVG files
 are automatically converted to .png files for inclusion since SVG files aren't
 widely supported.
 
-@h3 @imagemap
-This tag is used to generate an Image map. It currently only works in the
-HTML output template.
 
-@h3 @sequence
-This tag is used to generate a sequence diagram.
+
+
+@h3 @checklist
+The @checklist tag creates a non-interactive checklist
+@checklist: title="test" caption="test"
+- one: caption="blah blah blah" checked="yes"
+- two
+- three: checked="yes"
+- four
+
+
+@h3 @acronyms
+@acronyms
+- Acronym | Definition
+- EPT     | Egress Parser Table
+- EPC     | Egress Parser CAM
+
+
+
+@h3 @embed
+TBD - Add description of this tag
+
+
+@include "chapters/sequence_diagrams.tpl"
+
+@include "chapters/test_cases.tpl"
 
