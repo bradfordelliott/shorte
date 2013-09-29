@@ -3275,6 +3275,9 @@ class template_odt_t(template_t):
             else:
                 path_oowriter = "\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
 
+        elif(sys.platform == "darwin"):
+            path_startup = g_startup_path
+            path_oowriter = shorte_get_config("shorte", "path.oowriter.osx")
         else:
             path_startup = g_startup_path
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
