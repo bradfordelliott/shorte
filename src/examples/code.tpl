@@ -347,13 +347,19 @@ puts "Hello world!"
 - returns:
     TRUE on success, FALSE on failure
 - params:
-    - val1 | I | {1 = blah blah
-                      and more blah blah
-                      plus blah;
-                  2 = blah blah blah;
-                  0 = turn [[[beacon]]] on}
-    - val2 | I | *1* = blah blah\n
-                 *2* = blah blah blah
+    -- val1 | I |
+        1 = blah blah
+            and more blah blah
+            plus blah;
+        
+        2 = blah blah blah;
+        
+        0 = turn [[[beacon]]] on
+    -- val2 | I |
+        *1* = blah blah
+        
+        *2* = blah blah blah
+
 - example:
     rc = my_function(val);
 
@@ -406,15 +412,18 @@ puts "Hello world!"
 - returns:
     TRUE on success, FALSE on failure
 - params:
-    - val1 | I | {1 = blah blah
-                      and more blah blah
-                      plus blah;
-                  2 = blah blah blah;
-                  0 = turn [[[beacon]]] on}
-    - val2 | I | *1* = blah blah\n
-                 *2* = blah blah blah
-
-
+    -- val1 | I |
+        1 = blah blah
+            and more blah blah
+            plus blah;
+        
+        2 = blah blah blah;
+        
+        0 = turn [[[beacon]]] on
+    -- val2 | I |
+        *1* = blah blah
+        
+        *2* = blah blah blah
 @h1 Acronyms
 
 @acronyms

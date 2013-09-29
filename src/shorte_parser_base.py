@@ -8,13 +8,18 @@ class parser_t:
     
     
     def strip_indent(self, input, indent):
+        
+        #print "\n\nINPUT=[%s], indent=%d" % (input, indent)
 
         if(indent == 0):
             return input
 
-        #print "INPUT=[%s], indent=%d" % (input, indent)
+        len_input = len(input)
 
         for i in range(0, indent+1):
+            if(i >= (len_input-1)):
+                break
+
             if(input[i] != ' '):
                 break
 
@@ -129,7 +134,7 @@ class parser_t:
 
         for i in range(0, len(source)):
 
-            if(source[i] == '-'):
+            if(source[i] in ('-')):
 
                 # Look backwards till the first newline
                 # to ensure this is a list item and not
@@ -175,15 +180,29 @@ class parser_t:
 
         return list
 
+    def get_indent_of_line(self, data, start_of_line):
+
+        i = start_of_line
+        indent = ''
+        len_data = len(data)
+
+        while(i < len_data and data[i] == ' '):
+            indent += '0'
+            i += 1
+        
+        return indent
+
+
     def parse_textblock(self, data):
         
-        #print "DATA: [%s]" % data
+        #print "PARSING TEXTBLOCK: [%s]" % data
 
         data = trim_leading_indent(data)
 
         STATE_NORMAL = 0
         STATE_LIST = 1
         STATE_CODE = 2
+        STATE_INLINE = 3
         states = []
         states.append(STATE_NORMAL)
 
@@ -200,7 +219,9 @@ class parser_t:
             state = states[-1]
 
             if(state == STATE_NORMAL):
-                if(data[i] == "-"):
+                # If the line starts with - or * then treat it
+                # as a list. If it is ** then it is actually bold text
+                if(data[i] == "-"): #  or (data[i] == "*" and (i+1 < len(data) and data[i+1] != "*"))):
                     if(i == 0 or data[i-1] == "\n"):
                         #print "Starting a list, last seg=%s" % segment
                         i += 1 
@@ -215,11 +236,73 @@ class parser_t:
 
                 # Start of a new segment
                 elif(data[i] == "\n" and (i < len(data)-1) and data[i+1] == "\n"):
+                    #print "SEGMENT [%s]" % segment["text"]
+                    #print "Start of new segment"
                     segments.append(segment)
                     segment = {}
                     segment["type"] = "text"
                     segment["text"] = ""
-                    i += 2 
+                    i += 1 
+                # DEBUG BRAD: This is not implemented
+                #  If a line is indented then we should treat all consecutive lines
+                #  that have the same indent level as an indented block.
+                #elif(data[i] == "\n" and (i < len(data)-1) and data[i+1] in (" ")):
+                elif(data[i] == "\n" and data[i+1] == " "):
+                    segments.append(segment)
+                    segment = {}
+                    segment["type"] = "text"
+                    segment["text"] = ""
+                    
+                    #print "\n\nParsing Indented text [%s]\n" % data[i+1:]
+
+                    j = i+1
+
+                    block = ""
+
+                    same_indent = True
+                    while(same_indent):
+                        prefix = ""
+
+                        while((j <= len(data)-1) and data[j] == ' '):
+                            prefix += "0"
+                            block += " "
+                            j += 1
+                        
+                        if(j >= (len(data)-1)):
+                            break
+
+                        # Add the rest of the text to the end of the line
+                        while((j <= len(data)-1) and data[j] != '\n'):
+                            block += data[j]
+                            j += 1
+                        #print "data[%d] = [%s]" % (j, data[j])
+                        block += "\n"
+
+                        # Now that I've hit the newline get the indent
+                        # level of the next line. If it is the same then
+                        # continue adding this line to the current paragraph
+                        # If it is different then stop processing
+                        j += 1
+                        #print "REMAINDER: [%s]" % data[j:]
+                        indent = self.get_indent_of_line(data, j)
+
+                        if(indent != prefix):
+                            same_indent = False
+                            #print "indent [%s] != prefix [%s]" % (indent,prefix)
+                            break
+
+                    segment["text"] = block
+
+                    #print "   TEXT: [%s]" % segment["text"]
+                    i = j+1
+                    
+                    segments.append(segment)
+                    segment = {}
+                    segment["type"] = "text"
+                    segment["text"] = ""
+
+                    #i += 2
+
                 elif(data[i] == "{" and data[i+1] == "{"):
                     segments.append(segment)
                     segment = {}
@@ -227,10 +310,35 @@ class parser_t:
                     segment["text"] = ""
                     i += 2
                     states.append(STATE_CODE)
+
+                elif(data[i] == '@'):
+                    #segments.append(segment)
+                    #segment = {}
+                    #segment["type"] = "text"
+                    segment["text"] += "@"
+                    i += 1
+                    states.append(STATE_INLINE)
+
+                else:
+                    #print "In Else block"
+                    segment["text"] += data[i]
+                    i += 1
+
+            elif(state == STATE_INLINE):
+                if(data[i] == "}"):
+                    segment["text"] += "}"
+                    i += 1
+                    #segments.append(segment)
+                    #segment = {}
+                    #segment["type"] = "text"
+                    #segment["text"] = ""
+                    states.pop()
                 else:
                     segment["text"] += data[i]
                     i += 1
+
             elif(state == STATE_CODE):
+                #print "PARSING CODE"
                 
                 if(data[i] == "}" and data[i+1] == "}"):
                     segment["text"] += ""
@@ -243,7 +351,9 @@ class parser_t:
                 else:
                     segment["text"] += data[i]
                     i += 1
+
             elif(state == STATE_LIST):
+                #print "PARSING LIST"
                 if(data[i] == "\n" and (i > len(data)-2 or data[i+1] == "\n")):
                     segment["text"] += data[i]
                     i += 2 
@@ -255,12 +365,15 @@ class parser_t:
                 else:
                     segment["text"] += data[i]
                     i += 1
+                #print "  [%s]" % segment["text"]
 
         if(segment["text"] != ""):
             segments.append(segment)
 
+        #s = 0
         #for segment in segments:
-        #    print "SEGMENT: \n%s" % segment
+        #    print "SEGMENT[%d]: [%s]" % (s,segment)
+        #    s+=1
 
         paragraphs = []
 
@@ -279,6 +392,7 @@ class parser_t:
 
             is_code = False
             is_list = False
+            is_table = False
             
             # Handle any code blocks detected within the
             # textblock. Code blocks are represented by {{ }}
@@ -294,12 +408,18 @@ class parser_t:
 
                 text = elements
                 is_list = True
+            elif(type == "table"):
+                elements = self.parse_table(text, "")
+
+                text = elements
+                is_table = True
 
             paragraphs.append({
                 "indent":indent,
                 "text":text,
                 "code":is_code,
-                "list":is_list})
+                "list":is_list,
+                "table":is_table})
         
         return paragraphs
     

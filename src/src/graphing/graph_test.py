@@ -1,16 +1,13 @@
 #!/usr/bin/python
 import sys
 import re
-sys.path.append("../../libs")
-sys.path.append("../..")
-sys.path.append("libs")
-import cairo_access
-from cairo_access import *
+import libs.cairo_access
+from libs.cairo_access import *
 import math
 
-import linegraph
-import bargraph
-import sequence_diagram
+import src.graphing.linegraph as linegraph
+import src.graphing.bargraph as bargraph
+import src.graphing.sequence_diagram as sequence_diagram
 
 lgraph = linegraph.line_graph_t(800,600)
 lgraph.set_title("This is a test graph", "A test line graph with some data")

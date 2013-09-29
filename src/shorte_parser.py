@@ -22,32 +22,18 @@ import platform
 import time
 from shorte_parser_base import parser_t
     
-from template_shorte import template_shorte_t
+from src.templates.template_shorte import template_shorte_t
 
-startup_path = os.path.dirname(sys.argv[0])
-sys.path.append(startup_path + "/libs")
+import src.graphing.sequence_diagram as sequence_diagram
 
-sys.path.append(startup_path + "/src/graphing")
-sys.path.append(startup_path + "/src/templates")
-import sequence_diagram
-
-#print platform.system()
-if("Windows" == platform.system()):
-    sys.path.append(startup_path + "/libs/win32")
-else:
-    if(platform.architecture()[0] == '32bit'):
-        sys.path.append(startup_path + "/libs/lib32")
-    else:
-        sys.path.append(startup_path + "/libs/lib64")
-    
 g_cairo_loaded = False
 try:
-    from cairo_access import cairo
+    from libs.cairo_access import cairo
     g_cairo_loaded = True
 except:
     print "WARNING: Failed to load cairo_access library"
-    
-from records import *
+        
+from libs.records import *
 
 
 class shorte_parser_t(parser_t):
@@ -64,6 +50,7 @@ class shorte_parser_t(parser_t):
             "h3"              : True,
             "h4"              : True,
             "h5"              : True,
+            "h"               : True,
             "p"               : True,
             "text"            : True,
             "note"            : True,
@@ -93,6 +80,7 @@ class shorte_parser_t(parser_t):
             "code"            : True,
             "d"               : True,
             "bash"            : True,
+            "shorte"          : True,
             "include"         : True,
             "include_child"   : True,
 
@@ -118,6 +106,8 @@ class shorte_parser_t(parser_t):
             "docrevisions"    : True,
             "docversion"      : True,
             "docfilename"     : True,
+            "outdir"          : True,
+            "sourcedir"       : True,
 
             # Layout tags
             "columns"         : True,
@@ -141,7 +131,8 @@ class shorte_parser_t(parser_t):
             "h3"      : 4,
             "h4"      : 5,
             "h5"      : 6,
-            "include_child" : 7,
+            "h"       : 7,
+            "include_child" : 8,
             "least"   : 100
         }
 
@@ -226,6 +217,9 @@ class shorte_parser_t(parser_t):
             attr["number"] = ""
             attr["revision_history"] = None
             attr["filename"] = None
+            attr["sourcedir"] = None
+            attr["outdir"] = None
+
             return attr
 
         tags = self._parse_tags("title", data[0:start-1], 0)
@@ -243,6 +237,8 @@ class shorte_parser_t(parser_t):
         header["number"] = ""
         header["revision_history"] = None
         header["filename"] = None
+        header["outdir"] = None
+        header["sourcedir"] = None
 
         for tag in tags:
             if(tag["name"] == "doctitle"):
@@ -261,6 +257,13 @@ class shorte_parser_t(parser_t):
                 header["number"] = tag["contents"]
             elif(tag["name"] == "docrevisions"):
                 header["revision_history"] = self.parse_table(tag["contents"], tag["modifiers"])
+            elif(tag["name"] == "sourcedir"):
+                header["sourcedir"] = tag["contents"]
+                self.m_engine.set_working_dir(header["sourcedir"])
+
+            elif(tag["name"] == "outdir"):
+                header["outdir"] = tag["contents"]
+                self.m_engine.set_output_dir(header["outdir"])
 
         return header
 
@@ -273,14 +276,14 @@ class shorte_parser_t(parser_t):
     
     def tag_is_source_code(self, tag_name):
 
-        if(tag_name in ("python", "perl", "shell", "d", "c", "sql", "code", "vera", "bash", "java", "verilog", "tcl")):
+        if(tag_name in ("python", "perl", "shell", "d", "c", "sql", "code", "vera", "bash", "java", "verilog", "tcl", "shorte")):
            return True
 
         return False
     
     def tag_is_header(self, tag_name):
         
-        if(tag_name in ("h1", "h2", "h3", "h4", "h5")):
+        if(tag_name in ("h1", "h2", "h3", "h4", "h5", "h")):
             return True
 
         return False
@@ -300,6 +303,7 @@ class shorte_parser_t(parser_t):
         STATE_NORMAL     = 0
         STATE_COMMENT    = 1
         STATE_MODIFIER   = 2
+        STATE_MULTILINE_STRING = 3
 
         states = []
         states.append(STATE_NORMAL)
@@ -355,6 +359,7 @@ class shorte_parser_t(parser_t):
                     i+=2
                     continue
 
+
                 else:
                     tag_data += input[i]
 
@@ -362,6 +367,21 @@ class shorte_parser_t(parser_t):
                 
                 if(input[i] == '\n'):
                     states.pop()
+                elif(input[i:i+3] == "'''"):
+                    #print "DO I GET HERE?"
+                    tag_modifier += '"'
+                    states.append(STATE_MULTILINE_STRING )
+                    i = i + 3
+                    continue
+                else:
+                    tag_modifier += input[i]
+
+            elif(state == STATE_MULTILINE_STRING):
+                if(input[i:i+3] == "'''"):
+                    states.pop()
+                    i = i + 2
+                    #print "MODIFIER: [%s]" % tag_modifier
+                    tag_modifier += '"'
                 else:
                     tag_modifier += input[i]
 
@@ -673,7 +693,11 @@ class shorte_parser_t(parser_t):
         table["rows"] = []
 
         for modifier in modifiers:
-            table[modifier] = modifiers[modifier]
+            if(modifier in ("caption", "description")):
+                table[modifier] = self.parse_textblock(modifiers[modifier])
+            else:
+                table[modifier] = modifiers[modifier]
+
         
         if(modifiers.has_key("mark_reserved")):
             mark_reserved = True
@@ -713,6 +737,7 @@ class shorte_parser_t(parser_t):
             table_row["is_reserved"] = False
             table_row["is_spacer"] = False
             table_row["is_crossed"] = False
+            table_row["is_title"] = False
 
             # Mark the first row as the header
             if(row_num == 0):
@@ -751,10 +776,10 @@ class shorte_parser_t(parser_t):
             # Check to see the leading characters in each
             # row. If they are &, *, or ^ then they have
             # special significance.
-            if(row[0] == '&'):
+            if(row[0] == '&' or row[0] == 's'):
                 table_row["is_subheader"] = True
                 start = 1
-            elif(row[0] == '*'):
+            elif(row[0] == '*' or row[0] == 'h'):
                 table_row["is_header"] = True
                 start = 1
             elif(row[0] == '^'):
@@ -763,6 +788,18 @@ class shorte_parser_t(parser_t):
             elif(row[0] == '='):
                 table_row["is_crossed"] = True
                 start = 1
+            elif(row[0] == 'r'):
+                table_row["is_reserved"] = True
+                start = 1
+            elif(row[0] == 't'):
+                table_row["is_title"] = True
+                table_row["is_header"] = False
+                start = 1
+            elif(row[0] == 'x'):
+                table_row["is_crossed"] = False
+                table_row["is_header"] = False
+                start = 1
+
 
             i = start 
             end = len(row)
@@ -801,6 +838,9 @@ class shorte_parser_t(parser_t):
                         tmp = {}
                         tmp["span"] = colspan 
                         tmp["text"] = text
+                        tmp["textblock"] = self.parse_textblock(trim_leading_indent(text))
+
+                        #print "TEXT:\n%s" % text
 
                         table_row["cols"].append(tmp)
                         col = ""
@@ -825,10 +865,12 @@ class shorte_parser_t(parser_t):
 
             if(col != ""):
 
-                col = col.strip()
+                #col = col.strip()
                 tmp = {}
                 tmp["span"] = 1
                 tmp["text"] = col
+                #print "TEXT\n[%s]" % col
+                tmp["textblock"] = self.parse_textblock(trim_leading_indent(col))
                 table_row["cols"].append(tmp)
 
             table["rows"].append(table_row)
@@ -875,18 +917,43 @@ class shorte_parser_t(parser_t):
         return input
     
     
-    def parse_define(self, source, modifiers):
+    def parse_define(self, source, attributes):
+        '''The parse_define method is called to parse
+a C/C++ like define that looks like:
+
+#define MY_DEFINE blah blah blah
+
+@param source    [I] = The source of the define
+@param modifiers [I] = The list of attributes associated
+                       with the define.
+'''
 
         define = {}
-        define["name"] = modifiers["name"]
-        define["desc"] = unescape_string(modifiers["caption"])
-        define["value"] = unescape_string(modifiers["value"])
+        define["name"] = attributes["name"]
+        if(attributes.has_key("description")):
+            description = attributes["description"]
+            define["desc"] = unescape_string(attributes["description"])
+        else:
+            define["desc"] = unescape_string(attributes["caption"])
+            description = attributes["caption"]
+        define["value"] = unescape_string(attributes["value"])
         define["source"] = source
+
+        define["description"] = self.parse_textblock(trim_leading_indent(description))
 
         return define
 
 
     def parse_struct(self, source, modifiers):
+        '''This method is called to parse an @struct tag containing a structure
+           definition.
+
+           @param self [I] - The shorte parser instance
+           @param source [I] - The source code for the tag
+           @param modifiers [I] - A list of modifiers associated with the tag.
+
+           @return A dictionary defining the structure
+        '''
 
         struct = {}
         struct["fields"] = []
@@ -900,7 +967,10 @@ class shorte_parser_t(parser_t):
         mark_reserved = True
 
         for modifier in modifiers:
-            struct[modifier] = modifiers[modifier]
+            if(modifier in ("caption", "description")):
+                struct[modifier] = self.parse_textblock(modifiers[modifier])
+            else:
+                struct[modifier] = modifiers[modifier]
 
         rows = []
         buffer = ""
@@ -938,6 +1008,7 @@ class shorte_parser_t(parser_t):
             field["attrs"] = []
             field["is_reserved"] = False
             field["is_header"] = False
+            field["is_title"] = False
             field["is_subheader"] = False
             field["is_caption"] = False
             field["is_spacer"] = False
@@ -1007,10 +1078,12 @@ class shorte_parser_t(parser_t):
                         colnum += 1
                         if(colnum > max_cols):
                             max_cols = colnum
+                        
+                        #print "ATTR: [%s]" % col
 
                         attr = col.strip()
-                        
-                        #print "ATTR: [%s]" % attr
+                        tmp = {}
+                        tmp["textblock"] = self.parse_textblock(col)
 
                         # Strip any formatting characters
                         attr = self.strip_formatting(attr)
@@ -1019,7 +1092,11 @@ class shorte_parser_t(parser_t):
                         if(mark_reserved and self.is_reserved_text(text)):
                             field["is_reserved"] = True
 
-                        field["attrs"].append(attr)
+                        #field["attrs"].append(attr)
+                        
+                        tmp["text"] = attr
+                        field["attrs"].append(tmp)
+
                         col = ""
 
                     else:
@@ -1033,13 +1110,18 @@ class shorte_parser_t(parser_t):
 
 
             if(col != ""):
+                
+                tmp = {}
+                tmp["textblock"] = self.parse_textblock(col)
                         
                 attr = col.strip()
 
                 if(attr == "Reserved" or attr == 'reserved' or attr == 'Rsvd' or attr == 'rsvd'):
                     field["is_reserved"] = True
 
-                field["attrs"].append(attr)
+                tmp["text"] = attr
+
+                field["attrs"].append(tmp)
 
             #print field
 
@@ -1047,7 +1129,7 @@ class shorte_parser_t(parser_t):
 
         for field in fields:
             if(not fields_are_bytes):
-                bits = field["attrs"][0]
+                bits = field["attrs"][0]["text"]
 
                 if(bits.find("b") != -1):
                     fields_are_bits = True
@@ -1065,7 +1147,7 @@ class shorte_parser_t(parser_t):
 
             elif(fields_are_bytes):
 
-                bytes = field["attrs"][0]
+                bytes = field["attrs"][0]["text"]
 
                 if((bytes[0] >= '0') and (bytes[0] <= '9')):
                     parts = bytes.split("x") 
@@ -1095,7 +1177,7 @@ class shorte_parser_t(parser_t):
 
             elif(fields_are_bits):
 
-                bits = field["attrs"][0]
+                bits = field["attrs"][0]["text"]
 
                 if((bits[0] >= '0') and (bits[0] <= '9')):
                     #print "BITS: %s" % bits
@@ -1108,7 +1190,7 @@ class shorte_parser_t(parser_t):
                     type = bits
 
             else:
-                bits = field["attrs"][0]
+                bits = field["attrs"][0]["text"]
 
                 # If it's not the header then see if we should insert
                 # a reserved field befor this one to accomodate any gaps
@@ -1154,6 +1236,7 @@ class shorte_parser_t(parser_t):
                         new_field["attrs"].append("Automatically generated")
                         new_field["is_reserved"] = True
                         new_field["is_header"] = False
+                        new_field["is_title"] = False
                         new_field["is_subheader"] =  field["is_subheader"]
                         new_field["is_caption"] = False
                         new_field["is_spacer"] = False
@@ -1202,7 +1285,7 @@ class shorte_parser_t(parser_t):
                 if(field.has_key("array_elem_size")):
                     array_elem_size = int(field["array_elem_size"])
 
-                record.append_field(field["attrs"][1], field["width"], field["attrs"][2], field["is_reserved"], is_array, array_elem_size, field["type"])
+                record.append_field(field["attrs"][1]["text"], field["width"], field["attrs"][2]["text"], field["is_reserved"], is_array, array_elem_size, field["type"])
        
         # Generate an record of the structure so that images
         # or source code can be generated from it.
@@ -1322,12 +1405,7 @@ class shorte_parser_t(parser_t):
         sections = splitter.split(source)
 
         vars = {}
-        vars["function_name"]      = ""
-        #vars["function_desc"]      = ""
-        #vars["function_prototype"] = ""
-        #vars["function_params"]    = ""
-        #vars["function_returns"]   = ""
-        #vars["function_example"]   = ""
+        vars["name"]      = ""
         
         language = "code"
         if(modifiers.has_key("language")):
@@ -1337,38 +1415,38 @@ class shorte_parser_t(parser_t):
             if(section != ""):
                 
                 if(section.startswith("function:")):
-                    vars["function_name"] = section[9:len(section)].strip()
+                    vars["name"] = section[9:len(section)].strip()
                 
                 elif(section.startswith("description:")):
-                    vars["function_desc"] = section[12:len(section)].strip()
+                    vars["desc"] = section[12:len(section)].strip()
                     tmp = section[12:len(section)]
-                    vars["function_desc2"] = self.parse_textblock(tmp)
+                    vars["desc2"] = self.parse_textblock(tmp)
                 
                 elif(section.startswith("prototype:")):
-                    vars["function_prototype"] = section[10:len(section)].strip()
+                    vars["prototype"] = section[10:len(section)].strip()
 
                     function_prototype = section[10:len(section)].strip()
 
                     code = source_code_t()
                     prototype = code.parse_source_code(language, function_prototype)
-                    vars["function_prototype"] = {}
-                    vars["function_prototype"]["language"] = language
-                    vars["function_prototype"]["parsed"] = prototype
-                    vars["function_prototype"]["unparsed"] = function_prototype
+                    vars["prototype"] = {}
+                    vars["prototype"]["language"] = language
+                    vars["prototype"]["parsed"] = prototype
+                    vars["prototype"]["unparsed"] = function_prototype
                 
                 elif(section.startswith("called by:")):
-                    vars["function_called_by"] = section[10:len(section)].strip()
+                    vars["called_by"] = section[10:len(section)].strip()
                 
                 elif(section.startswith("calls:")):
-                    vars["function_calls"] = section[6:len(section)].strip()
+                    vars["calls"] = section[6:len(section)].strip()
                 
                 elif(section.startswith("params:")):
                     params = '\n' + section[8:len(section)].strip() + '\n'
                     #params = re.sub('\n', ' ', params).strip()
 
-                    vars["function_params"] = []
+                    vars["params"] = []
                 
-                    #print "Parsing [%s] = [%s]" % (vars["function_name"], params)
+                    #print "Parsing [%s] = [%s]" % (vars["name"], params)
                     
                     rows = re.split("\n *--", params);
                     for row in rows:
@@ -1383,8 +1461,8 @@ class shorte_parser_t(parser_t):
                             #print "N:%s, I:%s, V:%s" % (param_name, param_io, param_value)
                             fields = {}
                             
-                            fields["param_name"] = param_name
-                            fields["param_io"]   = param_io
+                            fields["name"] = param_name
+                            fields["io"]   = param_io
 
                             #desc = []
                             #cols = re.split(";", param_value)
@@ -1398,10 +1476,10 @@ class shorte_parser_t(parser_t):
 
                             #    desc.append((name, val))
 
-                            fields["param_desc"] = param_value
-                            fields["param_desc2"] = self.parse_textblock(trim_leading_blank_lines(desc))
+                            fields["desc"] = param_value
+                            fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(desc))
 
-                            vars["function_params"].append(fields)
+                            vars["params"].append(fields)
 
 
                         else:
@@ -1416,20 +1494,20 @@ class shorte_parser_t(parser_t):
                                 if(len(cols) > 1):
                                     fields = {}
                                     
-                                    fields["param_name"] = cols[0]
-                                    fields["param_io"]   = cols[1].strip()
+                                    fields["name"] = cols[0]
+                                    fields["io"]   = cols[1].strip()
                                     desc = []
                                     desc.append((cols[2]))
                                     #print "DESC2: [%s]" % trim_leading_blank_lines(trim_leading_indent(cols[2]))
                                     desc2 = cols[2]
-                                    fields["param_desc"] = desc
-                                    fields["param_desc2"] = self.parse_textblock(trim_leading_blank_lines(trim_leading_indent(cols[2])))
-                                    fields["param_desc2"] = self.parse_textblock(cols[2]) 
+                                    fields["desc"] = desc
+                                    fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(trim_leading_indent(cols[2])))
+                                    fields["desc2"] = self.parse_textblock(cols[2]) 
 
-                                    vars["function_params"].append(fields)
+                                    vars["params"].append(fields)
                 
                 elif(section.startswith("returns:")):
-                    vars["function_returns"] = section[8:len(section)].strip()
+                    vars["returns"] = section[8:len(section)].strip()
                 
                 elif(section.startswith("example:")):
                     example = section[8:len(section)]
@@ -1438,9 +1516,9 @@ class shorte_parser_t(parser_t):
 
                     code = source_code_t()
                     example = code.parse_source_code(language, example)
-                    vars["function_example"] = {}
-                    vars["function_example"]["language"] = language
-                    vars["function_example"]["parsed"] = example 
+                    vars["example"] = {}
+                    vars["example"]["language"] = language
+                    vars["example"]["parsed"] = example 
 
                 elif(section.startswith("pseudocode:")):
                     
@@ -1452,16 +1530,16 @@ class shorte_parser_t(parser_t):
 
                     code = source_code_t()
                     pseudocode = code.parse_source_code(language, pseudocode)
-                    vars["function_pseudocode"] = {}
-                    vars["function_pseudocode"]["language"] = language
-                    vars["function_pseudocode"]["parsed"] = pseudocode
-                    vars["function_pseudocode"]["unparsed"] = section[11:len(section)]
+                    vars["pseudocode"] = {}
+                    vars["pseudocode"]["language"] = language
+                    vars["pseudocode"]["parsed"] = pseudocode
+                    vars["pseudocode"]["unparsed"] = section[11:len(section)]
 
                 elif(section.startswith("see also:")):
-                    vars["function_see_also"] = section[9:len(section)].strip()
+                    vars["see_also"] = section[9:len(section)].strip()
                 
                 elif(section.startswith("deprecated:")):
-                    vars["function_deprecated"] = section[11:len(section)].strip()
+                    vars["deprecated"] = section[11:len(section)].strip()
 
 
         return vars
@@ -1747,7 +1825,10 @@ else:
             tmp = lines[0].strip()
             tag["contents"] = tmp
             tag["source"] = tmp
-            self.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
+
+            if(name != "h"):
+                self.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
+
             self.m_headers.append(tag)
         
             tags.append(tag)
@@ -1839,18 +1920,18 @@ else:
                 header["is_header"] = True
                 header["is_prototype"] = True
                 header["name"] = prototype_add_header
-                header["contents"] = function["function_name"]
-                header["source"] = function["function_name"]
+                header["contents"] = function["name"]
+                header["source"] = function["name"]
                 header["modifiers"] = modifiers
                 header["file"] = filename
                 header["line"] = linenum
                 
                 # If a header with the same name already exists then don't
                 # bother adding a new one
-                #print "FUNC NAME: [%s]" % function["function_name"]
-                hdr_tag = self.get_header(function["function_name"])
+                #print "FUNC NAME: [%s]" % function["name"]
+                hdr_tag = self.get_header(function["name"])
                 if(hdr_tag == None):
-                    tmp = function["function_name"]
+                    tmp = function["name"]
                     tmp = re.sub("\n", " ", tmp).strip()
                     self.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
                     tags.append(header)
@@ -1876,7 +1957,7 @@ else:
                 
                 # If a header with the same name already exists then don't
                 # bother adding a new one
-                #print "FUNC NAME: [%s]" % function["function_name"]
+                #print "FUNC NAME: [%s]" % function["name"]
                 hdr_tag = self.get_header(testcase["name"])
                 if(hdr_tag == None):
                     tmp = testcase["name"]
@@ -1911,7 +1992,9 @@ else:
             
             i = 0
             num_rows = len(table["rows"])
-            
+
+            table["rows"][0]["is_header"] = True
+
             # Create Wiki links for each of the enums
             for i in range(1, num_rows):
 

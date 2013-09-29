@@ -1,0 +1,15 @@
+include version.inc
+include os.inc
+
+# Display a list of available targets
+help:
+	@${echo} "Available Targets:"
+	@${echo} "=================="
+	@${echo} " shorte = build shorte and the associated cairo plugin"
+
+
+# Build shorte and the cairo plugin used for generating
+# images
+shorte:
+	cd libs/unix && make
+

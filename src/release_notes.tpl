@@ -55,6 +55,32 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.56
+This is a bug fix version to address some issues reported by users. The
+following list of bugs have been closed as part of this release:
+
+@table: title="Closed Bugs"
+- 1 | Documented support for the @include_child tag which is used
+      to handle including files that obey the header cascading for
+      conditional text.
+- 2 | Updated convert_to_pdf.odt to fix the trapping of open office
+      errors. This should prevent a bug that causes it OpenOffice to
+      hang when generating a document that has an uncaught syntax
+      error in it.
+- 3 | Fixed up use of text block for struct, enum and function
+      prototype sections. Could probably use some more validation.
+- 4 | Fixed up the display of function descriptions in the function
+      summary section.
+- 6 | Fixed issue with title wrapping in PDF documents. This was done
+      by modifying the margin of the title and subtitle. Instead of wrapping
+      they will collide with the Cortina logo instead which is a more
+      noticible problem to the user.
+- 13 | Fixed up the formatting of @h5 tags in ODT/PDF documents to be
+       a little nicer. Colors could probably be a bit more consistent
+       though.
+- 14 | Fixed the indent of the @h tag to be in line with the other
+       headers.
+
 @h3 Version 1.0.55
 - Added support for @sql tag
 - Fixed a parsing issue with spanned columns in table headers

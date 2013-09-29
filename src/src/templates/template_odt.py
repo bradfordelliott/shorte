@@ -117,15 +117,15 @@ class template_odt_t(template_t):
         self.m_styles["table"]["style"] = "shorte_table"
         self.m_styles["table"]["column"] = "shorte_table.A"
         self.m_styles["table"]["cell"] = {}
-        self.m_styles["table"]["cell"]["title"] = "shorte_table.C1"
-        self.m_styles["table"]["cell"]["title_text"] = "shorte_para_white_bold"
-        self.m_styles["table"]["cell"]["header"] = "shorte_table.B1"
-        self.m_styles["table"]["cell"]["header_text"] = "ShorteHeaderText"
+        self.m_styles["table"]["cell"]["title"] = "ShorteNormalText" #"shorte_table.title"
+        self.m_styles["table"]["cell"]["title_text"] = "ShorteNormalText" # "shorte_para_white_bold"
+        self.m_styles["table"]["cell"]["header"] = "ShorteNormalText" # "shorte_table.header"
+        self.m_styles["table"]["cell"]["header_text"] = "ShorteNormalText" # "shorte_table.header_text"
         self.m_styles["table"]["cell"]["subheader"] = "shorte_table.subheader"
         self.m_styles["table"]["cell"]["subheader_text"] = "ShorteNormalText"
         self.m_styles["table"]["cell"]["reserved"] = "shorte_table.reserved"
         self.m_styles["table"]["cell"]["reserved_text"] = "reserved"
-        self.m_styles["table"]["cell"]["normal"] = "shorte_table.B2"
+        self.m_styles["table"]["cell"]["normal"] = "shorte_table.normal_cell"
         self.m_styles["table"]["cell"]["normal_text"] = "ShorteNormalText"
         
 
@@ -154,6 +154,20 @@ class template_odt_t(template_t):
         
         self.m_styles["para"]["indent"] = {}
         self.m_styles["para"]["indent"][0] = "shorte_indent_0"
+        
+        # Styles for function/type summaries
+        self.m_styles["para"]["summary_indent"] = {}
+        self.m_styles["para"]["summary_indent"][0] = "shorte_summary_table_indent_0"
+        
+        self.m_styles["para"]["summary_list_level"] = {}
+        self.m_styles["para"]["summary_list_level"][0] = "shorte_summary_list_level0"
+        self.m_styles["para"]["summary_list_level"][1] = "shorte_summary_list_level1"
+        self.m_styles["para"]["summary_list_level"][2] = "shorte_summary_list_level2"
+        self.m_styles["para"]["summary_list_level"][3] = "shorte_summary_list_level3"
+        self.m_styles["para"]["summary_list_level"][4] = "shorte_summary_list_level4"
+        self.m_styles["para"]["summary_list_level"][5] = "shorte_summary_list_level5"
+        self.m_styles["para"]["summary_list_level"][6] = "shorte_summary_list_level6"
+        self.m_styles["para"]["summary_list_level"][7] = "shorte_summary_list_level7"
 
         self.m_styles["span"] = {}
         self.m_styles["span"]["pre"] = "shorte_code3"
@@ -205,10 +219,12 @@ class template_odt_t(template_t):
         self.m_styles["table"]["styles"]["prototype"] = "shorte_table_prototype"
 
         self.m_styles["headings"] = {}
-        self.m_styles["headings"][HEADING1] = "Heading_20_1" #"shorte_heading_1"
-        self.m_styles["headings"][HEADING2] = "Heading_20_2" #"shorte_heading_2"
-        self.m_styles["headings"][HEADING3] = "Heading_20_3" #"shorte_heading_3"
-        self.m_styles["headings"][HEADING4] = "Heading_20_4" #"shorte_heading_4"
+        self.m_styles["headings"][HEADING1] = "shorte_heading_1"
+        self.m_styles["headings"][HEADING2] = "shorte_heading_2"
+        self.m_styles["headings"][HEADING3] = "shorte_heading_3"
+        self.m_styles["headings"][HEADING4] = "shorte_heading_4"
+        self.m_styles["headings"][HEADING5] = "shorte_heading_5"
+        self.m_styles["headings"][HEADING6] = "shorte_heading_6"
 
         self.m_styles_extra = ''
         self.m_table_id = 0
@@ -217,7 +233,8 @@ class template_odt_t(template_t):
         return '''
 
     <style:style style:name="shorte_standard" style:family="paragraph" style:class="text">
-        <style:paragraph-properties fo:margin-top="0.356cm" fo:margin-bottom="0.356cm" style:contextual-spacing="false" fo:line-height="115%" fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
+        <!--<style:paragraph-properties fo:margin-top="0.356cm" fo:margin-bottom="0.356cm" style:contextual-spacing="false" fo:line-height="115%" fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>-->
+        <style:paragraph-properties fo:margin-top="0.156cm" fo:margin-left="0.1cm" fo:margin-bottom="0.156cm" style:contextual-spacing="false" fo:line-height="115%" fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
         <style:text-properties style:use-window-font-color="true" style:font-name="Arial1" fo:font-size="12pt" fo:language="en" fo:country="CA" style:font-name-asian="Calibri" style:font-size-asian="11pt" style:font-name-complex="Calibri" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA"/>
     </style:style>
     
@@ -227,11 +244,11 @@ class template_odt_t(template_t):
     </style:style>
     
     <style:style style:name="shorte_heading_1" style:display-name="Heading 1" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:master-page-name="" style:default-outline-level="1">
-      <style:paragraph-properties fo:margin-top="0.0835in" fo:margin-left="-0.15in" fo:margin-bottom="0.25in" fo:keep-together="always" style:page-number="auto" fo:break-before="page" fo:keep-with-next="always"/>
+      <style:paragraph-properties fo:margin-top="0.0835in" fo:margin-left="-0.15in" fo:margin-bottom="0.15in" fo:keep-together="always" style:page-number="auto" fo:break-before="page" fo:keep-with-next="always"/>
       <style:text-properties fo:color="#0063A5" style:font-name="Arial2" fo:font-size="14pt" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-size-asian="14pt" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-size-complex="14pt" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:name="shorte_heading_2" style:display-name="Heading 2" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="2">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-left="-0.15in" fo:margin-bottom="0.1in" fo:keep-together="always" fo:keep-with-next="always"/>
+      <style:paragraph-properties fo:margin-top="0.08535in" fo:margin-left="-0.15in" fo:margin-bottom="0.1in" fo:keep-together="always" fo:keep-with-next="always"/>
       <style:text-properties fo:color="#000000" style:font-name="Arial2" fo:font-size="13pt" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-size-asian="13pt" style:font-weight-asian="bold" style:font-size-complex="13pt" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:name="shorte_heading_2_break" style:display-name="Heading 2 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="2">
@@ -255,12 +272,29 @@ class template_odt_t(template_t):
       <style:text-properties fo:color="#909090" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-style-complex="italic" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:name="shorte_heading_5" style:display-name="Heading 5" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="5">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-bottom="0in" fo:keep-together="always" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#243f60" style:font-name="Cambria" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman"/>
+      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-bottom="0in" fo:margin-left="-0.15in" fo:keep-together="always" fo:keep-with-next="always"/>
+      <style:text-properties fo:color="#303030" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-style-complex="italic" style:font-weight-complex="bold"/>
     </style:style>
-    <style:style style:name="shorte_heading_5_break" style:display-name="Heading 5 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="5">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-bottom="0in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#243f60" style:font-name="Cambria" style:font-name-asian="Times New Roman" style:font-name-complex="Times New Roman"/>
+    <style:style style:name="shorte_heading_5_break" style:display-name="Heading 5 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="None">
+      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-bottom="0in" fo:margin-left="-0.15in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
+      <style:text-properties
+        fo:color="#000000"
+        style:font-name="Arial2"
+        fo:font-size="13pt"
+        style:font-weight="bold"/>
+    </style:style>
+    <style:style style:name="shorte_heading_6" style:display-name="Heading 6" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="None">
+      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-bottom="0.1in" fo:margin-left="-0.08in" fo:keep-together="always" fo:keep-with-next="always"/>
+      <style:text-properties
+        fo:color="#000000"
+        style:font-name="Arial2"
+        fo:font-size="11pt"
+        fo:font-weight="bold"
+        style:font-name-asian="Times New Roman" style:text-underline-style="solid" style:text-underline-color="font-color" style:font-size-asian="13pt" style:font-weight-asian="bold" style:font-size-complex="13pt" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:name="shorte_heading_6_break" style:display-name="Heading 6 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="None">
+      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-bottom="0.1in" fo:margin-left="-0.15in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
+      <style:text-properties fo:color="#000000" style:font-name="Arial2" fo:font-size="12pt" style:font-weight="bold"/>
     </style:style>
 
     <style:style style:name="shorte_table" style:family="table">
@@ -270,36 +304,153 @@ class template_odt_t(template_t):
       <style:table-column-properties style:column-width="3.25in" style:rel-column-width="32767*"/>
     </style:style>
     <style:style style:name="shorte_table.A1" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#c0c0c0" fo:padding="0.0382in" fo:border-left="0.0007in solid #000000" fo:border-right="none" fo:border-top="0.0007in solid #000000" fo:border-bottom="0.0007in solid #000000">
+      <style:table-cell-properties
+        fo:background-color="#c0c0c0"
+        fo:padding="0.0182in"
+        fo:border-left="0.008in solid #C0C0C0"
+        fo:border-right="none"
+        fo:border-top="0.008in solid #C0C0C0"
+        fo:border-bottom="0.008in solid #C0C0C0">
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.B1" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#c0c0c0" fo:padding="0.0382in" fo:border="0.0007in solid #000000">
+    <style:style style:name="shorte_table.header" style:family="table-cell">
+      <style:table-cell-properties
+            fo:background-color="#D0D0D0"
+            fo:padding="0.0182in"
+            fo:border-top="0.008in solid #C0C0C0"
+            fo:border-bottom="0.008in solid #C0C0C0"
+            fo:border-left="0.008in solid #C0C0C0"
+            fo:border-right="0.008in solid #C0C0C0" >
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
     <style:style style:name="shorte_table.subheader" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#e0e0e0" fo:padding="0.0382in" fo:border="0.0007in solid #000000">
+      <style:table-cell-properties
+         fo:background-color="#E1E8EF"
+         fo:padding="0.0182in"
+         fo:border="0.008in solid #C0C0C0">
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
     <style:style style:name="shorte_table.reserved" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#f0f0f0" fo:padding="0.0382in" fo:border="0.0007in solid #000000">
+      <style:table-cell-properties fo:background-color="#f0f0f0" fo:padding="0.0182in" fo:border="0.008in solid #C0C0C0">
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.C1" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#005CDB" fo:padding="0.0382in" fo:border="0.0007in solid #000000">
+    <style:style style:name="shorte_table.reserved_text" style:family="paragraph" style:class="text">
+        <style:paragraph-properties
+            fo:margin-top="0.156cm"
+            fo:margin-left="0.156cm"
+            fo:margin-bottom="0.156cm"
+            style:contextual-spacing="false"
+            fo:line-height="115%"
+            fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
+        <style:text-properties fo:color="#c0c0c0"/>
+    </style:style>
+    <style:style style:name="shorte_table.title" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="#0057A6" fo:padding="0.0282in"
+        fo:border-top="0.008in solid #0057A6"
+        fo:border-bottom="0.00in solid #d0d0d0"
+        fo:border-left="0.008in solid #0057A6"
+        fo:border-right="0.008in solid #0057A6"
+        >
         <style:background-image/>
       </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table.title_text" style:family="paragraph" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-left="0.05in" fo:margin-bottom="0.05in"/>
+      <style:text-properties fo:color="#ffffff" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     <style:style style:name="shorte_table.A2" style:family="table-cell">
-      <style:table-cell-properties fo:padding="0.0382in" fo:border-left="0.0007in solid #000000" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.0007in solid #000000"/>
+      <style:table-cell-properties fo:padding="0.0182in"
+          fo:border-left="0.008in solid #C0C0C0" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.008in solid #C0C0C0"/>
     </style:style>
-    <style:style style:name="shorte_table.B2" style:family="table-cell">
-      <style:table-cell-properties fo:padding="0.0382in" fo:border-left="0.0007in solid #000000" fo:border-right="0.0007in solid #000000" fo:border-top="none" fo:border-bottom="0.0007in solid #000000"/>
+    <style:style style:name="shorte_table.normal_cell" style:family="table-cell">
+      <style:table-cell-properties fo:padding="0.0182in"
+          fo:border-left="0.008in solid #C0C0c0" fo:border-right="0.008in solid #C0C0C0" fo:border-top="0.008in solid #C0C0C0" fo:border-bottom="0.008in solid #C0C0C0"/>
     </style:style>
+    <style:style style:name="shorte_table.normal_text" style:family="paragraph" style:class="text">
+        <style:paragraph-properties
+            fo:margin-top="0.156cm"
+            fo:margin-left="0.156cm"
+            fo:margin-bottom="0.156cm"
+            style:contextual-spacing="false"
+            fo:line-height="115%"
+            fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
+        <style:text-properties style:use-window-font-color="true" style:font-name="Arial1" fo:font-size="12pt" fo:language="en" fo:country="CA" style:font-name-asian="Calibri" style:font-size-asian="11pt" style:font-name-complex="Calibri" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA"/>
+    </style:style>
+
+
+
+    <style:style style:name="shorte_table_rounded.top_left" style:family="table-cell">
+        <style:table-cell-properties style:vertical-align="middle" fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
+            <style:background-image xlink:href="Pictures/table_blue.png" xlink:type="simple" xlink:actuate="onLoad" style:position="top left" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.top_center_first" style:family="table-cell">
+        <style:table-cell-properties style:vertical-align="middle" fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
+            <style:background-image xlink:href="Pictures/table_blue.png" xlink:type="simple" xlink:actuate="onLoad" style:position="top center" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.top_center" style:family="table-cell">
+        <style:table-cell-properties style:vertical-align="middle" fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="0.05pt solid #c0c0c0" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
+            <style:background-image xlink:href="Pictures/table_blue.png" xlink:type="simple" xlink:actuate="onLoad" style:position="top center" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.top_right" style:family="table-cell">
+        <style:table-cell-properties style:vertical-align="middle" fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
+            <style:background-image xlink:href="Pictures/table_blue.png" xlink:type="simple" xlink:actuate="onLoad" style:position="top right" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="shorte_table_rounded.center_left" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.3cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
+            <style:background-image xlink:href="Pictures/table_left_right.png" xlink:type="simple" xlink:actuate="onLoad" style:position="center left" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.center_center_first" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.3cm" fo:border-left="none" fo:border-right="none" fo:border-top="0.05pt solid #c0c0c0" fo:border-bottom="0.05pt solid #c0c0c0">
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.center_center" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.3cm" fo:border-left="0.05pt solid #c0c0c0" fo:border-right="none" fo:border-top="0.05pt solid #c0c0c0" fo:border-bottom="0.05pt solid #c0c0c0">
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.center_right" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.3cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
+            <style:background-image xlink:href="Pictures/table_left_right.png" xlink:type="simple" xlink:actuate="onLoad" style:position="center right" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="shorte_table_rounded.bottom_left" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.0cm" fo:border="none">
+            <style:background-image xlink:href="Pictures/table_white.png" xlink:type="simple" xlink:actuate="onLoad" style:position="bottom left" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.bottom_center_first" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="none">
+            <style:background-image xlink:href="Pictures/table_white.png" xlink:type="simple" xlink:actuate="onLoad" style:position="bottom center" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.bottom_center" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="0.05pt solid #c0c0c0" fo:border-right="none" fo:border-top="none" fo:border-bottom="none">
+            <style:background-image xlink:href="Pictures/table_white.png" xlink:type="simple" xlink:actuate="onLoad" style:position="bottom center" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table_rounded.bottom_right" style:family="table-cell">
+        <style:table-cell-properties fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="none">
+            <style:background-image xlink:href="Pictures/table_white.png" xlink:type="simple" xlink:actuate="onLoad" style:position="bottom right" style:repeat="no-repeat"/>
+        </style:table-cell-properties>
+    </style:style>
+    
+    <style:style style:name="shorte_table_rounded.column_edge" style:family="table-column">
+      <style:table-column-properties style:column-width="2.51cm" style:rel-column-width="1600*"/>
+    </style:style>
+    
+
+
+
     <style:style style:name="P1" style:family="paragraph" style:parent-style-name="Header">
       <style:paragraph-properties fo:background-color="transparent" fo:padding-left="0in" fo:padding-right="0in" fo:padding-top="0in" fo:padding-bottom="0.0138in" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.0071in solid #999999">
         <style:background-image/>
@@ -336,10 +487,10 @@ class template_odt_t(template_t):
       <style:text-properties fo:language="zxx" fo:country="none" fo:font-weight="bold" style:language-asian="zxx" style:country-asian="none" style:font-weight-asian="bold"/>
     </style:style>
     <style:style style:name="ShorteNormalText" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+      <style:paragraph-properties fo:margin-top="0in" fo:padding-top="0in" fo:padding-bottom="0in" fo:margin-bottom="0in"/>
     </style:style>
-    <style:style style:name="ShorteHeaderText" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+    <style:style style:name="shorte_table.header_text" style:family="paragraph" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-top="0in" fo:padding-top="0in" fo:padding-bottom="0in" fo:margin-bottom="0in"/>
       <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     
@@ -388,7 +539,7 @@ class template_odt_t(template_t):
 
     <style:style style:name="reserved" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="#909090"/>
+      <style:text-properties fo:color="#C0C0C0"/>
     </style:style>
 
     <style:style style:name="shorte_table_prototype" style:family="table">
@@ -751,6 +902,43 @@ class template_odt_t(template_t):
         fo:padding-top="0.0138in"/>
     </style:style>
     
+    <style:style style:name="shorte_summary_table_indent_0" style:family="paragraph" style:parent-style-name="Standard">
+      <style:paragraph-properties
+        fo:margin-left="0.1846in"
+        style:auto-text-indent="false"
+        fo:padding-top="0.0138in"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    
+    <style:style style:name="shorte_summary_list_level1" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_1">
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    <style:style style:name="shorte_summary_list_level2" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_2">
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    <style:style style:name="shorte_summary_list_level3" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_3">
+      <style:paragraph-properties fo:margin-left="0.7in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    <style:style style:name="shorte_summary_list_level4" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_4">
+      <style:paragraph-properties fo:margin-left="0.9in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    <style:style style:name="shorte_summary_list_level5" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_5">
+      <style:paragraph-properties fo:margin-left="1.1in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    <style:style style:name="shorte_summary_list_level6" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_6">
+      <style:paragraph-properties fo:margin-left="1.3in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+    <style:style style:name="shorte_summary_list_level7" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_7">
+      <style:paragraph-properties fo:margin-left="1.5in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:text-properties fo:color="#A0A0A0" style:font-name="Times New Roman" fo:font-size="9pt"/>
+    </style:style>
+
+    
     <style:style style:name="shorte_page_break" style:family="paragraph" style:parent-style-name="Standard">
         <style:paragraph-properties fo:break-after="page"/>
     </style:style>
@@ -767,6 +955,9 @@ class template_odt_t(template_t):
 
         #if("width" in label):
         #print "WIKIWORD: [%s]" % label
+
+        label = self.xmlize(label)
+        link_word = self.xmlize(link_word)
 
         if(is_bookmark):
             tmp = '''<text:a xlink:type="simple" xlink:href="#%s" office:name="%s">%s</text:a>''' % (link_word, label, label)
@@ -856,6 +1047,26 @@ class template_odt_t(template_t):
             self.m_header_id += 1
 
             self.m_sections[0]["Headings"].append(heading)
+        
+        elif(name == "h5"):
+            heading = {}
+            heading["Title"] = data
+            heading["Type"] = HEADING5
+            heading["Content"] = ""
+            heading["break_before"] = break_before
+            self.m_header_id += 1
+
+            self.m_sections[0]["Headings"].append(heading)
+        
+        elif(name == "h"):
+            heading = {}
+            heading["Title"] = data
+            heading["Type"] = HEADING6
+            heading["Content"] = ""
+            heading["break_before"] = break_before
+            self.m_header_id += 1
+
+            self.m_sections[0]["Headings"].append(heading)
     
     def _expand_links(self, matches):
 
@@ -867,6 +1078,7 @@ class template_odt_t(template_t):
         #print "SOURCE = %s, LABEL = %s" % (source, label)
         #source.replace("-&amp;gt;", "")
         #label = label.replace("-&gt;", "")
+        label = self.xmlize(label)
 
         if(source[0:4] == "http" or external == True):
             if(source[0:4] != "http"):
@@ -882,6 +1094,7 @@ class template_odt_t(template_t):
     def _expand_anchors(self, matches):
 
         (source, label, external) = self._process_link(matches)
+        label = self.xmlize(label)
         
         return '''
 <text:bookmark-start text:name="%s"/>
@@ -1026,6 +1239,8 @@ class template_odt_t(template_t):
         elif(len(parts) > 1):
             tag = parts[0]
             replace = ''.join(parts[1:])
+        
+        replace = trim_leading_blank_lines(replace)
        
         # Check if it's an inline styling block such as color
         #   @{color:00ff00,my text here}
@@ -1051,6 +1266,13 @@ class template_odt_t(template_t):
             return "<text:span>%s</text:span>" % (replace)
         elif(tag == "hl"):
             return '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["highlight"], replace)
+        elif(tag == "table"):
+            table = self.m_engine.m_parser.parse_table(replace, {})
+            xml = "</text:p>"
+            #print "REPLACE[%s]" % replace
+            xml += self.__format_table(replace, table)
+            xml += "<text:p text:style-name=\"shorte_standard\">"
+            return xml
 
         return replace
 
@@ -1085,37 +1307,39 @@ class template_odt_t(template_t):
         data = re.sub(">", "&gt;", data)
 
         data = re.sub("®", "&#174;", data)
-        
+
         if(expand_equals_block):
             data = re.sub("\n\s*\n", "<text:line-break/><text:line-break/>", data)
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
             data = re.sub("==+", "<text:line-break/>====================<text:line-break/>", data)
         
-        data = data.replace("\n", " ")
+        #data = data.replace("\n", " ")
         
-        # Hilite any text between **** **** 
-        hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
-        data = hiliter.sub("\\1", data)
+        ## Hilite any text between **** **** 
+        #hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
+        #data = hiliter.sub("\\1", data)
 
-        # Underline anything in <<<>>> brackets
-        hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
-        data = hiliter.sub("\\1", data)
+        ## Underline anything in <<<>>> brackets
+        #hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
+        #data = hiliter.sub("\\1", data)
         
-        # First make any links
-        data = self._format_links(data)
 
         # Collapse multiple spaces
         data = re.sub("  +", " ", data)
         
-        ## Now convert any [[[phrase]]] to highlighted text
+        # Now convert any [[[phrase]]] to highlighted text
         #highlight = re.compile("\[\[\[(.*?)\]\]\]", re.DOTALL)
         #data = highlight.sub("<w:rPr><w:b/><w:highlight w:val=\"yellow\"/></w:rPr><w:t>\\1</w:t></w:r><w:r><w:t>", data)
         
         # First convert any underlines
-        underline = re.compile("\*\*(.*?)\*\*")
+        underline = re.compile("__(.*?)__")
         data = underline.sub("<text:span text:style-name=\"%s\">\\1</text:span>" % self.m_styles["underline"], data)
-
+        
+        # Now convert any //phrase// to italics
+        bold = re.compile("\/\/(.*?)\/\/")
+        data = bold.sub("<text:span text:style-name=\"%s\">\\1</text:span>" % self.m_styles["italic"], data)
+        
         # Now convert any *phrase* to bold
         bold = re.compile("\*(.*?)\*")
         data = bold.sub("<text:span text:style-name=\"%s\">\\1</text:span>" % self.m_styles["bold"], data)
@@ -1127,9 +1351,13 @@ class template_odt_t(template_t):
         expr = re.compile("@\{(.*?)\}", re.DOTALL)
         data = expr.sub(self.parse_inline_styling, data)
         data = re.sub(' *<text:line-break/> *', '<text:line-break/>', data)
-
+        
+        # First make any links
+        data = self._format_links(data)
+        
         if(allow_wikify):
             data = self.wikify(data)
+        #print "FINAL: [%s]" % data
 
         return data
     
@@ -1168,24 +1396,24 @@ class template_odt_t(template_t):
 
         table = {}
         table["title"] = {
-                "cell" : "shorte_table.C1",
-                "text" : "shorte_para_white_bold"
+                "cell" : "shorte_table.title",
+                "text" : "shorte_table.title_text"
                 }
         table["header"] = {
-                "cell" : "shorte_table.B1",
-                "text" : "ShorteHeaderText"
+                "cell" : "shorte_table.header",
+                "text" : "shorte_table.header_text"
                 }
         table["subheader"] = {
                 "cell" : "shorte_table.subheader",
-                "text" : "ShorteNormalText"
+                "text" : "shorte_table.normal_text"
                 }
         table["reserved"] = {
                 "cell" : "shorte_table.reserved",
-                "text" : "reserved"
+                "text" : "shorte_table.reserved_text"
                 }
         table["default"] = {
-                "cell" : "shorte_table.B2",
-                "text" : "ShorteNormalText"
+                "cell" : "shorte_table.normal_cell",
+                "text" : "shorte_table.normal_text"
                 }
 
         return table
@@ -1215,6 +1443,13 @@ class template_odt_t(template_t):
         '''This is an internal method used to format the column
            styles section of the table'''
 
+        if(table.has_key("table_style_name") and table["table_style_name"] == "shorte_table_rounded"):
+            col_styles = '''
+<table:table-column table:style-name="shorte_table_rounded.column_edge" table:number-columns-repeated="1"/>
+'''
+        else:
+            col_styles = ''
+
         if(table.has_key("column-styles")):
             col_styles = ''
             i = 0
@@ -1225,12 +1460,28 @@ class template_odt_t(template_t):
 ''' % table["column-styles"][i]
                 i += 1
         else:
-            col_styles = '''
+            col_styles += '''
 <table:table-column table:style-name="%s" table:number-columns-repeated="%d"/>
 ''' % (self.m_styles["table"]["column"], table["max_cols"])
         
+        if(table.has_key("table_style_name") and table["table_style_name"] == "shorte_table_rounded"):
+            col_styles += '''
+<table:table-column table:style-name="shorte_table_rounded.column_edge" table:number-columns-repeated="1"/>
+'''
         
-        odt = '''
+        if(table.has_key("table_style_name") and table["table_style_name"] == "shorte_table_rounded"):
+            if(table.has_key("title")):
+                table_title = self.format_bold(table["title"])
+            else:
+                table_title = ''
+
+            odt = '''
+%s
+<table:table table:name="shorte_table_%d" table:style-name="%s">
+%s
+''' % (table_title, self.m_table_id, self.m_styles["table"]["style"], col_styles)
+        else:
+            odt = '''
 <table:table table:name="shorte_table_%d" table:style-name="%s">
 %s
 %s
@@ -1238,9 +1489,12 @@ class template_odt_t(template_t):
 
         return odt
 
-    def __format_table_cell(self, col, style, cell_type, cell_text):
+    def __format_table_cell(self, col, style, cell_type, cell_text, frame_paragraph=True):
 
-        if(cell_type == "is_header"):
+        if(cell_type == "is_title"):
+            cell_style = style["title"]["cell"]
+            text_style = style["title"]["text"]
+        elif(cell_type == "is_header"):
             cell_style = style["header"]["cell"]
             text_style = style["header"]["text"]
         elif(cell_type == "is_subheader"):
@@ -1257,8 +1511,26 @@ class template_odt_t(template_t):
             if(col.has_key("text-style")):
                 text_style = col["text-style"]
 
+        if(col.has_key("table_style") and col["table_style"] == "shorte_table_rounded"):
+            if(col["row_index"] == 0):
+                if(col["col_index"] == 0):
+                    cell_style = "shorte_table_rounded.top_center_first"
+                else:
+                    cell_style = "shorte_table_rounded.top_center"
 
-        xml = '''
+            elif(col["row_index"] == col["max_rows"]-1):
+                if(col["col_index"] == 0):
+                    cell_style = "shorte_table_rounded.bottom_center_first"
+                else:
+                    cell_style = "shorte_table_rounded.bottom_center"
+            else:
+                if(col["col_index"] == 0):
+                    cell_style = "shorte_table_rounded.center_center_first"
+                else:
+                    cell_style = "shorte_table_rounded.center_center"
+
+        if(frame_paragraph):
+            xml = '''
           <table:table-cell table:style-name="%s" office:value-type="string" table:number-columns-spanned="%d">
             <text:p text:style-name="%s">%s</text:p>
           </table:table-cell>
@@ -1266,6 +1538,15 @@ class template_odt_t(template_t):
        col["span"],
        text_style,
        cell_text)
+        else:
+            xml = '''
+          <table:table-cell table:style-name="%s" office:value-type="string" table:number-columns-spanned="%d">
+            %s
+          </table:table-cell>
+''' % (cell_style,
+       col["span"],
+       cell_text)
+
 
         return xml
 
@@ -1277,14 +1558,26 @@ class template_odt_t(template_t):
         
         xml = ''
         title = ''
+            
+        # DEBUG BRAD: Uncomment this to test out the new rounded table support
+        #table_style_name = "shorte_table_rounded"
         
         # get the style information associated with the style name
         style = self.__table_get_style(table_style_name)
+
+        table["table_style_name"] = table_style_name
+        
+            #xml += self.format_caption("Caption: %s" % table["caption"])
 
         title = self.__table_format_title(table, style)
         xml += self.__table_format_column_styles(table, style, title)
 
         self.m_table_id += 1
+
+        row_index = 0
+        col_index = 0
+        max_cols = table["max_cols"]
+        max_rows = len(table["rows"])
 
         for row in table["rows"]:
 
@@ -1295,30 +1588,90 @@ class template_odt_t(template_t):
             xml += '''
     <table:table-row>
 '''
+
+            col_index = 0
+
+            if(table_style_name == "shorte_table_rounded"):
+                if(row_index == 0):
+                    xml += '''<table:table-cell table:style-name="shorte_table_rounded.top_left" office:value-type="string" table:number-columns-spanned="1"></table:table-cell>'''
+                elif(row_index == (max_rows-1)):
+                    xml += '''<table:table-cell table:style-name="shorte_table_rounded.bottom_left" office:value-type="string" table:number-columns-spanned="1"></table:table-cell>'''
+                else:
+                    xml += '''<table:table-cell table:style-name="shorte_table_rounded.center_left" office:value-type="string" table:number-columns-spanned="1"></table:table-cell>'''
+            
+            col_max = len(row["cols"])
             for col in row["cols"]:                     
 
-                cell_text = col["text"]
-                if(format_text):
-                    cell_text = self.format_text(cell_text)
+                cell_text = ''
+                if(col.has_key("text")):
+                    cell_text = col["text"]
+
+                frame_para = True
+                if(col.has_key("textblock")):
+                    tag = {}
+                    tag["contents"] = col["textblock"]
+
+                    if(row["is_reserved"]):
+                        cell_text = self.format_textblock(
+                            tag,
+                            style=style["reserved"]["text"])
+                    elif(row.has_key("is_title") and row["is_title"]):
+                        cell_text = self.format_textblock(
+                            tag,
+                            style=style["title"]["text"])
+                    elif(row["is_header"]):
+                        cell_text = self.format_textblock(
+                            tag,
+                            style=style["header"]["text"])
+                    elif(row["is_subheader"]):
+                        cell_text = self.format_textblock(
+                            tag,
+                            style=style["subheader"]["text"])
+                    else:
+                        cell_text = self.format_textblock(
+                            tag,
+                            style=style["default"]["text"])
+                    frame_para = False
 
                 #print "T.CELL: [%s]" % cell_text
+                col["row_index"] = row_index
+                col["col_index"] = col_index
+                col["max_cols"] = max_cols
+                col["max_rows"] = max_rows
+                col["table_style"] = table_style_name
 
-                if(row["is_header"]):
-                    xml += self.__format_table_cell(col, style, "is_header", cell_text)
+                col_index += col["span"]
+
+                if(row.has_key("is_title") and row["is_title"]):
+                    xml += self.__format_table_cell(col, style, "is_title", cell_text, frame_paragraph=frame_para)
+                elif(row["is_header"]):
+                    xml += self.__format_table_cell(col, style, "is_header", cell_text, frame_paragraph=frame_para)
                 elif(row["is_subheader"]):
-                    xml += self.__format_table_cell(col, style, "is_subheader", cell_text)
+                    xml += self.__format_table_cell(col, style, "is_subheader", cell_text, frame_paragraph=frame_para)
                 elif(row["is_reserved"] or row["is_crossed"]):
-                    xml += self.__format_table_cell(col, style, "is_reserved", cell_text)
+                    xml += self.__format_table_cell(col, style, "is_reserved", cell_text, frame_paragraph=frame_para)
                 else:
-                    xml += self.__format_table_cell(col, style, "default", cell_text)
+                    xml += self.__format_table_cell(col, style, "default", cell_text, frame_paragraph=frame_para)
+            
+            if(table_style_name == "shorte_table_rounded"):
+                if(row_index == 0):
+                    xml += '''<table:table-cell table:style-name="shorte_table_rounded.top_right" office:value-type="string" table:number-columns-spanned="1"></table:table-cell>'''
+                elif(row_index == (max_rows-1)):
+                    xml += '''<table:table-cell table:style-name="shorte_table_rounded.bottom_right" office:value-type="string" table:number-columns-spanned="1"></table:table-cell>'''
+                else:
+                    xml += '''<table:table-cell table:style-name="shorte_table_rounded.center_right" office:value-type="string" table:number-columns-spanned="1"></table:table-cell>'''
+
+            row_index += 1
 
             xml += "</table:table-row>\n"
 
         xml += "</table:table>"
-
+        
         # If the table has a caption then output the caption
         if "caption" in table:
-            xml += self.format_caption("Caption: %s" % table["caption"])
+            xml += self.format_bold("Caption:")
+            xml += self.format_textblock(table["caption"], style="shorte_standard_indented")
+
 
         #xml += "<text:p></text:p>"
 
@@ -1329,17 +1682,14 @@ class template_odt_t(template_t):
         define = tag["contents"]
         name   = self.format_text(define["name"])
         value  = self.format_text(define["value"])
-        desc   = self.format_text(define["desc"])
+        desc   = self.format_textblock(define["description"])
 
         xml = '''
 <text:p text:style-name="%s">%s = %s</text:p>
-      <text:p text:style-name="%s">%s</text:p>
-      <text:p text:style-name="%s"/>
+%s
 ''' % (self.m_styles["para"]["bold"],
        name, value,
-       self.m_styles["para"]["normal"],
-       desc,
-       self.m_styles["para"]["normal"]
+       desc
        )
 
         return xml
@@ -1361,8 +1711,23 @@ class template_odt_t(template_t):
     #|
     #+-----------------------------------------------------------------------------
     def format_struct(self, source, struct, style_name="default"):    
+        '''This method is called to format a structure definition
+           into a block of open office text
+
+           @param self       [I] - The class instance
+           @param source     [I] - The original source text
+           @param struct     [I] - The structure object as a dictionary
+           @param style_name [I] - The open office style
+
+           @return The XML defining the structure
+        '''
         
         xml = ''
+        
+        if("caption" in struct):
+            xml += self.format_textblock(struct["caption"])
+        elif("description" in struct):
+            xml += self.format_textblock(struct["description"])
         
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
@@ -1383,13 +1748,24 @@ class template_odt_t(template_t):
             xml += '''
     <table:table-row>
 '''
-            for col in field["attrs"]:                     
+            for attr in field["attrs"]:                     
                 
+                frame_paragraph = True
+
                 # DEBUG BRAD: cells for a structure are currently not formatted
                 #             the same way as a table - need to convert them
                 #             into a dictionary for the time being - need to fix
                 #             this in future releases for easier maintainability.
-                cell_text = self.format_text(col)
+                if(is_dict(attr)):
+
+                    if(attr.has_key("textblock")):
+                        cell_text = self.format_textblock(attr["textblock"])
+                        frame_paragraph = False
+                    else:
+                        attr = attr["text"]
+                        cell_text = self.format_text(attr)
+                else:
+                    cell_text = self.format_text(attr)
 
                 #print "S.CELL: [%s]" % cell_text
 
@@ -1400,23 +1776,27 @@ class template_odt_t(template_t):
                 elif(field["is_reserved"]):
                     xml += self.__format_table_cell({"span" : 1}, style, "is_reserved", cell_text)
                 else:
-                    xml += self.__format_table_cell({"span" : 1}, style, "default", cell_text)
+                    xml += self.__format_table_cell({"span" : 1}, style, "default", cell_text, frame_paragraph)
 
 
             xml += "</table:table-row>\n"
         xml += "</table:table>"
 
-        # If the table has a caption then output the caption
-        if "caption" in struct:
-            xml += self.format_caption("Caption: %s" % struct["caption"])
-
         return xml
 
 
     def format_enum(self, tag, style_name="default"):
+        '''This method is called to format an enum for display within an
+           Open Office document.
+
+           @param self       [I] - The template class instance
+           @param tag        [I] - The tag defining the enum to convert to HTML.
+           @param style_name [I] - The style to use to format the enum.
+
+           @return The XML snippet defining the enum
+        '''
 
         table = tag["contents"]
-        
         
         if(shorte_get_config("html", "show_enum_values") == "1"):
             show_enum_vals = True
@@ -1429,10 +1809,18 @@ class template_odt_t(template_t):
         style = self.__table_get_style(style_name)
 
         title = self.__table_format_title(table, style)
+        
+        xml = ''
 
+        if("caption" in table):
+            #print "CAPTION: [", table["caption"], "]"
+            xml += self.format_textblock(table["caption"])
+        if("description" in table):
+            #print "DESCRIPTION: [", table["description"], "]"
+            xml += self.format_textblock(table["description"])
 
         if(show_enum_vals):
-            xml = '''
+            xml += '''
 <table:table table:name="shorte_table_%d" table:style-name="%s">
 <table:table-column table:style-name="%s"/>
 <table:table-column table:style-name="%s"/>
@@ -1443,9 +1831,14 @@ class template_odt_t(template_t):
        "shorte_enum_col2",
        "shorte_enum_col3",
        title)
+            xml += '''<table:table-row>'''
+            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Enum")
+            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Value")
+            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
+            xml += "</table:table-row>\n"
 
         else:
-            xml = '''
+            xml += '''
 <table:table table:name="shorte_table_%d" table:style-name="%s">
 <table:table-column table:style-name="%s"/>
 <table:table-column table:style-name="%s"/>
@@ -1454,12 +1847,25 @@ class template_odt_t(template_t):
        "shorte_enum_col1",
        "shorte_enum_col2",
        title)
+        
+            xml += '''<table:table-row>'''
+            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Enum")
+            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
+            xml += "</table:table-row>\n"
 
         self.m_table_id += 1
 
         i = 0
+        
 
         for row in table["rows"]:
+            
+            # If this is the first row and it is a header
+            # then skip it as it is likely just the table
+            # header.
+            if(i == 0 and row["is_header"]):
+                i+=1
+                continue
             
             xml += '''
     <table:table-row>
@@ -1469,20 +1875,31 @@ class template_odt_t(template_t):
             for col in row["cols"]:
 
                 is_header = True
+
+                # Normally we want to include the paragraph frame
+                # around the cell text. However, if the text is a textblock
+                # then we don't want to include this.
+                frame_paragraph = True
+            
+
                 # Don't attempt to wikify or format the acronym name. Instead
                 # create a link to it
                 if(col_index == 0):
                     if(row["is_header"] or row["is_subheader"]):
-                        text = col["text"]
+                        text = self.xmlize(col["text"])
                     else:
-                        word = col["text"]
+                        word = self.xmlize(col["text"])
                         text = '''
 <text:bookmark-start text:name="%s"/>
     <text:a xlink:type="simple" xlink:href="" office:name="%s">%s</text:a>
 <text:bookmark-end text:name="%s"/>''' % (word, word, word, word)
                         #text = '<a name="%s"></a>%s' % (col["text"], col["text"])
                 else:
-                    text = self.format_text(col["text"])
+                    if(col.has_key("textblock")):
+                        text = self.format_textblock(col["textblock"])
+                        frame_paragraph = False
+                    else:
+                        text = self.format_text(col["text"])
 
                 if(col_index == 1 and (not show_enum_vals)):
                     col_index += 1
@@ -1496,7 +1913,7 @@ class template_odt_t(template_t):
                 elif(row["is_subheader"]):
                     xml += self.__format_table_cell(col, style, "is_subheader", text)
                 else:   
-                    xml += self.__format_table_cell(col, style, "default", text)
+                    xml += self.__format_table_cell(col, style, "default", text, frame_paragraph)
 
                 col_index += 1
             
@@ -1506,8 +1923,6 @@ class template_odt_t(template_t):
 
         xml += "</table:table>"
         
-        if("caption" in table):
-            xml += self.format_caption("Caption: %s" % table["caption"])
         
         return xml
 
@@ -1590,9 +2005,15 @@ class template_odt_t(template_t):
 
         return xml
     
-    def format_textblock(self, tag, style="shorte_standard"):
+    def format_textblock(self, tag,
+        style="shorte_standard",
+        indent_style="indent",
+        list_style="list_level"):
 
-        paragraphs = tag["contents"]
+        if(isinstance(tag, dict)):
+            paragraphs = tag["contents"]
+        else:
+            paragraphs = tag
 
         xml = ''
         
@@ -1609,13 +2030,18 @@ class template_odt_t(template_t):
                 xml += self.format_pre(text, "code")
                 xml += '<text:p text:style-name="shorte_spacer"></text:p>'
             elif(is_list):
-                xml += self.format_list(p["text"], False)
+                xml += self.format_list(p["text"], False,list_style=list_style)
             elif(indent > 0):
-                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (self.m_styles["para"]["indent"][0], self.format_text(text.strip(), expand_equals_block=True))
-                xml += '<text:p text:style-name="shorte_spacer"></text:p>'
+                lcl_style = self.m_styles["para"][indent_style][0]
+                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (lcl_style, self.format_text(text.strip(), expand_equals_block=True))
             else:
-                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (style, self.format_text(text.strip(),expand_equals_block=True))
+                if(text.strip() != ""):
+                    xml += '''<text:p text:style-name="%s">%s</text:p>''' % (style, self.format_text(text.strip(),expand_equals_block=True))
        
+        # Strip any blank paragraphs that got added
+        xml = xml.replace("<text:p text:style-name=\"shorte_standard\"></text:p>", "")
+
+        #print "TEXTBLOCK\n[%s]" % xml
         return xml
     
     def format_pre(self, source, style="pre"):
@@ -1645,7 +2071,8 @@ class template_odt_t(template_t):
         #        text += source[i]
         #    i += 1
         
-        text = source
+        text = self.xmlize(source)
+        #text = source
         text = self.wikify(text)
         text = text.replace("\n", "<text:line-break/>")
         
@@ -1798,25 +2225,18 @@ class template_odt_t(template_t):
         return output
     
     
-    def format_list_child(self, elem, style, level):
+    def format_list_child(self, elem, style, list_style, level):
 
         source = ''
         if(elem.has_key("children")):
             source += '''<text:list-item>
                <text:p text:style-name="%s">%s</text:p>
                <text:list text:style-name="%s">''' % (
-                   self.m_styles["para"]["list_level"][level], self.format_text(elem["text"]), style)
+                   self.m_styles["para"][list_style][level], self.format_text(elem["text"]), style)
             
-#            source += '''
-#    <text:list-item>
-#            <text:p text:style-name="%s">%s</text:p>
-#    </text:list-item>
-#''' % (
-#                   self.m_styles["para"]["list_level"][level], self.format_text(elem["text"]))
-
             num_children = len(elem["children"])
             for i in range(0, num_children):
-                source += self.format_list_child(elem["children"][i], style, level+1) 
+                source += self.format_list_child(elem["children"][i], style, list_style, level+1) 
             
             source += "</text:list></text:list-item>"
         else:
@@ -1824,11 +2244,17 @@ class template_odt_t(template_t):
     <text:list-item>
         <text:p text:style-name="%s">%s</text:p>
     </text:list-item>
-''' % (self.m_styles["para"]["list_level"][level], self.format_text(elem["text"]))
+''' % (self.m_styles["para"][list_style][level], self.format_text(elem["text"]))
 
         return source
     
-    def format_list(self, list, ordered=False):
+    def format_list(self,
+        list,
+        ordered=False,
+        style="list",
+        list_style="list_level"):
+        '''This method is called to format a list into a format
+           suitable for Open Office'''
 
         if(not ordered):
             style = self.m_styles["list"]["unordered"]
@@ -1837,9 +2263,8 @@ class template_odt_t(template_t):
 
         source = "<text:list text:style-name=\"%s\">" % style
         
-        
         for elem in list:
-            source += self.format_list_child(elem, style, 1)
+            source += self.format_list_child(elem, style, list_style, 1)
 
         source += '</text:list>'
 
@@ -1951,8 +2376,8 @@ class template_odt_t(template_t):
             cols = []
 
             if(summary_type == "functions"):
-                name = obj["function_name"]
-                tmp = obj["function_prototype"]["parsed"]
+                name = obj["name"]
+                tmp = obj["prototype"]["parsed"]
                 (returns, prototype) = self.htmlize_prototype(tmp)
             
                 style = self.m_styles["table"]["cell"]["fname"]
@@ -1970,9 +2395,12 @@ class template_odt_t(template_t):
 
                 text_style = self.m_styles["para"]["fdesc"]
                 function_desc = ''
-                if(obj.has_key("function_desc")):
-                    function_desc = obj["function_desc"]
-                cols.append({"span":1, 'text':xmlize(function_desc), "style": style, "text-style": text_style})
+                if(obj.has_key("desc2")):
+                    function_desc = obj["desc2"]
+                    cols.append({"span":1, 'textblock':function_desc, "style": style, "text-style": text_style})
+                elif(obj.has_key("desc")):
+                    function_desc = obj["desc"]
+                    cols.append({"span":1, 'text':xmlize(function_desc), "style": style, "text-style": text_style})
             
             elif(summary_type == "types"):
                 name = ''
@@ -1998,8 +2426,14 @@ class template_odt_t(template_t):
                 desc = ''
                 if(obj.has_key("caption")):
                     desc = obj["caption"]
+                elif("description" in obj):
+                    desc = obj["description"]
+                #    desc = '</text:p>' + self.format_textblock(obj["caption"], style=text_style, indent_style="summary_indent", list_style="summary_list_level") + "<text:p>"
+                #elif("description" in obj):
+                #    desc = '</text:p>' + self.format_textblock(obj["description"], style=text_style, indent_style="summary_indent", list_style="summary_list_level") + "<text:p>"
+
                 text_style = self.m_styles["para"]["fdesc"]
-                cols.append({"span":1, 'text':self.xmlize(desc), "style": style, "text-style": text_style})
+                cols.append({"span":1, 'textblock':desc, "style": style, "text-style": text_style})
 
             elif(summary_type == "testcases"):
 
@@ -2021,7 +2455,7 @@ class template_odt_t(template_t):
 
             table["rows"].append(row)
 
-        return self.__format_table("", table, False)
+        return self.__format_table("", table, True)
 
     def format_function_summary(self, tag):
 
@@ -2109,20 +2543,20 @@ class template_odt_t(template_t):
         
         file = "blah"
         function = {}
-        function["function_name"] = prototype["function_name"]
-        function["function_example"] = ''
-        function["function_pseudocode"] = ''
-        function["function_prototype"] = ''
-        function["function_desc"] = ''
-        function["function_params"] = ''
-        function["function_returns"] = ''
-        function["function_see_also"] = ''
-        function["function_deprecated"] = ''
+        function["name"] = prototype["name"]
+        function["example"] = ''
+        function["pseudocode"] = ''
+        function["prototype"] = ''
+        function["desc"] = ''
+        function["params"] = ''
+        function["returns"] = ''
+        function["see_also"] = ''
+        function["deprecated"] = ''
 
         is_deprecated = False
 
         wikiwords = []
-        wikiwords.append(function["function_name"])
+        wikiwords.append(function["name"])
 
         # Lookup the styles for formatting a prototypes
         function["style_table"] = self.m_styles["table"]["styles"]["prototype"]
@@ -2140,24 +2574,24 @@ class template_odt_t(template_t):
         function["style_col3"] = self.m_styles["table"]["columns"]["prototype"][3]
 
 
-        if(prototype.has_key("function_desc")):
+        if(prototype.has_key("desc")):
             tmp = '''<text:p text:style-name="%s">''' % self.m_styles["para"]["prototype"]["text"]
-            tmp += self.format_text(prototype["function_desc"],expand_equals_block=True)
+            tmp += self.format_text(prototype["desc"],expand_equals_block=True)
             tmp += "</text:p>"
-            function["function_desc"] = tmp
+            function["desc"] = tmp
 
-        if(prototype.has_key("function_desc2")):
+        if(prototype.has_key("desc2")):
             tag = {}
-            tag["contents"] = prototype["function_desc2"]
-            function["function_desc"] = self.format_textblock(tag)
+            tag["contents"] = prototype["desc2"]
+            function["desc"] = self.format_textblock(tag)
 
-        if(prototype.has_key("function_prototype")):
-            language = prototype["function_prototype"]["language"]
-            example = prototype["function_prototype"]["parsed"]
-            function["function_prototype"] = self.format_source_code(language, example, wikiwords, False, False)
+        if(prototype.has_key("prototype")):
+            language = prototype["prototype"]["language"]
+            example = prototype["prototype"]["parsed"]
+            function["prototype"] = self.format_source_code(language, example, wikiwords, False, False)
 
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
+        if(prototype.has_key("params")):
+            params = prototype["params"]
 
             table = {}
             table["max_cols"] = 4 
@@ -2169,12 +2603,12 @@ class template_odt_t(template_t):
             <text:p text:style-name="$para_prototype_param"></text:p>
           </table:table-cell>
           <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
-            <text:p text:style-name="$para_prototype_param_name">${param_name}</text:p>
+            <text:p text:style-name="$para_prototype_param_name">${name}</text:p>
           </table:table-cell>
           <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
-            <text:p text:style-name="$para_prototype_param">[${param_io}]</text:p>
+            <text:p text:style-name="$para_prototype_param">[${io}]</text:p>
           </table:table-cell>
-          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">${param_desc}</table:table-cell>
+          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">${desc}</table:table-cell>
         </table:table-row>
                         """)
 
@@ -2184,10 +2618,10 @@ class template_odt_t(template_t):
                 row = {}
                 row["is_header"] = False
                 row["cols"] = []
-                row["cols"].append(param["param_name"])
-                row["cols"].append(param["param_io"])
+                row["cols"].append(param["name"])
+                row["cols"].append(param["io"])
                 row["cols"].append("-")
-                row["cols"].append(param["param_desc"])
+                row["cols"].append(param["desc"])
 
                 table["rows"].append(row)
 
@@ -2195,12 +2629,12 @@ class template_odt_t(template_t):
                 #print "Desc:  " , param["param_desc"]
 
                 tmp = ''
-                desc = param["param_desc"]
+                desc = param["desc"]
 
                 if(isinstance(desc, str) or isinstance(desc, unicode)):
                     tmp += desc # self.format_text(desc)
                 else:
-                    for val in param["param_desc"]:
+                    for val in param["desc"]:
                         if(len(val) == 2):
                             tmp += '''
                                 <text:span text:style-name="%s">%s</text:span>
@@ -2212,12 +2646,12 @@ class template_odt_t(template_t):
                         else:
                             tmp += self.format_text(val)
 
-                param["param_desc"] = tmp
+                param["desc"] = tmp
                 
-                if(param.has_key("param_desc2")):
+                if(param.has_key("desc2")):
                     tag = {}
-                    tag["contents"] = param["param_desc2"]
-                    param["param_desc"] = self.format_textblock(tag, style=self.m_styles["para"]["prototype"]["param"])
+                    tag["contents"] = param["desc2"]
+                    param["desc"] = self.format_textblock(tag, style=self.m_styles["para"]["prototype"]["param"])
 
                 param["table_row_prototype"] = self.m_styles["table"]["row"]["prototype"]
                 param["table_cell_prototype"] = self.m_styles["table"]["cell"]["prototype"]
@@ -2227,7 +2661,7 @@ class template_odt_t(template_t):
                 output += param_template.substitute(param)
 
             if(len(output) > 0):
-                function["function_params"] = string.Template('''<table:table-row table:style-name="${style_row}">
+                function["params"] = string.Template('''<table:table-row table:style-name="${style_row}">
           <table:table-cell table:style-name="${style_section}" table:number-columns-spanned="4" office:value-type="string">
             <text:p text:style-name="${style_para_section}">Parameters:</text:p>
           </table:table-cell>
@@ -2239,7 +2673,7 @@ class template_odt_t(template_t):
                                            "style_para_section"     : function["style_para_section"],
                                            "params"                 : output})
 
-        if(prototype.has_key("function_returns") and len(prototype["function_returns"]) > 0):
+        if(prototype.has_key("returns") and len(prototype["returns"]) > 0):
         
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
@@ -2252,14 +2686,14 @@ class template_odt_t(template_t):
         </table:table-row>
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style2}" table:number-columns-spanned="4" office:value-type="string">
-            <text:p text:style-name="${param_style}">${function_returns}</text:p>
+            <text:p text:style-name="${param_style}">${returns}</text:p>
           </table:table-cell>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "function_returns" : self.format_text(prototype["function_returns"]),
+    "returns" : self.format_text(prototype["returns"]),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2267,9 +2701,9 @@ class template_odt_t(template_t):
     "param_style" : self.m_styles["para"]["prototype"]["param"]
     })
 
-            function["function_returns"] = xml
+            function["returns"] = xml
 
-        if(prototype.has_key("function_see_also")):
+        if(prototype.has_key("see_also") and prototype["see_also"] != None):
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
@@ -2288,7 +2722,7 @@ class template_odt_t(template_t):
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "see_also" : self.format_text(prototype["function_see_also"]),
+    "see_also" : self.format_text(prototype["see_also"]),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2296,10 +2730,10 @@ class template_odt_t(template_t):
     "param_style" : self.m_styles["para"]["prototype"]["param"]
     })
 
-            function["function_see_also"] = xml
+            function["see_also"] = xml
         
         
-        if(prototype.has_key("function_deprecated")):
+        if(prototype.has_key("deprecated")):
             is_deprecated = True
 
             xml = string.Template('''
@@ -2320,7 +2754,7 @@ class template_odt_t(template_t):
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "deprecated" : self.format_text(prototype["function_deprecated"]),
+    "deprecated" : self.format_text(prototype["deprecated"]),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2328,12 +2762,12 @@ class template_odt_t(template_t):
     "param_style" : self.m_styles["para"]["prototype"]["param"]
     })
 
-            function["function_deprecated"] = xml
+            function["deprecated"] = xml
 
-        if(prototype.has_key("function_example")):
+        if(prototype.has_key("example")):
 
-            language = prototype["function_example"]["language"]
-            example = prototype["function_example"]["parsed"]
+            language = prototype["example"]["language"]
+            example = prototype["example"]["parsed"]
 
             example = self.format_source_code(language, example)
 
@@ -2366,13 +2800,13 @@ class template_odt_t(template_t):
     "param_style" : self.m_styles["para"]["prototype"]["param"]
     })
 
-            function["function_example"] = xml
+            function["example"] = xml
         
         
-        if(prototype.has_key("function_pseudocode")):
+        if(prototype.has_key("pseudocode")):
 
-            language = prototype["function_pseudocode"]["language"]
-            example = prototype["function_pseudocode"]["parsed"]
+            language = prototype["pseudocode"]["language"]
+            example = prototype["pseudocode"]["parsed"]
             example = self.format_source_code(language, example)
         
             xml = string.Template('''
@@ -2404,10 +2838,10 @@ class template_odt_t(template_t):
     "param_style" : self.m_styles["para"]["prototype"]["param"]
     })
 
-            function["function_pseudocode"] = xml
+            function["pseudocode"] = xml
 
 
-        topic = topic_t({"name"   : prototype["function_name"],
+        topic = topic_t({"name"   : prototype["name"],
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
@@ -2421,7 +2855,7 @@ class template_odt_t(template_t):
         <table:table-column table:style-name="${style_col3}"/>
         <table:table-row table:style-name="${style_row}">
           <table:table-cell table:style-name="${style_section_name}" table:number-columns-spanned="4" office:value-type="string">
-            <text:p text:style-name="${style_para_name}">Function: ${function_name}</text:p>
+            <text:p text:style-name="${style_para_name}">Function: ${name}</text:p>
           </table:table-cell>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
@@ -2430,7 +2864,7 @@ class template_odt_t(template_t):
 
         <table:table-row table:style-name="${style_row}">
           <table:table-cell table:style-name="${style_section_data}" table:number-columns-spanned="4" office:value-type="string">
-            ${function_desc}
+            ${desc}
           </table:table-cell>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
@@ -2448,7 +2882,7 @@ class template_odt_t(template_t):
 
         <table:table-row table:style-name="${style_row}">
           <table:table-cell table:style-name="${style_section_data}" table:number-columns-spanned="4" office:value-type="string">
-            <text:p text:style-name="${style_para_text}">${function_prototype}</text:p>
+            <text:p text:style-name="${style_para_text}">${prototype}</text:p>
           </table:table-cell>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
@@ -2456,12 +2890,12 @@ class template_odt_t(template_t):
         </table:table-row>
 
 
-        ${function_params}
-        ${function_returns}
-        ${function_example}
-        ${function_pseudocode}
-        ${function_see_also}
-        ${function_deprecated}
+        ${params}
+        ${returns}
+        ${example}
+        ${pseudocode}
+        ${see_also}
+        ${deprecated}
 </table:table>
 <text:p text:style-name="${style_para_normal}"></text:p>
 """)
@@ -2470,7 +2904,7 @@ class template_odt_t(template_t):
         self.m_table_id += 1
 
         if(is_deprecated):
-            function["function_name"] += " (DEPRECATED)"
+            function["name"] += " (DEPRECATED)"
 
         xml = template.substitute(function)
 
@@ -2563,7 +2997,8 @@ class template_odt_t(template_t):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_sequence(tag)
         # These tags are not supported in OTD documents
         elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns")):
-            print "WARNING: %s tag not supported in ODT documents" % name
+            #print "WARNING: %s tag not supported in ODT documents" % name
+            pass
         else:
             print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
     
@@ -2599,13 +3034,24 @@ class template_odt_t(template_t):
                     header_type = "%s%s" % (self.m_styles["headings"][HEADING3], postfix)
                 elif(heading["Type"] == HEADING4):
                     header_type = "%s%s" % (self.m_styles["headings"][HEADING4], postfix)
+                elif(heading["Type"] == HEADING5):
+                    header_type = "%s%s" % (self.m_styles["headings"][HEADING5], postfix)
+                elif(heading["Type"] == HEADING6):
+                    header_type = "%s%s" % (self.m_styles["headings"][HEADING6], postfix)
                 elif(heading["Type"] == HEADING_DEFAULT):
                     header_type = "Normal"
+                    #header_type = "%s%s" % (self.m_styles["headings"][HEADING6], postfix)
+                    #add_to_toc = False
                 else:
                     print "Unsupported heading type"
                     sys.exit(-1)
 
-                xml += '''
+                if(heading["Type"] == HEADING6):
+                    xml += '''
+<text:p text:style-name="%s">%s</text:p>
+''' % (header_type, heading["Title"])
+                else:
+                    xml += '''
 <text:h text:style-name="%s" text:outline-level="%s">%s</text:h>
 ''' % (header_type, heading["Type"], heading["Title"])
 
@@ -2702,6 +3148,16 @@ class template_odt_t(template_t):
             image["ext"] = ".png"
             self.m_pictures.append(image)
 
+        images = ["table_blue", "table_left_right", "table_white"]
+        for path in images:
+            # Add the note.png file
+            png = g_startup_path + "/templates/shared/odt/%s.png" % path
+            image = {}
+            image["src"] = png
+            image["name"] = path
+            image["ext"] = ".png"
+            self.m_pictures.append(image)
+
         # Copy any pictures into the document archive
         #os.mkdir("scratch/Pictures")
         pictures = ""
@@ -2725,6 +3181,18 @@ class template_odt_t(template_t):
         xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_version(), xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
         xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_number(), xml)
+        
+        ## Replace the automatic styles
+        #start = xml.find("<office:automatic-styles>")
+        #end   = xml.find("</office:automatic-styles>")
+
+        #prefix = xml[0:start+25]
+        #styles = xml[start+25:end]
+        #postfix = xml[end:]
+
+        #xml = prefix + styles + self.get_styles() + postfix
+
+
         handle = open("%s/odt/styles.xml" % scratchdir, "wt")
         handle.write(xml)
         handle.close()
@@ -2747,6 +3215,20 @@ class template_odt_t(template_t):
    
 
     def generate(self, theme, version, package):
+        '''This method is called to generate the output
+           ODT or PDF document
+
+           @param self  [I] - The instance of the template class
+           @param theme [I] - The name of theme to use to generate the output document.
+                              This is used to find the .odt template file describing
+                              the document.
+           @param version [I] - The version number to use when generating the
+                                document.
+           @param package [I] - The package name to use when generating the document.
+                                This could be "odt" or "pdf" depending on whether
+                                or not we are creating a PDF file or not.
+        '''
+
         global g_startup_path
 
         scratchdir = shorte_get_config("shorte", "scratchdir")
@@ -2784,8 +3266,8 @@ class template_odt_t(template_t):
         pwd = re.sub('\\\\', '/', pwd)
 
         if(sys.platform == "cygwin" or sys.platform == "win32"):
-            startup_path = g_startup_path.replace("/cygdrive/c/", "C:\\")
-            startup_path = startup_path.replace("/", "\\")
+            path_startup = g_startup_path.replace("/cygdrive/c/", "C:\\")
+            path_startup = path_startup.replace("/", "\\")
                 
             if(sys.platform == "win32"):
                 # This is to workaround a path problem with spaces in windows
@@ -2794,66 +3276,55 @@ class template_odt_t(template_t):
                 path_oowriter = "\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
 
         else:
-            startup_path = g_startup_path
+            path_startup = g_startup_path
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
 
-        if(package == PACKAGE_TYPE_ODT):
-            input = "%s" % (self.m_engine.get_output_dir() + "/" + self.get_index_name())
-            input_path = input.replace("/cygdrive/c/", "C:\\")
-            input_path = input_path.replace("\\", "/")
-            startup_path = startup_path.replace("\\", "/")
+        print "PACKAGE: %s" % package
+        
+        params_oowriter = "--nologo --nofirststartwizard --norestore --nodefault --headless --invisible --nolockcheck"
+            
+        path_converter = "%s/templates/odt/convert_to_pdf.odt" % path_startup
+        path_input = "%s" % (self.m_engine.get_output_dir() + "/" + self.get_index_name())
 
-            output = input
-            output = output.replace(".odt", "")
+        if(sys.platform in ("cygwin", "win32")):
+
+            params_oowriter = ""
+
+            path_input = path_input.replace("/cygdrive/c/", "C:\\")
+            path_input = path_input.replace("\\", "/")
+            path_converter = path_converter.replace("/", "\\")
+
+        if(package == PACKAGE_TYPE_ODT):
+
+            path_output = path_input
+            path_output = path_output.replace(".odt", "")
 
             output = output + "_copy.odt"
 
-            if(sys.platform in ("cygwin","win32")):
-                #print "DO I get here?"
-                #sys.exit(0)
-                cmd = "%s \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (path_oowriter, startup_path, input_path)
-            else:
-                cmd = "%s -nologo -nofirststartwizard -norestore -nodefault -headless -invisible -nolockcheck \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (path_oowriter, startup_path, input_path)
+            cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (
+                path_oowriter,
+                params_oowriter,
+                path_converter,
+                path_input)
 
-            for i in range(0, 5):
-                try:
-                    os.popen(cmd).read()
-                    rc = 0
+            #print cmd
+            os.system(cmd)
 
-                    #rc = os.system(cmd)
-                    if(rc != 0):
-                        print "Failed converting document, retrying"
-                        break
-                    else:
-                        break
-                except:
-                    print "Failed converting document, retrying"
-
-            shutil.move(output, input)
+            shutil.move(path_output, path_input)
         
         if(package == PACKAGE_TYPE_PDF):
-            input = self.m_engine.get_output_dir() + "/" + self.get_index_name()
-            input = input.replace("/cygdrive/c/", "C:\\")
-            input = input.replace("/", "\\")
 
-            #print "INPUT = %s" % input
-
-            if(sys.platform in ("cygwin","win32")):
-                params = ""
-            else:
-                params = "-nologo -nofirststartwizard -norestore -nodefault -headless -hidden -invisible -nolockcheck"
-
-            cmd = "%s %s \"%s/templates/odt/convert_to_pdf.odt\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\", \\\"1.0\\\", \\\"blah\\\")\"" % (path_oowriter, params, startup_path, input)
-            print cmd
+            cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\", \\\"1.0\\\", \\\"blah\\\")\"" % (
+                    path_oowriter,
+                    params_oowriter,
+                    path_converter,
+                    path_input)
+            #print cmd
             os.system(cmd)
             
-            #for i in range(0, 5):
-            #    try:
-            #        rc = os.system(cmd)
-            #        if(rc != 0):
-            #            print "Failed converting document, retrying"
-            #        else:
-            #            break
-            #    except:
-            #        print "Failed converting document, retrying"
+            # If the output file doesn't exist then generate a failure since the macro failed
+            path_output = path_input.replace("odt", "pdf")
+            if(not os.path.exists(path_output)):
+                print "\nERROR: Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n" % path_output
+                sys.exit(-1)
 

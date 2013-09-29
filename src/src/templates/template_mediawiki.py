@@ -101,11 +101,7 @@ class template_mediawiki_t(template_t):
     
     def format_source_code(self, language, tags, source=""):
 
-        output = '''
-<!--
-%s
--->
-''' % source
+        output = ''
         
         lt = re.compile("<")
         gt = re.compile(">")
@@ -114,6 +110,9 @@ class template_mediawiki_t(template_t):
         amp = re.compile("&")
 
         line = 1
+
+        source = source.replace('\\', '')
+        return '<pre>%s</pre>' % source
 
         output += '<span style="color:#c0c0c0;">001&nbsp;&nbsp;</span>'
         
@@ -201,25 +200,73 @@ class template_mediawiki_t(template_t):
 
         return source
     
-    def format_list(self, list, ordered=False):
-
+    def format_list_child(self, elem, ordered, start_tag, end_tag):
         source = ''
+                
+        if(ordered):
+            start_tag += "#"
+        else:
+            start_tag += "*"
+
+        if(elem.has_key("children")):
+            source += start_tag
+            source += "%s" % self.format_text(elem["text"])
+            num_children = len(elem["children"])
+            #print "num_children = %d" % num_children
+            for i in range(0, num_children):
+                source += self.format_list_child(elem["children"][i], ordered, start_tag, end_tag)
+            source += end_tag
+        else:
+            source += start_tag + self.format_text(elem["text"]) + end_tag
+
+        return source
+    
+    def format_list(self, list, ordered=False, indent=0):
+
+        start_tag = ""
+        end_tag = "\n"
+
+        source = start_tag
 
         for elem in list:
+            source += self.format_list_child(elem, ordered, start_tag, end_tag)
 
-            if(elem.has_key("children")):
+        source += end_tag
 
-                num_children = len(elem["children"])
+        return source
+    
+    def format_textblock(self, tag):
 
-                source += "   * %s\n" % self.format_text(elem["parent"])
+        paragraphs = tag["contents"]
+        html = ''
 
-                for i in range(0, num_children):
-                    source += "   * %s\n" % self.format_text(elem["children"][i])
+        if(is_array(paragraphs)):
+            for p in paragraphs:
+                indent  = p["indent"]
+                text    = p["text"]
+                is_code = p["code"]
+                is_list = p["list"]
 
-            else:
-                source += "   * " + self.format_text(elem["parent"]) + "\n"
+                #print "Indent: [%d], text: [%s]" % (indent, text)
 
-        return source + "\n"
+                if(is_code):
+                    style = "margin-left:%dpx;background-color:#eee;border:1px solid #ccc;" % (30 )
+                else:
+                    style = "margin-left:%dpx;" % (20 + (indent * 10))
+
+                if(is_code):
+                    #html += "<div class='code'><div class='snippet' style='white-space:pre'>" + self.format_text(text) + "</div></div>\n"
+                    html += self.format_text(text) + "\n"
+                elif(is_list):
+                    html += self.format_list(p["text"], False, indent)
+                else:
+                    #html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;%s'>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
+                    html += self.format_text(text, expand_equals_block=True) + "\n"
+        else:
+            #html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
+            html += self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
+
+        return html
     
     
     #+-----------------------------------------------------------------------------
@@ -394,9 +441,8 @@ class template_mediawiki_t(template_t):
 
         html = '\n'
         
-        if("title" in table):
-
-            html += "Title: %s\n" % (table["title"])
+        #if("title" in table):
+        #    html += "Title: %s\n" % (table["title"])
 
         num_cols = table["max_cols"]
         col_widths = []
@@ -413,6 +459,7 @@ class template_mediawiki_t(template_t):
                     col_widths[j] = len(col["text"])
                 j += 1
 
+        html += "{|\n"
 
         for row in table["rows"]:
 
@@ -420,30 +467,33 @@ class template_mediawiki_t(template_t):
             is_subheader = row["is_subheader"]
             is_reserved = row["is_reserved"]
 
-            html += '|'
-
             if(row["is_caption"]):
-                html += "      Caption: %s\n" % (row["cols"][0])
+                #html += "      Caption: %s\n" % (row["cols"][0])
+                pass
             else: 
                 col_num = 0
                 for col in row["cols"]:
 
                     txt = self.format_text(col["text"])
+                    colspan = col["span"]
                     
                     if(is_header):
-                        html += ("*%s* | ") % (txt)
+                        html += ('''! style="background-color:#c0c0c0;" colspan='%d'|%s\n''') % (colspan,txt)
+
+                    elif(is_subheader):
+                        html += ('''! style="background-color:#a0a0a0;" colspan='%d'|%s\n''') % (colspan,txt)
                     else:
-                        html += (" %s | ") % (txt)
+                        html += ("| %s\n") % (txt)
 
                     col_num += 1
 
-            html += "\n"
+            html += "\n|-\n"
 
         #if("caption" in table):
         #    html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
 
 
-        html += '\n'
+        html += '|}\n'
         
         return html
 
@@ -660,7 +710,7 @@ class template_mediawiki_t(template_t):
 
         return self.format_image(image)
 
-    def format_text(self, data):
+    def format_text(self, data, expand_equals_block=False):
 
         # Collapse multiple spaces
         data = re.sub('\n', " ", data)
@@ -669,6 +719,9 @@ class template_mediawiki_t(template_t):
 
         # Replace any links
         data = re.sub(r'\[\[(->)?(.*?)\]\]', r'\2', data)
+        
+        if(expand_equals_block):
+            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
        
         return data
 
@@ -680,16 +733,16 @@ class template_mediawiki_t(template_t):
         tmp = ''
         
         if(tag == "h1"):
-            tmp = '''---+ %s\n''' % (data.strip())
+            tmp = '''\n=%s=\n\n''' % (data.strip())
 
         elif(tag == "h2"):
-            tmp = '''---++ %s\n''' % (data.strip())
+            tmp = '''\n==%s==\n\n''' % (data.strip())
 
         elif(tag == "h3"):
-            tmp = '''---+++%s\n''' % (data.strip())
+            tmp = '''\n===%s===\n\n''' % (data.strip())
         
         elif(tag == "h4"):
-            tmp = '''---++++%s\n''' % (data.strip())
+            tmp = '''\n====%s====\n\n''' % (data.strip())
 
         self.m_contents += tmp
     
@@ -699,6 +752,9 @@ class template_mediawiki_t(template_t):
         rc = ''
         rc += self.format_source_code(tag["name"], tag["contents"], tag["source"])
         result = tag["result"]
+
+        self.m_contents += rc
+        return ''
 
         if(result != None):
 
@@ -733,6 +789,8 @@ class template_mediawiki_t(template_t):
             return
         if(name in "p"):
             self.m_contents += self.format_text(tag["contents"]) + "\n"
+        elif(name == "text"):
+            self.m_contents += self.format_textblock(tag)
         elif(name == "pre"):
             self.m_contents += "<pre style='margin-left:30px;'>" + self.format_text(tag["contents"]) + "</pre>\n"
         elif(name == "note"):

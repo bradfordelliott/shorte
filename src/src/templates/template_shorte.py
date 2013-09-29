@@ -99,11 +99,12 @@ class template_shorte_t(template_t):
         title = re.sub("[ \n]+", " ", title).strip()
 
         if(table.has_key("caption")):
+            #print "ENUM CAPTION: %s" % table["caption"]
             caption = self.format_textblock(table["caption"])
         else:
             caption = ""
 
-        caption = re.sub("[ \n]+", " ", caption).strip()
+        #caption = re.sub("[ \n]+", " ", caption).strip()
 
         values = ''
 
@@ -114,17 +115,25 @@ class template_shorte_t(template_t):
             desc = row["cols"][2]["text"]
             desc = re.sub("\|", "\\\\\\|", desc)
             val = re.sub("\|", "\\\\\\|", val)
+            
+            if(row["cols"][2].has_key("textblock")):
+                lines = desc.split("\n") 
+                desc = '\n'
+                for line in lines:
+                    desc += "   " + line + "\n"
 
             values += '''- %s | %s | %s
 ''' % (name, val, desc)
 
-        template = string.Template('''
+        template = string.Template("""
 @h4 $name
 
-@enum: name="$name" caption="$caption"
+@enum: name="$name" caption='''
+$caption
+'''
 - Enum Name | Enum Value | Enum Description
 $values
-        ''')
+        """)
 
         vars = {}
         vars["name"] = title
@@ -135,15 +144,17 @@ $values
 
     def format_define(self, tag):
 
-        template = string.Template('''
+        template = string.Template("""
 @h4 $name
 
-@define: name="$name" caption="$caption" value="$value"
-        ''')
+@define: name="$name" value="$value" description='''
+$caption
+'''
+        """)
 
         vars = {}
         vars["name"] = tag["contents"]["name"]
-        vars["caption"] = escape_string(tag["contents"]["desc"])
+        vars["caption"] = trim_leading_indent(tag["contents"]["desc"])
         vars["value"] = escape_string(tag["contents"]["value"])
 
         return template.substitute(vars)
@@ -164,11 +175,9 @@ $values
         title = re.sub("[ \n]+", " ", title).strip()
 
         if(table.has_key("caption")):
-            caption = table["caption"]
+            caption = self.format_textblock(table["caption"])
         else:
             caption = ""
-
-        caption = re.sub("[ \n]+", " ", caption).strip()
 
         values = ''
 
@@ -182,13 +191,15 @@ $values
             values += '''- %s | %s | %s
 ''' % (bits, name, desc)
 
-        template = string.Template('''
+        template = string.Template("""
 @h4 $name
 
-@struct: name="$name" title="$title" caption="$caption"
+@struct: name="$name" title="$title" caption='''
+$caption
+'''
 - Type | Name | Description
 $values
-        ''')
+        """)
 
         vars = {}
         vars["name"] = title
@@ -205,43 +216,43 @@ $values
         self.m_num_prototypes += 1
        
         template = string.Template('''
-@h4 $function_name
+@h4 $name
 @prototype
 - function:
-    $function_name
+    $name
 $prototype
 - description:
-$function_desc
+$desc
 $params
 - returns:
-    $function_returns
-$function_example
+    $returns
+$example
 $pseudocode
 $seealso
 $deprecated
 ''')
         function = {}
-        function["function_name"] = prototype["function_name"]
-        function["function_example"] = ''
+        function["name"] = prototype["name"]
+        function["example"] = ''
         function["prototype"] = ''
-        function["function_desc"] = trim_blank_lines(prototype["function_desc"])
-        function["function_params"] = ''
-        function["function_returns"] = prototype["function_returns"]
+        function["desc"] = trim_blank_lines(prototype["desc"])
+        function["params"] = ''
+        function["returns"] = prototype["returns"]
         function["pseudocode"] = ''
 
-        if(prototype.has_key("function_prototype")):
+        if(prototype.has_key("prototype")):
             function["prototype"] = '''
 - prototype:
     %s
-''' % prototype["function_prototype"]["unparsed"]
+''' % prototype["prototype"]["unparsed"]
 
-        if(prototype.has_key("function_params")):
+        if(prototype.has_key("params")):
             output = ''
-            params = prototype["function_params"]
+            params = prototype["params"]
             
             for param in params:
 
-                output += '''-- %s | %s | %s\n    ''' % (param["param_name"], param["param_io"], param["param_desc"])
+                output += '''-- %s | %s | %s\n    ''' % (param["name"], param["io"], param["desc"])
 
 
             function["params"] = '''
@@ -251,35 +262,35 @@ $deprecated
 
 
 
-        if(prototype.has_key("function_example")):
-            function["function_example"] = '''
+        if(prototype.has_key("example")):
+            function["example"] = '''
 - example:
 %s
-''' % self.format_source_code(prototype["function_example"]["unparsed"])
+''' % self.format_source_code(prototype["example"]["unparsed"])
         
-        if(prototype.has_key("function_pseudocode")):
+        if(prototype.has_key("pseudocode")):
             function["pseudocode"] = '''
 - pseudocode:
 %s
-''' % self.format_source_code(prototype["function_pseudocode"]["unparsed"])
+''' % self.format_source_code(prototype["pseudocode"]["unparsed"])
 
-        if(prototype.has_key("function_see_also") and prototype["function_see_also"] != None):
+        if(prototype.has_key("see_also") and prototype["see_also"] != None):
             function["seealso"] = '''
 - see also:
 %s
-''' % (prototype["function_see_also"])
+''' % (prototype["see_also"])
         else:
             function["seealso"] = ''
         
-        if(prototype.has_key("function_deprecated") and prototype["function_deprecated"] != None):
+        if(prototype.has_key("deprecated") and prototype["deprecated"] != None):
             function["deprecated"] = '''
 - deprecated:
 %s
-''' % (prototype["function_deprecated"])
+''' % (prototype["deprecated"])
         else:
             function["deprecated"] = ''
 
-        topic = topic_t({"name"   : prototype["function_name"],
+        topic = topic_t({"name"   : prototype["name"],
                          "file"   : file,
                          "indent" : 3})
 
@@ -383,8 +394,12 @@ exported by this module in greater detail.
 
             tags = page["tags"]
             source_file = page["source_file"]
-            file_brief = page["file_brief"]
-            file_author = page["file_author"]
+            file_brief = ''
+            if("file_brief" in page):
+                file_brief = page["file_brief"]
+            file_author = ''
+            if("file_author" in page):
+                file_author = page["file_author"]
 
             # Strip off the extension
             title = os.path.basename(source_file)

@@ -2,6 +2,11 @@ include version.inc
 
 uname := $(shell uname)
 
+cairo_path := libs/unix
+echo       := echo
+mkdir      := mkdir
+archive    := tar -czf shorte-${version}.tar.gz *
+
 ifeq ("$(uname)", "Darwin")
 	cairo_path := libs/osx
     echo       := echo

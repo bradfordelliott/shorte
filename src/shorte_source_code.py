@@ -254,7 +254,22 @@ puts
 CREATE TABLE INTEGER AUTO_INCREMENT
 TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
 '''
-
+        elif(language == "shorte"):
+            keyword_str = '''
+@body
+@doctitle @docsubtitle @docversion @docnumber @docrevisions
+@h1 @h2 @h3 @h4 @h5
+@text @p @pre
+@c @python @java @perl @tcl @d @vera @verilog
+@include @include_child
+@sequence
+@table
+@struct
+@vector
+@note
+@ul
+@ol
+'''
 
         keyword_list = re.split(r'\n| +', keyword_str)
 
@@ -345,6 +360,7 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
     
             if(state == STATE_NORMAL):
 
+                # Treat # as a single line comment
                 if(source[i] == '#'):
                     states.append(STATE_COMMENT)
                     tags.append(tag)
@@ -353,6 +369,7 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
                     tag["data"] = "#"
                     tag["type"] = TAG_TYPE_COMMENT
 
+                # Treat // as a single line comment
                 elif(source[i] == '/' and source[i+1] == '/'):
                     states.append(STATE_COMMENT)
                     tags.append(tag)
@@ -360,7 +377,8 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
                     tag = {}
                     tag["data"] = '/'
                     tag["type"] = TAG_TYPE_COMMENT
-                # Handle SQL comments
+
+                # Treat -- as a single line comment in SQL blocks
                 elif(source_lang == "sql" and (source[i] == '-' and source[i+1] == '-')):
                     states.append(STATE_COMMENT)
                     tags.append(tag)
@@ -368,6 +386,7 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
                     tag["data"] = '-'
                     tag["type"] = TAG_TYPE_COMMENT
                     
+                # Treat /* as the start of a multi-line comment
                 elif(source[i] == '/' and source[i+1] == '*'):
                     states.append(STATE_MCOMMENT)
                     tags.append(tag)
@@ -376,6 +395,7 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
                     tag["data"] = '/'
                     tag["type"] = TAG_TYPE_MCOMMENT
 
+                # Treat " as the start of a string
                 elif(source[i] == '"'):
                     states.append(STATE_STRING)
                     tags.append(tag)
@@ -384,6 +404,7 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
                     tag["data"] = '"'
                     tag["type"] = TAG_TYPE_STRING
 
+                # Treat @{ as inline styling
                 elif(source[i] == '@' and source[i+1] == '{'):
                     states.append(STATE_INLINE_STYLING)
                     tags.append(tag)

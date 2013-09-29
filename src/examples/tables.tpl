@@ -78,4 +78,11 @@ This is a test of the table captions
 - Blah 2 | Blah 2 | Blah 3 | Blah 4
 -r Blah 2 | Blah 2 | Blah 3 | Blah 4
 - Blah 2 | Blah 2 | Blah 3 | Blah 4
+-= Blah 2 | Blah 2 | Blah 3 | Blah 4
+
+@h3 A table with no header
+@table
+-x One | Two | Three
+- One | Two | Three
+- One | Two | Three
 

@@ -323,22 +323,79 @@ def trim_leading_indent(source):
 
     source = trim_blank_lines(source)
 
-    # Now figure out the indent of the first line
-    i = 0
-    leading_indent = ''
-    while i < len(source) and source[i] == " ":
-        leading_indent += source[i]
-        i += 1
-
     # Trim any leading indent from each line
     lines = re.split("\n", source)
     lines_out = []
 
-    for line in lines:
-        line = re.sub("^%s" % leading_indent, "", line)
-        lines_out.append(line)
+    # Now figure out the indent of the first line
+    i = 0
+    leading_indent = ''
+    while i < len(lines[0]) and lines[0][i] == " ":
+        leading_indent += lines[0][i]
+        i += 1
+
+    #print "Source: [%s]" % source
     
-    source = "\n".join(lines_out)
+    #print "leading indent: [%s]" % leading_indent
+    
+    if(len(lines) > 1):
+        second_line_indent = ''
+        i = 0
+
+        l = 1
+        while((l < len(lines)-1) and len(lines[l]) == 0):
+
+        #    print "L: %d, len(lines) = %d" % (l,len(lines))
+        #    if(l+1 >= len(lines)):
+        #        return source
+
+            l+=1
+
+        #print "L: %d" % l
+
+        while i < len(lines[l]) and lines[l][i] == " ":
+            second_line_indent += lines[l][i]
+            i += 1
+
+        #print "second line indent: [%s]" % second_line_indent
+
+        # If every line has an indent > second_line_indent
+        # then strip the second line indent from every line
+        all_indented = True
+        i = 0
+        for line in lines:
+            if(i > 0 and len(line) > 0):
+                if(not line.startswith(second_line_indent)):
+                    #print "line [%s] not indented, index=%d" % (line, i)
+                    all_indented = False
+                    break
+            i+=1
+
+        #if(all_indented):
+        #    print "All lines have same indent"
+        #    print "[%s]" % source
+
+        j = 0
+        for line in lines:
+            if(all_indented):
+                if(j == 0):
+                    line = re.sub("^%s" % leading_indent, "", line)
+                    lines_out.append(line)
+                else:
+                    line = re.sub("^%s" % second_line_indent, "", line)
+                    lines_out.append(line)
+            else:
+                line = re.sub("^%s" % leading_indent, "", line)
+                lines_out.append(line)
+            j+=1
+
+    else: 
+        for line in lines:
+            line = re.sub("^%s" % leading_indent, "", line)
+            lines_out.append(line)
+    
+    source = "\n".join(lines_out).strip()
+    #print "OUTPUT\n[%s]" % source.strip()
 
     return source
 

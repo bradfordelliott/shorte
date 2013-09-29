@@ -4,8 +4,42 @@
  *
  * With another line here and some *bold* text.
  *
- * @param blah  [I] - Some dumb variable
- * @param dummy [O] - Some other dumb variable.
+ * @{table,
+ * -t Title of my table here
+ * -h One   | Two
+ * -  Three | Four
+ * }
+ *
+ * @param blah  [I] -
+ *     Some dumb variable that behaves like
+ *     a text block with a list
+ *
+ *     - one
+ *         - two
+ *     - three
+ *
+ *     And a new paragraph and a table
+ *
+ *     @{table,
+ *     - One
+ *     - Two
+ *     } 
+ *
+ * @param dummy [O] -
+ *     Some other dumb variable.
+ *
+ *     With a new paragraph and some @{b,bold} text
+ *     and a list:
+ *
+ *     - list
+ *       - list1
+ *       - list2
+ *
+ *     and a table
+ *     @{table,
+ *     - One | Two
+ *     - Three | Four
+ *     }
  *
  * @return TRUE on success, FALSE on failure.
  *

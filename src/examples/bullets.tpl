@@ -1,5 +1,5 @@
-@doctitle A test of the bullets
-@docsubtitle Some other stuff
+@doctitle Shorte Examples
+@docsubtitle Lists/Bullets 
 @docversion 1.0
 @body
 
@@ -7,6 +7,7 @@
 
 @h2 An Unordered List
 Some text before the list
+
 @ul
 - A
     - B
@@ -22,11 +23,13 @@ Some text before the list
       wrapped across a line
     - E
         - F
+
 @text
 And some text after the list
 
 @h2 An ordered list
 Blah blah blah
+
 @ol
 - A
     - B
@@ -45,6 +48,7 @@ Blah blah blah
         -four
     - five
 - six
+
 @text
 And blah blah blah
 

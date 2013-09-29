@@ -26,31 +26,24 @@ import datetime
 import ConfigParser, os
 from types import *
 
-sys.path.append(".")
-
-# Add the 'src' subdirectories
-path = os.path.dirname(sys.argv[0])
-sys.path.append("%s/src" % path)
-sys.path.append("%s/src/templates" % path)
-
 from shorte_defines import *
 from shorte_source_code import *
 from shorte_parser import *
 from cpp_parser import *
 from shorte_code_executor import *
-from template_html import template_html_t
-from template_odt  import template_odt_t
-from template_word import template_word_t
-from template_text import template_text_t
-from template_twiki import template_twiki_t
-from template_c import template_c_t
-from template_vera import template_vera_t
-from template_shorte import template_shorte_t
-from template_swig import template_swig_t
-from template_labview import template_labview_t
-from template_mergefile import template_mergefile_t
-from template_sql import template_sql_t
-from template_mediawiki import template_mediawiki_t
+from src.templates.template_html import template_html_t
+from src.templates.template_odt  import template_odt_t
+from src.templates.template_word import template_word_t
+from src.templates.template_text import template_text_t
+from src.templates.template_twiki import template_twiki_t
+from src.templates.template_c import template_c_t
+from src.templates.template_vera import template_vera_t
+from src.templates.template_shorte import template_shorte_t
+from src.templates.template_swig import template_swig_t
+from src.templates.template_labview import template_labview_t
+from src.templates.template_mergefile import template_mergefile_t
+from src.templates.template_sql import template_sql_t
+from src.templates.template_mediawiki import template_mediawiki_t
 
 
 #+------------------------------------------------------------------------------
@@ -83,7 +76,7 @@ class engine_t:
         self.m_docsubtitle = ""
         self.m_docversion = None
         self.m_package = ""
-        self.m_docnumber = None
+        self.m_docnumber = "1.0"
         self.m_revision_history = None
 
         self.m_output_filename = None
@@ -93,6 +86,7 @@ class engine_t:
         self.m_search_and_replace = None
 
         # Create the output directory if it doesn't exist already
+        #print "OUTPUT_DIR: %s" % self.m_output_directory
         if(not os.path.exists(self.m_output_directory)):
             os.makedirs(self.m_output_directory)
 
@@ -157,6 +151,14 @@ class engine_t:
 
     def get_output_dir(self):
         return self.m_output_directory
+
+    def set_output_dir(self, path):
+        self.m_output_directory = path
+        if(not os.path.exists(self.m_output_directory)):
+            os.makedirs(self.m_output_directory)
+
+    def set_working_dir(self, path):
+        os.chdir(path)
     
     def _expand_url(self, matches):
         return self.m_parser.m_urls[matches.groups()[0]]
@@ -606,21 +608,18 @@ class engine_t:
     def search_and_replace(self, text):
         if(self.m_search_and_replace != None):
             #path = os.path.dirname(self.m_search_and_replace)
-            ##sys.path.append(os.getcwd())
             ##print "PATH: %s" % path
             ##print "sys.path %s" % sys.path
             #if(sys.platform == "cygwin" or sys.platform == "win32"):
             #    path = path.replace("/cygdrive/c/", "C:\\")
             #    path = path.replace("/", "\\")
-            #sys.path.append(path)
-            #sys.path.append(".")
            
             snr = self.m_search_and_replace
 
             dirname = os.path.dirname(snr)
             path = os.path.basename(snr)
             module_name = os.path.splitext(path)[0]
-            #print "DIRNAME: %s, MODULE=%s" % (dirname, module_name)
+            print "DIRNAME: %s, MODULE=%s, CWD=%s" % (dirname, module_name, os.getcwd())
             sys.path.append(dirname)
             module = __import__("%s" % module_name)
 
@@ -709,6 +708,9 @@ parser.add_option("-d", "--define",
 parser.add_option("-r", "--search_and_replace",
                   action="store",type="string",dest="replace",
                   help="An input search and replace module that is loaded to pre-process input files and replace any references")
+parser.add_option("-w", "--working_directory",
+                  action="store",type="string",dest="working_directory",
+                  help="The working directory")
 #parser.add_option("-I", "--include",
 #                  action="store",type="string",dest="include",
 #                  help="Include paths to search for include files")
@@ -724,7 +726,8 @@ if(options.about):
     print "Shorte Version %s" % version_string
     sys.exit(0)
 
-output_dir = "%s/%s" % (os.getcwd(), output_dir)
+if(not os.path.isabs(output_dir)):
+    output_dir = "%s/%s" % (os.getcwd(), output_dir)
 
 if(options.config != None):
     config = options.config
@@ -797,6 +800,9 @@ shorte.set_theme(options.theme)
 if(options.name != None):
     shorte.set_title(options.name)
     shorte.set_subtitle(options.name)
+
+if(options.working_directory != None):
+    shorte.set_working_dir(options.working_directory)
 
 # Save the version number of the document
 # if it was specified.

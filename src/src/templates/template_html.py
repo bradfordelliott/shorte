@@ -530,7 +530,7 @@ class template_html_t(template_t):
         keyword = ''
         pos_start = 0
 
-        source = re.sub('\n', '', source)
+        #source = re.sub('\n', '', source)
 
         for i in range(0, len(source)):
 
@@ -541,6 +541,11 @@ class template_html_t(template_t):
             #if((ord(c) >= 65 and ord(c) < 91) or (ord(c) >= 48 and ord(c) < 58) or (ord(c) >= 97 and ord(c) <= 122) or (ord(c) == 95) or (c == '.' and (i < len(source) - 1) and source[i+1] not in (' ', '\n', '\t'))):
             if((ord(c) >= 65 and ord(c) < 91) or (ord(c) >= 48 and ord(c) < 58) or (ord(c) >= 97 and ord(c) <= 122) or (ord(c) == 95) or (c == '.')):
                 keyword += c 
+            # DEBUG BRAD: This isn't perfect since it doesn't account for the fact
+            #             that shorte tags should only be at the beginning of a line
+            #             and not in the middle of a line.
+            elif(language == "shorte" and c == '@'):
+                keyword += c
             else:
                 if(keyword != ''):
 
@@ -867,7 +872,12 @@ class template_html_t(template_t):
         for tag in tags:
 
             function = tag["contents"]
-            
+
+            desc = ''
+            if(function.has_key("desc2")):
+                desc = self.format_textblock(function["desc2"])
+            elif(function.has_key("desc")):
+                desc = function["desc"]
             
             if(tag["hierarchy"] != hierarchy):
                 hierarchy = tag["hierarchy"]
@@ -876,8 +886,12 @@ class template_html_t(template_t):
     <td colspan=2 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">%s</td>
 </tr>''' % (hierarchy)
 
-            prototype = function["function_prototype"]["parsed"]
-            (returns, prototype) = self.htmlize_prototype(prototype)
+            if(function.has_key("prototype")):
+                prototype = function["prototype"]["parsed"]
+                (returns, prototype) = self.htmlize_prototype(prototype)
+            else:
+                returns = ''
+                prototype = ''
 
             html += string.Template('''
 <tr valign=top>
@@ -888,7 +902,7 @@ class template_html_t(template_t):
     <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
     <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'>$desc</td>
 </tr>
-''').substitute({"returns": returns, "prototype" : prototype, "desc" : function["function_desc"], "return" : returns})
+''').substitute({"returns": returns, "prototype" : prototype, "desc" : desc, "return" : returns})
         
         html += '</table><br/>'
 
@@ -907,7 +921,9 @@ class template_html_t(template_t):
 
             desc = ''
             if(struct.has_key("caption")):
-                desc = struct["caption"]
+                desc = self.format_textblock(struct["caption"])
+            elif(struct.has_key("description")):
+                desc = self.format_textblock(struct["description"])
 
             html += string.Template('''
 <tr valign=top>
@@ -1002,27 +1018,27 @@ class template_html_t(template_t):
         
         template = string.Template("""
         <div class="bordered" style="margin-top:10px;${background}">
-        <div style='background-color:#ccc;padding:10px;'><b>Function:</b> ${function_name}</div>
+        <div style='background-color:#ccc;padding:10px;'><b>Function:</b> ${name}</div>
         <div>
             <div style="margin-left: 10px;">
                 <div style="color: #396592; font-weight: bold;">Description:</div>
-                <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${function_desc}</div>
+                <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
             </div>
         </div>
         <div class='prototype' style="font-size: 0.9em;">
             <div style="margin-left: 10px; margin-top: 10px;">
-                ${function_prototype}
+                ${prototype}
                 
-                ${function_params}
-                ${function_returns}
+                ${params}
+                ${returns}
                 
 
-                ${function_example}
-                ${function_called_by}
-                ${function_calls}
-                ${function_pseudocode}
-                ${function_see_also}
-                ${function_deprecated}
+                ${example}
+                ${called_by}
+                ${calls}
+                ${pseudocode}
+                ${see_also}
+                ${deprecated}
                 
             </div>
             
@@ -1034,7 +1050,7 @@ class template_html_t(template_t):
         <div>
             <div style="color: #396592; font-weight: bold;">Prototype:</div>
             <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc; font-family:courier new;">
-                ${function_prototype}
+                ${prototype}
             </div>
         </div>
         """);
@@ -1045,7 +1061,7 @@ class template_html_t(template_t):
                     <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
                         The following example demonstrates the use of this method:<br>
                     </div>
-                    ${function_example}
+                    ${example}
                 </div>
             
         ''');
@@ -1057,7 +1073,7 @@ class template_html_t(template_t):
                     <div style="margin-left: 10px; margin-top: 5px;">
                         The following pseudocode describes the implementation of this method:<br>
                     </div>
-                    ${function_pseudocode}
+                    ${pseudocode}
                 </div>
             
         ''')
@@ -1065,7 +1081,7 @@ class template_html_t(template_t):
         template_returns = string.Template('''
             <div>
                 <div style="color: #396592; font-weight: bold;">Returns:</div>
-                <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${function_returns}</p>
+                <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${returns}</p>
             </div>
         ''')
         
@@ -1102,7 +1118,7 @@ class template_html_t(template_t):
                     <div style="color: #396592; font-weight: bold;">Params:</div>
                     <div style="margin-left: 0px;">
                         <table style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px; border: 0px solid black;">
-                            ${function_params}
+                            ${params}
                         </table>
                     </div>
                 </div>
@@ -1112,87 +1128,87 @@ class template_html_t(template_t):
         
         file = "blah"
         function = {}
-        function["function_name"] = prototype["function_name"]
-        function["function_example"] = ''
-        function["function_prototype"] = ''
-        function["function_desc"] = ''
-        function["function_params"] = ''
-        function["function_returns"] = ''
-        function["function_pseudocode"] = ''
-        function["function_see_also"] = ''
-        function["function_deprecated"] = ''
-        function["function_calls"] = ''
-        function["function_called_by"] = ''
+        function["name"] = prototype["name"]
+        function["example"] = ''
+        function["prototype"] = ''
+        function["desc"] = ''
+        function["params"] = ''
+        function["returns"] = ''
+        function["pseudocode"] = ''
+        function["see_also"] = ''
+        function["deprecated"] = ''
+        function["calls"] = ''
+        function["called_by"] = ''
 
-        if(prototype.has_key("function_desc")):
-            function["function_desc"] = self.format_text(prototype["function_desc"], expand_equals_block=True)
-        if(prototype.has_key("function_desc2")):
+        if(prototype.has_key("desc")):
+            function["desc"] = self.format_text(prototype["desc"], expand_equals_block=True)
+        if(prototype.has_key("desc2")):
             #print "Do I get here?"
             tag = {}
-            tag["contents"] = prototype["function_desc2"]
+            tag["contents"] = prototype["desc2"]
             #print "CONTENTS [%s]" % tag["contents"]
-            function["function_desc"] = self.format_textblock(tag)
+            function["desc"] = self.format_textblock(tag)
         
         exclude_wikiwords = []
-        exclude_wikiwords.append(function["function_name"])
+        exclude_wikiwords.append(function["name"])
 
-        if(prototype.has_key("function_prototype")):
-            language = prototype["function_prototype"]["language"]
-            example = prototype["function_prototype"]["parsed"]
+        if(prototype.has_key("prototype")):
+            language = prototype["prototype"]["language"]
+            example = prototype["prototype"]["parsed"]
 
-            function["function_prototype"] = self.format_source_code(language, example, exclude_wikiwords, False)
-            function["function_prototype"] = template_prototype.substitute(function)
+            function["prototype"] = self.format_source_code(language, example, exclude_wikiwords, False)
+            function["prototype"] = template_prototype.substitute(function)
 
-        if(prototype.has_key("function_params") and (len(prototype["function_params"]) > 0)):
-            params = prototype["function_params"]
+        if(prototype.has_key("params") and (len(prototype["params"]) > 0)):
+            params = prototype["params"]
             
             param_template = string.Template("""
                         <tr style='border-bottom:1px solid #ccc;'>
                             ${type}
-                            <td style="vertical-align:text-top;border: 0px;"><b>${param_name}</b></td>
-                            <td style="vertical-align:text-top;font-family: courier new; border: 0px;">(${param_io})</td>
+                            <td style="vertical-align:text-top;border: 0px;"><b>${name}</b></td>
+                            <td style="vertical-align:text-top;font-family: courier new; border: 0px;">(${io})</td>
                             <td style="vertical-align:text-top;border: 0px;">-</td>
-                            <td style="vertical-align:text-top;border: 0px;">${param_desc}</td>
+                            <td style="vertical-align:text-top;border: 0px;">${desc}</td>
                         </tr>""")
 
             output = ''
             for param in params:
 
                 html_tmp = ''
-                for val in param["param_desc"]:
+                for val in param["desc"]:
                     if(len(val) == 2):
                         html_tmp += '<b>%s</b> = %s<br/>' % (val[0], self.format_text(val[1]))
                     else:
                         html_tmp += self.format_text(val)
 
-                param["param_desc"] = html_tmp
+                param["desc"] = html_tmp
 
-                if(param.has_key("param_desc2")):
+                if(param.has_key("desc2")):
                     tag = {}
-                    tag["contents"] = param["param_desc2"]
-                    param["param_desc"] = self.format_textblock(tag)
+                    tag["contents"] = param["desc2"]
+                    param["desc"] = self.format_textblock(tag)
                 else:
                     print "WTF?"
                     sys.exit(-1)
 
-                if(param.has_key("param_type")):
-                    param["type"] = '''<td style="vertical-align:text-top;border: 0px;">%s</td>''' % param["param_type"]
+                if(param.has_key("type")):
+                    param["type"] = '''<td style="vertical-align:text-top;border: 0px;">%s</td>''' % param["type"]
                 else:
                     param["type"] = ''
 
                 output += param_template.substitute(param)
             
             params = {}
-            params["function_params"] = output
-            function["function_params"] = template_params.substitute(params)
+            params["params"] = output
+            function["params"] = template_params.substitute(params)
 
-        if(prototype.has_key("function_returns")):
-            function["function_returns"] = template_returns.substitute(prototype)
+        if(prototype.has_key("returns")):
+            function["returns"] = template_returns.substitute(prototype)
 
-        if(prototype.has_key("function_example")):
+        if(prototype.has_key("example")):
 
-            example = prototype["function_example"]["parsed"]
-            language = prototype["function_example"]["language"]
+            example = prototype["example"]["parsed"]
+            language = prototype["example"]["language"]
             
             if(self.m_show_code_headers["example"]):
                 snippet_id = self.m_snippet_id
@@ -1216,14 +1232,14 @@ class template_html_t(template_t):
                         "template" : "code2",
                         "result"   : ""})
 
-            function["function_example"] = code
-            function["function_example"] = template_example.substitute(function)
+            function["example"] = code
+            function["example"] = template_example.substitute(function)
         
         
-        if(prototype.has_key("function_pseudocode")):
+        if(prototype.has_key("pseudocode")):
 
-            pseudocode = prototype["function_pseudocode"]["parsed"]
-            language = prototype["function_pseudocode"]["language"]
+            pseudocode = prototype["pseudocode"]["parsed"]
+            language = prototype["pseudocode"]["language"]
             
             if(self.m_show_code_headers["pseudocode"]):
                 snippet_id = self.m_snippet_id
@@ -1245,38 +1261,38 @@ class template_html_t(template_t):
                         "template" : "code2",
                         "result"   : ""})
            
-            function["function_pseudocode"] = code
-            function["function_pseudocode"] = template_pseudocode.substitute(function)
+            function["pseudocode"] = code
+            function["pseudocode"] = template_pseudocode.substitute(function)
 
-        if(prototype.has_key("function_see_also")):
+        if(prototype.has_key("see_also")):
             params = {}
-            params["see_also"] = self.format_text(prototype["function_see_also"])
-            function["function_see_also"] = template_see_also.substitute(params)
+            params["see_also"] = self.format_text(prototype["see_also"])
+            function["see_also"] = template_see_also.substitute(params)
         
         is_deprecated = False
-        if(prototype.has_key("function_deprecated")):
+        if(prototype.has_key("deprecated")):
             params = {}
-            params["deprecated"] = self.format_text(prototype["function_deprecated"])
-            function["function_deprecated"] = template_deprecated.substitute(params)
+            params["deprecated"] = self.format_text(prototype["deprecated"])
+            function["deprecated"] = template_deprecated.substitute(params)
             is_deprecated = True
         
-        if(prototype.has_key("function_called_by")):
+        if(prototype.has_key("called_by")):
             params = {}
-            params["called_by"] = self.format_text(prototype["function_called_by"])
-            function["function_called_by"] = template_called_by.substitute(params)
+            params["called_by"] = self.format_text(prototype["called_by"])
+            function["called_by"] = template_called_by.substitute(params)
         
-        if(prototype.has_key("function_calls")):
+        if(prototype.has_key("calls")):
             params = {}
-            params["calls"] = self.format_text(prototype["function_calls"])
-            function["function_calls"] = template_calls.substitute(params)
+            params["calls"] = self.format_text(prototype["calls"])
+            function["calls"] = template_calls.substitute(params)
 
         function["background"] = '';
         
         if(is_deprecated):
-            function["function_name"] += " (THIS METHOD IS DEPRECATED)"
+            function["name"] += " (THIS METHOD IS DEPRECATED)"
             function["background"] = "background: url('css/images/deprecated.png') center;";
             
-        topic = topic_t({"name"   : prototype["function_name"],
+        topic = topic_t({"name"   : prototype["name"],
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
@@ -1344,43 +1360,63 @@ class template_html_t(template_t):
             is_header    = row["is_header"]
             is_reserved  = row["is_reserved"]
             is_crossed   = row["is_crossed"]
+            is_title     = False
+            if(row.has_key("is_title")):
+                is_title = row["is_title"]
 
-            if(is_header):
-                html += "    <tr class='header'>\n";
+            if(is_title):
+                html += "<tr><th colspan='%d'>%s</th></tr>\n" % (table["max_cols"], row["cols"][0]["text"])
+                i+= 1
+                continue
+            elif(is_header):
+                html += "<tr class='header'>\n";
             elif(row["is_caption"]):
-                html += "    <tr class='caption'>\n";
+                html += "<tr class='caption'>\n";
             else:
                 html += "<tr>\n"
 
             if(row["is_caption"]):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (table["max_cols"], self.format_text(row["cols"][0]["text"]))
+                html += "<td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (table["max_cols"], self.format_text(row["cols"][0]["text"]))
             elif(row["is_spacer"]):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
+                html += "<td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
             else: 
                 for col in row["cols"]:
 
-                    text = self.format_text(col["text"])
+                    if(col.has_key("textblock")):
+                        tag = {}
+                        tag["contents"] = col["textblock"]
+                        text = self.format_textblock(tag, False)
+                    else:
+                        text = self.format_text(col["text"])
+
                     colspan = col["span"]
 
-                    if(is_header == True):
-                        html += "      <td colspan='%d' class='header'>%s</td>\n" % (colspan, text)
-                    elif(is_subheader == True):
-                        html += "      <td colspan='%d' class='subheader'>%s</td>\n" % (colspan, text)
-                    elif(is_reserved == True):
-                        html += "      <td colspan='%d' class='reserved'>%s</td>\n" % (colspan, text)
-                    elif(is_crossed == True):
-                        html += "      <td colspan='%d' class='reserved'><strike>%s</strike></td>\n" % (colspan, text)
+                    if(colspan > 1):
+                        colspan = "colspan='%d'" % colspan
                     else:
-                        html += "      <td colspan='%d'>%s</td>\n" % (colspan, text)
+                        colspan = ''
+
+                    if(is_header == True):
+                        html += "<td %s class='header'>%s</td>\n" % (colspan, text)
+                    elif(is_subheader == True):
+                        html += "<td %s class='subheader'>%s</td>\n" % (colspan, text)
+                    elif(is_reserved == True):
+                        html += "<td %s class='reserved'>%s</td>\n" % (colspan, text)
+                    elif(is_crossed == True):
+                        html += "<td %s class='reserved'><strike>%s</strike></td>\n" % (colspan, text)
+                    else:
+                        html += "<td %s>%s</td>\n" % (colspan, text)
             
             html += "</tr>\n"
 
             i+=1
 
-        if("caption" in table):
-            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
 
+        if("caption" in table):
+            html += "<tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:left;'><b>Caption:</b> %s</td></tr>\n" % (table["max_cols"], self.format_textblock(table["caption"], False))
+        
         html += "</table>"
+
         #html += "</div>"
         
         return html
@@ -1440,9 +1476,20 @@ table.inline tr.alternaterow
         return html
 
 
-    def format_textblock(self, tag):
+    def format_textblock(self, tag, standalone=True):
+        '''This method is called to format a block of text
+within an HTML document.
 
-        paragraphs = tag["contents"]
+@param tag        [I] = The tag to parse, usually a dictionary object
+@param standalone [I] = Is the block of text standalone or is it embedded
+                        within another element like a table?
+'''
+
+        if(isinstance(tag, dict)):
+            paragraphs = tag["contents"]
+        else:
+            paragraphs = tag
+
         html = ''
 
         if(is_array(paragraphs)):
@@ -1455,18 +1502,33 @@ table.inline tr.alternaterow
                 #print "Indent: [%d], text: [%s]" % (indent, text)
 
                 if(is_code):
-                    style = "margin-left:%dpx;background-color:#eee;border:1px solid #ccc;" % (30 )
+                    if(standalone):
+                        style = "style = 'margin-left:%dpx;background-color:#eee;'" % (20)
+                    else:
+                        style = "style = 'margin-left:%dpx;background-color:#eee;border:1px solid #ccc;'" % (0)
                 else:
-                    style = "margin-left:%dpx;" % (20 + (indent * 10))
+                    if(indent > 0):
+                        if(standalone):
+                            style = "style='margin-left:%dpx;'" % (20 + (indent * 6))
+                        else:
+                            style = "style='margin-left:%dpx;'" % ((indent * 6))
+                    else:
+                        style = ''
 
                 if(is_code):
-                    html += "<div class='code'><div class='snippet' style='white-space:pre'>" + self.format_text(text) + "</div></div>\n"
+                    html += "<div class='code' %s><div class='snippet' style='white-space:pre'>" % style + self.format_text(text) + "</div></div>\n"
                 elif(is_list):
                     html += self.format_list(p["text"], False, indent)
                 else:
-                    html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;%s'>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
+                    if(standalone):
+                        html += "<div class='tblkps' %s>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
+                    else:
+                        html += "<div class='tblkp' %s>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
         else:
-            html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
+            if(standalone):
+                html += "<div class='tblkps'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
+            else:
+                html += "<div class='tblkp'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
 
         return html
 
@@ -1583,8 +1645,18 @@ table.inline tr.alternaterow
     
     
     def format_enum(self, tag):
+        '''This method is called to format an enum for display within an
+           HTML document.
+
+           @param self [I] - The template class instance
+           @param tag  [I] - The tag defining the enum to convert to HTML.
+            
+           @return The HTML snippet defining the enum
+           '''
+
 
         table = tag["contents"]
+        #print table
 
         if(self.m_engine.get_config("html", "show_enum_values") == "1"):
             show_enum_vals = True
@@ -1593,11 +1665,16 @@ table.inline tr.alternaterow
             show_enum_vals = False
             max_cols = table["max_cols"] - 1
 
+        show_enum_vals = False
         
         html = ''
         
-        # Append the caption
-        html += "<p>%s</p>\n" % (table["caption"])
+        # Append the caption/description
+        if("caption" in table):
+            html += self.format_textblock(table["caption"])
+        elif("description" in table):
+            html += self.format_textblock(table["description"])
+
 
         html += "<table class='bordered'>\n"
 
@@ -1607,17 +1684,34 @@ table.inline tr.alternaterow
 
         i = 0
 
-#        html += '''
-#<tr class='header'>
-#  <td>Value</td>
-#  <td>Description</td>
-#  </tr>'''
+        if(show_enum_vals):
+            html += '''
+<tr class='header'>
+  <td>Name</td>
+  <td>Value</td>
+  <td>Description</td>
+  </tr>'''
+        else:
+            html += '''
+<tr class='header'>
+  <td>Name</td>
+  <td>Description</td>
+  </tr>'''
+        
 
         for row in table["rows"]:
+
             
             is_subheader = row["is_subheader"]
             is_header    = row["is_header"]
             is_reserved  = row["is_reserved"]
+            
+            # If this is the first row and it is a header
+            # then skip it as it is likely just the table
+            # header.
+            if(i == 0 and is_header):
+                i+=1
+                continue
 
             if(is_header):
                 html += "    <tr class='header'>\n";
@@ -1644,7 +1738,12 @@ table.inline tr.alternaterow
                         else:
                             text = '<a name="%s"></a>%s' % (col["text"], col["text"])
                     else:
-                        text = self.format_text(col["text"], False)
+                        if(col.has_key("textblock")):
+                            text = self.format_textblock(col["textblock"])
+                            #print "ENUM_TB [%s]" % text
+                        else:
+                            text = self.format_text(col["text"], False)
+                            #print "ENUM_T [%s]" % text
 
                     colspan = col["span"]
 
@@ -1679,14 +1778,28 @@ table.inline tr.alternaterow
 
         define = tag["contents"]
 
-        html = '''<div class='bordered'><div class='question'><b>%s</b> = %s</div><div>%s</div></div><br/>''' % (define["name"], define["value"], define["desc"])
+        html = '''<div class='bordered'><div class='question'><b>%s</b> = %s</div><div>%s</div></div><br/>''' % (define["name"], define["value"], self.format_textblock(define["description"]))
 
         return html
 
     # Called for format a structure for HTML output 
     def format_struct(self, source, struct):
+        '''This method is called to format the contents of an @struct tag
+           as an HTML entity.
+
+           @param self [I] - The instance of the formatter class
+           @param source [I] - The original source of the structure
+           @param struct [I] - The object defining the structure.
+
+           @return The HTML output of the structure
+        '''
         
-        html = "<p>%s</p>\n" % (struct["caption"])
+        html = ""
+        
+        if("caption" in struct):
+            html += self.format_textblock(struct["caption"])
+        elif("description" in struct):
+            html += self.format_textblock(struct["description"])
         
         html += "<table class='bordered'>\n"
         
@@ -1743,10 +1856,17 @@ table.inline tr.alternaterow
             else:
                 for attr in field["attrs"]:
 
+                    #print attr
                     if(is_dict(attr)):
-                        attr = attr["text"]
-
-                    attr = self.format_text(attr)
+                        #print "IS DICT"
+                        if(attr.has_key("textblock")):
+                            attr = self.format_textblock(attr["textblock"])
+                        else:
+                            attr = attr["text"]
+                    else:
+                        attr = ''
+                    #    print "Do I GET HERE? [%s]" % attr
+                    #    attr = self.format_text(attr)
 
                     if(is_header):
                         html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
@@ -2070,15 +2190,17 @@ $href_end
     def parse_inline_styling(self, matches):
 
         data = matches.groups()[0].strip()
-        #print "DATA: %s" % data
+        #print "DATA: [%s]" % data
         #print "data: %s" % data
         parts = data.split(",")
         if(len(parts) == 1):
             tag = parts[0]
+            replace = tag
         elif(len(parts) > 1):
             tag = parts[0]
             replace = ''.join(parts[1:])
 
+        replace = trim_leading_blank_lines(replace)
         #print "TAG: %s, REPLACE: %s" % (tag,replace)
        
         # Check if it's an inline styling block such as color
@@ -2104,12 +2226,15 @@ $href_end
             return "<span style='%s'>%s</span>" % (qualifier, replace)
         elif(tag in ("hl", "hilite", "highlight")):
             return "<span style='background-color:yellow;'>%s</span>" % (replace)
+        elif(tag in "table"):
+            table = self.m_engine.m_parser.parse_table(replace, {})
+            return self.format_table(replace, table)
 
         return replace
 
 
     def format_text(self, data, allow_wikify=True, exclude_wikify=[], expand_equals_block=False):
-        
+
         if(data == None):
             return
 
@@ -2131,17 +2256,18 @@ $href_end
         if(expand_equals_block):
             data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
         
-        # Hilite any text between **** ****
-        hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
-        data = hiliter.sub("<font class='hilite'>\\1</font>", data)
+        ## Hilite any text between **** ****
+        #hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
+        #data = hiliter.sub("<font class='hilite'>\\1</font>", data)
 
         # Underline any text between __ __
         hiliter = re.compile("__(.*?)__", re.DOTALL)
         data = hiliter.sub("<u>\\1</u>", data)
 
-        # Underline anything in <<<>>> brackets
-        hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
-        data = hiliter.sub("<u>\\1</u>", data)
+        # DEBUG BRAD: Oldy Syntax
+        #     Underline anything in <<<>>> brackets
+        #     hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
+        #     data = hiliter.sub("<u>\\1</u>", data)
         
         # First make any links or references
         data = self._format_links(data)
@@ -2152,9 +2278,18 @@ $href_end
         data = re.sub("<<(.*?),(.*?)(,(.*?))?>>", self.format_inline_image, data)
         data = re.sub("<<(.*?)>>", self.format_inline_image, data)
 
-        # Now convert any ** to italics
-        italics = re.compile("\*\*(.*?)\*\*", re.DOTALL)
-        data = italics.sub("<i>\\1</i>", data)
+        # DEBUG BRAD: Old syntax
+        #    # Now convert any ** to italics
+        #    italics = re.compile("\*\*(.*?)\*\*", re.DOTALL)
+        #    data = italics.sub("<i>\\1</i>", data)
+        #    
+        #    # Now convert any *phrase* to bold
+        #    bold = re.compile("\*(.*?)\*", re.DOTALL)
+        #    data = bold.sub("<b>\\1</b>", data)
+
+        # New syntax
+        #italics = re.compile("\/\/(.*?)\/\/", re.DOTALL)
+        #data = italics.sub("<i>\\1</i>", data)
         
         # Now convert any *phrase* to bold
         bold = re.compile("\*(.*?)\*", re.DOTALL)
@@ -2200,6 +2335,9 @@ $href_end
             
             elif(tag == "h5"):
                 self.m_contents += "<h5>" + self.m_indexer.level5(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n"
+
+            elif(tag == "h"):
+                self.m_contents += "<h6>" + data.strip() + "</h6>\n"
         else:
             if(tag == "h1"):
                 self.m_contents += "<h1>" + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n"
@@ -2215,6 +2353,9 @@ $href_end
             
             elif(tag == "h5"):
                 self.m_contents += "<h5>" + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n"
+            
+            elif(tag == "h"):
+                self.m_contents += "<h6>" + data.strip() + "</h6>\n"
     
      
     def append_source_code(self, tag):
@@ -2323,7 +2464,7 @@ $href_end
             self.m_contents += "<div style='float:left;'>"
             pass
         elif(name == "endcolumns"):
-            self.m_contents += "</div><div style='clear:both;'>"
+            self.m_contents += "</div><div style='clear:both;'></div>"
         elif(name == "column"):
             self.m_contents += "</div><div style='float:left;'>"
             pass
@@ -2612,6 +2753,7 @@ $cnts
   h3{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;}
   h4{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
   h5{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #A67F00;}
+  h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;text-decoration:underline;}
   
   p {margin-left: 20px;margin-bottom:10px;font-size: 1.0em;}
   p.caption {margin-left: 0px;text-align: center;margin-top: 5px;}
@@ -2697,6 +2839,12 @@ $cnts
       background-color:#E1E8EF;
       border-top:1px solid #ccc;
       border-bottom:0px solid #ccc;
+  }
+  .bordered tr td.reserved {
+      background-color:#f0f0f0;
+      border-top:1px solid #ccc;
+      border-bottom:0px solid #ccc;
+      color:#a0a0a0;
   }
   
   .bordered td:first-child, .bordered th:first-child {
@@ -2862,6 +3010,10 @@ div.snippet span.str {color: #9933CC;}
 div.snippet span.mstring {color: #9933CC;}
 div.snippet span.cmt {font-style:italic;color: green;}
 div.snippet span.ln {color: #C0C0C0;}
+
+/* Styling of text blocks */
+div.tblkps {margin:0px;padding:0px;margin-left:20px;}
+div.tblkp  {margin:0px;padding:0px;}
 ''',
 
             "screen_only" : '''
@@ -2892,6 +3044,10 @@ div.snippet span.ln {color: #C0C0C0;}
   div.snippet span.mstring {color: #9933CC;}
   div.snippet span.cmt {color: green;}
   div.snippet span.ln {color: #C0C0C0;}
+
+  /* Styling of text blocks */
+  div.tblkps {margin-left:4px;margin-bottom:4px;font-size:1.0em;}
+  div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
 '''
             })
 

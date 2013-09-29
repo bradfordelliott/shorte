@@ -67,6 +67,99 @@ class template_sql_t(template_t):
     
         desc = self.format_comment(desc, "//|     ")
         return desc
+    
+    def format_list_child(self, elem, start_tag, end_tag):
+        source = ''
+        if(elem.has_key("children")):
+            source += "<li>%s" % self.format_text(elem["text"])
+            num_children = len(elem["children"])
+            source += start_tag
+            #print "num_children = %d" % num_children
+            for i in range(0, num_children):
+                source += self.format_list_child(elem["children"][i], start_tag, end_tag)
+            source += "%s</li>" % (end_tag)
+        else:
+            source += "<li>" + self.format_text(elem["text"]) + "</li>"
+
+        return source
+    
+    def format_list(self, list, ordered=False, indent=0):
+
+        if(indent != 0):
+            style = " style='margin-left:%d;' " % indent*10
+        else:
+            style = ""
+
+        if(not ordered):
+            start_tag = "<ul%s>" % style
+            end_tag = "</ul>"
+        else:
+            start_tag = "<ol%s>" % style
+            end_tag = "</ol>"
+
+        source = start_tag
+
+        for elem in list:
+            source += self.format_list_child(elem, start_tag, end_tag)
+
+        source += end_tag
+
+        return source
+    
+    def format_textblock(self, tag, standalone=True):
+        '''This method is called to format a block of text
+within an HTML document.
+
+@param tag        [I] = The tag to parse, usually a dictionary object
+@param standalone [I] = Is the block of text standalone or is it embedded
+                        within another element like a table?
+'''
+
+        if(isinstance(tag, dict)):
+            paragraphs = tag["contents"]
+        else:
+            paragraphs = tag
+
+        html = ''
+
+        if(is_array(paragraphs)):
+            for p in paragraphs:
+                indent  = p["indent"]
+                text    = p["text"]
+                is_code = p["code"]
+                is_list = p["list"]
+
+                #print "Indent: [%d], text: [%s]" % (indent, text)
+
+                if(is_code):
+                    if(standalone):
+                        style = "margin-left:%dpx;background-color:#eee;" % (20)
+                    else:
+                        style = "margin-left:%dpx;background-color:#eee;border:1px solid #ccc;" % (0)
+                else:
+                    if(standalone):
+                        style = "margin-left:%dpx;" % (20 + (indent * 6))
+                    else:
+                        style = "margin-left:%dpx;" % ((indent * 6))
+
+                if(is_code):
+                    html += "<div class='code' style='%s'><div class='snippet' style='white-space:pre'>" % style + self.format_text(text) + "</div></div>\n"
+                elif(is_list):
+                    html += self.format_list(p["text"], False, indent)
+                else:
+                    if(standalone):
+                        html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;%s'>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
+                    else:
+                        html += "<div style='margin-left:0px;padding:0px;margin-bottom:3px;font-size:1.0em;%s'>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
+        else:
+            if(standalone):
+                html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
+            else:
+                html += "<div style='margin-left:0px;padding:0px;margin-bottom:3px;font-size:1.0em;'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
+            
+        html = re.sub("'", "&apos;", html)
+
+        return html
 
     def format_keywords(self, language, source, exclude_wikiwords=[]):
 
@@ -261,11 +354,80 @@ class template_sql_t(template_t):
 
         return output
     
-    def format_text(self, data, allow_wikify=True, exclude_wikify=[]):
+    def format_text(self, data, allow_wikify=True, exclude_wikify=[], expand_equals_block=False):
+        if(data == None):
+            return
+
+        if(len(data) != 0):
+            data = re.sub("'", "&apos;", data)
+            return data
+
+        # Convert an < and > characters
+        #data = re.sub("->", "#", data)
+        #data = re.sub("<", "&lt;", data)
+        #data = re.sub(">", "&gt;", data)
+        data = trim_blank_lines(data)
+
+        #print "DATA: [%s]" % data
+
+        # Strip trailing lines
+
+        data = re.sub("\n\s*\n", "<br/><br/>", data)
+
+        # Replace any \n's with a <br>
+        data = re.sub("\\\\n", "<br/>", data)
+
+        if(expand_equals_block):
+            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
+        
+        # Hilite any text between **** ****
+        hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
+        data = hiliter.sub("<font class='hilite'>\\1</font>", data)
+
+        # Underline any text between __ __
+        hiliter = re.compile("__(.*?)__", re.DOTALL)
+        data = hiliter.sub("<u>\\1</u>", data)
+
+        # DEBUG BRAD: Oldy Syntax
+        #     Underline anything in <<<>>> brackets
+        #     hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
+        #     data = hiliter.sub("<u>\\1</u>", data)
+        
+        # First make any links or references
+        data = self._format_links(data)
+
+        # Then insert any images. Make sure to add
+        # them to the list of images that need to be
+        # copied over.
+        data = re.sub("<<(.*?),(.*?)(,(.*?))?>>", self.format_inline_image, data)
+        data = re.sub("<<(.*?)>>", self.format_inline_image, data)
+
+        # DEBUG BRAD: Old syntax
+        #    # Now convert any ** to italics
+        #    italics = re.compile("\*\*(.*?)\*\*", re.DOTALL)
+        #    data = italics.sub("<i>\\1</i>", data)
+        #    
+        #    # Now convert any *phrase* to bold
+        #    bold = re.compile("\*(.*?)\*", re.DOTALL)
+        #    data = bold.sub("<b>\\1</b>", data)
+
+        # New syntax
+        italics = re.compile("\/\/(.*?)\/\/", re.DOTALL)
+        data = italics.sub("<i>\\1</i>", data)
+        
+        # Now convert any *phrase* to bold
+        bold = re.compile("\*\*(.*?)\*\*", re.DOTALL)
+        data = bold.sub("<b>\\1</b>", data)
+
+        ## Convert any inline styling blocks
+        #expr = re.compile("@\{(.*?)\}", re.DOTALL)
+        #data = expr.sub(self.parse_inline_styling, data)
+        
+        if(allow_wikify):
+            data = self.wikify(data)
         
         # Escape for SQL
         if(len(data) != 0):
-            data = re.sub("\\\\n", "<br>", data)
             data = re.sub("'", "&apos;", data)
 
         return data
@@ -283,28 +445,28 @@ class template_sql_t(template_t):
         prototype = tag["contents"]
 
         function = {}
-        function["name"] = prototype["function_name"]
+        function["name"] = prototype["name"]
         function["desc"] = ''
         function["help"] = self.sqlize(help)
         
-        if(prototype.has_key("function_desc")):
-            function["desc"] = self.format_text(prototype["function_desc"])
+        if(prototype.has_key("desc")):
+            function["desc"] = self.format_text(prototype["desc"])
         
         sql = template.substitute(function)
 
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
+        if(prototype.has_key("params")):
+            params = prototype["params"]
             
             for param in params:
                 
-                if(not param.has_key('param_type')):
-                    param["param_type"] = ''
+                if(not param.has_key('type')):
+                    param["type"] = ''
 
-                if(not param.has_key('param_desc')):
-                    param["param_desc"] = ''
+                if(not param.has_key('desc')):
+                    param["desc"] = ''
                 
                 param_desc = ''
-                for val in param["param_desc"]:
+                for val in param["desc"]:
                     if(len(val) == 2):
                         param_desc += '<b>%s</b> = %s<br/>' % (val[0], self.format_text(val[1]))
                         #param_desc += 'tbd' self.format_text(val[1])
@@ -313,9 +475,9 @@ class template_sql_t(template_t):
 
                 #print "DESC: ", param["param_desc"]
 
-                param["param_desc"] = param_desc
+                param["desc"] = param_desc
 
-                sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('%d', '${param_name}', '${param_type}', '${param_desc}');\n" % self.m_prototype_uid).substitute(param);
+                sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('%d', '${name}', '${type}', '${desc}');\n" % self.m_prototype_uid).substitute(param);
 
                 #for val in param["param_desc"]:
                 #    if(len(val) == 2):
@@ -350,7 +512,7 @@ class template_sql_t(template_t):
         struct["help"] = self.sqlize(help)
         
         if(obj.has_key("caption")):
-            struct["desc"] = self.format_text(obj["caption"])
+            struct["desc"] = self.format_textblock(obj["caption"])
         
         sql = template.substitute(struct)
 
@@ -372,7 +534,7 @@ class template_sql_t(template_t):
         enum["help"] = self.sqlize(help)
         
         if(obj.has_key("caption")):
-            enum["desc"] = self.format_text(obj["caption"])
+            enum["desc"] = self.format_textblock(obj["caption"])
         
         sql = template.substitute(enum)
         

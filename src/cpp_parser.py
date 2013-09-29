@@ -24,22 +24,14 @@ from shorte_parser import *
 import platform
 import time
 
-startup_path = os.path.dirname(sys.argv[0])
-sys.path.append(startup_path + "/libs")
-
-if(platform.architecture()[0] == '32bit'):
-    sys.path.append(startup_path + "/libs/32")
-else:
-    sys.path.append(startup_path + "/libs/64")
-
 from shorte_source_code import *
 
 try:
-    from cairo_access import cairo
+    from libs.cairo_access import cairo
 except:
     print "WARNIING: Failed to load cairo_access library"
     
-from records import *
+from libs.records import *
 
 
 TOKEN_STRING        = (1,  "STRING")
@@ -137,6 +129,14 @@ class cpp_parser_t(shorte_parser_t):
     
     # Parse a C++ structure and store it
     def parse_cpp_struct(self, tokens, i):
+        '''This method is called to parse the contents of a C/C++
+           structure in order to extract a shorte object describing
+           the structure.
+
+           @param self   [I] - The parser class instance
+           @param tokens [I] - The list of tokens from the parsed file.
+           @param i      [I] - The current position in the token list.
+           '''
 
         pos_saved = i
 
@@ -240,7 +240,7 @@ class cpp_parser_t(shorte_parser_t):
         struct["rows"] = rows
         struct["fields"] = rows
         struct["title"] = struct_name
-        struct["caption"] = comment["desc"]
+        struct["caption"] = self.parse_textblock(comment["desc"])
         struct["max_cols"] = max_cols
         
 
@@ -350,7 +350,7 @@ class cpp_parser_t(shorte_parser_t):
         if(enum.strip() != ""):
             enums.append({"key"   : enum.strip(" \n"),
                           "value" : value.strip(" \n"),
-                          "desc"  : trim_leading_indent(self.format_comment(desc))})
+                          "desc"  : self.format_comment(desc)})
 
         for enum in enums:
 
@@ -358,6 +358,7 @@ class cpp_parser_t(shorte_parser_t):
             row["cols"] = []
             row["is_subheader"] = False
             row["is_header"] = False
+            row["is_title"] = False
             row["is_reserved"] = False
             row["is_caption"] = False
             row["is_spacer"] = False
@@ -375,6 +376,7 @@ class cpp_parser_t(shorte_parser_t):
             col = {}
             col["span"] = 1
             col["text"] = enum["desc"]
+            col["textblock"] = self.parse_textblock(enum["desc"])
             row["cols"].append(col)
 
             rows.append(row)
@@ -427,6 +429,15 @@ class cpp_parser_t(shorte_parser_t):
         return rows
     
     def parse_struct_fields(self, text):
+        '''This method is called to parse the individual fields within a
+           structure definition. It currently does this using a regular
+           expression.
+
+           @param self [I] - The parser class instance
+           @param text [I] - The text to extract field definitions from
+
+           @return An array of rows containing the fields of the structure.
+           '''
 
         rows   = []
         states = []
@@ -441,12 +452,14 @@ class cpp_parser_t(shorte_parser_t):
             row["cols"] = []
             row["is_subheader"] = False
             row["is_header"] = False
+            row["is_title"] = False
             row["is_reserved"] = False
             row["is_caption"] = False
             row["is_spacer"] = False
 
             desc = matches.groups()[0]
             desc = self.format_comment(desc)
+            desc_original = desc
             desc = re.sub("[ \n]+", " ", desc)
             #print "DESC: %s" % desc
 
@@ -515,6 +528,9 @@ class cpp_parser_t(shorte_parser_t):
             col = {}
             col["span"] = 1
             col["text"] = desc
+            # Format the description as a textblock instead of standard text
+            #print "DESC_ORIG: [%s]" % desc_original
+            col["textblock"] = self.parse_textblock(trim_leading_blank_lines(desc_original))
             row["cols"].append(col)
 
             row["attrs"] = row["cols"]
@@ -529,16 +545,24 @@ class cpp_parser_t(shorte_parser_t):
     # format agnostic
     def format_comment(self, comment, strip_single_line_comments=True):
 
+        #print "COMMENT_BEFORE\n[%s]" % comment
+
         comment = re.sub("/\*", "", comment)
         comment = re.sub("\*/", "", comment)
-        #comment = re.sub("^\s*\*", "", comment, re.MULTILINE)
+        comment = re.sub("^\s*\*", "", comment, re.MULTILINE)
 
         expr = re.compile("^\s*\*", re.MULTILINE)
         comment = expr.sub("", comment)
         
         if(strip_single_line_comments):
-            comment = re.sub(" +", " ", comment)
+            #comment = re.sub(" +", " ", comment)
             comment = re.sub("//", "", comment)
+        
+        #print "COMMENT_1\n[%s]" % comment
+        comment = trim_leading_blank_lines(comment)
+        #print "COMMENT_2\n[%s]" % comment
+        comment = trim_leading_indent(comment)
+        #print "COMMENT_3\n[%s]" % comment
 
         return comment
 
@@ -549,6 +573,14 @@ class cpp_parser_t(shorte_parser_t):
         return text
 
     def parse_cpp_func_comment(self, text):
+        '''This method is called to parse a comment associated with a C/C++
+           function in order to extract the associated fields.
+
+           @param self [I] - The parser class instance
+           @param text [I] - The text to parse.
+
+           @return A dictionary containing the comment attributes.
+        '''
 
         comment = {}
 
@@ -577,12 +609,14 @@ class cpp_parser_t(shorte_parser_t):
         if(len(text) == 0):
             comment["private"] = True
 
-        matches = re.search("(.*?)[@\\\]", text, re.DOTALL)
+        matches = re.search("(.*?)(@[^{]|\\\)", text, re.DOTALL)
 
         if(matches != None):
             comment["desc"] = self.format_text(matches.groups()[0])
+            comment["description"] = self.parse_textblock(trim_leading_blank_lines(matches.groups()[0]))
         else:
             comment["desc"] = self.format_text(text)
+            comment["description"] = self.parse_textblock(trim_leading_blank_lines(text))
 
         #print "COMMENT:"
         #print comment["desc"]
@@ -591,7 +625,7 @@ class cpp_parser_t(shorte_parser_t):
         if(matches != None):
             comment["private"] = True
 
-        expr_param = re.compile("[@\\\]param *([^ ]*) *([^@]*)", re.DOTALL)
+        expr_param = re.compile("[@\\\]param *([^ ]*) *(([^@]|@{)*)", re.DOTALL)
 
         matches = expr_param.search(text)
         while(matches != None):
@@ -728,8 +762,8 @@ class cpp_parser_t(shorte_parser_t):
         table["title"] = enum_name
 
         # DEBUG BRAD: Not ready yet to treat enums as text blocks
-        #table["caption"] = self.parse_textblock(text)
-        table["caption"] = text
+        table["caption"] = self.parse_textblock(text)
+        #table["caption"] = text
 
         max_cols = 0
         for row in rows:
@@ -783,11 +817,11 @@ class cpp_parser_t(shorte_parser_t):
                 ptype += "*"
 
             #print "NAME: [%s]" % pname
-            field["param_name"] = pname
-            field["param_io"] = ""
-            field["param_type"] = ptype
-            field["param_desc"] = ("")
-            field["param_desc2"] = self.parse_textblock("")
+            field["name"] = pname
+            field["io"] = ""
+            field["type"] = ptype
+            field["desc"] = ("")
+            field["desc2"] = self.parse_textblock("")
 
             return field
 
@@ -836,7 +870,7 @@ class cpp_parser_t(shorte_parser_t):
                 # DEBUG BRAD: Need to look into whether this is real failure or not
                 #print "TOKEN WITH FAILURE:"
                 #print token
-                raise Exception("Failed parsing %s" % token["type"][1])
+                raise Exception("Failed parsing ", token)
     
     def walk_forward(self, i, tokens, target, skip):
 
@@ -894,10 +928,12 @@ class cpp_parser_t(shorte_parser_t):
             (i, src) = self.walk_backwards(i-1, tokens, TARGET([TOKEN_COMMENT]), SKIP([]))
 
             comment = self.parse_cpp_func_comment(src)
-            define["desc"] = comment["desc"].strip()
+            define["desc"] = comment["desc"]
+            define["description"] = comment["description"]
             define["private"] = comment["private"]
         except:
             define["desc"] = ""
+            define["description"] = ""
             define["private"] = True
 
         if(not extract_private and True == define["private"]):
@@ -911,17 +947,31 @@ class cpp_parser_t(shorte_parser_t):
 
     # Parse a C++ function and turn it into a prototype definition
     def parse_cpp_function(self, tokens, i, source, is_prototype=False):
+        '''This method is called to parse the contents of a C/C++
+           function prototype in order to extract a shorte object
+           describing the prototype.
+
+           @param self         [I] - The parser class instance
+           @param tokens       [I] - The list of tokens from the parsed file.
+           @param i            [I] - The current position in the token list.
+           @param source       [I] - The original source in non-tokenized format.
+           @param is_prototype [I] - True if this a prototype that ends
+                                     in a semicolon or False if it is actually
+                                     the function definition.
+
+           '''
+
         token = tokens[i]
         end = False
         brace_cnt = 0
         pos_definition = i
 
         function = {}
-        function["function_name"] = ''
-        function["function_desc"] = ""
-        function["function_prototype"] = ""
-        function["function_params"] = []
-        function["function_returns"] = ""
+        function["name"] = ''
+        function["desc"] = ""
+        function["prototype"] = ""
+        function["params"] = []
+        function["returns"] = ""
         params = ''
 
         # Search backwards till we find the closing
@@ -937,23 +987,23 @@ class cpp_parser_t(shorte_parser_t):
 
         # Find the function name
         (i, src) = self.walk_backwards(i, tokens, TARGET([TOKEN_CODE]), SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE]))
-        function["function_name"] = src.strip()
+        function["name"] = src.strip()
         #print "NAME: [%s]" % function["function_name"]
 
         # Find the function return type
         (i, src) = self.walk_backwards(i, tokens, TARGET([TOKEN_CODE, TOKEN_KEYWORD]), SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE]))
         src = re.sub("[ \n]", "", src)
-        function["function_returns"] = src
+        function["returns"] = src
 
         # See if the word const was present before the return type
         try:
             (blah, blah2) = self.walk_backwards(i, tokens, TARGET([TOKEN_KEYWORD]), SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE]))
-            function["function_returns"] = blah2.strip() + function["function_returns"]
+            function["returns"] = blah2.strip() + function["returns"]
             i = blah
         except:
             do_nothing = 1
 
-        function["return_type"] = function["function_returns"]
+        function["return_type"] = function["returns"]
 
         #print "RETURNS: [%s]" % src
 
@@ -990,10 +1040,10 @@ class cpp_parser_t(shorte_parser_t):
         
         func_comment = self.parse_cpp_func_comment(desc)
 
-        function["function_see_also"] = func_comment["see_also"]
+        function["see_also"] = func_comment["see_also"]
 
         if(func_comment["deprecated"] != None):
-            function["function_deprecated"] = func_comment["deprecated"]
+            function["deprecated"] = func_comment["deprecated"]
 
         extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
         if(extract_private == "1"):
@@ -1010,8 +1060,9 @@ class cpp_parser_t(shorte_parser_t):
         if(not extract_private and True == func_comment["private"]):
             raise Exception("Not outputting private functions")
 
-        function["function_desc"] = func_comment["desc"]
-        function["function_returns"] = func_comment["returns"]
+        function["desc"] = func_comment["desc"]
+        function["desc2"] = self.parse_textblock(func_comment["desc"])
+        function["returns"] = func_comment["returns"]
         example = func_comment["example"]
 
         # Build up the prototype
@@ -1079,44 +1130,44 @@ class cpp_parser_t(shorte_parser_t):
 
         if(output_pseudocode):
             tmp = code.parse_source_code(language, pseudocode)
-            function["function_pseudocode"] = {}
-            function["function_pseudocode"]["language"] = language
-            function["function_pseudocode"]["parsed"] = tmp
-            function["function_pseudocode"]["unparsed"] = pseudocode
+            function["pseudocode"] = {}
+            function["pseudocode"]["language"] = language
+            function["pseudocode"]["parsed"] = tmp
+            function["pseudocode"]["unparsed"] = pseudocode
 
         if(example != ""): 
             tmp = code.parse_source_code(language, example)
-            function["function_example"] = {}
-            function["function_example"]["language"] = language
-            function["function_example"]["parsed"] = tmp
-            function["function_example"]["unparsed"] = example
+            function["example"] = {}
+            function["example"]["language"] = language
+            function["example"]["parsed"] = tmp
+            function["example"]["unparsed"] = example
 
         if(prototype != ""):
             tmp = code.parse_source_code(language, prototype)
-            function["function_prototype"] = {}
-            function["function_prototype"]["language"] = language
-            function["function_prototype"]["parsed"] = tmp
-            function["function_prototype"]["unparsed"] = prototype
+            function["prototype"] = {}
+            function["prototype"]["language"] = language
+            function["prototype"]["parsed"] = tmp
+            function["prototype"]["unparsed"] = prototype
 
 
         #print "Function"
         #print "    name: %s" % function["function_name"]
         #print "    returns: %s" % function["function_returns"]
         #function["function_prototype"] = prototype
-        function["function_params"] = self.parse_params(prototype)
+        function["params"] = self.parse_params(prototype)
             
-        params = function["function_params"]
+        params = function["params"]
         new_params = []
 
         for param in func_comment["params"]:
             #print "PARAM: %s" % param
 
             for p in params:
-                if(p["param_name"] == param):
+                if(p["name"] == param):
                     desc = func_comment["params"][param]["desc"]
-                    p["param_desc"] = desc
-                    p["param_desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
-                    p["param_io"] = func_comment["params"][param]["io"]
+                    p["desc"] = desc
+                    p["desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
+                    p["io"] = func_comment["params"][param]["io"]
 
 
         #if(len(new_params) > 0):
@@ -1304,7 +1355,7 @@ class cpp_parser_t(shorte_parser_t):
                 else:
                     tag = {}
                     tag["name"] = "h3"
-                    tag["contents"] = function["function_name"]
+                    tag["contents"] = function["name"]
                     tag["source"] = ""
                     tag["modifiers"] = {}
                     page["tags"].append(tag)

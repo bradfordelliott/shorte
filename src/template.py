@@ -8,6 +8,8 @@ HEADING1 = 1
 HEADING2 = 2
 HEADING3 = 3
 HEADING4 = 4
+HEADING5 = 5
+HEADING6 = 6
 
 class template_t:
    
