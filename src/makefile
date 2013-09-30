@@ -89,6 +89,7 @@ tests:
 	make test_code
 	make test_functions
 	make test_enums
+	make test_bullets
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -p "html+pdf" -o build-output/headings
@@ -109,6 +110,9 @@ test_functions:
 
 test_enums:
 	python shorte.py -f examples/enums.tpl -p "html+pdf" -o build-output/enums
+
+test_bullets:
+	python shorte.py -f examples/bullets.tpl -p "html_inline+pdf" -o build-output/bullets
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
