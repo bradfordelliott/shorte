@@ -4,7 +4,7 @@
 @body
 @h1 This is a test
 BLah blah
-with some __** // underlined bold italics // **__ blah blah
+with some @{b+u+i+hl,underlined bold italics} blah blah
 - a list
 - a list
 
@@ -18,9 +18,9 @@ a new paragraph
     
     a new indented paragraph
 
-{{
+@{pre,
 Some pre text here
-}}
+}
 
 some more text in a new paragraph
 
@@ -32,7 +32,7 @@ This is a test of the table captions
 '''
 - One | Two | Three
 - BLah blah
-  with some __** // underlined bold italics // **__ blah blah
+  with some @{u+b+i,underlined bold italics} blah blah
   - a list
   - a list
   
@@ -52,7 +52,7 @@ This is a test of the table captions
   
   some more text in a new paragraph
 - Blah blah blah | BLah blah
-                   with some __** // underlined bold italics // **__ blah blah
+                   with some @{u+b+i,underlined bold italics} blah blah
                    - a list
                    - a list
 

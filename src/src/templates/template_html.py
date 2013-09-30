@@ -2202,35 +2202,52 @@ $href_end
 
         replace = trim_leading_blank_lines(replace)
         #print "TAG: %s, REPLACE: %s" % (tag,replace)
-       
-        # Check if it's an inline styling block such as color
-        #   @{color:00ff00,my text here}
-        if(-1 != tag.find(":")):
-            parts = tag.split(":")
-            tag = parts[0].strip()
-            parts.pop(0)
-            qualifier = ":".join(parts)
+        
+        if(-1 != tag.find("+")):
+            tags = tag.split("+")
+        else:
+            tags = [tag]
 
+        prefix = ''
+        postfix = ''
 
-        if(tag in ("b", "bold")):
-            return "<b>%s</b>" % replace
-        elif(tag == "u"):
-            return "<u>%s</u>" % replace
-        elif(tag == "i"):
-            return "<i>%s</i>" % replace
-        elif(tag == "br"):
-            return "<br/>"
-        elif(tag == "color"):
-            return "<span style='color:#%s'>%s</span>" % (qualifier, replace)
-        elif(tag == "span"):
-            return "<span style='%s'>%s</span>" % (qualifier, replace)
-        elif(tag in ("hl", "hilite", "highlight")):
-            return "<span style='background-color:yellow;'>%s</span>" % (replace)
-        elif(tag in "table"):
-            table = self.m_engine.m_parser.parse_table(replace, {})
-            return self.format_table(replace, table)
+        for tag in tags:
+            # Check if it's an inline styling block such as color
+            #   @{color:00ff00,my text here}
+            if(-1 != tag.find(":")):
+                parts = tag.split(":")
+                tag = parts[0].strip()
+                parts.pop(0)
+                qualifier = ":".join(parts)
 
-        return replace
+            if(tag in ("b", "bold")):
+                prefix += "<b>"
+                postfix += "</b>"
+            elif(tag == "pre"):
+                prefix += "<pre style='margin-left:10px;'>"
+                postfix += "</pre>"
+            elif(tag == "u"):
+                prefix += "<u>"
+                postfix += "</u>"
+            elif(tag == "i"):
+                prefix += "<i>"
+                postfix += "</i>"
+            elif(tag == "br"):
+                postfix += "<br/>"
+            elif(tag == "color"):
+                prefix += "<span style='color:#%s'>" % (qualifier)
+                postfix += "</span>"
+            elif(tag == "span"):
+                prefix += "<span style='%s'>" % (qualifier)
+                postfix += "</span>"
+            elif(tag in ("hl", "hilite", "highlight")):
+                prefix += "<span style='background-color:yellow;'>"
+                postfix += "</span>"
+            elif(tag in "table"):
+                table = self.m_engine.m_parser.parse_table(replace, {})
+                return self.format_table(replace, table)
+
+        return prefix + replace + postfix
 
 
     def format_text(self, data, allow_wikify=True, exclude_wikify=[], expand_equals_block=False):
@@ -2417,7 +2434,7 @@ $href_end
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
         elif(name == "pre"):
-            self.m_contents += "<pre style='margin-left:30px;'>" + self.format_text(tag["contents"]) + "</pre>\n"
+            self.m_contents += "<pre style='margin-left:10px;'>" + self.format_text(tag["contents"]) + "</pre>\n"
         elif(name == "note"):
             self.m_contents += self.format_note(tag)
         elif(name == "tbd"):

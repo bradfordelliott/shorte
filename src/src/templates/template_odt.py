@@ -1241,40 +1241,60 @@ class template_odt_t(template_t):
             replace = ''.join(parts[1:])
         
         replace = trim_leading_blank_lines(replace)
-       
-        # Check if it's an inline styling block such as color
-        #   @{color:00ff00,my text here}
-        if(-1 != tag.find(":")):
-            parts = tag.split(":")
-            tag = parts[0].strip()
-            qualifier = parts[1].strip()
 
-        if(tag == "b"):
-            return "<text:span text:style-name=\"%s\">%s</text:span>" % (self.m_styles["bold"], replace)
-        elif(tag == "u"):
-            return "<text:span text:style-name=\"%s\">%s</text:span>" % (self.m_styles["underline"], replace)
-        elif(tag == "i"):
-            return "<text:span text:style-name=\"%s\">%s</text:span>" % (self.m_styles["italic"], replace)
-        elif(tag == "br"):
-            return '<text:line-break/>'
-        elif(tag == "color"):
-            color = qualifier
-            self.m_styles_extra += self.create_style_color(color)
-            return "<text:span text:style-name=\"%s\">%s</text:span>" % ("shorte_span_color_%s" % color, replace)
-        # Don't fully support span yet, need to figure out a way to support it
-        elif(tag == "span"):
-            return "<text:span>%s</text:span>" % (replace)
-        elif(tag == "hl"):
-            return '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["highlight"], replace)
-        elif(tag == "table"):
-            table = self.m_engine.m_parser.parse_table(replace, {})
-            xml = "</text:p>"
-            #print "REPLACE[%s]" % replace
-            xml += self.__format_table(replace, table)
-            xml += "<text:p text:style-name=\"shorte_standard\">"
-            return xml
+        if(-1 != tag.find("+")):
+            tags = tag.split("+")
+        else:
+            tags = [tag]
 
-        return replace
+        prefix = ''
+        postfix = ''
+
+        for tag in tags:
+            # Check if it's an inline styling block such as color
+            #   @{color:00ff00,my text here}
+            if(-1 != tag.find(":")):
+                parts = tag.split(":")
+                tag = parts[0].strip()
+                qualifier = parts[1].strip()
+
+            if(tag == "b"):
+                prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["bold"]
+                postfix += "</text:span>"
+            elif(tag == "u"):
+                prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["underline"]
+                postfix += "</text:span>"
+            elif(tag == "i"):
+                prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["italic"]
+                postfix += "</text:span>"
+            elif(tag == "br"):
+                postfix += '<text:line-break/>'
+            elif(tag == "pre"):
+                replace = replace.rstrip(" \r\n")
+                #print "PRE: [%s]" % replace
+                output = "</text:p>"
+                output += self.format_pre(replace, "pre")
+                output += "<text:p text:style-name='shorte_standard'>"
+                return output
+            elif(tag == "color"):
+                color = qualifier
+                self.m_styles_extra += self.create_style_color(color)
+                return "<text:span text:style-name=\"%s\">%s</text:span>" % ("shorte_span_color_%s" % color, replace)
+            # Don't fully support span yet, need to figure out a way to support it
+            elif(tag == "span"):
+                return "<text:span>%s</text:span>" % (replace)
+            elif(tag == "hl"):
+                prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
+                postfix += "</text:span>"
+            elif(tag == "table"):
+                table = self.m_engine.m_parser.parse_table(replace, {})
+                xml = "</text:p>"
+                #print "REPLACE[%s]" % replace
+                xml += self.__format_table(replace, table)
+                xml += "<text:p text:style-name=\"shorte_standard\">"
+                return xml
+
+        return prefix + replace + postfix
 
     def xmlize(self, data):
 
@@ -1359,6 +1379,7 @@ class template_odt_t(template_t):
             data = self.wikify(data)
         #print "FINAL: [%s]" % data
 
+
         return data
     
     def format_questions(self, tag):    
@@ -1383,12 +1404,12 @@ class template_odt_t(template_t):
                 xml += string.Template(
 '''
 <text:p text:style-name="$note"><text:span text:style-name="$bold">Q: </text:span>$question</text:p>
-<text:p></text:p>
+<text:p text:style-name='shorte_standard'></text:p>
 ''').substitute({"note": self.m_styles["note"],
                  "bold": self.m_styles["bold"],
                  "question" : question["question"]})
 
-        xml += '''<text:p></text:p>'''
+        xml += '''<text:p text:style-name="shorte_standard"></text:p>'''
 
         return xml
 
@@ -2028,7 +2049,7 @@ class template_odt_t(template_t):
 
             if(is_code):
                 xml += self.format_pre(text, "code")
-                xml += '<text:p text:style-name="shorte_spacer"></text:p>'
+                #xml += '<text:p text:style-name="shorte_spacer"></text:p>'
             elif(is_list):
                 xml += self.format_list(p["text"], False,list_style=list_style)
             elif(indent > 0):
@@ -2039,6 +2060,7 @@ class template_odt_t(template_t):
                     xml += '''<text:p text:style-name="%s">%s</text:p>''' % (style, self.format_text(text.strip(),expand_equals_block=True))
        
         # Strip any blank paragraphs that got added
+        #xml = xml.replace("<text:p text:style-name=\"shorte_standard\"></text:p>", "<text:p text:style-name=\"shorte_standard\">empty2</text:p>")
         xml = xml.replace("<text:p text:style-name=\"shorte_standard\"></text:p>", "")
 
         #print "TEXTBLOCK\n[%s]" % xml
@@ -2501,7 +2523,7 @@ class template_odt_t(template_t):
         cols = []
 
         vars = {}
-        vars["desc"] = "</text:p>" + self.format_textblock(testcase["desc"]) + "<text:p>"
+        vars["desc"] = "</text:p>" + self.format_textblock(testcase["desc"]) + "<text:p text:style-name=\"shorte_standard\">"
         vars["name"] = testcase["name"]
         vars["status"] = testcase["status"]
             
@@ -2952,7 +2974,7 @@ class template_odt_t(template_t):
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<text:p>%s</text:p>" % self.format_text(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<text:p text:style-name=\"shorte_standard\">%s</text:p>" % self.format_text(tag["contents"])
         elif(name in "text"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_textblock(tag)
         elif(name in "pre"):
@@ -3078,7 +3100,7 @@ class template_odt_t(template_t):
             if(replace_paragraph):
                 output = self.__format_table("", tag)
             else:
-                output = "</text:p>" + self.__format_table("", tag) + "<text:p>"
+                output = "</text:p>" + self.__format_table("", tag) + "<text:p text:style-name=\"shorte_standard\">"
 
             return output
         
@@ -3131,6 +3153,10 @@ class template_odt_t(template_t):
         postfix = xml[end:]
 
         xml = prefix + styles + self.get_styles() + postfix
+
+        # Now remove any blank paragraphs that got accidentally added
+        #xml = xml.replace("<text:p text:style-name='shorte_standard'></text:p>", "<text:p text:style-name='shorte_standard'>empty</text:p>")
+        xml = xml.replace("<text:p text:style-name='shorte_standard'></text:p>", "")
 
         xml = re.sub("__NEWLINE__", '\\\\n', xml)
         handle = open("%s/odt/content.xml" % scratchdir, "wt")

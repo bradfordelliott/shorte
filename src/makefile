@@ -83,40 +83,43 @@ tag:
 
 tests:
 	rm -rf build-output
-    # Parse some C code
-	shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
-	shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html+pdf"
-	shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "shorte"
-#	shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
-#	shorte.py -f "build-output/code/test.h.tpl build-output/code/test.tpl" -p html -o build-output/code_to_html
-	shorte.py -f examples/code.tpl -p html_inline -o build-output/html
-	shorte.py -f examples/functions.tpl -p "html+pdf" -o build-output/functions
-	shorte.py -f examples/functions.tpl -p "html_inline+pdf" -o build-output/functions
-	shorte.py -f examples/headings.tpl -p "html+pdf" -o build-output/headings
-	shorte.py -f examples/tables.tpl -p "html+pdf" -o build-output/tables
-	shorte.py -f examples/enums.tpl -p "html+pdf" -o build-output/enums
-	shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
+	make test_headings
+	make test_textblocks
+	make test_tables
+	make test_code
+	make test_functions
+	make test_enums
+
+test_headings:
+	python shorte.py -f examples/headings.tpl -p "html+pdf" -o build-output/headings
+
+test_textblocks:
+	python shorte.py -f examples/textblocks.tpl -o build-output/textblock -p "html+pdf"
 
 test_tables:
-	shorte.py -f examples/tables.tpl -p "html+pdf" -o build-output/tables
+	python shorte.py -f examples/tables.tpl -p "html+pdf" -o build-output/tables
+
 test_code:
-	shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
-	shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html+pdf"
+	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
+	python shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html+pdf"
+	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "shorte"
 
-test_code_quick:
-	shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html"
-	shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html"
+test_functions:
+	python shorte.py -f examples/functions.tpl -o build-output/functions -p "html+pdf"
 
-test4:
-	shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
-	shorte.py -f examples/functions.tpl -o build-output/functions -p "html+pdf"
+test_enums:
+	python shorte.py -f examples/enums.tpl -p "html+pdf" -o build-output/enums
 
-test5:
-	shorte.py -f examples/textblocks.tpl -o build-output/textblock -p "html+pdf"
-	shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
-
-test6:
-	shorte.py -f examples/headings.tpl -p "html+pdf" -o build-output/headings
+test_junk:
+#	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
+#	python shorte.py -f "build-output/code/test.h.tpl build-output/code/test.tpl" -p html -o build-output/code_to_html
+	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
+	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html"
+	python shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html"
+	python shorte.py -f examples/code.tpl -p html_inline -o build-output/html
+	python shorte.py -f examples/functions.tpl -p "html+pdf" -o build-output/functions
+	python shorte.py -f examples/functions.tpl -p "html_inline+pdf" -o build-output/functions
+	python shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
 
 exe:
 #	rm -rf dist
