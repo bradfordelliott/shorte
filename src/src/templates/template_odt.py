@@ -1067,17 +1067,32 @@ class template_odt_t(template_t):
             self.m_header_id += 1
 
             self.m_sections[0]["Headings"].append(heading)
+
+    def unxmlize(self, xml):
+        xml = xml.replace("&amp;", "&")
+        xml = xml.replace("&apos;", "'")
+        xml = xml.replace("&lt;", "<")
+        xml = xml.replace("&gt;", ">")
+        xml = xml.replace("&quot;", '"') 
+
+        return xml
     
     def _expand_links(self, matches):
 
         (source, label, external) = self._process_link(matches)
-       
+
         # DEBUG BRAD: This is a temporary hack to get links of the format -> to work
         source = re.sub(".*?#(.*)", "\\1", source)
         label = re.sub(".*?#(.*)", "\\1", label)
         #print "SOURCE = %s, LABEL = %s" % (source, label)
         #source.replace("-&amp;gt;", "")
         #label = label.replace("-&gt;", "")
+
+        # Unconvert any XML in case it has already been
+        # converted by format_text()
+        label = self.unxmlize(label)
+
+        # Now make the label XML safe again
         label = self.xmlize(label)
 
         if(source[0:4] == "http" or external == True):
@@ -1304,6 +1319,7 @@ class template_odt_t(template_t):
         #data = re.sub("", "&apos;", data)
         data = re.sub("<", "&lt;", data)
         data = re.sub(">", "&gt;", data)
+        data = re.sub('"', "&quot;", data)
 
         data = re.sub("®", "&#174;", data)
 
@@ -1325,6 +1341,7 @@ class template_odt_t(template_t):
         data = re.sub("’", "&apos;", data)
         data = re.sub("<", "&lt;", data)
         data = re.sub(">", "&gt;", data)
+        data = re.sub('"', "&quot;", data)
 
         data = re.sub("®", "&#174;", data)
 

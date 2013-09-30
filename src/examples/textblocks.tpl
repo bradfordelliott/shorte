@@ -6,7 +6,10 @@
 @h1 Text Blocks
 
 @text
-This is a test of a text block.
+This is a test of a text block. I've added some quotes like '
+and " to ensure they get translated correctly in the PDF file.
+
+What about special characters in a like this: [[http://www.cortina-systems.com, link with <> and ' and "]].
 
 Text blocks can have tables declared in them with the following
 syntax:
