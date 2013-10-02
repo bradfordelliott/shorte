@@ -1,4 +1,4 @@
-
+SHELL:=/bin/bash
 gcc:=gcc
 g++:=g++
 python:=/usr/bin/python

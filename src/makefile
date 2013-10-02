@@ -12,6 +12,9 @@ help:
 	@${echo} " tests        = run the test suite to generate the list of sample documents"
 	@${echo} " docs         = generate the documentation for the site"
 
+env:
+	@${echo} " SHELL: ${SHELL}"
+
 all:
 	make package
 

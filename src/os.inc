@@ -8,6 +8,7 @@ mkdir      := mkdir
 archive    := tar -czf shorte-${version}.tar.gz *
 
 ifeq ("$(uname)", "Darwin")
+    SHELL      := /bin/bash
 	cairo_path := libs/osx
     echo       := echo
 	mkdir      := mkdir
