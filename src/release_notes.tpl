@@ -55,6 +55,16 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.57
+This is another bug fix release to address template issues in the
+ODT template related to the header layout.
+
+@table: title="Closed Bugs"
+- 20 | Fixed issue with header layout. I broke it trying to fix
+       issue 6 in release 1.0.56.
+- 21 | Reverted the defaulting of the document number to address
+       a issue reported in the 1.0.56 release.
+
 @h3 Version 1.0.56
 This is a bug fix version to address some issues reported by users. The
 following list of bugs have been closed as part of this release:
@@ -80,6 +90,8 @@ following list of bugs have been closed as part of this release:
        though.
 - 14 | Fixed the indent of the @h tag to be in line with the other
        headers.
+- 18 | Fixed processing of quotes inside links in ODT documents in
+       text blocks to prevent double escaping of the link label.
 
 @h3 Version 1.0.55
 - Added support for @sql tag
