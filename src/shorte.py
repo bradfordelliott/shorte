@@ -76,7 +76,7 @@ class engine_t:
         self.m_docsubtitle = ""
         self.m_docversion = None
         self.m_package = ""
-        self.m_docnumber = "1.0"
+        self.m_docnumber = None
         self.m_revision_history = None
 
         self.m_output_filename = None
