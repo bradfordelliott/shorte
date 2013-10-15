@@ -2,13 +2,23 @@
 @h1 Installation Instructions
 
 @h2 Installing on Windows
-To install on Windows the easiest thing to do is to just a
+To install on Windows the easiest thing to do is to download a
 pre-compiled build of Shorte. This uses Py2exe to generate an
 executable version of the tool rather than requiring Python be
 installed on the system. The latest windows build can be downloaded
-from [[http://bradfordelliott.github.io/shorte/binaries/win32/shorte.1.0.56.zip]]
+from:
 
-@h2 Installing on Linux from Sources
+  [[http://home-ott/~belliott/projects/shorte/releases/win32]]
+
+@h2 Installing on Linux
+
+@h3 From a pre-built Binary
+The latest 64 bit linux build can be downloaded from:
+from:
+
+  [[http://home-ott/~belliott/projects/shorte/releases/linux64]]
+
+@h3 From Source
 To install from sources several prerequisites are required.
 They are shown in the following table:
 @table: title="Installation prerequisites"
@@ -21,6 +31,17 @@ They are shown in the following table:
 - Python | 2.6 or 2.7         | Shorte is built in Python. Version 2.6 or later is required but 3.x
                                 is currently not supported.
 - Py2exe | Version for Python | This tool is used to generate
+
+@h2 Changing the Path to LibreOffice/OpenOffice
+In order to generate PDF documents it is necessary to modify the shorte.cfg file to setup
+the path to OpenOffice/LibreOffice. This may be done the following field in the config file:
+
+@code
+# Paths to open office swriter
+path.oowriter.win32=C:/Program Files/LibreOffice 4/program/swriter.exe
+path.oowriter.linux=/home/belliott/libreoffice/opt/libreoffice4.1/program/swriter
+path.oowriter.osx=/Applications/LibreOffice.app/Contents/MacOS/soffice
+
 
 
 @h2 Setting up LibreOffice/OpenOffice

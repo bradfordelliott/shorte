@@ -246,6 +246,7 @@ supported by Shorte:
 - @perl   | A block of Perl code
 - @code   | A block of unknown source code
 - @shorte | A block of shorte code
+- @xml    | A block of XML code
 
 
 -& Other Tags
@@ -380,6 +381,26 @@ the @h4 tag. It is similar to the H5 tag from HTML.
 
 \@h5 This is a fifth level header
 Some example text here
+
+@h3 @h
+The @h tag can be used to create a header that is
+un-numbered.
+
+@shorte
+\@h This is an un-numbered header
+Some random text after the header
+
+@h3 Assigning Wikiwords
+Sometimes it is desirable to assign wikiwords to a heading. This
+allows multi-word headings to be automatically linked but also allows
+the user to prevent a short heading from being automatically linked
+
+@shorte
+\@h2: wikiword="MyHeading"
+Test
+
+This is some text associated with MyHeading. MyHeading will be expanded
+to the word "Test" but Test won't get expanded.
 
 
 @h2 Text Entry Tags
