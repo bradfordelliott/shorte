@@ -23,6 +23,8 @@ Minor release that adds:
         was being parsed as an inline tag which should only happen
         if it is followed by {.
 - 25  | Added support for @xml tag for source code snippets.
+- 26  | Fixed escaping of conditional php style tags within HTML
+        documents.
 
 @h3 Version 1.0.57
 This is another bug fix release to address template issues in the

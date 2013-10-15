@@ -2256,9 +2256,9 @@ $href_end
             return
 
         # Convert an < and > characters
-        #data = re.sub("->", "#", data)
-        #data = re.sub("<", "&lt;", data)
-        #data = re.sub(">", "&gt;", data)
+        data = re.sub("<", "&lt;", data)
+        data = re.sub(">", "&gt;", data)
+        data = re.sub("-&gt;", "->", data)
         data = trim_blank_lines(data)
 
         #print "DATA: [%s]" % data
@@ -2292,8 +2292,8 @@ $href_end
         # Then insert any images. Make sure to add
         # them to the list of images that need to be
         # copied over.
-        data = re.sub("<<(.*?),(.*?)(,(.*?))?>>", self.format_inline_image, data)
-        data = re.sub("<<(.*?)>>", self.format_inline_image, data)
+        data = re.sub("&lt;&lt;(.*?),(.*?)(,(.*?))?&gt;&gt;", self.format_inline_image, data)
+        data = re.sub("&lt;&lt;(.*?)&gt;&gt;", self.format_inline_image, data)
 
         # DEBUG BRAD: Old syntax
         #    # Now convert any ** to italics

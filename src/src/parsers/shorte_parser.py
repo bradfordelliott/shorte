@@ -2641,6 +2641,7 @@ def exists(s):
                             states.append(STATE_INTAG)
                         
                     elif(input[i] == '\\'):
+                        tag_data += input[i]
                         states.append(STATE_ESCAPE)
                 
                 elif(state == STATE_ESCAPE):

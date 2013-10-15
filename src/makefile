@@ -113,6 +113,7 @@ tests:
 	make test_enums
 	make test_bullets
 	make test_wikiwords
+	make test_conditionals
 
 test_hello:
 	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
@@ -150,6 +151,10 @@ test_t100:
 
 test_wikiwords:
 	python shorte.py -f examples/wikiwords.tpl -p "html+pdf" -o build-output/wikiwords
+
+test_conditionals:
+	python shorte.py -f examples/conditionals.tpl -p "html+pdf" -o build-output/conditionals
+
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
