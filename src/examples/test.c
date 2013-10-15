@@ -1,5 +1,22 @@
 
-/** A definition to parse */
+/**
+ * A definition to parse with a description
+ * that should act like a text block that
+ * can support lists:
+ *
+ * - one
+ *   - two
+ * - three
+ *
+ * and inline tables:
+ *
+ * @{table,
+ * -t One
+ * - Three | Four
+ * }
+ *
+ * and more paragraphs
+ */
 #define TEST 0
 
 /** Another define
@@ -16,7 +33,7 @@
  * - four
  *
  * @{table,
- * -t One | Two
+ * -t One
  * -  Three | Four
  * }
  *
