@@ -138,6 +138,7 @@
   h3{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;}
   h4{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
   h5{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #A67F00;}
+  h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;text-decoration:underline;}
   
   p {margin-left: 20px;margin-bottom:10px;font-size: 1.0em;}
   p.caption {margin-left: 0px;text-align: center;margin-top: 5px;}
@@ -223,6 +224,12 @@
       background-color:#E1E8EF;
       border-top:1px solid #ccc;
       border-bottom:0px solid #ccc;
+  }
+  .bordered tr td.reserved {
+      background-color:#f0f0f0;
+      border-top:1px solid #ccc;
+      border-bottom:0px solid #ccc;
+      color:#a0a0a0;
   }
   
   .bordered td:first-child, .bordered th:first-child {
@@ -371,6 +378,10 @@
   div.snippet span.cmt {color: green;}
   div.snippet span.ln {color: #C0C0C0;}
 
+  /* Styling of text blocks */
+  div.tblkps {margin-left:4px;margin-bottom:4px;font-size:1.0em;}
+  div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
+
 }
 
 @media print {
@@ -422,6 +433,10 @@ div.snippet span.str {color: #9933CC;}
 div.snippet span.mstring {color: #9933CC;}
 div.snippet span.cmt {font-style:italic;color: green;}
 div.snippet span.ln {color: #C0C0C0;}
+
+/* Styling of text blocks */
+div.tblkps {margin:0px;padding:0px;margin-left:20px;}
+div.tblkp  {margin:0px;padding:0px;}
 
 }
 
