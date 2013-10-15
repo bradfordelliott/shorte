@@ -1,3 +1,4 @@
+SHELL:=/bin/tcsh
 include version.inc
 include os.inc
 
