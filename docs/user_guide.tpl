@@ -9,7 +9,7 @@
 @docsubtitle Reference Manual
 
 # A version number (can be overwritten from the command line)
-@docversion 1.0
+@docversion 1.0.58
 
 # A number to assign to the document
 @docnumber 34567
@@ -17,6 +17,9 @@
 @docrevisions:
 - Revision | Date          | Description
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
+- 1.0.58   | 15 Oct, 2013  | Updated the documentation to describe preliminary
+                             install instructions, the new @h and @xml tags and
+                             the procedure to assign wikiwords to headings.
 
 
 # Shorte documents are split into a header and a body
@@ -732,6 +735,46 @@ Shorte.
 
 @h3 @shell
 TBD: add description of this tag.
+
+@h3 @xml
+This tag can be used to insert a block of XML tag in
+a document and highlight it appropriately. Note that you
+currently have to escape the <\? sequence to prevent it from
+being expanded by shorte.
+
+@shorte
+\@xml
+<\?xml version="1.0"?>
+<methodCall>
+  <methodName>dev.dev_reg_read</methodName>
+  <params>
+    <param>
+      <!-- The die being accessed (in decimal) -->
+      <value><i4>1</i4></value>
+    </param>
+    <param>
+      <!-- The address of the register being accessed (in decimal) -->
+      <value><i4>0</i4></value>
+    </param>
+  </params>
+</methodCall>
+
+@xml
+<\?xml version="1.0"?>
+<methodCall>
+  <methodName>dev.dev_reg_read</methodName>
+  <params>
+    <param>
+      <!-- The die being accessed (in decimal) -->
+      <value><i4>1</i4></value>
+    </param>
+    <param>
+      <!-- The address of the register being accessed (in decimal) -->
+      <value><i4>0</i4></value>
+    </param>
+  </params>
+</methodCall>
+
 
 
 
