@@ -69,8 +69,8 @@ python:
 		-shared -Wall -fPIC \
                 ${LDFLAGS} \
 		-lstdc++ -lcairo
-	cp ../cairo_access.py ../../.
-	cp _cairo_access${extension} ../../.
+	cp ../cairo_access.py ../.
+	cp _cairo_access${extension} ../.
 
 clean:
 	rm -rf sample
