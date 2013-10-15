@@ -8,7 +8,7 @@ import datetime
 
 from shorte_defines import *
 from template import *
-from cpp_parser import *
+from src.parsers.cpp_parser import *
 
 
 class template_c_t(template_t):

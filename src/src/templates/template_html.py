@@ -625,7 +625,7 @@ class template_html_t(template_t):
                     source = self.format_keywords(language, source, exclude_wikiwords)
                     #output += '<span>%s</span>' % source
                     output += '%s' % source
-            elif(type == TAG_TYPE_COMMENT or type == TAG_TYPE_MCOMMENT):
+            elif(type in (TAG_TYPE_COMMENT, TAG_TYPE_MCOMMENT, TAG_TYPE_XMLCOMMENT)):
                 source = self._format_links(source)
                 if(self.allow_wikify_comments()):
                     source = self.wikify(source, exclude_wikiwords)
@@ -2170,19 +2170,19 @@ $href_end
 #%s
 #""" % (href_start, name, style, caption, href_end)
     
-    def format_wikiword(self, link, link_word, label, is_bookmark):
+    def format_wikiword(self, wikiword, link_word):
         '''This method is called to format a wikiword. It is called by
            the wikify method in the template base class'''
 
         # If the document is being inlined then need to get
         # rid of the link prefix and just use a local link
         if(self.is_inline()):
-            link = ""
-
-        if(self.m_wikiword_path_prefix):
-            output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(link), link_word, label)
+            output = "<a href='#%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
         else:
-            output = "<a href='%s'>%s</a>" % (link_word, label)
+            if(self.m_wikiword_path_prefix):
+                output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.label, wikiword.label)
+            else:
+                output = "<a href='%s'>%s</a>" % (link.wikiword, link.label)
 
         return output
 
@@ -2572,6 +2572,7 @@ $href_end
         vars["link_index"] = "../index.html"
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
+        vars["link_revisions"] = "revisions.html"
         vars["html_tooltips"] = template_html_tooltips
 
 
@@ -2741,6 +2742,7 @@ $cnts
              "link_index" : "index.html",
              "link_index_framed" : "index_framed.html",
              "link_legal" : "content/legal.html",
+             "link_revisions" : "content/revisions.html",
              "html_tooltips" : template_html_tooltips
              })
         
@@ -3135,6 +3137,7 @@ div.tblkp  {margin:0px;padding:0px;}
         vars["link_index"] = "../index.html"
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "../legal.html"
+        vars["link_revisions"] = "../revisions.html"
         vars["html_tooltips"] = template_html_tooltips
 
         html = template.substitute(vars)
@@ -3167,6 +3170,43 @@ div.tblkp  {margin:0px;padding:0px;}
         vars["link_index"] = "../index.html"
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
+        vars["link_revisions"] = "revisions.html"
+
+        html = template.substitute(vars)
+
+        handle = open(output, "w")
+        handle.write(self._cleanup_html(html))
+        handle.close()
+
+    def generate_revision_history_page(self, output):
+        
+        history = self.m_engine.get_doc_revision_history()
+
+        if(history != None):
+            history["title"] = "Revision History"
+            history = self.format_table("", history)
+        else:
+            history = ""
+
+        template = string.Template(self._load_template("index.html"))
+        vars = {}
+        vars["rightmenu"] = ""
+        vars["src"] = ""
+        vars["version"] = self.m_engine.get_version();
+        vars["theme"] = self.m_engine.get_theme()
+        vars["date"] = datetime.date.today()
+        vars["css"] = self.get_css()
+        vars["pdf"] = ""
+        vars["links"] = ""
+        vars["contents"] = history
+        vars["html_tooltips"] = ""
+        vars["javascript"] = ""
+        vars["subtitle"] = "Document History"
+        vars["title"] = "Revision History"
+        vars["link_index"] = "../index.html"
+        vars["link_index_framed"] = "../index_framed.html"
+        vars["link_legal"] = "legal.html"
+        vars["link_revisions"] = "revisions.html"
 
         html = template.substitute(vars)
 
@@ -3243,10 +3283,14 @@ div.tblkp  {margin:0px;padding:0px;}
         if(self.is_inline() != True):
             self.generate_toc_frame(self.m_engine.get_title())
 
-        # Generate the legal info page
+        # Generate the legal and revision history pages
         if(self.is_inline() != True):
             path_legal = self.get_content_dir() + "/legal.html"
             self.generate_legal_page(path_legal)
+            
+            path_revisions = self.get_content_dir() + "/revisions.html"
+            self.generate_revision_history_page(path_revisions)
+
 
         #self.generate_source_file("build-output/code.c", "build-output/code_c.html")
 

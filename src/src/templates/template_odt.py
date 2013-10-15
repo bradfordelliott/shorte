@@ -949,15 +949,16 @@ class template_odt_t(template_t):
     
     ''' + self.m_styles_extra
                    
-    def format_wikiword(self, link, link_word, label, is_bookmark):
+    def format_wikiword(self, wikiword, link_word):
         '''This method is called to format a wikiword. It is called by
            the wikify method in the template base class'''
 
         #if("width" in label):
         #print "WIKIWORD: [%s]" % label
 
-        label = self.xmlize(label)
-        link_word = self.xmlize(link_word)
+        label = self.xmlize(wikiword.label)
+        link_word = self.xmlize(wikiword.label)
+        is_bookmark = wikiword.is_bookmark
 
         if(is_bookmark):
             tmp = '''<text:a xlink:type="simple" xlink:href="#%s" office:name="%s">%s</text:a>''' % (link_word, label, label)
@@ -2243,7 +2244,7 @@ class template_odt_t(template_t):
             if(type == TAG_TYPE_CODE):
                 source = self.format_keywords(language, source, exclude_wikiwords)
                 output += '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["span"]["code"], source)
-            elif(type == TAG_TYPE_COMMENT or type == TAG_TYPE_MCOMMENT):
+            elif(type in (TAG_TYPE_COMMENT, TAG_TYPE_MCOMMENT, TAG_TYPE_XMLCOMMENT)):
                 source = re.sub("(^ +)", self.__replace_whitespace, source)
                 #source.replace(" ", "<text:s text:c=\"1\"/>")
                 output += '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["span"]["code_comment"], source)
@@ -3146,6 +3147,7 @@ class template_odt_t(template_t):
         xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_version(), xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
         xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_number(), xml)
+
         xml = re.sub("<text:p text:style-name=\"[A-Za-z0-9_]+\">DOCUMENT_REVISION_HISTORY</text:p>", self.__format_revision_history(self.m_engine.get_doc_revision_history()), xml)
         #xml = re.sub("DOCUMENT_REVISION_HISTORY", self.__format_revision_history(self.m_engine.get_doc_revision_history(), False), xml)
 
