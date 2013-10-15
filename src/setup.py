@@ -35,10 +35,14 @@ def find_data_files(source,target,patterns):
 
 
 #data_files = find_data_files('templates', 'templates', ['*'])
-
-setup(
-    console=['shorte.py'],
-    data_files=find_data_files('templates','templates',[
+examples=find_data_files('examples','examples',[
+        '*.tpl',
+        '*.c',
+        '*.h'])
+syntax=find_data_files('syntax','syntax',[
+        'vim/*',
+        'vim/syntax/*'])
+templates=find_data_files('templates','templates',[
         'c/*',
         'html/cortina/*',
         'html/cortina_public/*',
@@ -46,4 +50,11 @@ setup(
         'html_inline/cortina_public/*',
         'shared/*',
         'odt/*'])
+files = examples
+files.extend(templates)
+files.extend(syntax)
+
+setup(
+    console=['shorte.py'],
+    data_files=files
 )
