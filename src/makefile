@@ -11,6 +11,7 @@ help:
 	@${echo} " install      = install shorte over the network"
 	@${echo} " exe          = build a standalone executable"
 	@${echo} " docs         = generate the documentation for the site"
+	@${echo} " release_notes = generate the release notes for shorte"
 	@${echo} ""
 	
 	@${echo} " tests        = run the test suite to generate the list of sample documents"
@@ -83,6 +84,9 @@ win32:
 
 vim:
 	cp syntax/vim/syntax/tpl.vim /cygdrive/c/Program\ Files/Vim/vim73/syntax/.
+
+release_notes:
+	python shorte.py -f release_notes.tpl -p html_inline -v ${version} -o build-output/release_notes
 
 install:
 	cd ../build-output && cp -r shorte-${version}.tar.gz /cygdrive/m/shorte/.
@@ -187,6 +191,7 @@ release:
 	cp -r version.inc ../build-output
 	cp -r syntax ../build-output
 	cp -r src ../build-output/.
+	cp build-output/release_notes/index.html ../build-output/release_notes.html
 	-rm -rf ../build-output/src/templates/*.pyc
 	-rm -rf ../build-output/src/graphing/*.pyc
 	-rm -rf ../build-output/src/parsers/*.pyc

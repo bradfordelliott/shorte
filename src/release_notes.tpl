@@ -1,61 +1,13 @@
-@doctitle The shorte shorthand language
+@doctitle The shorte language
 @docsubtitle Release Notes
 
 @body
 
 @h1 Releases
-@p This document describes the release history of the Shorte parser
+This document describes the release history of the Shorte language.
 
-@h2 To do List
-@text
-- Get rid of the requirement for the @text after a header - it should
-  be implicit
-- Make conditionals flow down hierarchically on a heading so that I don't
-  have to do everything below the heading
-- Add text substitution support so I can get rid of keywords like Leeds
-- Fix enums to obey the @private keyword
-- Bring the word template up to spec
-- Update the HTML template to add copyright info and other changes
-  suggested by Techdocs
-- Add tag support for test case documentation
-- Concatenate all documents into a single file
-- Add support for @example doxygen code so that I include examples
-  of how to use particular methods
-- Add support for case independant wikify.
-- Update to support checking for broken internal links when wikifying.
-- Update to support change bars (this might be difficult)
-- Update to support drawing timeline diagrams
-- Update sequence diagrams to draw the sequence table after the diagram
-  in PDFs
-- Add support for imagemaps at least for HTML generated documents.
-- Add support for drawing a grid over any images in order to assist
-  in creating imagemaps.
-- Would be nice to have a shortcut for \<\?result=CHIP?>. Perhaps something
-  like \$CHIP. Behavior should be try to expand it but if we can't then
-  generate a warning and leave it be.
 
-@h2 Bugs
-@text
-- Keywords don't seem to get hyperlinked inside comments within
-  code snippets.
-- Shorte doesn't properly handle function pointers inside function
-  prototypes:
-
-{{
-    cs_status cs_t100_ptp_timewheel_training(
-        cs_t100_handle_t  vp,
-        cs_boolean        unmask_interrupt,
-        void (*wait_pps_compare_ready_callback)(cs_t100_handle_t  vp))
-}}
-- cpp extensions don't work - When I parse main.cpp I get an output
-  file called mainpp.tpl instead of main.tpl.
-- Need to update the parser to not extract defines if they aren't
-  commented. Right now they show up regardless.
-- Need better support for the @example tag in function headers. Comments
-  aren't currently showing up. Also should support an include
-  mechanism
-
-@h3 Version 1.0.58
+@h3 Version 1.0.58 (Oct 15, 2013)
 Minor release that adds:
 - support for assigning wiki-words to headings in order to
   control automatic hyperlinking
@@ -63,51 +15,54 @@ Minor release that adds:
 - minor restructuring of the code tree
 
 @table: title="Closed Bugs"
-- 22 | Added support for assigning a wikiword to document headings.
-- 23 | Added hyperlink in the version number in the document header
-       to the revision history of a document in the HTML template.
-- 24 | Resolved issue when @ is encountered within a text block. It
-       was being parsed as an inline tag which should only happen
-       if it is followed by {.
-- 25 | Added support for @xml tag for source code snippets.
+- Bug | Description
+- 22  | Added support for assigning a wikiword to document headings.
+- 23  | Added hyperlink in the version number in the document header
+        to the revision history of a document in the HTML template.
+- 24  | Resolved issue when @ is encountered within a text block. It
+        was being parsed as an inline tag which should only happen
+        if it is followed by {.
+- 25  | Added support for @xml tag for source code snippets.
 
 @h3 Version 1.0.57
 This is another bug fix release to address template issues in the
 ODT template related to the header layout.
 
 @table: title="Closed Bugs"
-- 20 | Fixed issue with header layout. I broke it trying to fix
-       issue 6 in release 1.0.56.
-- 21 | Reverted the defaulting of the document number to address
-       a issue reported in the 1.0.56 release.
+- Bug | Description
+- 20  | Fixed issue with header layout. I broke it trying to fix
+        issue 6 in release 1.0.56.
+- 21  | Reverted the defaulting of the document number to address
+        a issue reported in the 1.0.56 release.
 
 @h3 Version 1.0.56
 This is a bug fix version to address some issues reported by users. The
 following list of bugs have been closed as part of this release:
 
 @table: title="Closed Bugs"
-- 1 | Documented support for the @include_child tag which is used
-      to handle including files that obey the header cascading for
-      conditional text.
-- 2 | Updated convert_to_pdf.odt to fix the trapping of open office
-      errors. This should prevent a bug that causes it OpenOffice to
-      hang when generating a document that has an uncaught syntax
-      error in it.
-- 3 | Fixed up use of text block for struct, enum and function
-      prototype sections. Could probably use some more validation.
-- 4 | Fixed up the display of function descriptions in the function
-      summary section.
-- 6 | Fixed issue with title wrapping in PDF documents. This was done
-      by modifying the margin of the title and subtitle. Instead of wrapping
-      they will collide with the Cortina logo instead which is a more
-      noticible problem to the user.
-- 13 | Fixed up the formatting of @h5 tags in ODT/PDF documents to be
-       a little nicer. Colors could probably be a bit more consistent
-       though.
-- 14 | Fixed the indent of the @h tag to be in line with the other
-       headers.
-- 18 | Fixed processing of quotes inside links in ODT documents in
-       text blocks to prevent double escaping of the link label.
+- Bug | Description
+- 1   | Documented support for the @include_child tag which is used
+        to handle including files that obey the header cascading for
+        conditional text.
+- 2   | Updated convert_to_pdf.odt to fix the trapping of open office
+        errors. This should prevent a bug that causes it OpenOffice to
+        hang when generating a document that has an uncaught syntax
+        error in it.
+- 3   | Fixed up use of text block for struct, enum and function
+        prototype sections. Could probably use some more validation.
+- 4   | Fixed up the display of function descriptions in the function
+        summary section.
+- 6   | Fixed issue with title wrapping in PDF documents. This was done
+        by modifying the margin of the title and subtitle. Instead of wrapping
+        they will collide with the Cortina logo instead which is a more
+        noticible problem to the user.
+- 13   | Fixed up the formatting of @h5 tags in ODT/PDF documents to be
+         a little nicer. Colors could probably be a bit more consistent
+         though.
+- 14   | Fixed the indent of the @h tag to be in line with the other
+         headers.
+- 18   | Fixed processing of quotes inside links in ODT documents in
+         text blocks to prevent double escaping of the link label.
 
 @h3 Version 1.0.55
 - Added support for @sql tag
@@ -175,34 +130,34 @@ following list of bugs have been closed as part of this release:
 - Changed java to headless when generating sequence diagrams to avoid
   an error with Batik
 
-@h2 Version 1.0.43
+@h3 Version 1.0.43
 - Added support for structures and enums in the sql package.
 - Added flag to control suppression of path in HTML wiki-words in order
   to make wikiwords work in the SQL package.
 
-@h2 Version 1.0.42
+@h3 Version 1.0.42
 - Started meshing out the "sql" package that coverts prototypes
   into an SQL database that can be loaded by other tools.
 
-@h2 Version 1.0.41
+@h3 Version 1.0.41
 - Temporary update to labview_template.py to temporarily
   remove the @seealso support because it is causing the
   Leeds build to fail.
 
-@h2 Version 1.0.40
+@h3 Version 1.0.40
 - Minor tweak to the search and replace mechanism to allow
   input modules not named snr.py
 
-@h2 Version 1.0.39
+@h3 Version 1.0.39
 - Added basic support for define preprocessor macro in C code
 - Cleaned up handling of structures and embedded images in ODT template
 - Fixed escaping quotes in tag modifiers
 
-@h2 Version 1.0.38
+@h3 Version 1.0.38
 - Improved the print output of HTML using CSS
 - Cleanup of the handling of CSS
 
-@h2 Version 1.0.37
+@h3 Version 1.0.37
 - Changed the structure of the HTML output to put everything
   except the index files in a contents subdirectory for readability
 - Fixed the CSS styles of mouse overs in the HTML inline template
@@ -214,17 +169,17 @@ following list of bugs have been closed as part of this release:
 - Some minor cleanup to the HTML template for drawing structures.
 - Some minor enhancements to the inline styling to allow for @{hl,tags}
 
-@h2 Version 1.0.36
+@h3 Version 1.0.36
 - Some cleanups to the CSS for the HTML output
 
-@h2 Version 1.0.35
+@h3 Version 1.0.35
 @text
 - Removed the old perl sequence diagram generator
   because I can't get it to work. Switched over to
   a python based generator.
 - Added batik library for converting sequence diagrams from SVG.
 
-@h2 Version 1.0.34
+@h3 Version 1.0.34
 @text
 - Added library code for generating line and bar graphs. Still
   needs some work in order to properly integrate them so that they
@@ -235,11 +190,11 @@ following list of bugs have been closed as part of this release:
   I don't have to explicitly add them all the time.
 - Added a few missing keywords
 
-@h2 Version 1.0.33
+@h3 Version 1.0.33
 @text
 - Updated the copyright date in the ODT and HTML templates 
 
-@h2 Version 1.0.32
+@h3 Version 1.0.32
 @text
 - Added support for excluding the script support in the inlined HTML output
 - Fixed an issue with the cascading of tag exclusions. Should not
@@ -248,16 +203,16 @@ following list of bugs have been closed as part of this release:
 - Added support for sequence diagrams.
 - Added support for multi-column output.
 
-@h2 Version 1.0.31
+@h3 Version 1.0.31
 @text
 - Added support for highlighting text in the ODT output.
 
-@h2 Version 1.0.30
+@h3 Version 1.0.30
 @text
 - Added cleanup method in the HTML template to replace any characters that
   are not HTML safe such as the trademark symbol in some of the documentation.
 
-@h2 Version 1.0.29
+@h3 Version 1.0.29
 @text
 - Performed some cleanup of the tag formats that require output
   as tables such as acronymns, enums, tables. This was done for
@@ -271,19 +226,19 @@ following list of bugs have been closed as part of this release:
   in documentation. This is an alpha version of the tag that I would
   like to enhance.
 
-@h2 Version 1.0.28
+@h3 Version 1.0.28
 @text
 - Fixed a minor issue parsing structure field definitions. The cpp_parser::parse_struct_fields
   method really needs to be updated to use a more solid parser but implementing
   a temporary patch for now.
 
-@h2 Version 1.0.27
+@h3 Version 1.0.27
 @text
 - Fixed bug in wikify feature broken in previous release.
 - Updated to fix the path to swriter in Linux and move it
   to the config file.
 
-@h2 Version 1.0.26
+@h3 Version 1.0.26
 @text
 - Fixed wiki word issue in the ODT template that was fixed in the HTML
   template in last release.
@@ -294,7 +249,7 @@ following list of bugs have been closed as part of this release:
 - Minor cleanup of the word template to stop it crashing parsing
   the copyright and trademark symbols.
 
-@h2 Version 1.0.25
+@h3 Version 1.0.25
 @text
 - Fixed some escaping issues in the ODT template. Also fixed issue with
   code formatting.
@@ -303,18 +258,18 @@ following list of bugs have been closed as part of this release:
   extern "C" blocks and also to cleanup the way that enums
   are parsed.
 
-@h2 Version 1.0.24
+@h3 Version 1.0.24
 @text
 - Fixed the invalid characters in the legal notice in the HTML document.
 - Wrapped the call to openoffice to try to work around the exceptions
   it sometimes throws.
 
-@h2 Version 1.0.23
+@h3 Version 1.0.23
 @text
 - Added legal info to the Cortina HTML template.
 - Created public template for HTML that has different legal information.
 
-@h2 Version 1.0.22
+@h3 Version 1.0.22
 @text
 - Updated to add the @docfilename tag allowing user to specify
   the name of the output file. This is currently only used for
@@ -324,26 +279,26 @@ following list of bugs have been closed as part of this release:
 - Updated the makefile to automatically install shorte so I don't
   have to do it manually any more.
 
-@h2 version 1.0.21
+@h3 version 1.0.21
 @text
 - Updated to enhance the way that includes are parsed
   to allow multiple includes separated by newlines. This
   makes it easier to manage the generated documentation.
 
-@h2 Version 1.0.20
+@h3 Version 1.0.20
 @text
 - Corrected a issue with macro expansion in include files and
   also added built-in macros. Currently only support one built-in
   macro which is SHORTE_DOC_TITLE. This is expanded to the
   document title. 
 
-@h2 Version 1.0.19
+@h3 Version 1.0.19
 @text
 - Restored support for the @docversion tag instead of
   requiring it be supplied from the command line. Command
   line can still override it.
 
-@h2 Version 1.0.18
+@h3 Version 1.0.18
 @text
 - ODT template
     - Fixed up issue with the revision history tag
@@ -354,7 +309,7 @@ following list of bugs have been closed as part of this release:
     - Fixed the target in the HTML template for links in
       the menu.
 
-@h2 Version 1.0.17
+@h3 Version 1.0.17
 @text
 - ODT template
     - Fixed the heading numbers in the ODT template
@@ -363,12 +318,12 @@ following list of bugs have been closed as part of this release:
 - Few minor bug fixes
     - Added include tag to the syntax highlighter for VIM
 
-@h2 Version 1.0.16
+@h3 Version 1.0.16
 @text
 - Added some enhancements to the @testcase tag and also
   started meshing out the @testcasesummary tag.
 
-@h2 Version 1.0.15
+@h3 Version 1.0.15
 @text
 - Added support for the @testcase tag used for creating test
   reports. This required support in the HTML, ODT, and parser
@@ -376,7 +331,7 @@ following list of bugs have been closed as part of this release:
 - Added some cleanup for the C code generation to support
   the API header file required to send to customers
 
-@h2 Version 1.0.14
+@h3 Version 1.0.14
 @text
 - Created mergefile or book template that concatenates a series shorte
   template files into one large book for easier distribution.
@@ -398,7 +353,7 @@ following list of bugs have been closed as part of this release:
     - Few new options for handling enums and structures
     
 
-@h2 Version 1.0.13
+@h3 Version 1.0.13
 @text
 - Shorte
     - Added dumb comment handling to the input file list - needs to be improved
@@ -411,7 +366,7 @@ following list of bugs have been closed as part of this release:
     - Decreased the font size of code snippets to make them fit better
       in the generated documentation.
 
-@h2 Version 1.0.12
+@h3 Version 1.0.12
 @text
 - ODT Template
     - Changed the ODT template to not copy convert_to_pdf.odt but reference it from
@@ -429,7 +384,7 @@ following list of bugs have been closed as part of this release:
       way out of date.
 
 
-@h2 Version 1.0.11
+@h3 Version 1.0.11
 @text
 - Fixed a bug in the CPP parser that wasn't getting doxygen
   headers if there were spaces between the function declaration
@@ -438,7 +393,7 @@ following list of bugs have been closed as part of this release:
 - Added conditional defines to the input file list
 - Added better parsing of embedded PHP style code 
 
-@h2 Version 1.0.10
+@h3 Version 1.0.10
 @text
 - Updated the ODT template for Cortina to fit the corporate standard.
 - Converted line endings in sources to unix style.
@@ -449,7 +404,7 @@ following list of bugs have been closed as part of this release:
 - Added support for @h5 tag.
 - Fixed up the HTML template for Cortina.
 
-@h2 Version 1.0.9
+@h3 Version 1.0.9
 @text
 - Fixed the function summary in include files
 - Cleaned up the prototype formatting in HTML docs
@@ -458,7 +413,7 @@ following list of bugs have been closed as part of this release:
 - Fixed an error with the handling of - in tables
 - Fixed an error with the @functionsummary when there was no page title
 
-@h2 Version 1.0.8
+@h3 Version 1.0.8
 @text
 - Cleaned up the HTML for the function summary
 - Cleaned up some of the CPP parsing to shorte files
@@ -468,7 +423,7 @@ following list of bugs have been closed as part of this release:
 - Added python snippets to the LabVIEW output
 - Fixed the wikifying of functions in the format class.name.
 
-@h2 Version 1.0.7
+@h3 Version 1.0.7
 @text
 - ODT Support
     - Updated to allow modifying the ODT template in OpenOffice
@@ -479,7 +434,7 @@ following list of bugs have been closed as part of this release:
 - Added docnumber tag to the header to support assigning document
   numbers to different documents.
 
-@h2 Version 1.0.6
+@h3 Version 1.0.6
 @text
 - LabView:
     - Updated the labview template and the CPP parser to extract and
@@ -488,7 +443,7 @@ following list of bugs have been closed as part of this release:
     - Fixed an issue parsing structures in the LabView template
 
 
-@h2 Version 1.0.5
+@h3 Version 1.0.5
 @text
 - Output Templates
     - HTML Template:
@@ -504,7 +459,7 @@ following list of bugs have been closed as part of this release:
         - Fixed up the HTML for the html output in the labview template
 
 
-@h2 Version 1.0.4
+@h3 Version 1.0.4
 @text
 - Output Templates
     - Fixed an output problem generating PDFs/ODT from within cygwin
@@ -550,7 +505,7 @@ following list of bugs have been closed as part of this release:
       can't handle nested types = need to do some work
       in this area
 
-@h2 Version 1.0.3
+@h3 Version 1.0.3
 @text
 - Output Templates
     - Cleaned up the text template
@@ -568,7 +523,7 @@ following list of bugs have been closed as part of this release:
       should only be dashes with only spaces before them up till
       the newline
 
-@h2 Version 1.0.2
+@h3 Version 1.0.2
 @text
 - Build Changes
     - Updated to allow building cairo plugin under Cygwin
@@ -588,7 +543,7 @@ following list of bugs have been closed as part of this release:
 
 
 
-@h2 Version 1.0.1
+@h3 Version 1.0.1
 @text
 - Added links to the table of contents in the OpenOffice and PDF generation.
 - Added doxygen parsing and output format for comments
@@ -596,35 +551,8 @@ following list of bugs have been closed as part of this release:
 - Added version.inc file for managing version number of the tool
 - Added support for the text tag to the txt template
 
-@h2 Version 1.0
+@h3 Version 1.0
 @text
 - This was the first release of shorte. It included a basic framework
 
-
-
-@h1 Installation Notes
-
-@h2 Cygwin Information
-@text
-You need to compile PIL from source so make sure you have gcc installed (in cygwin).
-There’s a handy installation helper in the cygwin setup package list called,
-‘gcc: C compiler upgrade helper’. Install this, and it grabs the dependencies.
-
-*PIL Python Imaging Library*
-
-Get the PIL source from here, and unpack the archive to your sources folder (I use /home/rich/sources).
-
-Now, if you run python setup.py install, the installation hangs (for me anyway).
-Googling reveals that this is not uncommon. What you need to do is ‘rebase’!
-Sound like a crack issue maybe it is?
-
-Here’s the magic command (and don’t ask me why this works):
-
-{{rebase -b 0x1000000000 /bin/tk84.dll}}
-
-So, close cygwin and open up task manager, kill any gcc.exe or
-python.exe processes that are hanging around. Next, run the
-above command. You should then be able to install using setup.py as normal.
-
-    {{python setup.py install}}
 
