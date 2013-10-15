@@ -28,8 +28,8 @@ from types import *
 
 from shorte_defines import *
 from shorte_source_code import *
-from shorte_parser import *
-from cpp_parser import *
+from src.parsers.shorte_parser import *
+from src.parsers.cpp_parser import *
 from shorte_code_executor import *
 from src.templates.template_html import template_html_t
 from src.templates.template_odt  import template_odt_t
@@ -147,6 +147,9 @@ class engine_t:
         return self.m_date
 
     def get_doc_number(self):
+        if(self.m_docnumber == None):
+            return ""
+
         return self.m_docnumber
 
     def get_output_dir(self):
@@ -711,6 +714,10 @@ parser.add_option("-r", "--search_and_replace",
 parser.add_option("-w", "--working_directory",
                   action="store",type="string",dest="working_directory",
                   help="The working directory")
+parser.add_option("-i", "--info",
+                  action="store",type="string",dest="info",
+                  help="List info about the document, for example, --info=wikiwords will show the list of scanned wikiwords")
+
 #parser.add_option("-I", "--include",
 #                  action="store",type="string",dest="include",
 #                  help="Include paths to search for include files")
@@ -912,7 +919,22 @@ else:
         #print("output file: %s" % shorte.get_output_dir() + "/" + output);
         shorte.parse_page(file)
 
-# Ther caller may have selected multiple packages
+
+if(options.info):
+
+    if(options.info == "wikiwords"):
+        print "Summary of wiki words:"
+        print "----------------------"
+        links = shorte.m_parser.m_wiki_links
+        for link in links:
+            print '''  %-24s
+    - wikiword: %s,
+    - label:    %s,
+    - bookmark: %s''' % (link, links[link].wikiword, links[link].label, links[link].is_bookmark)
+
+    sys.exit(0)
+
+# The caller may have selected multiple packages
 # in the output, for example, html+pdf. Step through
 # the list of packages and generate the output.
 for pkg in packages:

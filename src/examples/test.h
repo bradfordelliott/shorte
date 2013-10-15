@@ -58,3 +58,21 @@
  */
 int func1(int blah, bool* dummy);
 
+/**
+ * This is the structure that gets passed to an application registered
+ * interrupt handler.
+ */
+typedef struct {
+    cs_t100_handle_t dev_id;     /**< Device Handle value */
+    cs_t100_handle_t irq_handle; /**< IRQ Handle Value */
+/* start bugzilla 28081 */
+    cs_uint32        ireg_address; /**< Interrupt Register Address */
+/* bugzilla end 28081 */
+    cs_uint16        ireg_data;  /**< Current values of the interrupt register */
+    cs_uint16        ereg_data;  /**< Current values of the enable register */
+    cs_uint16        sreg_data;  /**< Current values of the status register,
+                                  *   Will be 0 when there is no status
+                                  *   register for a node */
+    cs_uint8         slice;      /**< For interrupts with multiple instances,
+                                  *   which instance has interrupted. */
+} cs_t100_irq_handler_data_t;

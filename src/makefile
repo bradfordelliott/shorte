@@ -9,8 +9,18 @@ help:
 	@${echo} " package      = build shorte and generate the tarball"
 	@${echo} " install      = install shorte over the network"
 	@${echo} " exe          = build a standalone executable"
-	@${echo} " tests        = run the test suite to generate the list of sample documents"
 	@${echo} " docs         = generate the documentation for the site"
+	
+	@${echo} " tests        = run the test suite to generate the list of sample documents"
+	@${echo} "   test_headings   = test the use of heading tags"
+	@${echo} "   test_textblocks = test the @textblock tag"
+	@${echo} "   test_tables     = test the @table tag"
+	@${echo} "   test_code       = test the parsing of C code"
+	@${echo} "   test_code_quick = test the parsing of C code but only generate HTML for faster results"
+	@${echo} "   test_functions  = test the @prototype source code tag"
+	@${echo} "   test_enums      = test the @enum source code tag"
+	@${echo} "   test_bullets    = test the @ul and @ol list tags"
+	@${echo} "   test_wkiwords   = test the use of wikiwords"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -86,6 +96,7 @@ tag:
 
 tests:
 	rm -rf build-output
+	make test_hello
 	make test_headings
 	make test_textblocks
 	make test_tables
@@ -93,6 +104,10 @@ tests:
 	make test_functions
 	make test_enums
 	make test_bullets
+	make test_wikwords
+
+test_hello:
+	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -p "html+pdf" -o build-output/headings
@@ -124,6 +139,9 @@ test_bullets:
 
 test_t100:
 	python shorte.py -f examples/cs_t100_api.h -x cpp -p "html_inline" -o build-output/t100
+
+test_wikiwords:
+	python shorte.py -f examples/wikiwords.tpl -p "html+pdf" -o build-output/wikiwords
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code

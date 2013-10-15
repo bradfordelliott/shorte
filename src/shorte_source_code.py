@@ -169,6 +169,10 @@ class     exec      in        raise
 continue  finally   is        return 
 def       for       lambda    try
 '''
+        elif(language == 'xml'):
+            keyword_str = '''
+xml version
+'''
 
         elif(language == "perl"):
             keyword_str = '''
@@ -395,6 +399,17 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
                     tag["data"] = '/'
                     tag["type"] = TAG_TYPE_MCOMMENT
 
+
+                # If this is an XML based document then treat
+                # <!-- as a multi-line comment
+                elif(source[i:i+4] == '<!--'):
+                    states.append(STATE_XMLCOMMENT)
+                    tags.append(tag)
+
+                    tag = {}
+                    tag["data"] = '<'
+                    tag["type"] = TAG_TYPE_XMLCOMMENT
+
                 # Treat " as the start of a string
                 elif(source[i] == '"'):
                     states.append(STATE_STRING)
@@ -432,6 +447,18 @@ TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
 
             elif(state == STATE_MCOMMENT):
                 if(source[i-1] == '*' and source[i] == '/'):
+                    tag["data"] += source[i]
+                    tags.append(tag)
+
+                    tag = {}
+                    tag["data"] = ""
+                    tag["type"] = TAG_TYPE_CODE
+                    states.pop()
+                else:
+                    tag["data"] += source[i]
+
+            elif(state == STATE_XMLCOMMENT):
+                if(source[i-2] == '-' and source[i-1] == '-' and source[i] == '>'):
                     tag["data"] += source[i]
                     tags.append(tag)
 

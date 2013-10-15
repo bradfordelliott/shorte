@@ -31,6 +31,13 @@ class tools_t:
     def get_tcl(self):
         return "tclsh"
 
+class wikiword_t:
+
+    def __init__(self):
+        self.wikiword = ""
+        self.is_bookmark = False
+        self.label = ""
+        self.link = ""
 
 
 g_tools = tools_t()
@@ -216,6 +223,7 @@ TAG_TYPE_COMMENT = 2
 TAG_TYPE_MCOMMENT = 3
 TAG_TYPE_WHITESPACE = 4
 TAG_TYPE_NEWLINE = 5
+TAG_TYPE_XMLCOMMENT = 6
 
 if(sys.platform == "win32"):
     PATH_INKSCAPE = "c:\\usr\\tools\\InkscapePortable\\InkscapePortable"
@@ -435,3 +443,4 @@ STATE_MSTRING  = 4
 STATE_MCOMMENT = 5
 STATE_MODIFIER = 6
 STATE_INLINE_STYLING = 7
+STATE_XMLCOMMENT = 8

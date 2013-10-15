@@ -55,6 +55,22 @@
   aren't currently showing up. Also should support an include
   mechanism
 
+@h3 Version 1.0.58
+Minor release that adds:
+- support for assigning wiki-words to headings in order to
+  control automatic hyperlinking
+- revision history for HTML documents
+- minor restructuring of the code tree
+
+@table: title="Closed Bugs"
+- 22 | Added support for assigning a wikiword to document headings.
+- 23 | Added hyperlink in the version number in the document header
+       to the revision history of a document in the HTML template.
+- 24 | Resolved issue when @ is encountered within a text block. It
+       was being parsed as an inline tag which should only happen
+       if it is followed by {.
+- 25 | Added support for @xml tag for source code snippets.
+
 @h3 Version 1.0.57
 This is another bug fix release to address template issues in the
 ODT template related to the header layout.
