@@ -244,7 +244,7 @@ release:
 	-rm -rf ../build-output/examples/*.svg
 	-rm -rf ../build-output/examples/test.tpl
 	-rm -rf ../build-output/examples/tmp.tpl
-	cd ../build-output && tar -czf shorte.${version}.tar.gz *
+	cd ../build-output && ${archive}
 
 #	cp -r src ../build-output
 #	cp -r libs ../build-output/libs
