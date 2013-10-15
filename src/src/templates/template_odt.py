@@ -3327,9 +3327,9 @@ class template_odt_t(template_t):
             path_startup = g_startup_path
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
 
-        print "PACKAGE: %s" % package
+        #print "PACKAGE: %s" % package
         
-        params_oowriter = "--nologo --nofirststartwizard --norestore --nodefault --headless --invisible --nolockcheck"
+        params_oowriter = "--writer --nologo --nofirststartwizard --norestore --nodefault --headless --invisible --nolockcheck"
             
         path_converter = "%s/templates/odt/convert_to_pdf.odt" % path_startup
         path_input = "%s" % (self.m_engine.get_output_dir() + "/" + self.get_index_name())

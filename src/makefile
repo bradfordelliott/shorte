@@ -10,13 +10,16 @@ help:
 	@${echo} " install      = install shorte over the network"
 	@${echo} " exe          = build a standalone executable"
 	@${echo} " docs         = generate the documentation for the site"
+	@${echo} ""
 	
 	@${echo} " tests        = run the test suite to generate the list of sample documents"
+	@${echo} "   test_hello      = A hello world example for shorte"
 	@${echo} "   test_headings   = test the use of heading tags"
 	@${echo} "   test_textblocks = test the @textblock tag"
 	@${echo} "   test_tables     = test the @table tag"
 	@${echo} "   test_code       = test the parsing of C code"
-	@${echo} "   test_code_quick = test the parsing of C code but only generate HTML for faster results"
+	@${echo} "   test_code_quick = test the parsing of C code but"
+	@${echo} "                     only generate HTML for faster results"
 	@${echo} "   test_functions  = test the @prototype source code tag"
 	@${echo} "   test_enums      = test the @enum source code tag"
 	@${echo} "   test_bullets    = test the @ul and @ol list tags"
@@ -104,7 +107,7 @@ tests:
 	make test_functions
 	make test_enums
 	make test_bullets
-	make test_wikwords
+	make test_wikiwords
 
 test_hello:
 	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
@@ -154,10 +157,13 @@ test_junk:
 	python shorte.py -f examples/functions.tpl -p "html_inline+pdf" -o build-output/functions
 	python shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
 
+# This target builds shorte as an executable that can be distributed
+# under Windows so that it is not necessary to re-distribute python
 exe:
 	rm -rf dist
 	c:/usr/tools/python/python setup.py py2exe
 	cp C:/usr/cvs/hsio/3rdparty/msvc/MSVCR100.dll dist
+	cp shorte.cfg dist/.
 	cd dist && zip -r shorte.${version}.zip *
 
 tarball:
@@ -182,6 +188,7 @@ release:
 	cp -r src ../build-output/.
 	-rm -rf ../build-output/src/templates/*.pyc
 	-rm -rf ../build-output/src/graphing/*.pyc
+	-rm -rf ../build-output/src/parsers/*.pyc
 	cp -r libs ../build-output/.
 	-rm -rf ../build-output/libs/cygwin
 	-rm -rf ../build-output/libs/osx

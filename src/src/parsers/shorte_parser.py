@@ -1948,12 +1948,12 @@ else:
                     word.wikiword = tmp
                     word.label = tmp
                     word.is_bookmark = False
-                    if(modiers.has_key("wikiword")):
+                    if(modifiers.has_key("wikiword")):
                         word.wikiword = modifiers["wikiword"]
 
                     word.link = os.path.basename(self.m_current_file)
 
-                    self.m_wiki_links[word.wikword] = word
+                    self.m_wiki_links[word.wikiword] = word
 
                     tags.append(header)
                 else:
