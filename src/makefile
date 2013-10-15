@@ -166,10 +166,10 @@ test_junk:
 # under Windows so that it is not necessary to re-distribute python
 exe:
 	rm -rf dist
-	cp build-output/release_notes/index.html dist/release_notes.html
 	c:/usr/tools/python/python setup.py py2exe
 	cp C:/usr/cvs/hsio/3rdparty/msvc/MSVCR100.dll dist
 	cp shorte.cfg dist/.
+	cp build-output/release_notes/index.html dist/release_notes.html
 	cd dist && zip -r shorte.${version}.zip *
 
 tarball:
