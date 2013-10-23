@@ -76,3 +76,51 @@ typedef struct {
     cs_uint8         slice;      /**< For interrupts with multiple instances,
                                   *   which instance has interrupted. */
 } cs_t100_irq_handler_data_t;
+
+
+/**
+ * This method is called to show the overall status of the device
+ * for a particular set of slices. This method will not work properly
+ * on simplex devices right now. This will be added in the future.
+ *
+ * This method is only defined if CS_DONT_USE_STDLIB is not defined
+ * implying that the C standard library is available. It uses sprintf()
+ * and the CS_PRINTF() macro to display output which may not be
+ * possible on systems that do not have a console.
+ *
+ * @{table,
+ * -t SERDES Status
+ * -h Column  | Description
+ * - Sl      | The slice number
+ * - Lock    | Whether or not the lock detector is locked
+ * - LockI   | The current value of the lock detect interrupt register
+ * - Freq    | The VCO frequency slot
+ * - EDC MD  | The configured EDC mode such as CX1, SR, etc.
+ * - CTRLA   | The main cursor
+ * - CTRLB   | The pre and post cursors
+ * - Squelch | 1 if the TX is squelched, 0 if not
+ * - Temp    | The measured temperature from the die
+ * - 1.8V    | The measured voltage of the die
+ * - 0.9V    | The measured voltage of the die
+ * }
+ *
+ * @param slice_start         [I] - The slice to start the dump from
+ * @param slice_end           [I] - The slice to end the dump at.
+ * @param sections_to_display [I] - A mask defining the sections of the report
+ *                                  to display.
+ *
+ * @return CS_OK on success, CS_ERROR on failure.
+ * 
+ * @example
+ *
+ *     // Print the full status for slices 0-7
+ *     cs4224_diags_show_status(0, 7, CS4224_STATUS_ALL);
+ *
+ *     // Only print the global information for slices 0-3
+ *     cs4224_diags_show_status(0, 3, CS4224_STATUS_GLOBAL);
+ */
+cs_status cs4224_diags_show_status(
+    cs_uint32 slice_start,
+    cs_uint32 slice_end,
+    cs_uint16 sections_to_display);
+

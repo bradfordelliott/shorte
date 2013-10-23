@@ -1211,18 +1211,18 @@ class cpp_parser_t(shorte_parser_t):
                     i += 1
                 
                 if(struct != None):
-                    tag = {}
-                    tag["name"] = "h3"
-                    tag["contents"] = struct["title"]
-                    tag["source"] = ""
-                    tag["modifiers"] = {}
+                    tag = tag_t()
+                    tag.name = "h3"
+                    tag.contents = struct["title"]
+                    tag.source = ""
+                    tag.modifiers = {}
                     page["tags"].append(tag)
 
-                    tag = {}
-                    tag["name"] = "struct"
-                    tag["contents"] = struct
-                    tag["source"] = ""
-                    tag["modifiers"] = {}
+                    tag = tag_t()
+                    tag.name = "struct"
+                    tag.contents = struct
+                    tag.source = ""
+                    tag.modifiers = {}
                     page["tags"].append(tag)
 
             elif(token["type"] == TOKEN_PREPROCESSOR):
@@ -1238,11 +1238,11 @@ class cpp_parser_t(shorte_parser_t):
                         i += 1
 
                     if(define != None):
-                        tag = {}
-                        tag["name"] = "define"
-                        tag["contents"] = define
-                        tag["source"] = ""
-                        tag["modifiers"] = {}
+                        tag = tag_t()
+                        tag.name = "define"
+                        tag.contents = define
+                        tag.source = ""
+                        tag.modifiers = {}
                         page["tags"].append(tag)
 
                 else:
@@ -1283,18 +1283,18 @@ class cpp_parser_t(shorte_parser_t):
                 #print enum
                 
                 if(enum != None):
-                    tag = {}
-                    tag["name"] = "h3"
-                    tag["contents"] = enum["title"]
-                    tag["source"] = ""
-                    tag["modifiers"] = {}
+                    tag = tag_t()
+                    tag.name = "h3"
+                    tag.contents = enum["title"]
+                    tag.source = ""
+                    tag.modifiers = {}
                     page["tags"].append(tag)
 
-                    tag = {}
-                    tag["name"] = "enum"
-                    tag["contents"] = enum
-                    tag["source"] = ""
-                    tag["modifiers"] = {}
+                    tag = tag_t()
+                    tag.name = "enum"
+                    tag.contents = enum
+                    tag.source = ""
+                    tag.modifiers = {}
                     page["tags"].append(tag)
 
             elif(self.match_token(token, TOKEN_OPEN_BRACE, "{") or self.match_token(token, TOKEN_SEMICOLON, ";")):
@@ -1371,18 +1371,18 @@ class cpp_parser_t(shorte_parser_t):
                                 #sys.exit(-1)
                         i += 1
                 else:
-                    tag = {}
-                    tag["name"] = "h3"
-                    tag["contents"] = function["name"]
-                    tag["source"] = ""
-                    tag["modifiers"] = {}
+                    tag = tag_t()
+                    tag.name = "h3"
+                    tag.contents = function["name"]
+                    tag.source = ""
+                    tag.modifiers = {}
                     page["tags"].append(tag)
 
-                    tag = {}
-                    tag["name"] = "prototype"
-                    tag["contents"] = function
-                    tag["source"] = ""
-                    tag["modifiers"] = {}
+                    tag = tag_t()
+                    tag.name = "prototype"
+                    tag.contents = function
+                    tag.source = ""
+                    tag.modifiers = {}
                     page["tags"].append(tag)
 
             i += 1
@@ -1404,17 +1404,17 @@ class cpp_parser_t(shorte_parser_t):
         page["links"] = []
 
 
-        tag = {}
-        tag["name"] = "h1"
-        tag["contents"] = source_file
-        tag["source"] = ""
-        tag["modifiers"] = {}
+        tag = tag_t()
+        tag.name = "h1"
+        tag.contents = source_file
+        tag.source = ""
+        tag.modifiers = {}
         page["tags"].append(tag)
 
-        tag = {}
-        tag["name"] = "functionsummary"
-        tag["contents"] = ""
-        tag["modifiers"] = self.parse_modifiers('src="%s"' % source_file)
+        tag = tag_t()
+        tag.name = "functionsummary"
+        tag.contents = ""
+        tag.modifiers = self.parse_modifiers('src="%s"' % source_file)
         page["tags"].append(tag)
         tag = {}
 
@@ -1672,8 +1672,8 @@ class cpp_parser_t(shorte_parser_t):
         page["file_author"] = self.m_author
 
         for tag in page["tags"]:
-            tag["source_file"] = page["source_file"]
-            tag["page_title"]  = page["source_file"]
+            tag.source_file = page["source_file"]
+            tag.page_title  = page["source_file"]
 
 
         ## Check to see if there were any includes found. If there are then

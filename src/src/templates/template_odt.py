@@ -996,13 +996,13 @@ class template_odt_t(template_t):
 
     def append_header(self, tag):
 
-        name = tag["name"]
-        data = tag["contents"]
+        name = tag.name
+        data = tag.contents
         break_before = False
 
-        if(tag.has_key("break_before")):
-            break_before = tag["break_before"]
-        elif(tag.has_key("is_prototype")):
+        if(tag.break_before):
+            break_before = tag.break_before
+        elif(tag.is_prototype):
             break_before = int(shorte_get_config("odt", "prototype_break_before"))
 
         data = self.format_text(data, False)
@@ -1403,7 +1403,7 @@ class template_odt_t(template_t):
     def format_questions(self, tag):    
         
         xml = ''
-        questions = tag["contents"]
+        questions = tag.contents
 
         for question in questions:
 
@@ -1647,8 +1647,8 @@ class template_odt_t(template_t):
 
                 frame_para = True
                 if(col.has_key("textblock")):
-                    tag = {}
-                    tag["contents"] = col["textblock"]
+                    tag = tag_t()
+                    tag.contents = col["textblock"]
 
                     if(row["is_reserved"]):
                         cell_text = self.format_textblock(
@@ -1718,7 +1718,7 @@ class template_odt_t(template_t):
     
     def format_define(self, tag):
         
-        define = tag["contents"]
+        define = tag.contents
         name   = self.format_text(define["name"])
         value  = self.format_text(define["value"])
         desc   = self.format_textblock(define["description"])
@@ -1835,7 +1835,7 @@ class template_odt_t(template_t):
            @return The XML snippet defining the enum
         '''
 
-        table = tag["contents"]
+        table = tag.contents
         
         if(shorte_get_config("html", "show_enum_values") == "1"):
             show_enum_vals = True
@@ -1968,7 +1968,7 @@ class template_odt_t(template_t):
 
     def format_acronyms(self, tag, style_name="default"):
 
-        table = tag["contents"]
+        table = tag.contents
         
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
@@ -2049,8 +2049,8 @@ class template_odt_t(template_t):
         indent_style="indent",
         list_style="list_level"):
 
-        if(isinstance(tag, dict)):
-            paragraphs = tag["contents"]
+        if(isinstance(tag, tag_t)):
+            paragraphs = tag.contents
         else:
             paragraphs = tag
 
@@ -2317,7 +2317,7 @@ class template_odt_t(template_t):
 
         source = "<text:list text:style-name=\"%s\">" % style
 
-        list = tag["contents"]
+        list = tag.contents
 
         for elem in list:
 
@@ -2387,14 +2387,14 @@ class template_odt_t(template_t):
         hierarchy = ''
     
         for tag in tags:
-            obj = tag["contents"]
+            obj = tag.contents
 
             style = self.m_styles["table"]["cell"]["fhier"]
             text_style = self.m_styles["para"]["fdesc"]
 
             if(summary_type == "testcases"):
-                if(tag["category"] != hierarchy):
-                    hierarchy = tag["category"]
+                if(tag.category != hierarchy):
+                    hierarchy = tag.category
                     row = self._table_row()
 
                     cols = []
@@ -2402,8 +2402,8 @@ class template_odt_t(template_t):
                     row["cols"] = cols
                     table["rows"].append(row)
             else:
-                if(tag["hierarchy"] != hierarchy):
-                    hierarchy = tag["hierarchy"]
+                if(tag.hierarchy != hierarchy):
+                    hierarchy = tag.hierarchy
                     row = self._table_row()
 
                     cols = []
@@ -2525,7 +2525,7 @@ class template_odt_t(template_t):
 
     def format_testcase(self, tag):
 
-        testcase = tag["contents"]
+        testcase = tag.contents
         table = {}
         table["max_cols"] = 2
         table["column-styles"] = ["shorte_func_summary_col1", "shorte_func_summary_col2"]
@@ -2579,7 +2579,7 @@ class template_odt_t(template_t):
 
     def format_prototype(self, tag):
         
-        prototype = tag["contents"]
+        prototype = tag.contents
         
         file = "blah"
         function = {}
@@ -2621,8 +2621,8 @@ class template_odt_t(template_t):
             function["desc"] = tmp
 
         if(prototype.has_key("desc2")):
-            tag = {}
-            tag["contents"] = prototype["desc2"]
+            tag = tag_t()
+            tag.contents = prototype["desc2"]
             function["desc"] = self.format_textblock(tag)
 
         if(prototype.has_key("prototype")):
@@ -2689,8 +2689,8 @@ class template_odt_t(template_t):
                 param["desc"] = tmp
                 
                 if(param.has_key("desc2")):
-                    tag = {}
-                    tag["contents"] = param["desc2"]
+                    tag = tag_t()
+                    tag.contents = param["desc2"]
                     param["desc"] = self.format_textblock(tag, style=self.m_styles["para"]["prototype"]["param"])
 
                 param["table_row_prototype"] = self.m_styles["table"]["row"]["prototype"]
@@ -2956,8 +2956,8 @@ class template_odt_t(template_t):
 
         output = ''
 
-        output += self.format_source_code(tag["name"], tag["contents"])
-        result = tag["result"]
+        output += self.format_source_code(tag.name, tag.contents)
+        result = tag.result
 
         if(result != None):
             # Convert any HTML tags in the input source
@@ -2977,46 +2977,46 @@ class template_odt_t(template_t):
 
     def format_sequence(self, tag):
 
-        image = tag["contents"]
+        image = tag.contents
         output = self.format_image(image)
-        output += self.__format_table("", tag["contents"]["html"])
+        output += self.__format_table("", tag.contents["html"])
 
         return output
 
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<text:p text:style-name=\"shorte_standard\">%s</text:p>" % self.format_text(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<text:p text:style-name=\"shorte_standard\">%s</text:p>" % self.format_text(tag.contents)
         elif(name in "text"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_textblock(tag)
         elif(name in "pre"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_pre(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_pre(tag.contents)
         elif(name == "note"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag)
         elif(name == "tbd"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="TBD:", image="tbd.png")
         elif(name == "question"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_question(self.format_text(tag["contents"]))
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_question(self.format_text(tag.contents))
         elif(name == "questions"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_questions(tag)
         elif(name == "table"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.__format_table(tag["source"], tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.__format_table(tag.source, tag.contents)
         elif(name == "ul"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag["contents"], False)
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag["contents"], True)
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag.contents, True)
         elif(name == "checklist"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_checklist(tag)
         elif(name == "image"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_image(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_image(tag.contents)
         elif(name == "struct"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag["source"], tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag.source, tag.contents)
         elif(name == "define"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_define(tag)
         elif(name == "prototype"):
@@ -3040,7 +3040,7 @@ class template_odt_t(template_t):
             #print "WARNING: %s tag not supported in ODT documents" % name
             pass
         else:
-            print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
+            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
     
 
     def _doc_pages_to_xml(self):
@@ -3294,10 +3294,10 @@ class template_odt_t(template_t):
 
             for tag in tags:
             
-                if(self.m_engine.tag_is_header(tag["name"])):
+                if(self.m_engine.tag_is_header(tag.name)):
                     self.append_header(tag)
             
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
                 else:
                     self.append(tag)

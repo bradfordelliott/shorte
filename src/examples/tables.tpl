@@ -86,3 +86,9 @@ This is a test of the table captions
 - One | Two | Three
 - One | Two | Three
 
+@h3 A test table for Transport
+@table
+- Input Key | Possible Key Values Include | Description
+-& Basic Parameters
+- \-mode | <cs_mx00_cfg_mode_e>        | Configuration Classification
+

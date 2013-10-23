@@ -417,8 +417,8 @@ class engine_t:
 
         functions = []
 
-        if(tag != None and tag.has_key("page_title")):
-            page_title = tag["page_title"]
+        if(tag != None and tag.page_title):
+            page_title = tag.page_title
         else:
             page_title = None
 
@@ -439,9 +439,9 @@ class engine_t:
 
                 #print tag
                 
-                if(tag["name"] == "prototype"):
+                if(tag.name == "prototype"):
                     
-                    if(page_title == "" or (not tag.has_key("page_title"))):
+                    if(page_title == "" or (not tag.page_title)):
                         #print "DO I GET HERE? page_title = %s" % (page_title)
                         #print tag
                         #sys.exit(-1)
@@ -452,19 +452,19 @@ class engine_t:
                         hierarchy = hierarchy.replace(".tpl", "")
                         hierarchy = hierarchy.replace("leeds", "cs4321")
 
-                        if(tag.has_key("modifiers")):
-                            if(isinstance(tag["modifiers"], DictType) and tag["modifiers"].has_key("hierarchy")):
-                                hierarchy = tag["modifiers"]["hierarchy"]
+                        if(tag.modifiers):
+                            if(isinstance(tag.modifiers, DictType) and tag.modifiers.has_key("hierarchy")):
+                                hierarchy = tag.modifiers["hierarchy"]
 
-                        tag["hierarchy"] = hierarchy
-                        tag["page"] = page["source_file"]
+                        tag.hierarchy = hierarchy
+                        tag.page = page["source_file"]
                         functions.append(tag)
 
-                    elif(tag["page_title"] == page_title):
+                    elif(tag.page_title == page_title):
                         hierarchy = page["source_file"]
                         #print tag
-                        if(tag.has_key("modifiers") and tag["modifiers"].has_key("hierarchy")):
-                            hierarchy = tag["modifiers"]["hierarchy"]
+                        if(tag.modifiers and tag.modifiers.has_key("hierarchy")):
+                            hierarchy = tag.modifiers["hierarchy"]
                         hierarchy = os.path.basename(hierarchy)
                         hierarchy = hierarchy.replace("leeds_", "")
                         hierarchy = hierarchy.replace(".c", "")
@@ -472,13 +472,13 @@ class engine_t:
                         hierarchy = hierarchy.replace(".tpl", "")
                         hierarchy = hierarchy.replace("leeds", "cs4321")
 
-                        tag["hierarchy"] = hierarchy
-                        tag["page"] = page["source_file"]
+                        tag.hierarchy = hierarchy
+                        tag.page = page["source_file"]
                         functions.append(tag)
                     #else:
                     #    print "tag['page'] = %s, page_title = %s" % (tag["page_title"], page_title) 
         
-        functions = sorted(functions, key=lambda k: k['hierarchy'], reverse=False)
+        functions = sorted(functions, key=lambda k: k.hierarchy, reverse=False)
 
         return functions
 
@@ -487,7 +487,7 @@ class engine_t:
         types = []
 
         if(tag != None):
-            page_title = tag["page_title"]
+            page_title = tag.page_title
         else:
             page_title = None
 
@@ -505,9 +505,9 @@ class engine_t:
 
                 #print tag
                 
-                if(tag["name"] == "struct" or tag["name"] == "vector" or tag["name"] == "enum"):
+                if(tag.name == "struct" or tag.name == "vector" or tag.name == "enum"):
                     
-                    if(page_title == "" or (not tag.has_key("page_title"))):
+                    if(page_title == "" or (not tag.page_title)):
                         hierarchy = os.path.basename(page["source_file"])
                         hierarchy = hierarchy.replace("leeds_", "")
                         hierarchy = hierarchy.replace(".c", "")
@@ -515,18 +515,18 @@ class engine_t:
                         hierarchy = hierarchy.replace(".tpl", "")
                         hierarchy = hierarchy.replace("leeds", "cs4321")
 
-                        if(tag.has_key("modifiers")):
-                            if(isinstance(tag["modifiers"], DictType) and tag["modifiers"].has_key("hierarchy")):
-                                hierarchy = tag["modifiers"]["hierarchy"]
+                        if(tag.modifiers):
+                            if(isinstance(tag.modifiers, DictType) and tag.modifiers.has_key("hierarchy")):
+                                hierarchy = tag.modifiers["hierarchy"]
 
-                        tag["hierarchy"] = hierarchy
-                        tag["page"] = page["source_file"]
+                        tag.hierarchy = hierarchy
+                        tag.page = page["source_file"]
                         types.append(tag)
 
-                    elif(tag["page_title"] == page_title):
+                    elif(tag.page_title == page_title):
                         hierarchy = page["source_file"]
-                        if(tag["modifiers"].has_key("hierarchy")):
-                            hierarchy = tag["modifiers"]["hierarchy"]
+                        if(tag.modifiers.has_key("hierarchy")):
+                            hierarchy = tag.modifiers["hierarchy"]
                         
                         hierarchy = os.path.basename(hierarchy)
                         hierarchy = hierarchy.replace("leeds_", "")
@@ -535,11 +535,11 @@ class engine_t:
                         hierarchy = hierarchy.replace(".tpl", "")
                         hierarchy = hierarchy.replace("leeds", "cs4321")
 
-                        tag["hierarchy"] = hierarchy
-                        tag["page"] = page["source_file"]
+                        tag.hierarchy = hierarchy
+                        tag.page = page["source_file"]
                         types.append(tag)
         
-        types = sorted(types, key=lambda k: k['hierarchy'], reverse=False)
+        types = sorted(types, key=lambda k: k.hierarchy, reverse=False)
 
         return types
     
@@ -549,7 +549,7 @@ class engine_t:
         types = []
 
         if(tag != None):
-            page_title = tag["page_title"]
+            page_title = tag.page_title
         else:
             page_title = None
 
@@ -567,9 +567,9 @@ class engine_t:
 
                 #print tag
                 
-                if(tag["name"] == "testcase"):
+                if(tag.name == "testcase"):
                     
-                    if(page_title == "" or (not tag.has_key("page_title"))):
+                    if(page_title == "" or (not tag.page_title)):
                         category = os.path.basename(page["source_file"])
                         category = category.replace("leeds_", "")
                         category = category.replace(".c", "")
@@ -577,18 +577,18 @@ class engine_t:
                         category = category.replace(".tpl", "")
                         category = category.replace("leeds", "cs4321")
 
-                        if(tag.has_key("modifiers")):
-                            if(isinstance(tag["modifiers"], DictType) and tag["modifiers"].has_key("category")):
-                                category = tag["modifiers"]["category"]
+                        if(tag.modifiers):
+                            if(isinstance(tag.modifiers, DictType) and tag.modifiers.has_key("category")):
+                                category = tag.modifiers["category"]
 
-                        tag["category"] = category
-                        tag["page"] = page["source_file"]
+                        tag.category = category
+                        tag.page = page["source_file"]
                         types.append(tag)
 
-                    elif(tag["page_title"] == page_title):
+                    elif(tag.page_title == page_title):
                         category = page["source_file"]
-                        if(tag["modifiers"].has_key("category")):
-                            category = tag["modifiers"]["category"]
+                        if(tag.modifiers.has_key("category")):
+                            category = tag.modifiers["category"]
                         
                         category = os.path.basename(category)
                         category = category.replace("leeds_", "")
@@ -597,11 +597,11 @@ class engine_t:
                         category = category.replace(".tpl", "")
                         category = category.replace("leeds", "cs4321")
 
-                        tag["category"] = category
-                        tag["page"] = page["source_file"]
+                        tag.category = category
+                        tag.page = page["source_file"]
                         types.append(tag)
         
-        types = sorted(types, key=lambda k: k['category'], reverse=False)
+        types = sorted(types, key=lambda k: k.category, reverse=False)
 
         return types
 
@@ -622,7 +622,7 @@ class engine_t:
             dirname = os.path.dirname(snr)
             path = os.path.basename(snr)
             module_name = os.path.splitext(path)[0]
-            print "DIRNAME: %s, MODULE=%s, CWD=%s" % (dirname, module_name, os.getcwd())
+            #print "DIRNAME: %s, MODULE=%s, CWD=%s" % (dirname, module_name, os.getcwd())
             sys.path.append(dirname)
             module = __import__("%s" % module_name)
 
@@ -645,13 +645,13 @@ class engine_t:
 
             for tag in tags:
 
-                tag["result"] = None
+                tag.result = None
             
-                if(self.tag_is_executable(tag["name"])):
-                    source = tag["source"] 
+                if(self.tag_is_executable(tag.name)):
+                    source = tag.source 
 
                     executor = code_executor_t()
-                    tag["result"] = executor.execute(tag["name"], tag["source"], tag["modifiers"])
+                    tag.result = executor.execute(tag.name, tag.source, tag.modifiers)
                 
         # If the version number was not specified on the command
         # line then use any @docversion one specified in one of

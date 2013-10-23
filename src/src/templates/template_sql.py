@@ -115,9 +115,11 @@ within an HTML document.
                         within another element like a table?
 '''
 
-        if(isinstance(tag, dict)):
+        if(isinstance(tag, tag_t)):
             paragraphs = tag["contents"]
         else:
+            print "WTF"
+            sys.exit(-1)
             paragraphs = tag
 
         html = ''
@@ -442,7 +444,7 @@ within an HTML document.
         html.m_wikiword_path_prefix = False
         help = html.format_prototype(tag)
         
-        prototype = tag["contents"]
+        prototype = tag.contents
 
         function = {}
         function["name"] = prototype["name"]
@@ -502,9 +504,9 @@ within an HTML document.
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
         html.m_wikiword_path_prefix = False
-        help = html.format_struct(tag["source"], tag["contents"])
+        help = html.format_struct(tag.source, tag.contents)
         
-        obj = tag["contents"]
+        obj = tag.contents
 
         struct = {}
         struct["name"] = obj["title"]
@@ -526,7 +528,7 @@ within an HTML document.
         html.m_wikiword_path_prefix = False
         help = html.format_enum(tag)
         
-        obj = tag["contents"]
+        obj = tag.contents
 
         enum = {}
         enum["name"] = obj["title"]
@@ -564,7 +566,7 @@ within an HTML document.
 
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
         sql = ''
 
         if(name == "prototype"):
@@ -615,9 +617,9 @@ CREATE TABLE Params
 
             for tag in tags:
 
-                if(self.m_engine.tag_is_header(tag["name"])):
+                if(self.m_engine.tag_is_header(tag.name)):
                     skip = 1
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     skip = 1
                 else:
                     sql += self.append(tag)

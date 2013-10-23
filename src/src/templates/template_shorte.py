@@ -89,7 +89,7 @@ class template_shorte_t(template_t):
 
         self.m_num_enums += 1
 
-        table = tag["contents"]
+        table = tag.contents
         
         if(table.has_key("title")):
             title = table["title"]
@@ -153,9 +153,9 @@ $caption
         """)
 
         vars = {}
-        vars["name"] = tag["contents"]["name"]
-        vars["caption"] = trim_leading_indent(tag["contents"]["desc"])
-        vars["value"] = escape_string(tag["contents"]["value"])
+        vars["name"] = tag.contents["name"]
+        vars["caption"] = trim_leading_indent(tag.contents["desc"])
+        vars["value"] = escape_string(tag.contents["value"])
 
         return template.substitute(vars)
 
@@ -165,7 +165,7 @@ $caption
         
         self.m_num_structs += 1
 
-        table = tag["contents"]
+        table = tag.contents
         
         if(table.has_key("title")):
             title = table["title"]
@@ -211,20 +211,20 @@ $values
 
     def format_prototype(self, tag):
 
-        prototype = tag["contents"]
+        prototype = tag.contents
 
         self.m_num_prototypes += 1
        
         template = string.Template('''
 @h4 $name
 @prototype
-- function:
+-- function:
     $name
 $prototype
-- description:
+-- description:
 $desc
 $params
-- returns:
+-- returns:
     $returns
 $example
 $pseudocode
@@ -242,7 +242,7 @@ $deprecated
 
         if(prototype.has_key("prototype")):
             function["prototype"] = '''
-- prototype:
+-- prototype:
     %s
 ''' % prototype["prototype"]["unparsed"]
 
@@ -256,7 +256,7 @@ $deprecated
 
 
             function["params"] = '''
-- params:
+-- params:
     %s
 ''' % output
 
@@ -264,19 +264,19 @@ $deprecated
 
         if(prototype.has_key("example")):
             function["example"] = '''
-- example:
+-- example:
 %s
 ''' % self.format_source_code(prototype["example"]["unparsed"])
         
         if(prototype.has_key("pseudocode")):
             function["pseudocode"] = '''
-- pseudocode:
+-- pseudocode:
 %s
 ''' % self.format_source_code(prototype["pseudocode"]["unparsed"])
 
         if(prototype.has_key("see_also") and prototype["see_also"] != None):
             function["seealso"] = '''
-- see also:
+-- see also:
 %s
 ''' % (prototype["see_also"])
         else:
@@ -284,7 +284,7 @@ $deprecated
         
         if(prototype.has_key("deprecated") and prototype["deprecated"] != None):
             function["deprecated"] = '''
-- deprecated:
+-- deprecated:
 %s
 ''' % (prototype["deprecated"])
         else:
@@ -300,7 +300,7 @@ $deprecated
     
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 

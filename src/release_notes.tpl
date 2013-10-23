@@ -6,6 +6,30 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.59 (Oct 23, 2013)
+Minor release to address the following issues:
+- Issues with parsing inline tables in function
+  headers
+- Partial fix to allow escaping characters with the \
+  character in text blocks. This is useful for preventing
+  the - getting expanded as a list.
+- Converted the existing tag dictionary to a class object
+  to make the source easier to maintain.
+
+@table: title="Closed/Partially Closed Bugs"
+- Bug | Description
+- 29  | Fixed issues parsing embedded tags like tables in
+        function prototypes caused by converting first from
+        C to shorte and then from shorte to HTML/PDF. Had to
+        change the @prototype tag to use -- to separate sections
+        since the parser is not very smart.
+- 27  | Fixed the escaping of the - character in text blocks
+        so that it is not expanded to a list if it is preceded
+        by an escape character '\'.
+       
+        This bug partially resolved but still needs some more
+        effort to be properly closed.
+
 
 @h3 Version 1.0.58 (Oct 15, 2013)
 Minor release that adds:

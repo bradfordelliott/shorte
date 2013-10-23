@@ -39,6 +39,22 @@ class wikiword_t:
         self.label = ""
         self.link = ""
 
+class tag_t:
+    def __init__(self):
+        self.source = ""
+        self.attributes = {}
+        self.name = ""
+        self.contents = None
+        self.page_title = None
+        self.break_before = False
+        self.file = ""
+        self.line = 0
+        self.is_header = False
+        self.is_prototype = False
+        self.result = None
+        self.hierarchy = ""
+        self.category = ""
+        self.page = None
 
 g_tools = tools_t()
 

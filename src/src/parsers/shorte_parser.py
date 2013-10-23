@@ -165,7 +165,7 @@ class shorte_parser_t(parser_t):
     def get_header(self, name):
         
         for header in self.m_headers:
-            if(header["contents"] == name):
+            if(header.contents == name):
                 return header
 
         return None
@@ -242,28 +242,28 @@ class shorte_parser_t(parser_t):
         header["sourcedir"] = None
 
         for tag in tags:
-            if(tag["name"] == "doctitle"):
-                header["title"] = tag["contents"]
-            elif(tag["name"] == "docfilename"):
-                header["filename"] = tag["contents"]
-            elif(tag["name"] == "title"):
-                header["title"] = tag["contents"]
-            elif(tag["name"] == "docsubtitle"):
-                header["subtitle"] = tag["contents"]
-            elif(tag["name"] == "csource"):
-                header["csource"] = tag["contents"]
-            elif(tag["name"] == "docversion"):
-                header["version"] = tag["contents"]
-            elif(tag["name"] == "docnumber"):
-                header["number"] = tag["contents"]
-            elif(tag["name"] == "docrevisions"):
-                header["revision_history"] = self.parse_table(tag["contents"], tag["modifiers"])
-            elif(tag["name"] == "sourcedir"):
-                header["sourcedir"] = tag["contents"]
+            if(tag.name == "doctitle"):
+                header["title"] = tag.contents
+            elif(tag.name == "docfilename"):
+                header["filename"] = tag.contents
+            elif(tag.name == "title"):
+                header["title"] = tag.contents
+            elif(tag.name == "docsubtitle"):
+                header["subtitle"] = tag.contents
+            elif(tag.name == "csource"):
+                header["csource"] = tag.contents
+            elif(tag.name == "docversion"):
+                header["version"] = tag.contents
+            elif(tag.name == "docnumber"):
+                header["number"] = tag.contents
+            elif(tag.name == "docrevisions"):
+                header["revision_history"] = self.parse_table(tag.contents, tag.modifiers)
+            elif(tag.name == "sourcedir"):
+                header["sourcedir"] = tag.contents
                 self.m_engine.set_working_dir(header["sourcedir"])
 
-            elif(tag["name"] == "outdir"):
-                header["outdir"] = tag["contents"]
+            elif(tag.name == "outdir"):
+                header["outdir"] = tag.contents
                 self.m_engine.set_output_dir(header["outdir"])
 
         return header
@@ -355,6 +355,9 @@ class shorte_parser_t(parser_t):
                     #             escape sequence backslashes
                     if(self.tag_is_source_code(tag_name)):
                         tag_data += input[i]
+                    # DEBUG BRAD: Added this on Oct 19, 2013
+                    else:
+                        tag_data += input[i]
 
                     tag_data += input[i+1]
                     i+=2
@@ -393,7 +396,7 @@ class shorte_parser_t(parser_t):
 
             i = i + 1
 
-        #print "tag modifier=%s" % tag_modifier
+        #print "TAG:\n  DATA: [%s]\n  MODIFIERS: [%s]" % (tag_data, tag_modifier)
 
         return (i, tag_data, tag_modifier)
     
@@ -811,9 +814,10 @@ class shorte_parser_t(parser_t):
                     i += 1
                     continue
                     
-                if(row[i] == '\\'):
-                    i += 2
-                    continue
+                #if(row[i] == '\\'):
+                #    print "DO I GET HERE?"
+                #    i += 2
+                #    continue
                         
                 if(state == STATE_NORMAL):
 
@@ -1384,11 +1388,11 @@ a C/C++ like define that looks like:
                 if(section.startswith("name:")):
                     vars["name"] = section[5:len(section)].strip()
                 if(section.startswith("desc:")):
-                    tag = {}
-                    tag["contents"] = trim_leading_indent(section[5:len(section)])
+                    tag = tag_t()
+                    tag.contents = trim_leading_indent(section[5:len(section)])
                     #print "contents: [%s]" % tag["contents"]
-                    tag["source"] = tag["contents"]
-                    tag["contents"] = self.parse_textblock(tag["contents"])
+                    tag.source = tag.contents
+                    tag.contents = self.parse_textblock(tag.contents)
 
                     vars["desc"] = tag
                 if(section.startswith("status:")):
@@ -1402,7 +1406,7 @@ a C/C++ like define that looks like:
     
     def parse_prototype(self, source, modifiers):
         
-        splitter = re.compile("^-[ \t]*", re.MULTILINE)
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
 
         vars = {}
@@ -1411,7 +1415,7 @@ a C/C++ like define that looks like:
         language = "code"
         if(modifiers.has_key("language")):
             language = modifiers["language"]
-        
+
         for section in sections:
             if(section != ""):
                 
@@ -1422,7 +1426,7 @@ a C/C++ like define that looks like:
                     vars["desc"] = section[12:len(section)].strip()
                     tmp = section[12:len(section)]
                     vars["desc2"] = self.parse_textblock(tmp)
-                
+
                 elif(section.startswith("prototype:")):
                     vars["prototype"] = section[10:len(section)].strip()
 
@@ -1790,24 +1794,24 @@ else:
                 #print "DO I GET HERE?"
                 return None
 
-        tag = {}
-        tag["name"] = name
-        tag["contents"] = data
-        tag["source"] = data
-        tag["modifiers"] = modifiers
-        tag["page_title"] = page_title
+        tag = tag_t()
+        tag.name = name
+        tag.contents = data
+        tag.source = data
+        tag.modifiers = modifiers
+        tag.page_title = page_title
 
         if(modifiers.has_key("break_before")):
-            tag["break_before"] = bool(modifiers["break_before"])
+            tag.break_before = bool(modifiers["break_before"])
 
         filename = os.path.basename(self.m_current_file)
         linenum  = self.m_current_line
 
-        tag["file"] = filename
-        tag["line"] = linenum
+        tag.file = filename
+        tag.line = linenum
 
         if(self.tag_is_header(name)):
-            tag["is_header"] = True 
+            tag.is_header = True 
 
             # DEBUG BRAD: old way of dealing with headers
             #    tmp = data
@@ -1824,8 +1828,8 @@ else:
             # the first line as a text block
             lines = data.split('\n')
             tmp = lines[0].strip()
-            tag["contents"] = tmp
-            tag["source"] = tmp
+            tag.contents = tmp
+            tag.source = tmp
 
             if(name != "h"):
                 word = wikiword_t()
@@ -1845,14 +1849,14 @@ else:
 
             # Now create a new text tag with the remainder 
             lines.pop(0)
-            tag = {}
-            tag["name"] = "text"
-            tag["source"] = '\n'.join(lines)
-            tag["contents"] = self.parse_textblock(tag["source"])
-            tag["modifiers"] = modifiers
-            tag["page_title"] = page_title
-            tag["file"] = filename
-            tag["line"] = linenum
+            tag = tag_t()
+            tag.name = "text"
+            tag.source = '\n'.join(lines)
+            tag.contents = self.parse_textblock(tag.source)
+            tag.modifiers = modifiers
+            tag.page_title = page_title
+            tag.file = filename
+            tag.line = linenum
 
             tags.append(tag)
 
@@ -1866,18 +1870,18 @@ else:
              name == "csource"):
             tmp = data
             tmp = re.sub("\n", " ", tmp).strip()
-            tag["source"] = data
-            tag["contents"] = tmp
+            tag.source = data
+            tag.contents = tmp
 
 
         elif(self.tag_is_source_code(name)):
             code = source_code_t()
         
-            tag["source"] = data
-            tag["contents"] = code.parse_source_code(name, data)
+            tag.source = data
+            tag.contents = code.parse_source_code(name, data)
 
         elif(name == "table"):
-            tag["contents"] = self.parse_table(data, modifiers)
+            tag.contents = self.parse_table(data, modifiers)
 
         elif(name == "include" or name == "include_child"):
             print "Parsing include(s) [%s]" % data
@@ -1894,29 +1898,29 @@ else:
 
         elif(name == "struct"):
             modifiers["treat_fields_as"] = "bytes"
-            tag["contents"] = self.parse_struct(data, modifiers)
+            tag.contents = self.parse_struct(data, modifiers)
 
         elif(name == "define"):
-            tag["contents"] = self.parse_define(data, modifiers)
+            tag.contents = self.parse_define(data, modifiers)
         
         elif(name == "vector"):
-            tag["contents"] = self.parse_struct(data, modifiers)
-            tag["name"] = "struct"
+            tag.contents = self.parse_struct(data, modifiers)
+            tag.name = "struct"
 
         elif(name in ("ol", "ul")):
-            tag["contents"] = self.parse_list(data, modifiers)
+            tag.contents = self.parse_list(data, modifiers)
 
         elif(name == "image"):
-            tag["contents"] = self.parse_image(modifiers)
+            tag.contents = self.parse_image(modifiers)
 
         elif(name == "imagemap"):
-            tag["contents"] = self.parse_imagemap(data, modifiers)
+            tag.contents = self.parse_imagemap(data, modifiers)
 
         elif(name == "embed"):
-            tag["contents"] = self.parse_embed(modifiers)
+            tag.contents = self.parse_embed(modifiers)
 
         elif(name == "input"):
-            tag["contents"] = self.parse_input(modifiers)
+            tag.contents = self.parse_input(modifiers)
         
         elif(name == "prototype"):
             
@@ -1926,15 +1930,15 @@ else:
 
                 # Automatically add a header before function prototypes
 
-                header = {}
-                header["is_header"] = True
-                header["is_prototype"] = True
-                header["name"] = prototype_add_header
-                header["contents"] = function["name"]
-                header["source"] = function["name"]
-                header["modifiers"] = modifiers
-                header["file"] = filename
-                header["line"] = linenum
+                header = tag_t()
+                header.is_header = True
+                header.is_prototype = True
+                header.name = prototype_add_header
+                header.contents = function["name"]
+                header.source = function["name"]
+                header.modifiers = modifiers
+                header.file = filename
+                header.line = linenum
                 
                 # If a header with the same name already exists then don't
                 # bother adding a new one
@@ -1957,24 +1961,24 @@ else:
 
                     tags.append(header)
                 else:
-                    hdr_tag["is_prototype"] = True
+                    hdr_tag.is_prototype = True
             
-            tag["contents"] = function
+            tag.contents = function
 
         elif(name == "testcase"):
             testcase = self.parse_testcase(data, modifiers)
 
             # Automatically add a header before testcase definitions
             if(testcase_add_header != None):
-                header = {}
-                header["is_header"] = True
-                header["is_prototype"] = True
-                header["name"] = testcase_add_header
-                header["contents"] = testcase["name"]
-                header["source"] = testcase["name"]
-                header["modifiers"] = modifiers
-                header["file"] = filename
-                header["line"] = linenum
+                header = tag_t()
+                header.is_header = True
+                header.is_prototype = True
+                header.name = testcase_add_header
+                header.contents = testcase["name"]
+                header.source = testcase["name"]
+                header.modifiers = modifiers
+                header.file = filename
+                header.line = linenum
                 
                 # If a header with the same name already exists then don't
                 # bother adding a new one
@@ -1997,30 +2001,30 @@ else:
 
                     tags.append(header)
                 else:
-                    hdr_tag["is_prototype"] = True
+                    hdr_tag.is_prototype = True
 
-            tag["contents"] = testcase
+            tag.contents = testcase
 
 
         elif(name == "functionlist"):
             vars = {}
-            tag["contents"] = vars
+            tag.contents = vars
 
         elif(name == "inkscape"):
-            tag["contents"] = self._parse_inkscape(data, modifiers)
-            tag["name"] = "image"
+            tag.contents = self._parse_inkscape(data, modifiers)
+            tag.name = "image"
 
         elif(name == "pre"):
-            tag["contents"] = data.strip()
+            tag.contents = data.strip()
 
         elif(name == "checklist"):
-            tag["contents"] = self.parse_checklist(data, modifiers)
+            tag.contents = self.parse_checklist(data, modifiers)
 
         elif(name == "enum"):
-            tag["contents"] = self.parse_table(data, modifiers)
-            tag["name"] = "enum"
+            tag.contents = self.parse_table(data, modifiers)
+            tag.name = "enum"
             
-            table = tag["contents"]
+            table = tag.contents
             
             i = 0
             num_rows = len(table["rows"])
@@ -2055,9 +2059,9 @@ else:
             table["name"] = table["title"]
 
         elif(name == "acronyms"):
-            tag["contents"] = self.parse_table(data, modifiers)
+            tag.contents = self.parse_table(data, modifiers)
 
-            table = tag["contents"]
+            table = tag.contents
 
             i = 0
             num_rows = len(table["rows"])
@@ -2083,22 +2087,22 @@ else:
                 table["title"] = "Acronyms"
 
         elif(name == "sequence"):
-            tag["contents"] = self.parse_sequence(data, modifiers)
+            tag.contents = self.parse_sequence(data, modifiers)
 
         elif(name == "questions"):
-            tag["contents"] = self.parse_questions(data, modifiers)
+            tag.contents = self.parse_questions(data, modifiers)
 
         elif(name == "text"):
-            tag["source"] = tag["contents"]
-            tag["contents"] = self.parse_textblock(tag["source"])
+            tag.source = tag.contents
+            tag.contents = self.parse_textblock(tag.source)
 
         elif(name == "note"):
-            tag["source"] = tag["contents"]
-            tag["contents"] = self.parse_textblock(tag["source"])
+            tag.source = tag.contents
+            tag.contents = self.parse_textblock(tag.source)
         
         elif(name == "tbd"):
-            tag["source"] = tag["contents"]
-            tag["contents"] = self.parse_textblock(tag["source"])
+            tag.source = tag.contents
+            tag.contents = self.parse_textblock(tag.source)
 
         tags.append(tag)
 
@@ -2301,6 +2305,7 @@ else:
                             states.append(STATE_INTAG)
                         
                     elif(input[i] == '\\'):
+                        #tag_data += '\\'
                         states.append(STATE_ESCAPE)
                 
                 elif(state == STATE_ESCAPE):
@@ -2421,6 +2426,7 @@ else:
                     states.append(STATE_INTAG)
                     
                 elif(input[i] == '\\'):
+                    tag_data += '\\'
                     states.append(STATE_ESCAPE)
             
             elif(state == STATE_ESCAPE):
@@ -2641,7 +2647,7 @@ def exists(s):
                             states.append(STATE_INTAG)
                         
                     elif(input[i] == '\\'):
-                        tag_data += input[i]
+                        #tag_data += input[i]
                         states.append(STATE_ESCAPE)
                 
                 elif(state == STATE_ESCAPE):

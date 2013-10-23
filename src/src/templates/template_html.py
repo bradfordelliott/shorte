@@ -751,7 +751,7 @@ class template_html_t(template_t):
 
 
         return note_template.substitute(
-            {"contents" : self.format_text(content),
+            {"contents" : content,
              "image"    : img_src,
              "title"    : "TBD"})
     
@@ -770,12 +770,12 @@ class template_html_t(template_t):
             
     def format_checklist(self, tag):
         
-        list = tag["contents"]
+        list = tag.contents
 
         source = ''
 
-        if(tag["modifiers"].has_key("title")):
-            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag["modifiers"]["title"] 
+        if(tag.modifiers.has_key("title")):
+            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag.modifiers["title"] 
 
         source += "<ul style='list-style-type:none'>"
 
@@ -788,8 +788,8 @@ class template_html_t(template_t):
 
         source += "</ul>"
 
-        if(tag["modifiers"].has_key("caption")):
-            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag["modifiers"]["title"] 
+        if(tag.modifiers.has_key("caption")):
+            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag.modifiers["title"] 
 
         return source
     
@@ -858,10 +858,10 @@ class template_html_t(template_t):
 
     def format_function_summary(self, tag):
 
-        if(tag.has_key("modifiers")):
-            if(tag["modifiers"].has_key("src")):
-                src_file = tag["modifiers"]["src"]
-                tag["page_title"] = src_file
+        if(tag.modifiers):
+            if(tag.modifiers.has_key("src")):
+                src_file = tag.modifiers["src"]
+                tag.page_title = src_file
 
         tags = self.m_engine.get_function_summary(tag)
 
@@ -871,7 +871,7 @@ class template_html_t(template_t):
     
         for tag in tags:
 
-            function = tag["contents"]
+            function = tag.contents
 
             desc = ''
             if(function.has_key("desc2")):
@@ -879,8 +879,8 @@ class template_html_t(template_t):
             elif(function.has_key("desc")):
                 desc = function["desc"]
             
-            if(tag["hierarchy"] != hierarchy):
-                hierarchy = tag["hierarchy"]
+            if(tag.hierarchy != hierarchy):
+                hierarchy = tag.hierarchy
                 html += '''
 <tr valign=top>
     <td colspan=2 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">%s</td>
@@ -917,7 +917,7 @@ class template_html_t(template_t):
     
         for tag in tags:
 
-            struct = tag["contents"]
+            struct = tag.contents
 
             desc = ''
             if(struct.has_key("caption")):
@@ -934,7 +934,7 @@ class template_html_t(template_t):
     <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
     <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'>$desc</td>
 </tr>
-''').substitute({"type": tag["name"], "name" : self.format_text(struct["title"]), "desc" : desc})
+''').substitute({"type": tag.name, "name" : self.format_text(struct["title"]), "desc" : desc})
         
         html += '</table><br/>'
 
@@ -966,10 +966,10 @@ class template_html_t(template_t):
     
         for tag in tags:
 
-            testcase = tag["contents"]
+            testcase = tag.contents
             
-            if(tag["category"] != category):
-                category = tag["category"]
+            if(tag.category != category):
+                category = tag.category
                 html += '''
 <tr valign=top>
     <td colspan=4 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">Category: %s</td>
@@ -1124,7 +1124,7 @@ class template_html_t(template_t):
                 </div>
                 ''')
         
-        prototype = tag["contents"]
+        prototype = tag.contents
         
         file = "blah"
         function = {}
@@ -1144,8 +1144,8 @@ class template_html_t(template_t):
             function["desc"] = self.format_text(prototype["desc"], expand_equals_block=True)
         if(prototype.has_key("desc2")):
             #print "Do I get here?"
-            tag = {}
-            tag["contents"] = prototype["desc2"]
+            tag = tag_t()
+            tag.contents = prototype["desc2"]
             #print "CONTENTS [%s]" % tag["contents"]
             function["desc"] = self.format_textblock(tag)
         
@@ -1184,8 +1184,8 @@ class template_html_t(template_t):
                 param["desc"] = html_tmp
 
                 if(param.has_key("desc2")):
-                    tag = {}
-                    tag["contents"] = param["desc2"]
+                    tag = tag_t()
+                    tag.contents = param["desc2"]
                     param["desc"] = self.format_textblock(tag)
                 else:
                     print "WTF?"
@@ -1319,7 +1319,7 @@ class template_html_t(template_t):
         </div>
         """)
 
-        testcase = tag["contents"]
+        testcase = tag.contents
 
         duration = ""
         if(testcase["duration"] != ""):
@@ -1383,8 +1383,8 @@ class template_html_t(template_t):
                 for col in row["cols"]:
 
                     if(col.has_key("textblock")):
-                        tag = {}
-                        tag["contents"] = col["textblock"]
+                        tag = tag_t() 
+                        tag.contents = col["textblock"]
                         text = self.format_textblock(tag, False)
                     else:
                         text = self.format_text(col["text"])
@@ -1423,7 +1423,7 @@ class template_html_t(template_t):
     
     def format_sequence(self, tag):
 
-        image = tag["contents"]
+        image = tag.contents
         html = self.format_image(image)
         html += '''
 <style>
@@ -1448,13 +1448,13 @@ table.inline tr.alternaterow
 }
 </style>
 '''
-        html += self.format_table("", tag["contents"]["html"])
+        html += self.format_table("", tag.contents["html"])
 
         return html
 
     def format_input(self, tag):
 
-        input = tag["contents"]
+        input = tag.contents
         label = input["label"]
 
         if(input["type"] == "submit"):
@@ -1485,8 +1485,8 @@ within an HTML document.
                         within another element like a table?
 '''
 
-        if(isinstance(tag, dict)):
-            paragraphs = tag["contents"]
+        if(isinstance(tag, tag_t)):
+            paragraphs = tag.contents
         else:
             paragraphs = tag
 
@@ -1536,7 +1536,7 @@ within an HTML document.
 
         html = '<table style="width:70%;margin-left:30px;background-color:#ddd;">'
 
-        questions = tag["contents"]
+        questions = tag.contents
 
 
         for question in questions:
@@ -1557,7 +1557,7 @@ within an HTML document.
 
         html = ''
 
-        questions = tag["contents"]
+        questions = tag.contents
 
         for question in questions:
 
@@ -1575,8 +1575,8 @@ within an HTML document.
     
     def format_acronyms(self, tag):
 
-        source = tag["source"]
-        table = tag["contents"]
+        source = tag.source
+        table = tag.contents
 
         html = "<table class='bordered'>\n"
 
@@ -1655,7 +1655,7 @@ within an HTML document.
            '''
 
 
-        table = tag["contents"]
+        table = tag.contents
         #print table
 
         if(self.m_engine.get_config("html", "show_enum_values") == "1"):
@@ -1776,7 +1776,7 @@ within an HTML document.
 
     def format_define(self, tag):
 
-        define = tag["contents"]
+        define = tag.contents
 
         html = '''<div class='bordered'><div class='question'><b>%s</b> = %s</div><div>%s</div></div><br/>''' % (define["name"], define["value"], self.format_textblock(define["description"]))
 
@@ -2077,7 +2077,7 @@ $href_end
     
     def format_embedded_object(self, tag):
 
-        obj = tag["contents"]
+        obj = tag.contents
 
         name = obj["name"] + obj["ext"]
 
@@ -2377,11 +2377,11 @@ $href_end
      
     def append_source_code(self, tag):
 
-        rc = self.format_source_code(tag["name"], tag["contents"])
+        rc = self.format_source_code(tag.name, tag.contents)
 
-        source = self.format_source_code_no_lines(tag["name"], tag["contents"])
+        source = self.format_source_code_no_lines(tag.name, tag.contents)
 
-        result = tag["result"]
+        result = tag.result
 
         snippet_id = self.m_snippet_id
         self.m_snippet_id += 1
@@ -2423,38 +2423,38 @@ $href_end
     
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_contents += "<p>" + self.format_text(tag["contents"]) + "</p>\n"
+            self.m_contents += "<p>" + self.format_text(tag.contents) + "</p>\n"
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
         elif(name == "pre"):
-            self.m_contents += "<pre style='margin-left:10px;'>" + self.format_text(tag["contents"]) + "</pre>\n"
+            self.m_contents += "<pre style='margin-left:10px;'>" + self.format_text(tag.contents) + "</pre>\n"
         elif(name == "note"):
             self.m_contents += self.format_note(tag)
         elif(name == "tbd"):
             self.m_contents += self.format_tbd(tag)
         elif(name == "question"):
-            self.m_contents += self.format_question(self.format_text(tag["contents"]))
+            self.m_contents += self.format_question(self.format_text(tag.contents))
         elif(name == "table"):
-            self.m_contents += self.format_table(tag["source"], tag["contents"])
+            self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag["source"], tag["contents"])
+            self.m_contents += self.format_struct(tag.source, tag.contents)
         elif(name == "define"):
             self.m_contents += self.format_define(tag)
         elif(name == "ul"):
-            self.m_contents += self.format_list(tag["contents"], False)
+            self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_contents += self.format_list(tag["contents"], True)
+            self.m_contents += self.format_list(tag.contents, True)
         elif(name == "checklist"):
             self.m_contents += self.format_checklist(tag)
         elif(name == "image"):
-            self.m_contents += self.format_image(tag["contents"])
+            self.m_contents += self.format_image(tag.contents)
         elif(name == "imagemap"):
             self.m_contents += self.format_imagemap(tag)
         elif(name == "prototype"):
@@ -2488,7 +2488,7 @@ $href_end
         elif(name == "input"):
             self.m_contents += self.format_input(tag)
         else:
-            print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
+            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
         
 
         #elif(tag == "pycairo"):
@@ -3260,10 +3260,10 @@ div.tblkp  {margin:0px;padding:0px;}
 
                 #print "TAG: %s" % tag["name"]
 
-                if(self.m_engine.tag_is_header(tag["name"])):
-                    self.append_header(tag["name"], tag["contents"], output_file)
+                if(self.m_engine.tag_is_header(tag.name)):
+                    self.append_header(tag.name, tag.contents, output_file)
 
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
 
                 else:

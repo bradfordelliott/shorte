@@ -203,6 +203,7 @@ class parser_t:
         STATE_LIST = 1
         STATE_CODE = 2
         STATE_INLINE = 3
+        STATE_ESCAPE = 4
         states = []
         states.append(STATE_NORMAL)
 
@@ -218,7 +219,19 @@ class parser_t:
 
             state = states[-1]
 
+            if(state == STATE_ESCAPE):
+                segment["text"] += data[i]
+                states.pop()
+                i += 1
+                continue
+                
+            if(data[i] == '\\'):
+                i += 1
+                states.append(STATE_ESCAPE)
+                continue
+
             if(state == STATE_NORMAL):
+
                 # If the line starts with - or * then treat it
                 # as a list. If it is ** then it is actually bold text
                 if(data[i] == "-"): #  or (data[i] == "*" and (i+1 < len(data) and data[i+1] != "*"))):
