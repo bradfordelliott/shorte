@@ -2182,7 +2182,7 @@ $href_end
             if(self.m_wikiword_path_prefix):
                 output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.label, wikiword.label)
             else:
-                output = "<a href='%s'>%s</a>" % (link.wikiword, link.label)
+                output = "<a href='%s'>%s</a>" % (wikiword.link, wikiword.label)
 
         return output
 
