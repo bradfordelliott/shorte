@@ -2452,7 +2452,7 @@ class template_odt_t(template_t):
                 text_style = self.m_styles["para"]["fdesc"]
                 text_style_code = self.m_styles["para"]["code2"]
 
-                cols.append({"span":1, 'text':tag["name"], "style": style, "text-style": text_style})
+                cols.append({"span":1, 'text':tag.name, "style": style, "text-style": text_style})
                 cols.append({"span":1, 'text':text, "style" : style, "text-style": text_style})
                 row["cols"] = cols
                 table["rows"].append(row)
