@@ -116,10 +116,8 @@ within an HTML document.
 '''
 
         if(isinstance(tag, tag_t)):
-            paragraphs = tag["contents"]
+            paragraphs = tag.contents
         else:
-            print "WTF"
-            sys.exit(-1)
             paragraphs = tag
 
         html = ''
@@ -512,7 +510,7 @@ within an HTML document.
         struct["name"] = obj["title"]
         struct["desc"] = ''
         struct["help"] = self.sqlize(help)
-        
+       
         if(obj.has_key("caption")):
             struct["desc"] = self.format_textblock(obj["caption"])
         
