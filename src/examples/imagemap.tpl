@@ -12,4 +12,4 @@
 - circle | 25,25,25        | Blah      | Blah blah blah
 - rect   | 100,100,200,200 | Blah2     | More blah blah
 
-@image: map="one" src="test.png"
+@image: map="one" src="examples/test.png"

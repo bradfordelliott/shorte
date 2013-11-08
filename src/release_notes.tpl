@@ -6,6 +6,25 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.60 (Nov 8, 2013)
+Minor bug fix release.
+
+@table: title="Closed Bugs"
+- Bug | Description
+- 33  | Updated to remove spurious debug message when generating ODT
+        documents instead of PDFs.
+- 34  | Checked in a zip file of the cairo dependencies to simplify
+        building on Windows. In future may want to change this so that
+        it downloads them from the web.
+- 35  | Resolved issue with latest version of LibreOffice because
+        multiple pictures are using the same draw:name tag. This causes
+        LibreOffice to complain and a PDF can't be generated.
+- 36  | Updated the mergefile package to include a placeholder document header.
+- 37  | Updated the mergefile package to include an @body tag.
+- 38  | Updated the SQL template to turn on transactions for faster
+        performance.
+
+
 @h3 Version 1.0.59 (Oct 23, 2013)
 Minor release to address the following issues:
 - Issues with parsing inline tables in function
@@ -29,6 +48,7 @@ Minor release to address the following issues:
        
         This bug partially resolved but still needs some more
         effort to be properly closed.
+
 
 
 @h3 Version 1.0.58 (Oct 15, 2013)

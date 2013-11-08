@@ -20,6 +20,8 @@ import shutil
 import time
 from string import Template;
 
+import sys
+sys.path.append("libs")
 try:
     import Image
 except:
@@ -1217,13 +1219,13 @@ class template_odt_t(template_t):
         data = """
 %s
 <text:p text:style-name="Standard">
-<draw:frame draw:style-name="fr1" draw:name="graphics1" text:anchor-type="character" %s %s draw:z-index="0">
+<draw:frame draw:style-name="fr1" draw:name="graphics%d" text:anchor-type="character" %s %s draw:z-index="0">
     <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
 </draw:frame>
 </text:p>
 %s
 %s
-""" % (tag_start, width, height, basename, caption, tag_end)
+""" % (tag_start, self.m_image_id+10, width, height, basename, caption, tag_end)
         
 #        data = """
 #</text:p>
@@ -3347,7 +3349,7 @@ class template_odt_t(template_t):
             path_output = path_input
             path_output = path_output.replace(".odt", "")
 
-            output = output + "_copy.odt"
+            path_output = path_output + "_copy.odt"
 
             cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (
                 path_oowriter,

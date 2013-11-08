@@ -1,13 +1,15 @@
 PATH_VCEXPRESS := "C:/Program Files/Microsoft Visual Studio 10.0/Common7/IDE/vcexpress.EXE"
+PATH_VCVARS    := "C:/Program Files/Microsoft Visual Studio 10.0/VC/bin/vcvars32.bat"
 
 # If this is a 64 bit machine then fix the path to visual studio
 TEST = $(shell ls "C:/Program Files (x86)/Microsoft Visual Studio 10.0/Common7/IDE/VCExpress.exe")
 ifneq ("$(TEST)", "")
      override PATH_VCEXPRESS := ${TEST}
+     override PATH_VCVARS    := "C:/Program Files (x86)/Microsoft Visual Studio 10.0/VC/bin/vcvars32.bat"
 endif
 
 
 all:
-	vcvars32.bat && "${PATH_VCEXPRESS}" /build release cairo_access.sln
+	${PATH_VCVARS} && "${PATH_VCEXPRESS}" /build release cairo_access.sln
 	cp Release/_cairo_access.pyd ../.
-	cp *.dll ../.
+	cp cairo/bin/*.dll ../.

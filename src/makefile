@@ -113,6 +113,7 @@ tests:
 	make test_bullets
 	make test_wikiwords
 	make test_conditionals
+	make test_images
 
 test_hello:
 	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
@@ -153,6 +154,9 @@ test_wikiwords:
 
 test_conditionals:
 	python shorte.py -f examples/conditionals.tpl -p "html+pdf" -o build-output/conditionals
+
+test_images:
+	python shorte.py -f examples/images.tpl -p "html+pdf" -o build-output/images
 
 
 test_junk:

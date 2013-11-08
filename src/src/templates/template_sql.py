@@ -585,6 +585,7 @@ within an HTML document.
         self.m_contents = ""
         links = []
         sql = '''
+BEGIN TRANSACTION;
 CREATE TABLE Types
 (
     id INTEGER AUTO_INCREMENT,
@@ -621,7 +622,8 @@ CREATE TABLE Params
                     skip = 1
                 else:
                     sql += self.append(tag)
-
+	
+	sql += '''END TRANSACTION;'''
          
         file = open(self.m_engine.m_output_directory + "/apis.sql", "w")
         file.write(sql)

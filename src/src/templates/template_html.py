@@ -2033,7 +2033,7 @@ $href_end
     
     def format_imagemap(self, imagemap):
         
-        imagemap = imagemap["contents"]
+        imagemap = imagemap.contents
         id = imagemap["id"]
 
         html = '''<map name="%s">

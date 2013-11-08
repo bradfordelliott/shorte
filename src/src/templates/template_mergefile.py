@@ -44,36 +44,42 @@ class template_mergefile_t(template_t):
         # Format the output pages
         pages = self.m_engine.m_parser.get_pages()
 
-        source = ""
+        source = '''
+@doctitle Merge File
+@docsubtitle Merge File
+@docversion 1.0
+
+@body
+'''
         
         for page in pages:
 
-            print "PAGE: %s" % page["title"]
+            #print "PAGE: %s" % page["title"]
             
             tags = page["tags"]
 
             for tag in tags:
 
-                print "TAG = %s" % tag["name"]
+                #print "TAG = %s" % tag.name
 
-                source += "@" + tag["name"]
-                if(tag.has_key("modifiers") and (len(tag["modifiers"]) > 0)):
+                source += "@" + tag.name
+                if(tag.modifiers != None and (len(tag.modifiers) > 0)):
 
                     source += ":"
-                    for modifier in tag["modifiers"]:
+                    for modifier in tag.modifiers:
 
                         name = modifier
-                        value = tag["modifiers"][name]
+                        value = tag.modifiers[name]
 
                         source += ' %s="%s"' % (name, value)
 
-                    source += "\n" + tag["source"] + "\n\n"
+                    source += "\n" + tag.source + "\n\n"
 
-                elif(tag["name"] in ("h1", "h2", "h3", "h4", "h5")):
-                    source += " " + tag["source"] + "\n\n"
+                elif(tag.name in ("h1", "h2", "h3", "h4", "h5", "h")):
+                    source += " " + tag.source + "\n\n"
                 else:
-                    if(tag.has_key("source")):
-                        source += "\n" + tag["source"] + "\n\n"
+		    if(tag.source != None):
+                        source += "\n" + tag.source + "\n\n"
 
         
         file = open(self.m_engine.m_output_directory + "/book.tpl", "w")
