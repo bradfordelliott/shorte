@@ -11,6 +11,9 @@ Minor bug fix release.
 
 @table: title="Closed Bugs"
 - Bug | Description
+- 15  | Worked on cleaning up the format for the @note template. Replaced the
+        old icons with my own since I don't know where they came from so I probably
+        should use something I know I have a license for.
 - 28  | Fixed issue with . and other punctuation marks being included
         as part of wikiwords. This was intended to hyperlink class identifiers
         like WikiWord.member but it doesn't work very well because it doesn't

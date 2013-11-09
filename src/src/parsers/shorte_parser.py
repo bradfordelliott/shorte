@@ -2099,6 +2099,10 @@ else:
         elif(name == "note"):
             tag.source = tag.contents
             tag.contents = self.parse_textblock(tag.source)
+
+        elif(name == "question"):
+            tag.source = tag.contents
+            tag.contents = self.parse_textblock(tag.source)
         
         elif(name == "tbd"):
             tag.source = tag.contents

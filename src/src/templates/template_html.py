@@ -755,7 +755,9 @@ class template_html_t(template_t):
              "image"    : img_src,
              "title"    : "TBD"})
     
-    def format_question(self, content):
+    def format_question(self, tag):
+
+	content = self.format_textblock(tag)
 
         img_src = "question.png"
 
@@ -764,9 +766,10 @@ class template_html_t(template_t):
             img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
             handle.close()
 
-        return question_template.substitute(
-            {"contents" : self.format_text(content),
-             "image"    : img_src})
+        return note_template.substitute(
+            {"contents" : content,
+             "image"    : img_src,
+             "title"    : "Question"})
             
     def format_checklist(self, tag):
         
@@ -2440,7 +2443,7 @@ $href_end
         elif(name == "tbd"):
             self.m_contents += self.format_tbd(tag)
         elif(name == "question"):
-            self.m_contents += self.format_question(self.format_text(tag.contents))
+            self.m_contents += self.format_question(tag)
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):

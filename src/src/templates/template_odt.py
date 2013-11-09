@@ -953,6 +953,7 @@ class template_odt_t(template_t):
 <style:style style:name="T8" style:family="text">
       <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold" officeooo:rsid="000885f5" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
+
     <style:style style:name="Frame_20_contents" style:display-name="Frame contents" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"/>
 
     <style:style style:name="shorte_note_frame" style:family="graphic" style:parent-style-name="Frame">
@@ -2157,22 +2158,22 @@ class template_odt_t(template_t):
 
 		
 	xml = '''
-<text:p text:style-name="shorte_standard_indented">
+<text:p text:style-name="shorte_standard">
 <draw:frame draw:style-name="shorte_note_frame" draw:name="Frame%d" text:anchor-type="as_character" style:rel-width="80%%" draw:z-index="13">
           <draw:text-box fo:min-height="0.2in" fo:min-width="0.7902in">
             <text:p text:style-name="shorte_standard_indented">
-              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.05in" svg:y="-0.0228in" svg:width="0.4592in" svg:height="0.4592in" draw:z-index="14">
+              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="0.05in" svg:y="0.05in" svg:width="0.3592in" svg:height="0.3592in" draw:z-index="14">
                 <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
               </draw:frame>
               <text:s text:c="4"/>
-	      <text:span text:style-name="T8">Note:</text:span>
+	      <text:span text:style-name="T8">%s</text:span>
             </text:p>
 	    %s
           </draw:text-box>
         </draw:frame>
 
 </text:p>
-	''' % (self.m_frame_id+10, self.m_image_id+10, image, source)
+	''' % (self.m_frame_id+10, self.m_image_id+10, image, label, source)
 
 	self.m_frame_id += 1
 	self.m_image_id += 1
@@ -3035,7 +3036,7 @@ class template_odt_t(template_t):
         elif(name == "tbd"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="TBD:", image="tbd.png")
         elif(name == "question"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_question(self.format_text(tag.contents))
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="Question:", image="question.png")
         elif(name == "questions"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_questions(tag)
         elif(name == "table"):
@@ -3216,7 +3217,7 @@ class template_odt_t(template_t):
         handle.close()
 
 
-        images = ["note", "tbd"]
+        images = ["note", "tbd", "question"]
         for path in images:
             # Add the note.png file
             png = g_startup_path + "/templates/shared/%s.png" % path

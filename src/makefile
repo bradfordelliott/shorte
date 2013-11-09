@@ -25,6 +25,8 @@ help:
 	@${echo} "   test_enums      = test the @enum source code tag"
 	@${echo} "   test_bullets    = test the @ul and @ol list tags"
 	@${echo} "   test_wkiwords   = test the use of wikiwords"
+	@${echo} "   test_images     = test the use of images"
+	@${echo} "   test_mergefile  = test the generation of mergefiles used for diffing"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -114,6 +116,7 @@ tests:
 	make test_wikiwords
 	make test_conditionals
 	make test_images
+	make test_mergefile
 
 test_hello:
 	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
@@ -157,6 +160,13 @@ test_conditionals:
 
 test_images:
 	python shorte.py -f examples/images.tpl -p "html+pdf" -o build-output/images
+
+# This example is used to test the generation of mergefiles. A mergefile is a target that
+# assembles a list of shorte files into a single document. This is useful for diffing things
+# in one assembly rather than trying to diff the output.
+test_mergefile:
+	python shorte.py -f "examples/images.tpl examples/headings.tpl" -p mergefile -o build-output/mergefile
+	python shorte.py -f "build-output/mergefile/book.tpl" -p "html+pdf" -o build-output/mergefile
 
 
 test_junk:
