@@ -27,6 +27,7 @@ help:
 	@${echo} "   test_wkiwords   = test the use of wikiwords"
 	@${echo} "   test_images     = test the use of images"
 	@${echo} "   test_mergefile  = test the generation of mergefiles used for diffing"
+	@${echo} "   test_sql        = test the generation of SQL databases to store source code annotations"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -117,6 +118,7 @@ tests:
 	make test_conditionals
 	make test_images
 	make test_mergefile
+	make test_sql
 
 test_hello:
 	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
@@ -167,6 +169,9 @@ test_images:
 test_mergefile:
 	python shorte.py -f "examples/images.tpl examples/headings.tpl" -p mergefile -o build-output/mergefile
 	python shorte.py -f "build-output/mergefile/book.tpl" -p "html+pdf" -o build-output/mergefile
+
+test_sql:
+	python shorte.py -f "examples/test.c examples/test.h" -x cpp -o build-output/sql -p "sql"
 
 
 test_junk:
