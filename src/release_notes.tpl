@@ -29,7 +29,8 @@ Minor bug fix release.
 - 37  | Updated the mergefile package to include an @body tag.
 - 38  | Updated the SQL template to turn on transactions for faster
         performance.
-
+- 40  | Fixed an issue with @note tag in the ODT/PDF template. This is the
+        same issue as Bug 35.
 
 @h3 Version 1.0.59 (Oct 23, 2013)
 Minor release to address the following issues:

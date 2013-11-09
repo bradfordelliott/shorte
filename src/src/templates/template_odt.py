@@ -2140,11 +2140,12 @@ class template_odt_t(template_t):
         
         xml = '''
 <text:p text:style-name="%s">
-<draw:frame draw:style-name="shorte_frame_note" draw:name="graphics4" text:anchor-type="paragraph" svg:x="-0.127cm" svg:y="-0.226cm" svg:width="0.887cm" svg:height="0.901cm" draw:z-index="9">
+<draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.127cm" svg:y="-0.226cm" svg:width="0.887cm" svg:height="0.901cm" draw:z-index="9">
     <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
 </draw:frame> <text:s text:c="6"/>%s
 </text:p>
-''' % (self.m_styles["para"]["bold"], image, label)
+''' % (self.m_styles["para"]["bold"], self.m_image_id+10, image, label)
+        self.m_image_id += 1
 
         return xml + source
     
