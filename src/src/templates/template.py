@@ -1,6 +1,7 @@
 # -*- coding: iso-8859-15 -*-
 import os
 import re
+import string
 from shorte_defines import *
 
 HEADING_DEFAULT = 0
@@ -131,10 +132,21 @@ class template_t:
         word = ''
 
         #print "Wikify"
+        
+        # Figure out the list of punctuation characters that are used to
+        # split up wikiwords.
+        end_characters = list(string.punctuation)
+        end_characters.append(' ')
+        end_characters.append('\t')
+        end_characters.append('\r')
+        end_characters.append('\n')
+        # Can't use _ as a separator for wikiwords because we want to hyperlink
+        # C Code
+        end_characters.remove('_')
 
         for i in data:
 
-            if(i == ',' or i == ';' or i == '\n' or i == ' ' or i == '(' or i == ')' or i == '*'):
+            if(i in end_characters):
 
                 words.append(word)
                 words.append(i)
@@ -153,7 +165,7 @@ class template_t:
             if(debug):
                 print "    Checking [%s]" % word
 
-            if(word == ',' or word == ';' or word == '\n' or word == ' ' or word == '(' or word == ')' or word == '*'):
+            if(word in end_characters):
                 output += word 
             else:
 

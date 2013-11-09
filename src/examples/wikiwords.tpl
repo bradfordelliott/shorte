@@ -33,7 +33,8 @@ See if TheseAreSomeWikiwords that will link up and These are some Wikiwords that
 also work as a link.
 
 Want to make sure that Test doesn't link to the Test section but if I enter
-TestSection it will link to the Test heading.
+TestSection it will link to the Test heading. Also double check bug \#28 to ensure
+that I can follow wikilinks with a period like TestSection.
 
 
 This is some random data

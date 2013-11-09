@@ -11,6 +11,12 @@ Minor bug fix release.
 
 @table: title="Closed Bugs"
 - Bug | Description
+- 28  | Fixed issue with . and other punctuation marks being included
+        as part of wikiwords. This was intended to hyperlink class identifiers
+        like WikiWord.member but it doesn't work very well because it doesn't
+        understand a period following WikiWord.
+- 31  | Fixed issues with the mergefile package that got broken
+        in the 1.0.59 release.
 - 33  | Updated to remove spurious debug message when generating ODT
         documents instead of PDFs.
 - 34  | Checked in a zip file of the cairo dependencies to simplify
