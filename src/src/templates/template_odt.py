@@ -108,6 +108,7 @@ class template_odt_t(template_t):
         self.m_wikify = True
 
         self.m_pictures = []
+	self.m_frame_id = 10
 
         self.m_styles = {}
         self.m_styles["note"] = "shorte_note"
@@ -947,6 +948,22 @@ class template_odt_t(template_t):
     
     <style:style style:name="shorte_highlight" style:family="text">
         <style:text-properties fo:background-color="#ffff00"/>
+    </style:style>
+    
+<style:style style:name="T8" style:family="text">
+      <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold" officeooo:rsid="000885f5" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
+    </style:style>
+    <style:style style:name="Frame_20_contents" style:display-name="Frame contents" style:family="paragraph" style:parent-style-name="Standard" style:class="extra"/>
+
+    <style:style style:name="shorte_note_frame" style:family="graphic" style:parent-style-name="Frame">
+      <style:graphic-properties style:vertical-pos="top" style:vertical-rel="paragraph-content" style:horizontal-pos="left" style:horizontal-rel="paragraph" fo:background-color="#f8f7cf" style:background-transparency="0%" draw:fill="solid"
+        fo:border-left="0.002cm solid #e0e0e0"
+        fo:border-bottom="0.002cm solid #e0e0e0"
+        fo:border-top="0.002cm solid #e0e0e0"
+        fo:border-right="0.002cm solid #e0e0e0"
+      >
+        <style:background-image/>
+      </style:graphic-properties>
     </style:style>
     
     ''' + self.m_styles_extra
@@ -2137,17 +2154,30 @@ class template_odt_t(template_t):
     def format_note(self, tag, label="Note:", image="note.png"):
 
         source = self.format_textblock(tag, style="shorte_standard_indented")
-        
-        xml = '''
-<text:p text:style-name="%s">
-<draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.127cm" svg:y="-0.226cm" svg:width="0.887cm" svg:height="0.901cm" draw:z-index="9">
-    <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
-</draw:frame> <text:s text:c="6"/>%s
-</text:p>
-''' % (self.m_styles["para"]["bold"], self.m_image_id+10, image, label)
-        self.m_image_id += 1
 
-        return xml + source
+		
+	xml = '''
+<text:p text:style-name="shorte_standard_indented">
+<draw:frame draw:style-name="shorte_note_frame" draw:name="Frame%d" text:anchor-type="as_character" style:rel-width="80%%" draw:z-index="13">
+          <draw:text-box fo:min-height="0.2in" fo:min-width="0.7902in">
+            <text:p text:style-name="shorte_standard_indented">
+              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.05in" svg:y="-0.0228in" svg:width="0.4592in" svg:height="0.4592in" draw:z-index="14">
+                <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+              </draw:frame>
+              <text:s text:c="4"/>
+	      <text:span text:style-name="T8">Note:</text:span>
+            </text:p>
+	    %s
+          </draw:text-box>
+        </draw:frame>
+
+</text:p>
+	''' % (self.m_frame_id+10, self.m_image_id+10, image, source)
+
+	self.m_frame_id += 1
+	self.m_image_id += 1
+
+        return xml
     
     def format_question(self, source):
         
