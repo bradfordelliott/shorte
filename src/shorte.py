@@ -676,7 +676,7 @@ parser.add_option("-v", "--version",
                   action="store", dest="version",
                   help="The version of the document")
 parser.add_option("-t", "--theme",
-		action="store",type="string",dest="theme",default="cortina",
+                  action="store",type="string",dest="theme",default="cortina",
                   help="The output theme")
 parser.add_option("-n", "--name",
                   action="store",type="string",dest="name",
@@ -922,7 +922,19 @@ else:
 
 if(options.info):
 
-    if(options.info == "wikiwords"):
+    # This target is used to base64 encode a list of images
+    # passed via the -t flag. This is useful when generating
+    # inline HTML documents.
+    if(options.info == "encode_images"):
+        files = options.files.split(" ")
+        for file in files:
+            handle = open(file, "rb")
+            name = "data:object/png;base64," + base64.encodestring(handle.read())
+            name = name.replace("\n","")
+            handle.close()
+            print "FILE %s:\n%s" % (file, name)
+        
+    elif(options.info == "wikiwords"):
         print "Summary of wiki words:"
         print "----------------------"
         links = shorte.m_parser.m_wiki_links

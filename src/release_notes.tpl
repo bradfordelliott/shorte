@@ -34,6 +34,8 @@ Minor bug fix release.
         performance.
 - 40  | Fixed an issue with @note tag in the ODT/PDF template. This is the
         same issue as Bug 35.
+- 46  | Added a new option to the info command line parameter to base64 encode
+        images to simplify creating inline HTML templates.
 
 @h3 Version 1.0.59 (Oct 23, 2013)
 Minor release to address the following issues:
