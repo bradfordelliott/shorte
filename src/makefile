@@ -120,58 +120,60 @@ tests:
 	make test_mergefile
 	make test_sql
 
+THEME:=shorte
+
 test_hello:
-	python shorte.py -f examples/hello.tpl -p "html+pdf" -o build-output/hello
+	python shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
 
 test_headings:
-	python shorte.py -f examples/headings.tpl -p "html+pdf" -o build-output/headings
+	python shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
 
 test_textblocks:
-	python shorte.py -f examples/textblocks.tpl -o build-output/textblock -p "html+pdf"
+	python shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html+pdf"
 
 test_tables:
-	python shorte.py -f examples/tables.tpl -p "html+pdf" -o build-output/tables
+	python shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
 
 test_code:
-	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
-	python shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html+pdf"
-	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "shorte"
+	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
+	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html+pdf"
+	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
 
 test_code_quick:
-	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html"
-	python shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html"
-	python shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "shorte"
+	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
+	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html"
+	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
 
 test_functions:
-	python shorte.py -f examples/functions.tpl -o build-output/functions -p "html+pdf"
+	python shorte.py -f examples/functions.tpl -t "${THEME}" -o build-output/functions -p "html+pdf"
 
 test_enums:
-	python shorte.py -f examples/enums.tpl -p "html+pdf" -o build-output/enums
+	python shorte.py -f examples/enums.tpl -t "${THEME}" -p "html+pdf" -o build-output/enums
 
 test_bullets:
-	python shorte.py -f examples/bullets.tpl -p "html_inline+pdf" -o build-output/bullets
+	python shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html_inline+pdf" -o build-output/bullets
 
 test_t100:
-	python shorte.py -f examples/cs_t100_api.h -x cpp -p "html_inline" -o build-output/t100
+	python shorte.py -f examples/cs_t100_api.h -t "${THEME}" -x cpp -p "html_inline" -o build-output/t100
 
 test_wikiwords:
-	python shorte.py -f examples/wikiwords.tpl -p "html+pdf" -o build-output/wikiwords
+	python shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html+pdf" -o build-output/wikiwords
 
 test_conditionals:
-	python shorte.py -f examples/conditionals.tpl -p "html+pdf" -o build-output/conditionals
+	python shorte.py -f examples/conditionals.tpl -t "${THEME}" -p "html+pdf" -o build-output/conditionals
 
 test_images:
-	python shorte.py -f examples/images.tpl -p "html+pdf" -o build-output/images
+	python shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
 
 # This example is used to test the generation of mergefiles. A mergefile is a target that
 # assembles a list of shorte files into a single document. This is useful for diffing things
 # in one assembly rather than trying to diff the output.
 test_mergefile:
-	python shorte.py -f "examples/images.tpl examples/headings.tpl" -p mergefile -o build-output/mergefile
-	python shorte.py -f "build-output/mergefile/book.tpl" -p "html+pdf" -o build-output/mergefile
+	python shorte.py -f "examples/images.tpl examples/headings.tpl" -t "${THEME}" -p mergefile -o build-output/mergefile
+	python shorte.py -f "build-output/mergefile/book.tpl" -t "${THEME}" -p "html+pdf" -o build-output/mergefile
 
 test_sql:
-	python shorte.py -f "examples/test.c examples/test.h" -x cpp -o build-output/sql -p "sql"
+	python shorte.py -f "examples/test.c examples/test.h" -t "${THEME}" -x cpp -o build-output/sql -p "sql"
 
 
 test_junk:
