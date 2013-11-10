@@ -34,6 +34,8 @@ Minor bug fix release.
         performance.
 - 40  | Fixed an issue with @note tag in the ODT/PDF template. This is the
         same issue as Bug 35.
+- 45  | Created a new theme for shorte that will eventually become the default
+        instead of using the Cortina template.
 - 46  | Added a new option to the info command line parameter to base64 encode
         images to simplify creating inline HTML templates.
 
