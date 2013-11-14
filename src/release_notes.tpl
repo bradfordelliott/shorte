@@ -6,6 +6,14 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.61 (Nov xx, 2013)
+
+- Added inline version of the "cortina_web" HTML template
+- Fixed the encoding of images. This can be done using the following command:
+    python shorte.py --info="encode_images" -f "templates/html/cortina_web/images/sl1-bg2.jpg templates/html/cortina_web/images/menu.png" > files.txt
+- Added a new @warning tag similar to @note to warn users about
+  potential issues.
+
 @h3 Version 1.0.60 (Nov 8, 2013)
 Minor bug fix release.
 
