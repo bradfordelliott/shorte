@@ -84,8 +84,8 @@ note_template = string.Template(
   <table>
     <tr valign="top">
         <td>
-            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="$image"/>$title:</div>
-            <div style="margin-left:10px;">$contents</div>
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="$image"></img>$title:</div>
+            <div style="margin-left:10px;margin-top:5px;">$contents</div>
         </td>
     </tr>
   </table>
@@ -717,14 +717,12 @@ class template_html_t(template_t):
     #|    The note data formatted as HTML.
     #|
     #+-----------------------------------------------------------------------------
-    def format_note(self, tag):
-
-        img_src = "note.png"
+    def format_note(self, tag, label="Note", img_src="note.png"):
 
         content = self.format_textblock(tag)
         
         if(self.is_inline() == True):
-            handle = open(g_startup_path + "/templates/shared/note.png", "rb")
+            handle = open(g_startup_path + "/templates/shared/%s" % img_src, "rb")
             img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
             img_src = re.sub("\n", "", img_src)
 
@@ -734,7 +732,7 @@ class template_html_t(template_t):
         return note_template.substitute(
             {"contents" : content,
              "image"    : img_src,
-             "title"    : "Note"})
+             "title"    : label})
     
     def format_tbd(self, tag):
 
@@ -2439,11 +2437,13 @@ $href_end
         elif(name == "pre"):
             self.m_contents += "<pre style='margin-left:10px;'>" + self.format_text(tag.contents) + "</pre>\n"
         elif(name == "note"):
-            self.m_contents += self.format_note(tag)
+            self.m_contents += self.format_note(tag, "Note", "note.png")
         elif(name == "tbd"):
             self.m_contents += self.format_tbd(tag)
         elif(name == "question"):
             self.m_contents += self.format_question(tag)
+        elif(name == "warning"):
+            self.m_contents += self.format_note(tag, "Warning", "warning.png")
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):

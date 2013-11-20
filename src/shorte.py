@@ -841,6 +841,21 @@ for package in package_list:
     else:
         packages.append(package)
 
+if(options.info):
+
+    # This target is used to base64 encode a list of images
+    # passed via the -t flag. This is useful when generating
+    # inline HTML documents.
+    if(options.info == "encode_images"):
+        files = options.files.split(" ")
+        for file in files:
+            handle = open(file, "rb")
+            name = "data:object/png;base64," + base64.encodestring(handle.read())
+            name = name.replace("\n","")
+            handle.close()
+            print "FILE %s:\n%s" % (file, name)
+
+    sys.exit(0)
 
 # If the user specified the -l option then an input
 # file containing a list of shorte files is being
@@ -922,19 +937,7 @@ else:
 
 if(options.info):
 
-    # This target is used to base64 encode a list of images
-    # passed via the -t flag. This is useful when generating
-    # inline HTML documents.
-    if(options.info == "encode_images"):
-        files = options.files.split(" ")
-        for file in files:
-            handle = open(file, "rb")
-            name = "data:object/png;base64," + base64.encodestring(handle.read())
-            name = name.replace("\n","")
-            handle.close()
-            print "FILE %s:\n%s" % (file, name)
-        
-    elif(options.info == "wikiwords"):
+    if(options.info == "wikiwords"):
         print "Summary of wiki words:"
         print "----------------------"
         links = shorte.m_parser.m_wiki_links

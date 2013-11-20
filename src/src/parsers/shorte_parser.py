@@ -54,6 +54,7 @@ class shorte_parser_t(parser_t):
             "p"               : True,
             "text"            : True,
             "note"            : True,
+            "warning"         : True,
             "question"        : True,
             "tbd"             : True,
             "pre"             : True,
@@ -2114,6 +2115,10 @@ else:
             tag.contents = self.parse_textblock(tag.source)
 
         elif(name == "note"):
+            tag.source = tag.contents
+            tag.contents = self.parse_textblock(tag.source)
+
+        elif(name == "warning"):
             tag.source = tag.contents
             tag.contents = self.parse_textblock(tag.source)
 

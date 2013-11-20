@@ -3037,6 +3037,8 @@ class template_odt_t(template_t):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="TBD:", image="tbd.png")
         elif(name == "question"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="Question:", image="question.png")
+        elif(name == "warning"):
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="Warning:", image="warning.png")
         elif(name == "questions"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_questions(tag)
         elif(name == "table"):
@@ -3196,6 +3198,9 @@ class template_odt_t(template_t):
         tmp += pages
         tmp += xml[end:len(xml)]
         xml = tmp
+        
+        # DEBUG BRAD: This isn't ready for primetime yet
+        # xml = re.sub("<text:p.*?>[[STYLES_TEMPLATES_START]].*[[STYLES_TEMPLATES_END]]</text:p>", "", xml)
 
         # Replace the automatic styles
         start = xml.find("<office:automatic-styles>")
@@ -3217,7 +3222,7 @@ class template_odt_t(template_t):
         handle.close()
 
 
-        images = ["note", "tbd", "question"]
+        images = ["note", "tbd", "question", "warning"]
         for path in images:
             # Add the note.png file
             png = g_startup_path + "/templates/shared/%s.png" % path
