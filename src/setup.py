@@ -46,8 +46,10 @@ templates=find_data_files('templates','templates',[
         'c/*',
         'html/cortina/*',
         'html/cortina_public/*',
+        'html/cortina_web/*',
         'html_inline/cortina/*',
         'html_inline/cortina_public/*',
+        'html_inline/cortina_web/*',
         'shared/*',
         'odt/*'])
 files = examples
