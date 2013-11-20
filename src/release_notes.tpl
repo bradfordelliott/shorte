@@ -6,6 +6,15 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+
+@h3 Version 1.0.61 (Nov xx, 2013)
+Minor bug fix release.
+
+@table: title="Closed bugs"
+- Bug | Description
+- xx  | Added release_win32 target for building release archive for win32. Still
+        requires python2.6.
+
 @h3 Version 1.0.60 (Nov 8, 2013)
 Minor bug fix release.
 

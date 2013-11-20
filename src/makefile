@@ -191,8 +191,8 @@ test_junk:
 # under Windows so that it is not necessary to re-distribute python
 exe:
 	rm -rf dist
-	c:/usr/tools/python/python setup.py py2exe
-	cp C:/usr/cvs/hsio/3rdparty/msvc/MSVCR100.dll dist
+	${PATH_PYTHON} setup.py py2exe
+	cp libs/win32/msvc/msvcr100.dll dist
 	cp shorte.cfg dist/.
 	cp build-output/release_notes/index.html dist/release_notes.html
 	cd dist && zip -r shorte.${version}.zip *
@@ -270,6 +270,71 @@ release:
 	-rm -rf ../build-output/examples/test.tpl
 	-rm -rf ../build-output/examples/tmp.tpl
 	cd ../build-output && ${archive}
+
+release_win32:
+	rm -rf ../build-output
+	${mkdir} -p ../build-output
+	cp -r *.py ../build-output
+	rm -rf ../build-output/setup.py
+	rm -rf ../build-output/mediawiki_parser.py
+	cp -r *.cfg ../build-output
+	cp -r makefile.customer ../build-output/makefile
+	cp -r os.inc ../build-output
+	cp -r version.inc ../build-output
+	cp -r syntax ../build-output
+	cp -r src ../build-output/.
+	cp build-output/release_notes/index.html ../build-output/release_notes.html
+	-rm -rf ../build-output/src/templates/*.pyc
+	-rm -rf ../build-output/src/graphing/*.pyc
+	-rm -rf ../build-output/src/parsers/*.pyc
+	cp -r libs ../build-output/.
+	-rm -rf ../build-output/libs/cygwin
+	-rm -rf ../build-output/libs/osx
+	-rm -rf ../build-output/libs/*.pyc
+#	-rm -rf ../build-output/libs/win32
+#	-rm -rf ../build-output/libs/*.dll
+	-rm -rf ../build-output/libs/*.pdb
+	-rm -rf ../build-output/libs/*.lib
+	-rm -rf ../build-output/libs/*.cxx
+	-rm -rf ../build-output/libs/build.old
+	-rm -rf ../build-output/libs/3rdparty
+	cp -r templates ../build-output/.
+	-rm -rf ../build-output/templates/html/exar
+	-rm -rf ../build-output/templates/html_inline/exar
+	-rm -rf ../build-output/templates/c/exar*
+	-rm -rf ../build-output/templates/css
+	-rm -rf ../build-output/templates/logos
+	-rm -rf ../build-output/templates/photoshop
+	-rm -rf ../build-output/templates/powerpoint
+	-rm -rf ../build-output/templates/swig
+	-rm -rf ../build-output/templates/vera
+	-rm -rf ../build-output/templates/word
+	-rm -rf ../build-output/templates/odt/cortina
+	-rm -rf ../build-output/templates/odt/cortina_public
+	-rm -rf ../build-output/templates/odt/images
+	-rm -rf ../build-output/templates/odt/convert_to_pdf_stripped.odt
+	-rm -rf ../build-output/templates/odt/cortina.backup.odt
+	-rm -rf ../build-output/templates/odt/cortina_public.backup.odt
+	-rm -rf ../build-output/templates/odt/page_header_logo.png
+	cp -r examples ../build-output/.
+	-rm ../build-output/examples/.*.swp
+	-rm ../build-output/examples/*.swf
+	-rm -rf ../build-output/examples/blah.tpl
+	-rm -rf ../build-output/examples/code.tpl
+	-rm -rf ../build-output/examples/simple.tpl
+	-rm -rf ../build-output/examples/hello.tpl
+	-rm -rf ../build-output/examples/cs_t100*
+	-rm -rf ../build-output/examples/ideas.tpl
+	-rm -rf ../build-output/examples/imagemap.tpl
+	-rm -rf ../build-output/examples/mdio.tpl
+	-rm -rf ../build-output/examples/nested_tables.tpl
+	-rm -rf ../build-output/examples/php.tpl
+	-rm -rf ../build-output/examples/*.png
+	-rm -rf ../build-output/examples/*.svg
+	-rm -rf ../build-output/examples/test.tpl
+	-rm -rf ../build-output/examples/tmp.tpl
+	cd ../build-output && ${archive}
+
 
 #	cp -r src ../build-output
 #	cp -r libs ../build-output/libs

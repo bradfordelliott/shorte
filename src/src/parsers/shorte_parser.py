@@ -62,6 +62,7 @@ class shorte_parser_t(parser_t):
             "struct"          : True,
             "define"          : True,
             "vector"          : True,
+            "register"        : True,
             "ol"              : True,
             "image"           : True,
             "inkscape"        : True,
@@ -1049,6 +1050,7 @@ a C/C++ like define that looks like:
             
             pos = 0
             start = 0
+
             
             # Check to see the leading characters in each
             # row. If they are &, *, or ^ then they have
@@ -1074,9 +1076,15 @@ a C/C++ like define that looks like:
                 
                 if(state == STATE_NORMAL):
                     if(row[i] == '\\'):
-
                         states.append(state)
                         state = STATE_ESCAPE
+
+                    elif(row[i] == '@' and row[i+1] == '{'):
+			states.append(state)
+			state = STATE_INLINE_STYLING
+			col += row[i]
+			col += row[i+1]
+			i += 1
 
                     elif(row[i] == '|'):
                         
@@ -1106,6 +1114,11 @@ a C/C++ like define that looks like:
 
                     else:
                         col += row[i]
+
+	        elif(state == STATE_INLINE_STYLING):
+	            col += row[i]
+		    if(row[i] == '}'):
+                    	state = states.pop()
 
                 elif(state == STATE_ESCAPE):
                     col += row[i]
@@ -1904,6 +1917,10 @@ else:
             tag.contents = self.parse_define(data, modifiers)
         
         elif(name == "vector"):
+            tag.contents = self.parse_struct(data, modifiers)
+            tag.name = "struct"
+	    
+        elif(name == "register"):
             tag.contents = self.parse_struct(data, modifiers)
             tag.name = "struct"
 
