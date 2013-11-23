@@ -19,7 +19,7 @@ Minor bug fix release.
 @table: title="Closed bugs"
 - Bug | Description
 - xx  | Added release_win32 target for building release archive for win32. Still
-
+- 47  | Cleaned up the mediawiki template to use the tag class.
 
 @h3 Version 1.0.60 (Nov 8, 2013)
 Minor bug fix release.

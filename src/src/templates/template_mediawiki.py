@@ -177,12 +177,12 @@ class template_mediawiki_t(template_t):
             
     def format_checklist(self, tag):
         
-        list = tag["contents"]
+        list = tag.contents
 
         source = ''
 
-        if(tag["modifiers"].has_key("title")):
-            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag["modifiers"]["title"] 
+        if(tag.modifiers.has_key("title")):
+            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag.modifiers["title"] 
 
         source += "<ul style='list-style-type:none'>"
 
@@ -195,8 +195,8 @@ class template_mediawiki_t(template_t):
 
         source += "</ul>"
 
-        if(tag["modifiers"].has_key("caption")):
-            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag["modifiers"]["title"] 
+        if(tag.modifiers.has_key("caption")):
+            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag.modifiers["title"] 
 
         return source
     
@@ -237,7 +237,7 @@ class template_mediawiki_t(template_t):
     
     def format_textblock(self, tag):
 
-        paragraphs = tag["contents"]
+        paragraphs = tag.contents
         html = ''
 
         if(is_array(paragraphs)):
@@ -361,7 +361,7 @@ class template_mediawiki_t(template_t):
             
         ''')
         
-        prototype = tag["contents"]
+        prototype = tag.contents
         
         file = "blah"
         function = {}
@@ -743,6 +743,12 @@ class template_mediawiki_t(template_t):
         
         elif(tag == "h4"):
             tmp = '''\n====%s====\n\n''' % (data.strip())
+        
+        elif(tag == "h5"):
+            tmp = '''\n=====%s=====\n\n''' % (data.strip())
+        
+        elif(tag == "h"):
+            tmp = '''\n======%s======\n\n''' % (data.strip())
 
         self.m_contents += tmp
     
@@ -750,8 +756,8 @@ class template_mediawiki_t(template_t):
     def append_source_code(self, tag):
 
         rc = ''
-        rc += self.format_source_code(tag["name"], tag["contents"], tag["source"])
-        result = tag["result"]
+        rc += self.format_source_code(tag.name, tag.contents, tag.source)
+        result = tag.result
 
         self.m_contents += rc
         return ''
@@ -781,28 +787,28 @@ class template_mediawiki_t(template_t):
     
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_contents += self.format_text(tag["contents"]) + "\n"
+            self.m_contents += self.format_text(tag.contents) + "\n"
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
         elif(name == "pre"):
-            self.m_contents += "<pre style='margin-left:30px;'>" + self.format_text(tag["contents"]) + "</pre>\n"
+            self.m_contents += "<pre style='margin-left:30px;'>" + self.format_text(tag.contents) + "</pre>\n"
         elif(name == "note"):
-            self.m_contents += self.format_note(self.format_text(tag["contents"]))
+            self.m_contents += self.format_note(self.format_text(tag.contents))
         elif(name == "table"):
-            self.m_contents += self.format_table(tag["source"], tag["contents"])
+            self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag["source"], tag["contents"])
+            self.m_contents += self.format_struct(tag.source, tag.contents)
         elif(name == "ul"):
-            self.m_contents += self.format_list(tag["contents"], False)
+            self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_contents += self.format_list(tag["contents"], True)
+            self.m_contents += self.format_list(tag.contents, True)
         #elif(name == "checklist"):
         #    self.m_contents += self.format_checklist(tag)
         #elif(name == "image"):
@@ -858,15 +864,15 @@ class template_mediawiki_t(template_t):
 
             tags = page["tags"]
             source_file = page["source_file"]
-            output_file = re.sub(".tpl", ".twiki", source_file)
+            output_file = re.sub(".tpl", ".mediawiki", source_file)
             path = self.m_engine.get_output_dir() + "/" + output_file
 
             for tag in tags:
 
-                if(self.m_engine.tag_is_header(tag["name"])):
-                    self.append_header(tag["name"], tag["contents"], output_file)
+                if(self.m_engine.tag_is_header(tag.name)):
+                    self.append_header(tag.name, tag.contents, output_file)
 
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
 
                 else:
