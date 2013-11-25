@@ -51,7 +51,7 @@ class template_mediawiki_t(template_t):
         self.m_engine = engine
         self.m_indexer = indexer
         self.m_theme = ""
-        self.m_template_dir = g_startup_path + "/templates/text/"
+        self.m_template_dir = shorte_get_startup_path() + "/templates/text/"
         self.m_inline = False
 
     def format_keywords(self, language, source):
@@ -164,7 +164,7 @@ class template_mediawiki_t(template_t):
     #+-----------------------------------------------------------------------------
     def format_note(self, content):
 
-        handle = open(g_startup_path + "/templates/shared/note.png", "rb")
+        handle = open(shorte_get_startup_path() + "/templates/shared/note.png", "rb")
         img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
         img_src = re.sub("\n", "", img_src)
 
@@ -838,7 +838,7 @@ class template_mediawiki_t(template_t):
         return True
 
     def set_template_dir(self, template_dir):
-        self.m_template_dir = g_startup_path + "/templates/%s/" % template_dir
+        self.m_template_dir = shorte_get_startup_path() + "/templates/%s/" % template_dir
     
     
     def install_support_files(self, outputdir):

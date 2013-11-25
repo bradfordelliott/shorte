@@ -7,7 +7,7 @@
 This document describes the release history of the Shorte language.
 
 
-@h3 Version 1.0.61 (Nov xx, 2013)
+@h3 Version 1.0.61 (Nov 25, 2013)
 Minor bug fix release.
 
 - Added inline version of the "cortina_web" HTML template
@@ -18,8 +18,9 @@ Minor bug fix release.
 
 @table: title="Closed bugs"
 - Bug | Description
-- xx  | Added release_win32 target for building release archive for win32. Still
 - 47  | Cleaned up the mediawiki template to use the tag class.
+- 49  | Updated to address a problem with the g_startup_path global variable. Replaced
+        it with a shorte_get_startup_path() method instead and fixed issue under Cygwin.
 
 @h3 Version 1.0.60 (Nov 8, 2013)
 Minor bug fix release.

@@ -21,7 +21,7 @@ class template_vera_t(template_t):
         self.m_engine = engine
         self.m_indexer = indexer
         self.m_theme = ""
-        self.m_template_dir = g_startup_path + "/templates/text/"
+        self.m_template_dir = shorte_get_startup_path() + "/templates/text/"
         self.m_inline = False
 
     def get_header(self):
@@ -82,7 +82,7 @@ class s2io_data_c {
 
     def _load_template(self):
         
-        handle = open(g_startup_path + "/templates/vera/%s.vr" % self.m_engine.get_theme(), "r")
+        handle = open(shorte_get_startup_path() + "/templates/vera/%s.vr" % self.m_engine.get_theme(), "r")
         contents = handle.read()
         handle.close()
 

@@ -307,7 +307,7 @@ class template_html_t(template_t):
         self.m_engine = engine
         self.m_indexer = indexer
         self.m_theme = ""
-        self.m_template_dir = g_startup_path + "/templates/"
+        self.m_template_dir = shorte_get_startup_path() + "/templates/"
         self.m_inline = False
         self.m_include_pdf = False
         self.m_wikiword_path_prefix = True
@@ -342,7 +342,7 @@ class template_html_t(template_t):
         if(self.m_include_pdf):
             img_src = ''
             if(self.is_inline() == True):
-                handle = open(g_startup_path + "/templates/shared/pdf.png", "rb")
+                handle = open(shorte_get_startup_path() + "/templates/shared/pdf.png", "rb")
                 img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
                 handle.close()
             else:
@@ -722,7 +722,7 @@ class template_html_t(template_t):
         content = self.format_textblock(tag)
         
         if(self.is_inline() == True):
-            handle = open(g_startup_path + "/templates/shared/%s" % img_src, "rb")
+            handle = open(shorte_get_startup_path() + "/templates/shared/%s" % img_src, "rb")
             img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
             img_src = re.sub("\n", "", img_src)
 
@@ -741,7 +741,7 @@ class template_html_t(template_t):
         img_src = "tbd.png"
         
         if(self.is_inline() == True):
-            handle = open(g_startup_path + "/templates/shared/tbd.png", "rb")
+            handle = open(shorte_get_startup_path() + "/templates/shared/tbd.png", "rb")
             img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
             img_src = re.sub("\n", "", img_src)
 
@@ -760,7 +760,7 @@ class template_html_t(template_t):
         img_src = "question.png"
 
         if(self.is_inline() == True):
-            handle = open(g_startup_path + "/templates/shared/question.png", "rb")
+            handle = open(shorte_get_startup_path() + "/templates/shared/question.png", "rb")
             img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
             handle.close()
 
@@ -2530,9 +2530,9 @@ $href_end
     def _load_template(self, template_name):
         
         if(self.is_inline() == True):
-            handle = open(g_startup_path + "/templates/html_inline/%s/%s" % (self.m_engine.get_theme(), template_name), "r")
+            handle = open(shorte_get_startup_path() + "/templates/html_inline/%s/%s" % (self.m_engine.get_theme(), template_name), "r")
         else:
-            handle = open(g_startup_path + "/templates/html/%s/%s" % (self.m_engine.get_theme(), template_name), "r")
+            handle = open(shorte_get_startup_path() + "/templates/html/%s/%s" % (self.m_engine.get_theme(), template_name), "r")
 
         contents = handle.read()
         handle.close()
@@ -2756,7 +2756,7 @@ $cnts
         return True
 
     def set_template_dir(self, template_dir):
-        self.m_template_dir = g_startup_path + "/templates/%s/" % template_dir
+        self.m_template_dir = shorte_get_startup_path() + "/templates/%s/" % template_dir
     
 
     def _fix_css(self, contents):
@@ -3101,10 +3101,10 @@ div.tblkp  {margin:0px;padding:0px;}
         handle.write(css)
         handle.close()
 
-        shutil.copy(g_startup_path + "/templates/shared/pdf.png", outputdir)
-        shutil.copy(g_startup_path + "/templates/shared/question.png", outputdir)
-        shutil.copy(g_startup_path + "/templates/shared/note.png", outputdir)
-        shutil.copy(g_startup_path + "/templates/shared/tbd.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/pdf.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/question.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/note.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/tbd.png", outputdir)
 
 
     def get_output_path(self, path):

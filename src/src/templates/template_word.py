@@ -1194,7 +1194,7 @@ $box_end
 
     def _load_template(self):
         
-        handle = open("%s/templates/word/%s.xml" % (g_startup_path, self.m_engine.get_theme()), "r")
+        handle = open("%s/templates/word/%s.xml" % (shorte_get_startup_path(), self.m_engine.get_theme()), "r")
         contents = handle.read()
         handle.close()
         return contents

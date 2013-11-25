@@ -34,7 +34,7 @@ class template_text_t(template_t):
         self.m_engine = engine
         self.m_indexer = indexer
         self.m_theme = ""
-        self.m_template_dir = g_startup_path + "/templates/text/"
+        self.m_template_dir = shorte_get_startup_path() + "/templates/text/"
         self.m_inline = False
 
     
@@ -848,7 +848,7 @@ Table of Contents
         return True
 
     def set_template_dir(self, template_dir):
-        self.m_template_dir = g_startup_path + "/templates/%s/" % template_dir
+        self.m_template_dir = shorte_get_startup_path() + "/templates/%s/" % template_dir
     
     
     def install_support_files(self, outputdir):

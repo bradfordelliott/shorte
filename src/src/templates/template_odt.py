@@ -3139,7 +3139,7 @@ class template_odt_t(template_t):
 
     def __load_template(self):
         
-        handle = open(g_startup_path + "/templates/odt/%s.odt" % self.m_engine.get_theme(), "r")
+        handle = open(shorte_get_startup_path() + "/templates/odt/%s.odt" % self.m_engine.get_theme(), "r")
         contents = handle.read()
         handle.close()
         return contents
@@ -3167,7 +3167,7 @@ class template_odt_t(template_t):
 
         #print "Theme: %s" % self.m_engine.m_theme
 
-        shutil.copy(g_startup_path + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+        shutil.copy(shorte_get_startup_path() + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
        
         unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
 
@@ -3225,7 +3225,7 @@ class template_odt_t(template_t):
         images = ["note", "tbd", "question", "warning"]
         for path in images:
             # Add the note.png file
-            png = g_startup_path + "/templates/shared/%s.png" % path
+            png = shorte_get_startup_path() + "/templates/shared/%s.png" % path
             image = {}
             image["src"] = png
             image["name"] = path
@@ -3235,7 +3235,7 @@ class template_odt_t(template_t):
         images = ["table_blue", "table_left_right", "table_white"]
         for path in images:
             # Add the note.png file
-            png = g_startup_path + "/templates/shared/odt/%s.png" % path
+            png = shorte_get_startup_path() + "/templates/shared/odt/%s.png" % path
             image = {}
             image["src"] = png
             image["name"] = path
@@ -3313,8 +3313,6 @@ class template_odt_t(template_t):
                                 or not we are creating a PDF file or not.
         '''
 
-        global g_startup_path
-
         scratchdir = shorte_get_config("shorte", "scratchdir")
         
         try:
@@ -3350,7 +3348,7 @@ class template_odt_t(template_t):
         pwd = re.sub('\\\\', '/', pwd)
 
         if(sys.platform == "cygwin" or sys.platform == "win32"):
-            path_startup = g_startup_path.replace("/cygdrive/c/", "C:\\")
+            path_startup = shorte_get_startup_path()
             path_startup = path_startup.replace("/", "\\")
                 
             if(sys.platform == "win32"):
@@ -3360,10 +3358,10 @@ class template_odt_t(template_t):
                 path_oowriter = "\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
 
         elif(sys.platform == "darwin"):
-            path_startup = g_startup_path
+            path_startup = shorte_get_startup_path()
             path_oowriter = shorte_get_config("shorte", "path.oowriter.osx")
         else:
-            path_startup = g_startup_path
+            path_startup = shorte_get_startup_path()
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
 
         #print "PACKAGE: %s" % package

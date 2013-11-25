@@ -739,7 +739,7 @@ if(not os.path.isabs(output_dir)):
 if(options.config != None):
     config = options.config
 else:
-    config = g_startup_path + os.path.sep + "shorte.cfg"
+    config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
 
 
 shorte = engine_t(output_dir, config, options.parser)
