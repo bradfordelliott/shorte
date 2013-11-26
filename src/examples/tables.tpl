@@ -2,7 +2,8 @@
 @docsubtitle Test Cases
 
 @body
-@h1 This is a test
+@h1: wikiword=TestHeader
+This is a test
 BLah blah
 with some @{b+u+i+hl,underlined bold italics} blah blah
 - a list
@@ -30,7 +31,7 @@ some more text in a new paragraph
 @table: title="This is a test" caption='''
 This is a test of the table captions
 '''
-- One | Two | Three
+- One | Two | TestHeader
 - BLah blah
   with some @{u+b+i,underlined bold italics} blah blah
   - a list

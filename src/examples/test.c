@@ -11,8 +11,8 @@
  * and inline tables:
  *
  * @{table,
- * -t One
- * - Three | Four
+ * -t One (my_test)
+ * - Three | Four | my_test
  * }
  *
  * and more paragraphs
