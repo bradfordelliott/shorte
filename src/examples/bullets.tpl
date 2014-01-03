@@ -95,3 +95,31 @@ This is TBD
     - One two three
       four five six
 
+
+@h2 Checkboxes
+This section provides some examples of creating a list with
+some checkboxes
+
+-[]  Not checked
+-[x] checked
+    -[]  not checked
+    -[x] checked
+    - no checkbox
+- This item has no checkbox
+- Neither does this
+
+This is another example using the @ol tag:
+@ol
+-[]  Not checked
+-[x] checked
+    -[]  not checked
+    -[x] checked
+
+This is a final example using the @ul tag:
+@ul
+-[]  Not checked
+-[x] checked
+    -[]  not checked
+    -[x] checked
+
+A paragraph to end everything. For some reason this is getting indented incorrectly.
