@@ -77,6 +77,9 @@ This is another note
 @question
 This is a test
 
+@warning
+This is some random warning!
+
 @note This is a third note
 
 @tbd
@@ -100,9 +103,9 @@ This is TBD
 This section provides some examples of creating a list with
 some checkboxes
 
--[]  Not checked
+-[ ] Not checked
 -[x] checked
-    -[]  not checked
+    -[ ] not checked
     -[x] checked
     - no checkbox
 - This item has no checkbox
@@ -115,11 +118,14 @@ This is another example using the @ol tag:
     -[]  not checked
     -[x] checked
 
+@text
 This is a final example using the @ul tag:
+
 @ul
 -[]  Not checked
 -[x] checked
     -[]  not checked
     -[x] checked
 
-A paragraph to end everything. For some reason this is getting indented incorrectly.
+@text
+A paragraph to end everything.

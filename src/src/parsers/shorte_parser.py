@@ -692,7 +692,7 @@ class shorte_parser_t(parser_t):
         return image
 
 
-    def parse_table(self, source, modifiers):
+    def parse_table(self, source, modifiers, col_separators=['|']):
 
         table = {}
 
@@ -823,7 +823,7 @@ class shorte_parser_t(parser_t):
                         
                 if(state == STATE_NORMAL):
 
-                    if(row[i] == '|'):
+                    if(row[i] in col_separators):
                         
                         colspan = 1
                         colnum += 1
@@ -831,7 +831,7 @@ class shorte_parser_t(parser_t):
                         # If we hit a || then we need
                         # to merge with the next column
                         # and increment our colspan
-                        while(row[i+1] == '|'):
+                        while(row[i+1] in col_separators):
                             colspan += 1
                             i += 1
 

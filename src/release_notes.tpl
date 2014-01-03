@@ -7,6 +7,13 @@
 This document describes the release history of the Shorte language.
 
 
+@h3 Version 1.0.62 (Jan xx, 2014)
+Minor bug fix release
+
+- Added support for checkboxes in lists similar to github
+- 
+
+
 @h3 Version 1.0.61 (Nov 25, 2013)
 Minor bug fix release.
 

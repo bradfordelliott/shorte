@@ -138,8 +138,8 @@ test_code:
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html+pdf"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
-    # This target is currently failing. Not sure how easy it will be to fix.
-	python shorte.py -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code -p "html+pdf"
+    # DEBUG BRAD: This target is currently failing. Not sure how easy it will be to fix.
+	python shorte.py -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code_error -p "html+pdf"
 
 test_code_quick:
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"

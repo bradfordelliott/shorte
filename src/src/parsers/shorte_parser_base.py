@@ -1,5 +1,37 @@
 from shorte_defines import *
 
+class list_item_t:
+
+    def __init__(self):
+
+        self.text = None
+        self.indent = 0
+        self.children = None
+        self.type = "list"
+        self.checked = False
+
+    def set_text(self, text):
+
+        if(text.startswith("[x]")):
+            self.type = "checkbox"
+            self.checked = True
+            text = text[3:]
+        elif(text.startswith("[ ]")):
+            self.type = "checkbox"
+            self.checked = False
+            text = text[3:]
+        elif(text.startswith("[]")):
+            self.type = "checkbox"
+            self.checked = False
+            text = text[2:]
+
+        self.text = text
+
+    def get_text(self):
+
+        return self.text.strip()
+       
+
 class parser_t:
 
     def __init__(self):
@@ -68,8 +100,8 @@ class parser_t:
 
         while(i < len(items)):
             item   = items[i]
-            indent = item[1]
-            text   = item[0].strip()
+            indent = item.indent
+            text   = item.get_text()
             children = None
 
             #print "%*sitem=%s, indent=%d" % (x*3, " ", text, indent)
@@ -78,16 +110,19 @@ class parser_t:
             # indent, if it is then it's a child
             if(i+1 < len(items)):
                 next_item = items[i+1]
-                next_indent = next_item[1]
-                next_text = next_item[0].strip()
+                next_indent = next_item.indent
+                next_text = next_item.get_text()
                 
                 # If the next node in the list has a smaller
                 # indent then we've hit the end of this branch
                 if(next_indent < indent):
                     #print "%*sstopping at %s, curr_text = %s" % (x*3, " ", next_text, text)
                     #print "%*sAdding node %s" % (x*3, " ", text)
-                    node = {}
-                    node["text"] = text
+                    node = list_item_t()
+                    node.checked = item.checked
+                    node.type = item.type
+                    node.children = item.children
+                    node.set_text(text)
                     nodes.append(node)
                     return (i+1, nodes)
                 # If the next node is indented more than it's
@@ -105,11 +140,14 @@ class parser_t:
                 i += 1
               
             #print "%*sAdding node %s" % (x*3, " ", text)
-            node = {}
-            node["text"] = text
+            node = list_item_t()
+            node.checked = item.checked
+            node.type = item.type
+            node.set_text(text)
+            node.children = item.children
             if(children != None):
                 if(len(children) > 0):
-                    node["children"] = children
+                    node.children = children
                     children = []
 
             nodes.append(node)
@@ -118,7 +156,7 @@ class parser_t:
             # then end of this level
             if(i < len(items)):
                 next_item = items[i]
-                next_indent = next_item[1]
+                next_indent = next_item.indent
                 if(next_indent < indent):
                     #print "Next item %s is up one level" % next_item[0].strip()
                     i -= 1
@@ -154,7 +192,10 @@ class parser_t:
 
                 # Output the last item if it exists
                 if(item != ""):
-                    items.append([item, item_indent])
+                    litem = list_item_t()
+                    litem.set_text(item)
+                    litem.indent = item_indent
+                    items.append(litem)
                 item = ""
 
                 # Figure out the indent level of this item
@@ -171,7 +212,10 @@ class parser_t:
                 item += source[i]
 
         if(item != ""):
-            items.append([item, item_indent])
+            litem = list_item_t()
+            litem.text = item
+            litem.indent = item_indent
+            items.append(litem)
 
         (i, list) = self.parse_list_child(0, items)
 

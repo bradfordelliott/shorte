@@ -34,10 +34,10 @@
 
     @{table,
     -t An inlined table title
-    -h Heading One | Heading Two
-    -  Col 1       | Col 2
+    -h Heading One ! Heading Two
+    -  Col 1       ! Col 2
     -s Subheading 1
-    -  Col 3       | Col 4
+    -  Col 3       ! Col 4
     }
 
 -- prototype:

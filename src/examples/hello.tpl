@@ -16,8 +16,8 @@ It supports lists
 and tables:
 @{table,
 -t My Table
--h Column One | Column Two
--  Three      | Four
+-h Column One ! Column Two
+-  Three      ! Four
 }
 
 This is some random stuff here with a link to [[->Example: Dynamic Reconfiguration, dynamically reconfigure something]]

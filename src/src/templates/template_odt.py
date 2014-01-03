@@ -1323,7 +1323,7 @@ class template_odt_t(template_t):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
                 postfix += "</text:span>"
             elif(tag == "table"):
-                table = self.m_engine.m_parser.parse_table(replace, {})
+                table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['!', '|'])
                 xml = "</text:p>"
                 #print "REPLACE[%s]" % replace
                 xml += self.__format_table(replace, table)
@@ -2302,23 +2302,38 @@ class template_odt_t(template_t):
     def format_list_child(self, elem, style, list_style, level):
 
         source = ''
-        if(elem.has_key("children")):
+        if(elem.children != None):
+
+            prefix = ''
+            if(elem.type == "checkbox"):
+                if(elem.checked == True):
+                    prefix = "&#10003; "
+                else:
+                    prefix = "&#10799; "
+
             source += '''<text:list-item>
                <text:p text:style-name="%s">%s</text:p>
                <text:list text:style-name="%s">''' % (
-                   self.m_styles["para"][list_style][level], self.format_text(elem["text"]), style)
+                   self.m_styles["para"][list_style][level], prefix + self.format_text(elem.get_text()), style)
             
-            num_children = len(elem["children"])
+            num_children = len(elem.children)
             for i in range(0, num_children):
-                source += self.format_list_child(elem["children"][i], style, list_style, level+1) 
+                source += self.format_list_child(elem.children[i], style, list_style, level+1) 
             
             source += "</text:list></text:list-item>"
         else:
+            prefix = ''
+            if(elem.type == "checkbox"):
+                if(elem.checked == True):
+                    prefix = "&#10003; "
+                else:
+                    prefix = "&#10799; "
+
             source += '''
     <text:list-item>
         <text:p text:style-name="%s">%s</text:p>
     </text:list-item>
-''' % (self.m_styles["para"][list_style][level], self.format_text(elem["text"]))
+''' % (self.m_styles["para"][list_style][level], prefix + self.format_text(elem.get_text()))
 
         return source
     
