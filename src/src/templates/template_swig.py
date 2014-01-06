@@ -361,7 +361,7 @@ $fields
         
     def _load_template(self):
         
-        handle = open(g_startup_path + "/templates/swig/%s.i" % self.m_engine.get_theme(), "r")
+        handle = open(shorte_get_startup_path() + "/templates/swig/%s.i" % self.m_engine.get_theme(), "r")
         contents = handle.read()
         handle.close()
 

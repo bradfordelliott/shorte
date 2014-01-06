@@ -1,3 +1,6 @@
+@doctitle Shorte Examples
+@docsubtitle Images
+
 @body
 @h1 Images
 

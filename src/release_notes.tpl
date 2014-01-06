@@ -6,13 +6,28 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.61 (Nov xx, 2013)
+
+@h3 Version 1.0.62 (Jan xx, 2014)
+Minor bug fix release
+
+- Added support for checkboxes in lists similar to github
+- 
+
+
+@h3 Version 1.0.61 (Nov 25, 2013)
+Minor bug fix release.
 
 - Added inline version of the "cortina_web" HTML template
 - Fixed the encoding of images. This can be done using the following command:
     python shorte.py --info="encode_images" -f "templates/html/cortina_web/images/sl1-bg2.jpg templates/html/cortina_web/images/menu.png" > files.txt
 - Added a new @warning tag similar to @note to warn users about
   potential issues.
+
+@table: title="Closed bugs"
+- Bug | Description
+- 47  | Cleaned up the mediawiki template to use the tag class.
+- 49  | Updated to address a problem with the g_startup_path global variable. Replaced
+        it with a shorte_get_startup_path() method instead and fixed issue under Cygwin.
 
 @h3 Version 1.0.60 (Nov 8, 2013)
 Minor bug fix release.

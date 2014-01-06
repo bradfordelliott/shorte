@@ -70,16 +70,32 @@ class template_sql_t(template_t):
     
     def format_list_child(self, elem, start_tag, end_tag):
         source = ''
-        if(elem.has_key("children")):
-            source += "<li>%s" % self.format_text(elem["text"])
-            num_children = len(elem["children"])
+        if(elem.children != None):
+            if(elem.type == "checkbox"):
+                if(elem.checked):
+                    prefix = '<input type="checkbox" checked onclick="return false;"></input>'
+                else:
+                    prefix = '<input type="checkbox" onclick="return false;"></input>'
+
+                source += "<li>%s %s" % (prefix, self.format_text(elem.get_text()))
+            else:
+                source += "<li>%s" % self.format_text(elem.get_text())
+            
+            num_children = len(elem.children)
             source += start_tag
             #print "num_children = %d" % num_children
             for i in range(0, num_children):
-                source += self.format_list_child(elem["children"][i], start_tag, end_tag)
+                source += self.format_list_child(elem.children[i], start_tag, end_tag)
             source += "%s</li>" % (end_tag)
         else:
-            source += "<li>" + self.format_text(elem["text"]) + "</li>"
+            if(elem.type == "checkbox"):
+                if(elem.checked):
+                    prefix = "<input type='checkbox' checked onclick='return false;'></input>"
+                else:
+                    prefix = "<input type='checkbox' onclick='return false;'></input>"
+                source += "<li>%s " % prefix + self.format_text(elem.get_text()) + "</li>"
+            else:
+                source += "<li>" + self.format_text(elem.get_text()) + "</li>"
 
         return source
     

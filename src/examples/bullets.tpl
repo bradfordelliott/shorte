@@ -77,7 +77,55 @@ This is another note
 @question
 This is a test
 
+@warning
+This is some random warning!
+
 @note This is a third note
 
 @tbd
 This is TBD
+
+
+
+@h2 Bullet Checks
+
+@h3 Make sure this is a nested list
+- Blah blah
+    - Some indented blah blah
+
+@h3 This should also have two levels
+- One two three
+    - One two three
+      four five six
+
+
+@h2 Checkboxes
+This section provides some examples of creating a list with
+some checkboxes
+
+-[ ] Not checked
+-[x] checked
+    -[ ] not checked
+    -[x] checked
+    - no checkbox
+- This item has no checkbox
+- Neither does this
+
+This is another example using the @ol tag:
+@ol
+-[]  Not checked
+-[x] checked
+    -[]  not checked
+    -[x] checked
+
+@text
+This is a final example using the @ul tag:
+
+@ul
+-[]  Not checked
+-[x] checked
+    -[]  not checked
+    -[x] checked
+
+@text
+A paragraph to end everything.

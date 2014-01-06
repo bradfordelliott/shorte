@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import sys
 import re
+sys.path.append('.')
 import libs.cairo_access
 from libs.cairo_access import *
 import math

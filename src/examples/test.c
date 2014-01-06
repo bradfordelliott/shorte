@@ -12,7 +12,7 @@
  *
  * @{table,
  * -t One
- * - Three | Four
+ * - Three ! Four
  * }
  *
  * and more paragraphs
@@ -34,7 +34,7 @@
  *
  * @{table,
  * -t One
- * -  Three | Four
+ * -  Three ! Four
  * }
  *
  * and a new paragraph
@@ -55,15 +55,17 @@ typedef enum
      *   - Three
      * - Four
      *
+     * and a table:
+     *
      * @{table,
-     * -x One | two
-     * -  Three | Four
+     * -x One   ! two
+     * -  Three ! Four
      * }
      */
-    a = 1,
+    xxx = 1,
 
     /** Some value for b */
-    b = 2,
+    yyy = 2,
 }blah;
 
 /**
@@ -102,8 +104,8 @@ typedef enum
      * With a table
      *
      * @{table,
-     * - One | Two | Three
-     * - Four | Five | Six
+     * - One  ! Two  ! Three
+     * - Four ! Five ! Six
      * }
      */
     CS4224_PRBS_Tx_2exp23 = 0x1,
@@ -133,8 +135,8 @@ typedef enum
  *
  * And a table
  * @{table,
- * - One | Two | Three
- * - Four | Five | Six
+ * - One  ! Two  ! Three
+ * - Four ! Five ! Six
  * }
  *
  * @param blah  [I] -
@@ -142,8 +144,8 @@ typedef enum
  *     with some more data
  *
  *     @{table,
- *     - One | Two
- *     - Three | Four
+ *     - One   ! Two
+ *     - Three ! Four
  *     }
  *
  *     This is more @{b,data}.

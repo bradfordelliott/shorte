@@ -25,27 +25,27 @@ This is a test enum
 
 Another paragraph
 '''
-- Name | Value | Description
-- LEEDS_VLT_SUPPLY_1V_TX | 0x0 |  1V supply TX 
-- LEEDS_VLT_SUPPLY_1V_RX | 0x1 |  1V supply RX 
-- LEEDS_VLT_SUPPLY_1V_CRE | 0x2 |  1V supply digital core 
-- LEEDS_VLT_SUPPLY_1V_DIG_RX | 0x3 |  1V supply digital RX 
-- LEEDS_VLT_SUPPLY_1p8V_RX | 0x4 |  1.8V supply RX 
-- LEEDS_VLT_SUPPLY_1p8V_TX | 0x5 |  1.8V supply TX 
-- LEEDS_VLT_SUPPLY_2p5V | 0xf |  2.5V supply 
-- LEEDS_VLT_SUPPLY_TP_P | 0x9 |  Test point P 
-- LEEDS_VLT_SUPPLY_TP_N | 0x8 |  Test point N 
+- Name                       | Value | Description
+- LEEDS_VLT_SUPPLY_1V_TX     | 0x0   |  1V supply TX 
+- LEEDS_VLT_SUPPLY_1V_RX     | 0x1   |  1V supply RX 
+- LEEDS_VLT_SUPPLY_1V_CRE    | 0x2   |  1V supply digital core 
+- LEEDS_VLT_SUPPLY_1V_DIG_RX | 0x3   |  1V supply digital RX 
+- LEEDS_VLT_SUPPLY_1p8V_RX   | 0x4   |  1.8V supply RX 
+- LEEDS_VLT_SUPPLY_1p8V_TX   | 0x5   |  1.8V supply TX 
+- LEEDS_VLT_SUPPLY_2p5V      | 0xf   |  2.5V supply 
+- LEEDS_VLT_SUPPLY_TP_P      | 0x9   |  Test point P 
+- LEEDS_VLT_SUPPLY_TP_N      | 0x8   |  Test point N 
 
 @h4 e_cs4224_loopback
 
 @enum: name="e_cs4224_loopback" caption='''
 The loopback interface point
 '''
-- Enum Name | Enum Value | Enum Description
-- CS4224_LOOPBK_DIGITAL_NEAR_DATA | 0x1 | Digital Near data loopback. Deprecated, replaced by CS4224_LOOPBK_DUPLEX_NEAR_DATA
-- CS4224_LOOPBK_DUPLEX_NEAR_DATA | 0x1 | Duplex Near data loopback
-- CS4224_LOOPBK_DIGITAL_FAR_DATA | 0x2 | Digital Far data loopback. Deprecated, replaced by CS4224_LOOPBK_DUPLEX_FAR_DATA
-- CS4224_LOOPBK_DUPLEX_FAR_DATA | 0x2 | Duplex Far data loopback
+- Enum Name                       | Enum Value | Enum Description
+- CS4224_LOOPBK_DIGITAL_NEAR_DATA | 0x1        | Digital Near data loopback. Deprecated, replaced by CS4224_LOOPBK_DUPLEX_NEAR_DATA
+- CS4224_LOOPBK_DUPLEX_NEAR_DATA  | 0x1        | Duplex Near data loopback
+- CS4224_LOOPBK_DIGITAL_FAR_DATA  | 0x2        | Digital Far data loopback. Deprecated, replaced by CS4224_LOOPBK_DUPLEX_FAR_DATA
+- CS4224_LOOPBK_DUPLEX_FAR_DATA   | 0x2        | Duplex Far data loopback
 
         
 @h4 e_cs4224_loopback_interface
@@ -53,9 +53,9 @@ The loopback interface point
 @enum: name="e_cs4224_loopback_interface" caption='''
 The loopback interface
 '''
-- Enum Name | Enum Value | Enum Description
-- CS4224_LOOPBK_HOST | 0x1 | Loopback on the host interface
-- CS4224_LOOPBK_LINE | 0x3 | Loopback on the line interface
+- Enum Name          | Enum Value | Enum Description
+- CS4224_LOOPBK_HOST | 0x1        | Loopback on the host interface
+- CS4224_LOOPBK_LINE | 0x3        | Loopback on the line interface
 
         
 @h4 cs4224_diags_duplex_loopback_state_t

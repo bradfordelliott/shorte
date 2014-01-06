@@ -243,7 +243,7 @@ class template_odt_t(template_t):
 
         #print "Theme: %s" % self.m_engine.m_theme
 
-        shutil.copy(g_startup_path + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+        shutil.copy(shorte_get_startup_path() + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
        
         unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
 
@@ -1346,7 +1346,7 @@ class template_odt_t(template_t):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
                 postfix += "</text:span>"
             elif(tag == "table"):
-                table = self.m_engine.m_parser.parse_table(replace, {})
+                table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['!', '|'])
                 xml = "</text:p>"
                 #print "REPLACE[%s]" % replace
                 xml += self.__format_table(replace, table)
@@ -2341,23 +2341,38 @@ class template_odt_t(template_t):
     def format_list_child(self, elem, style, list_style, level):
 
         source = ''
-        if(elem.has_key("children")):
+        if(elem.children != None):
+
+            prefix = ''
+            if(elem.type == "checkbox"):
+                if(elem.checked == True):
+                    prefix = "&#10003; "
+                else:
+                    prefix = "&#10799; "
+
             source += '''<text:list-item>
                <text:p text:style-name="%s">%s</text:p>
                <text:list text:style-name="%s">''' % (
-                   self.m_styles["para"][list_style][level], self.format_text(elem["text"]), style)
+                   self.m_styles["para"][list_style][level], prefix + self.format_text(elem.get_text()), style)
             
-            num_children = len(elem["children"])
+            num_children = len(elem.children)
             for i in range(0, num_children):
-                source += self.format_list_child(elem["children"][i], style, list_style, level+1) 
+                source += self.format_list_child(elem.children[i], style, list_style, level+1) 
             
             source += "</text:list></text:list-item>"
         else:
+            prefix = ''
+            if(elem.type == "checkbox"):
+                if(elem.checked == True):
+                    prefix = "&#10003; "
+                else:
+                    prefix = "&#10799; "
+
             source += '''
     <text:list-item>
         <text:p text:style-name="%s">%s</text:p>
     </text:list-item>
-''' % (self.m_styles["para"][list_style][level], self.format_text(elem["text"]))
+''' % (self.m_styles["para"][list_style][level], prefix + self.format_text(elem.get_text()))
 
         return source
     
@@ -3178,7 +3193,7 @@ class template_odt_t(template_t):
 
     def __load_template(self):
         
-        handle = open(g_startup_path + "/templates/odt/%s.odt" % self.m_engine.get_theme(), "r")
+        handle = open(shorte_get_startup_path() + "/templates/odt/%s.odt" % self.m_engine.get_theme(), "r")
         contents = handle.read()
         handle.close()
         return contents
@@ -3280,7 +3295,7 @@ class template_odt_t(template_t):
 
         #print "Theme: %s" % self.m_engine.m_theme
 
-        shutil.copy(g_startup_path + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+        shutil.copy(shorte_get_startup_path() + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
        
         unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
 
@@ -3340,7 +3355,7 @@ class template_odt_t(template_t):
         images = ["note", "tbd", "question", "warning"]
         for path in images:
             # Add the note.png file
-            png = g_startup_path + "/templates/shared/%s.png" % path
+            png = shorte_get_startup_path() + "/templates/shared/%s.png" % path
             image = {}
             image["src"] = png
             image["name"] = path
@@ -3350,7 +3365,7 @@ class template_odt_t(template_t):
         images = ["table_blue", "table_left_right", "table_white"]
         for path in images:
             # Add the note.png file
-            png = g_startup_path + "/templates/shared/odt/%s.png" % path
+            png = shorte_get_startup_path() + "/templates/shared/odt/%s.png" % path
             image = {}
             image["src"] = png
             image["name"] = path
@@ -3428,12 +3443,9 @@ class template_odt_t(template_t):
                                 or not we are creating a PDF file or not.
         '''
 
-        global g_startup_path
-        
-        
         scratchdir = shorte_get_config("shorte", "scratchdir")
         #print "Theme: %s" % self.m_engine.m_theme
-        shutil.copy(g_startup_path + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+        shutil.copy(shorte_get_startup_path() + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
         unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
         os.unlink("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme))
         handle = open("%s/odt/content.xml" % scratchdir)
@@ -3441,8 +3453,6 @@ class template_odt_t(template_t):
         handle.close()
         self.extract_styles(xml);
 
-        scratchdir = shorte_get_config("shorte", "scratchdir")
-        
         try:
             shutil.rmtree(scratchdir + os.path.sep + 'odt')
         except:
@@ -3476,7 +3486,7 @@ class template_odt_t(template_t):
         pwd = re.sub('\\\\', '/', pwd)
 
         if(sys.platform == "cygwin" or sys.platform == "win32"):
-            path_startup = g_startup_path.replace("/cygdrive/c/", "C:\\")
+            path_startup = shorte_get_startup_path()
             path_startup = path_startup.replace("/", "\\")
                 
             if(sys.platform == "win32"):
@@ -3486,10 +3496,10 @@ class template_odt_t(template_t):
                 path_oowriter = "\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
 
         elif(sys.platform == "darwin"):
-            path_startup = g_startup_path
+            path_startup = shorte_get_startup_path()
             path_oowriter = shorte_get_config("shorte", "path.oowriter.osx")
         else:
-            path_startup = g_startup_path
+            path_startup = shorte_get_startup_path()
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
 
         #print "PACKAGE: %s" % package

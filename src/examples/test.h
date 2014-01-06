@@ -6,17 +6,25 @@
  *
  * @{table,
  * -t Title of my table here
- * -h One   | Two
- * -  Three | Four
+ * -h One   ! Two
+ * -  Three ! Four
  * }
+ *
+ * This is a list with some checkboxes
+ * -[ ] one
+ * -[x] two
+ *     - blah
+ *     -[x] blah2
+ * -[ ] three
+ * -[x] four
  *
  * @param blah  [I] -
  *     Some dumb variable that behaves like
  *     a text block with a list
  *
- *     - one
+ *     -[x] one
  *         - two
- *     - three
+ *     -three
  *
  *     And a new paragraph and a table
  *
@@ -37,8 +45,8 @@
  *
  *     and a table
  *     @{table,
- *     - One | Two
- *     - Three | Four
+ *     - One   ! Two
+ *     - Three ! Four
  *     }
  *
  * @return TRUE on success, FALSE on failure.
@@ -90,18 +98,18 @@ typedef struct {
  *
  * @{table,
  * -t SERDES Status
- * -h Column  | Description
- * - Sl      | The slice number
- * - Lock    | Whether or not the lock detector is locked
- * - LockI   | The current value of the lock detect interrupt register
- * - Freq    | The VCO frequency slot
- * - EDC MD  | The configured EDC mode such as CX1, SR, etc.
- * - CTRLA   | The main cursor
- * - CTRLB   | The pre and post cursors
- * - Squelch | 1 if the TX is squelched, 0 if not
- * - Temp    | The measured temperature from the die
- * - 1.8V    | The measured voltage of the die
- * - 0.9V    | The measured voltage of the die
+ * -h Column  ! Description
+ * - Sl       ! The slice number
+ * - Lock     ! Whether or not the lock detector is locked
+ * - LockI    ! The current value of the lock detect interrupt register
+ * - Freq     ! The VCO frequency slot
+ * - EDC MD   ! The configured EDC mode such as CX1, SR, etc.
+ * - CTRLA    ! The main cursor
+ * - CTRLB    ! The pre and post cursors
+ * - Squelch  ! 1 if the TX is squelched, 0 if not
+ * - Temp     ! The measured temperature from the die
+ * - 1.8V     ! The measured voltage of the die
+ * - 0.9V     ! The measured voltage of the die
  * }
  *
  * @param slice_start         [I] - The slice to start the dump from

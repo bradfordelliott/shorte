@@ -535,7 +535,7 @@ $fields
         else:
             ext = ".h"
 
-        handle = open(g_startup_path + "/templates/c/%s%s" % (self.m_engine.get_theme(), ext), "r")
+        handle = open(shorte_get_startup_path() + "/templates/c/%s%s" % (self.m_engine.get_theme(), ext), "r")
         contents = handle.read()
         handle.close()
 

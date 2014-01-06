@@ -65,7 +65,7 @@ class template_shorte_t(template_t):
 
                 if(is_list):
                     for elem in p["text"]:
-                        txt += "- %s\n" % elem["text"]
+                        txt += "- %s\n" % elem.text
                 else:
                     txt += text
 
@@ -154,8 +154,13 @@ $caption
 
         vars = {}
         vars["name"] = tag.contents["name"]
-        vars["caption"] = trim_leading_indent(tag.contents["desc"])
-        vars["value"] = escape_string(tag.contents["value"])
+        val = tag.contents["desc"]
+        val = re.sub("\|", "\\\\\\|", val)
+        vars["caption"] = trim_leading_indent(val)
+            
+        val = tag.contents["value"]
+        val = re.sub("\|", "\\\\\\|", val)
+        vars["value"] = escape_string(val)
 
         return template.substitute(vars)
 
@@ -321,7 +326,7 @@ $deprecated
         
     def _load_template(self):
         
-        handle = open(g_startup_path + "/templates/shorte/%s.tpl" % self.m_engine.get_theme(), "r")
+        handle = open(shorte_get_startup_path() + "/templates/shorte/%s.tpl" % self.m_engine.get_theme(), "r")
         contents = handle.read()
         handle.close()
 

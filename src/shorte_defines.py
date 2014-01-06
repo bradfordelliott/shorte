@@ -58,12 +58,18 @@ class tag_t:
 
 g_tools = tools_t()
 
-g_startup_path = os.path.dirname(sys.argv[0])
-if(g_startup_path == ""):
-    g_startup_path = "."
+def shorte_get_startup_path():
+    argv0 = sys.argv[0]
+    argv0 = argv0.replace("\\", "/")
+    
+    startup_path = os.path.dirname(argv0)
+    if(startup_path == ""):
+        startup_path = "."
+    
+    # Replace any Cygwin path references
+    startup_path = startup_path.replace("/cygdrive/c/", "C:/")
 
-# Replace any Cygwin path references
-g_startup_path = g_startup_path.replace("/cygdrive/c/", "C:/")
+    return startup_path
 
 class topic_t:
     def __init__(self, vars):
@@ -437,7 +443,7 @@ def unescape_string(source):
 def shorte_get_config(section, key):
 
     config = ConfigParser.ConfigParser()
-    config.read(g_startup_path + "/shorte.cfg")
+    config.read(shorte_get_startup_path() + "/shorte.cfg")
     #config.read("../../shorte.cfg")
 
     # If searching for a path then make sure
