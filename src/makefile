@@ -28,6 +28,7 @@ help:
 	@${echo} "   test_images     = test the use of images"
 	@${echo} "   test_mergefile  = test the generation of mergefiles used for diffing"
 	@${echo} "   test_sql        = test the generation of SQL databases to store source code annotations"
+	@${echo} "   test_defines    = test the formatting of defines"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -111,6 +112,7 @@ tests:
 	make test_textblocks
 	make test_tables
 	make test_code
+	make test_defines
 	make test_functions
 	make test_enums
 	make test_bullets
@@ -138,6 +140,10 @@ test_code:
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html+pdf"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
+
+test_defines:
+	python shorte.py -f examples/defines.h -t "${THEME}" -x cpp -o build-output/defines -p "html+pdf"
+
 
 test_code_quick:
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"

@@ -222,15 +222,38 @@ class template_odt_t(template_t):
         self.m_styles["table"]["styles"]["prototype"] = "shorte_table_prototype"
 
         self.m_styles["headings"] = {}
-        self.m_styles["headings"][HEADING1] = "shorte_heading_1"
-        self.m_styles["headings"][HEADING2] = "shorte_heading_2"
-        self.m_styles["headings"][HEADING3] = "shorte_heading_3"
-        self.m_styles["headings"][HEADING4] = "shorte_heading_4"
-        self.m_styles["headings"][HEADING5] = "shorte_heading_5"
-        self.m_styles["headings"][HEADING6] = "shorte_heading_6"
+        #self.m_styles["headings"][HEADING1] = "shorte_heading_1"
+        #self.m_styles["headings"][HEADING2] = "shorte_heading_2"
+        #self.m_styles["headings"][HEADING3] = "shorte_heading_3"
+        #self.m_styles["headings"][HEADING4] = "shorte_heading_4"
+        #self.m_styles["headings"][HEADING5] = "shorte_heading_5"
+        #self.m_styles["headings"][HEADING6] = "shorte_heading_6"
+        self.m_styles["headings"][HEADING1] = "Heading_20_1"
+        self.m_styles["headings"][HEADING2] = "Heading_20_2"
+        self.m_styles["headings"][HEADING3] = "Heading_20_3"
+        self.m_styles["headings"][HEADING4] = "Heading_20_4"
+        self.m_styles["headings"][HEADING5] = "Heading_20_5"
+        self.m_styles["headings"][HEADING6] = "Heading_20_6"
 
         self.m_styles_extra = ''
         self.m_table_id = 0
+        
+        
+        scratchdir = shorte_get_config("shorte", "scratchdir")
+
+        #print "Theme: %s" % self.m_engine.m_theme
+
+        shutil.copy(g_startup_path + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+       
+        unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
+
+        os.unlink("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme))
+
+        handle = open("%s/odt/content.xml" % scratchdir)
+        xml = handle.read()
+        handle.close()
+
+        self.extract_styles(xml);
 
     def get_styles(self):
         return '''
@@ -2152,12 +2175,11 @@ class template_odt_t(template_t):
 
         return xml
 
-    def format_note(self, tag, label="Note:", image="note.png"):
+    def format_note(self, tag, type="note", label="Note", image="note.png"):
 
         source = self.format_textblock(tag, style="shorte_standard_indented")
 
-		
-	xml = '''
+        xml = '''
 <text:p text:style-name="shorte_standard">
 <draw:frame draw:style-name="shorte_note_frame" draw:name="Frame%d" text:anchor-type="as_character" style:rel-width="80%%" draw:z-index="13">
           <draw:text-box fo:min-height="0.2in" fo:min-width="0.7902in">
@@ -2166,17 +2188,34 @@ class template_odt_t(template_t):
                 <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
               </draw:frame>
               <text:s text:c="4"/>
-	      <text:span text:style-name="T8">%s</text:span>
+            <text:span text:style-name="T8">%s</text:span>
             </text:p>
-	    %s
+%s
           </draw:text-box>
         </draw:frame>
 
 </text:p>
-	''' % (self.m_frame_id+10, self.m_image_id+10, image, label, source)
+        ''' % (self.m_frame_id+10, self.m_image_id+10, image, label, source)
 
-	self.m_frame_id += 1
-	self.m_image_id += 1
+        tmp = string.Template(self.styles[type])
+
+        #print "TEMPLATE for %s" % label
+        #print self.styles[label]
+        #print "----"
+        #print ""
+
+        xml = tmp.substitute({
+            "%s_TITLE" % type.upper() : label,
+            "FRAME"      : "Frame%d" % (self.m_frame_id+10),
+            "GRAPHIC"    : "Graphic%d" % (self.m_image_id+10),
+            "%s_CONTENT" % type.upper() : source})
+
+        #print "NOTE OUTPUT"
+        #print xml
+        #print "----"
+
+        self.m_frame_id += 1
+        self.m_image_id += 1
 
         return xml
     
@@ -3032,13 +3071,13 @@ class template_odt_t(template_t):
         elif(name in "pre"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_pre(tag.contents)
         elif(name == "note"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag)
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="note", label="Note")
         elif(name == "tbd"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="TBD:", image="tbd.png")
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="tbd", label="TBD")
         elif(name == "question"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="Question:", image="question.png")
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="question", label="Question")
         elif(name == "warning"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, label="Warning:", image="warning.png")
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="warning", label="Warning", image="warning.png")
         elif(name == "questions"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_questions(tag)
         elif(name == "table"):
@@ -3159,6 +3198,80 @@ class template_odt_t(template_t):
             return output
         
         return ""
+    
+    def extract_template(self, xml, content_variable):
+        # Find the start of the CONTENT field
+        pos = xml.find("CONTENT")
+        if(pos == -1):
+            print "extract_template: can't find content"
+            sys.exit(-1)
+            return xml
+
+        # Search for the ending </text:p> tag
+        end = xml.find("</text:p>", pos)
+
+        if(end == -1):
+            print "extract_template: can't find end of content"
+            sys.exit(-1)
+
+        # Search for the beginning <text:p tag
+        begin = xml.rfind("<text:p", 0, pos)
+
+        if(begin == -1):
+            print "extract_template: can't find beginning of content"
+
+        output = xml[0:begin] + content_variable + xml[end+9:]
+
+        #print "TEMPLATE for %s" % content_variable
+        #print output
+        #print "===="
+
+        return output
+    
+    def extract_style_section(self, xml, start, end):
+
+        pos_start = xml.find(start)
+
+        # Now find the end of the paragraph
+        pos_start_style = xml.find("</text:p>", pos_start)
+        pos_start_style += 9
+
+        pos_end = xml.find(end)
+        pos_end_style = xml.rfind("<text:p", 0, pos_end)
+
+        return xml[pos_start_style:pos_end_style]
+         
+
+    def extract_styles(self, xml):
+        self.styles = {}
+
+        matches = re.search("(<text:p.*?>\[\[STYLES.TEMPLATES.START\]\]</text:p>.*?<text:p.*?>\[\[STYLES.TEMPLATES.END\]\]</text:p>)", xml, re.DOTALL)
+
+        if(matches != None):
+            styles = matches.groups()[0]
+
+            # print "STYLES"
+            # print styles
+            # print "======="
+
+            style = self.extract_style_section(xml, "STYLES.NOTE.BEGIN", "STYLES.NOTE.END")
+            self.styles["note"] = self.extract_template(style, "$NOTE_CONTENT")
+
+            # print "NOTE"
+            # print style
+            # print "===="
+
+            style = self.extract_style_section(xml, "STYLES.WARNING.BEGIN", "STYLES.WARNING.END")
+            self.styles["warning"] = self.extract_template(style, "$WARNING_CONTENT")
+            # print "WARNING"
+            # print style
+            # print "===="
+            
+            style = self.extract_style_section(xml, "STYLES.TBD.BEGIN", "STYLES.TBD.END")
+            self.styles["tbd"] = self.extract_template(style, "$TBD_CONTENT")
+            
+            style = self.extract_style_section(xml, "STYLES.QUESTION.BEGIN", "STYLES.QUESTION.END")
+            self.styles["question"] = self.extract_template(style, "$QUESTION_CONTENT")
 
 
     def generate_index(self, title, theme, version):
@@ -3176,6 +3289,8 @@ class template_odt_t(template_t):
         handle = open("%s/odt/content.xml" % scratchdir)
         xml = handle.read()
         handle.close()
+
+        self.extract_styles(xml);
 
         xml = re.sub("DOCUMENT_SHORTTITLE", self.get_title_short(), xml)
         xml = re.sub("DOCUMENT_TITLE", self.get_title(), xml)
@@ -3200,7 +3315,7 @@ class template_odt_t(template_t):
         xml = tmp
         
         # DEBUG BRAD: This isn't ready for primetime yet
-        # xml = re.sub("<text:p.*?>[[STYLES_TEMPLATES_START]].*[[STYLES_TEMPLATES_END]]</text:p>", "", xml)
+        xml = re.sub("<text:p.*?>\[\[STYLES.TEMPLATES.START\]\].*?\[\[STYLES.TEMPLATES.END\]\]</text:p>", "", xml)
 
         # Replace the automatic styles
         start = xml.find("<office:automatic-styles>")
@@ -3314,6 +3429,17 @@ class template_odt_t(template_t):
         '''
 
         global g_startup_path
+        
+        
+        scratchdir = shorte_get_config("shorte", "scratchdir")
+        #print "Theme: %s" % self.m_engine.m_theme
+        shutil.copy(g_startup_path + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+        unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
+        os.unlink("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme))
+        handle = open("%s/odt/content.xml" % scratchdir)
+        xml = handle.read()
+        handle.close()
+        self.extract_styles(xml);
 
         scratchdir = shorte_get_config("shorte", "scratchdir")
         

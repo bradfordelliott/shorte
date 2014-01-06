@@ -84,7 +84,7 @@ note_template = string.Template(
   <table>
     <tr valign="top">
         <td>
-            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="$image"></img>$title:</div>
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:35px;margin-left:-10px;margin-top:-10px;' src="$image"></img>$title:</div>
             <div style="margin-left:10px;margin-top:5px;">$contents</div>
         </td>
     </tr>
@@ -1779,7 +1779,25 @@ within an HTML document.
 
         define = tag.contents
 
-        html = '''<div class='bordered'><div class='question'><b>%s</b> = %s</div><div>%s</div></div><br/>''' % (define["name"], define["value"], self.format_textblock(define["description"]))
+        html = string.Template('''
+<div class='bordered'>
+<div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Value:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${value}</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+    </div>
+</div>
+</div><br/>''').substitute({
+    "name" : define["name"],
+    "value" : self.format_textblock(define["value"]),
+    "desc" : self.format_textblock(define["description"])})
 
         return html
 
@@ -3105,6 +3123,7 @@ div.tblkp  {margin:0px;padding:0px;}
         shutil.copy(g_startup_path + "/templates/shared/question.png", outputdir)
         shutil.copy(g_startup_path + "/templates/shared/note.png", outputdir)
         shutil.copy(g_startup_path + "/templates/shared/tbd.png", outputdir)
+        shutil.copy(g_startup_path + "/templates/shared/warning.png", outputdir)
 
 
     def get_output_path(self, path):
