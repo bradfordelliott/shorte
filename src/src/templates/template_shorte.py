@@ -49,6 +49,46 @@ class template_shorte_t(template_t):
         code = re.sub("#", "\\#", code)
 
         return code
+    
+    def format_list_child(self, elem, indent=""):
+        source = ''
+        if(elem.children != None):
+            if(elem.type == "checkbox"):
+                if(elem.checked):
+                    prefix = '[x]'
+                else:
+                    prefix = '[ ]'
+
+                source += "%s-%s %s\n" % (indent, prefix, elem.get_text())
+            else:
+                source += "%s-%s\n" % (indent,elem.get_text())
+
+            num_children = len(elem.children)
+            #print "num_children = %d" % num_children
+            for i in range(0, num_children):
+                source += self.format_list_child(elem.children[i], indent + "    ")
+        else:
+            if(elem.type == "checkbox"):
+                if(elem.checked):
+                    prefix = "[x]"
+                else:
+                    prefix = "[ ]"
+                source += "%s-%s %s\n" % (indent, prefix, elem.get_text())
+            else:
+                source += "%s-%s\n" % (indent,elem.get_text())
+
+        return source
+    
+    def format_list(self, list, ordered=False, indent=0):
+
+        source = ''
+
+        for elem in list:
+            source += self.format_list_child(elem)
+
+        source += "\n"
+
+        return source
 
     def format_textblock(self, input_data):
 
@@ -64,8 +104,7 @@ class template_shorte_t(template_t):
                 #print "Indent: [%d], text: [%s]" % (indent, text)
 
                 if(is_list):
-                    for elem in p["text"]:
-                        txt += "- %s\n" % elem.text
+                    txt += self.format_list(p["text"], False)
                 else:
                     txt += text
 
