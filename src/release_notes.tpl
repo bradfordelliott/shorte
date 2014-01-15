@@ -11,7 +11,10 @@ This document describes the release history of the Shorte language.
 Minor bug fix release
 
 - Added support for checkboxes in lists similar to github
-- 
+    - Added support for actions within lists using the [a] and [ax]
+      prefixes.
+- Cleanup of the sources to move some of the includes into the src subdirectory
+- Added support for XML-RPC server for web integration
 
 
 @h3 Version 1.0.61 (Nov 25, 2013)
