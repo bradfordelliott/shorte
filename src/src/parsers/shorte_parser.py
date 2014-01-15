@@ -17,7 +17,7 @@
 import re
 import sys
 import os
-from shorte_source_code import *
+from src.shorte_source_code import *
 import platform
 import time
 from shorte_parser_base import parser_t

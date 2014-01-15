@@ -2,7 +2,7 @@
 import os
 import re
 import string
-from shorte_defines import *
+from src.shorte_defines import *
 
 HEADING_DEFAULT = 0
 HEADING1 = 1

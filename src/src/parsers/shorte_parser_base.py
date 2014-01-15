@@ -1,4 +1,4 @@
-from shorte_defines import *
+from src.shorte_defines import *
 
 class list_item_t:
 
@@ -24,6 +24,14 @@ class list_item_t:
             self.type = "checkbox"
             self.checked = False
             text = text[2:]
+        elif(text.startswith("[a]")):
+            self.type = "action"
+            self.checked = False
+            text = "*ACTION:* " + text[3:]
+        elif(text.startswith("[ax]")):
+            self.type = "action"
+            self.checked = True
+            text = "*ACTION:* @{cross," + text[4:] + "}"
 
         self.text = text
 

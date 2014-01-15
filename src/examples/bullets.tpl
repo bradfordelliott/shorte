@@ -100,7 +100,7 @@ This is TBD
 
 
 @h2 Checkboxes
-This section provides some examples of creating a list with
+This @{strike,section provides} some @{b,examples} of creating a list with
 some checkboxes
 
 -[ ] Not checked
@@ -110,6 +110,8 @@ some checkboxes
     - no checkbox
 - This item has no checkbox
 - Neither does this
+-[a] An action
+-[ax] A closed action
 
 This is another example using the @ol tag:
 @ol

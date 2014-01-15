@@ -23,7 +23,7 @@ try:
 except:
     print "WARNING: Failed to load cairo_access library"
 
-from shorte_defines import *
+from src.shorte_defines import *
 
 # Field attributes
 NAME   = "name"

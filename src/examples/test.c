@@ -32,6 +32,8 @@
  *   - three
  * - four
  *
+ * This is a new parapraph
+ *
  * @{table,
  * -t One
  * -  Three ! Four

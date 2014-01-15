@@ -6,7 +6,7 @@ from string import Template;
 import shutil
 import datetime
 
-from shorte_defines import *
+from src.shorte_defines import *
 from template import *
 import template_html
 
@@ -71,7 +71,7 @@ class template_sql_t(template_t):
     def format_list_child(self, elem, start_tag, end_tag):
         source = ''
         if(elem.children != None):
-            if(elem.type == "checkbox"):
+            if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
                     prefix = '<input type="checkbox" checked onclick="return false;"></input>'
                 else:
@@ -88,7 +88,7 @@ class template_sql_t(template_t):
                 source += self.format_list_child(elem.children[i], start_tag, end_tag)
             source += "%s</li>" % (end_tag)
         else:
-            if(elem.type == "checkbox"):
+            if(elem.type in ("checkbox", "status")):
                 if(elem.checked):
                     prefix = "<input type='checkbox' checked onclick='return false;'></input>"
                 else:

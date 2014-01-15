@@ -28,6 +28,13 @@ A new paragraph in a text block that has an unordered list:
   - two
 - three
 
+An inline table after a list
+@{table,
+-t Test Title
+- One | Two | Three
+- Four | Five | Six
+}
+
 A final @{hl,highlighted paragraph} with some @{b,bold data}.
 
 This is the end of the text block with some @{i, italic text}.

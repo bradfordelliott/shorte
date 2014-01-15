@@ -23,9 +23,9 @@ import time
 import datetime
 import base64
 
-from shorte_defines import *
+from src.shorte_defines import *
 from template import *
-from shorte_source_code import *
+from src.shorte_source_code import *
 
 template_html_tooltips = '''
     <style>
@@ -798,7 +798,7 @@ class template_html_t(template_t):
     def format_list_child(self, elem, start_tag, end_tag):
         source = ''
         if(elem.children != None):
-            if(elem.type == "checkbox"):
+            if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
                     prefix = '<input type="checkbox" checked onclick="return false;"></input>'
                 else:
@@ -815,7 +815,7 @@ class template_html_t(template_t):
                 source += self.format_list_child(elem.children[i], start_tag, end_tag)
             source += "%s</li>" % (end_tag)
         else:
-            if(elem.type == "checkbox"):
+            if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
                     prefix = "<input type='checkbox' checked onclick='return false;'></input>"
                 else:
@@ -2275,6 +2275,9 @@ $href_end
             elif(tag == "span"):
                 prefix += "<span style='%s'>" % (qualifier)
                 postfix += "</span>"
+            elif(tag in ("cross","strike")):
+                prefix += "<strike>"
+                postfix += "</strike>"
             elif(tag in ("hl", "hilite", "highlight")):
                 prefix += "<span style='background-color:yellow;'>"
                 postfix += "</span>"
