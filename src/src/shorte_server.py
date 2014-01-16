@@ -19,19 +19,20 @@ def parse(contents, theme):
     output_dir = "build-output"
     parser = "shorte"
     g_shorte = engine_t(output_dir, config, parser)
+    g_shorte.set_theme(theme)
     g_shorte.parse_string(contents)
     
-    g_shorte.set_package('html')
+    g_shorte.set_package('html_inline')
 
     indexer = indexer_t()
     
     template = template_html_t(g_shorte, indexer)
     template.m_inline = True
-    template.set_template_dir('html')
+    template.set_template_dir('html_inline')
     template.m_include_pdf = False
 
     g_shorte.set_template(template)
-    content = g_shorte.generate_string('html')
+    content = g_shorte.generate_string('html_inline')
 
     g_shorte.clear()
 
