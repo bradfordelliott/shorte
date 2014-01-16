@@ -12,7 +12,7 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
 
-def parse(contents, theme):
+def parse(contents, theme, settings):
     #global g_shorte
     
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
@@ -20,6 +20,20 @@ def parse(contents, theme):
     parser = "shorte"
     g_shorte = engine_t(output_dir, config, parser)
     g_shorte.set_theme(theme)
+
+    if(settings != None):
+        settings = settings.split(";")
+
+        for s in settings:
+            matches = re.search("(.*?)\.(.*?)=(.*)", s)
+
+            if(matches != None):
+                sect = matches.groups()[0]
+                key = matches.groups()[1]
+                val = matches.groups()[2]
+               
+                g_shorte.set_config(sect, key, val)
+
     g_shorte.parse_string(contents)
     
     g_shorte.set_package('html_inline')

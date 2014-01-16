@@ -12,6 +12,8 @@ This is some more data
 Blah blah blah
 '''
 
-print proxy.parse(contents, "shorte")
+settings = "html.header_numbers=0;html.inline_toc=0";
+
+print proxy.parse(contents, "unstyled", settings)
 
 
