@@ -2217,7 +2217,7 @@ $href_end
             if(self.m_wikiword_path_prefix):
                 output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.label, wikiword.label)
             else:
-                output = "<a href='%s'>%s</a>" % (wikiword.link, wikiword.label)
+                output = "<a href='%s'>%s</a>" % (wikiword.label, wikiword.label)
 
         return output
 
@@ -2794,6 +2794,7 @@ $cnts
         return True
 
     def set_template_dir(self, template_dir):
+        #print "set_template_dir, template_dir=%s" % template_dir
         self.m_template_dir = shorte_get_startup_path() + "/templates/%s/" % template_dir
     
 
@@ -3125,7 +3126,9 @@ div.tblkp  {margin:0px;padding:0px;}
 
         #os.makedirs(outputdir)
 
-        print("Copying %s" % (self.m_template_dir + self.m_theme + "/" + self.m_theme))
+        #print "Theme: [%s]" % self.m_theme
+        #print "Template dir: [%s]" % self.m_template_dir
+        #print("Copying %s" % (self.m_template_dir + self.m_theme + "/" + self.m_theme))
 
         ignore_patterns=('*.html', '*.swp')
         shutil.copytree(self.m_template_dir + self.m_theme, outputdir + "/css", ignore=shutil.ignore_patterns(*ignore_patterns))

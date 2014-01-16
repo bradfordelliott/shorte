@@ -312,6 +312,7 @@ within an HTML document.
 
         (source, label) = self._process_link(matches)
 
+        #print "_expand_links: source=%s,label=%s" % (source,label)
         return "<a href='%s'>%s</a>" % (source, label)
     
     def _format_links(self, data):
@@ -364,8 +365,11 @@ within an HTML document.
                     link = self.m_engine.is_wiki_word(word)
 
                 if(link != None):
-                    output += "<a href='%s#%s'>%s</a>" % (self.get_output_path(link), word, word)
+                    tmp = "<a href='%s#%s'>%s</a>" % (self.get_output_path(link), word, word)
+                    #print "WIKIWORD: %s" % tmp
+                    output += tmp
                 else:
+                    #print "HERE I AM: %s" % word
                     output += word
 
         return output
@@ -526,11 +530,23 @@ within an HTML document.
         struct["name"] = obj["title"]
         struct["desc"] = ''
         struct["help"] = self.sqlize(help)
-       
+        
         if(obj.has_key("caption")):
             struct["desc"] = self.format_textblock(obj["caption"])
         
         sql = template.substitute(struct)
+
+        # Add the structure fields
+        if(obj.has_key('fields')):
+            for field in obj['fields']:
+
+                desc = "TBD"
+                name = field["attrs"][1]["textblock"][0]['text']
+                
+                sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('${belongs_to}', '${name}', '', '${desc}');\n").substitute(
+                        {"belongs_to" : self.m_prototype_uid,
+                         "name" : name,
+                         "desc" : desc})
 
         return sql
         
@@ -541,6 +557,8 @@ within an HTML document.
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
         html.m_wikiword_path_prefix = False
         help = html.format_enum(tag)
+
+        #print "HELP [%s]" % help
         
         obj = tag.contents
 
@@ -568,12 +586,11 @@ within an HTML document.
             #print "i = %d, VAL = %s" % (i, cols[1]["text"])
             #val  = int(cols[1]["text"], 16)
             desc = self.format_text(cols[2]["text"])
-                
+        
             sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('${belongs_to}', '${name}', '', '${desc}');\n").substitute(
                     {"belongs_to" : self.m_prototype_uid,
                      "name" : enum,
                      "desc" : desc})
-        
 
         return sql
 

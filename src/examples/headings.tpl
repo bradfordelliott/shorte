@@ -41,5 +41,7 @@ Some more stuff here
 
 @h5 Heading 5
 
-@h Heading Other
+@h: break_before=True
+Heading Other
+
 This is some text here

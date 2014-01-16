@@ -40,6 +40,10 @@ import sys, zipfile, os, os.path
 
 def unzip_file_into_dir(file, dir):
 
+    #print "unzip_file_into_dir\n"
+    #print "  FILE: %s" % file
+    #print "  DIR:  %s" % dir
+
     try:
         os.makedirs(dir)
     except:
@@ -62,6 +66,7 @@ def unzip_file_into_dir(file, dir):
                 ignore_error = 1
 
             outfile = open(os.path.join(dir, name), 'wb')
+            #print "  outfile = %s" % outfile
             outfile.write(zfobj.read(name))
             outfile.close()
 import zipfile, os
@@ -108,7 +113,7 @@ class template_odt_t(template_t):
         self.m_wikify = True
 
         self.m_pictures = []
-	self.m_frame_id = 10
+        self.m_frame_id = 10
 
         self.m_styles = {}
         self.m_styles["note"] = "shorte_note"
@@ -231,21 +236,30 @@ class template_odt_t(template_t):
         self.m_styles["headings"][HEADING1] = "Heading_20_1"
         self.m_styles["headings"][HEADING2] = "Heading_20_2"
         self.m_styles["headings"][HEADING3] = "Heading_20_3"
-        self.m_styles["headings"][HEADING4] = "Heading_20_4"
+        self.m_styles["headings"][HEADING4] = "shorte_heading_4"
         self.m_styles["headings"][HEADING5] = "Heading_20_5"
-        self.m_styles["headings"][HEADING6] = "Heading_20_6"
+        self.m_styles["headings"][HEADING6] = "shorte_heading_6"
 
         self.m_styles_extra = ''
         self.m_table_id = 0
         
         
         scratchdir = shorte_get_config("shorte", "scratchdir")
+        
+        try:
+            shutil.rmtree(scratchdir + os.path.sep + 'odt')
+        except:
+            # Ignore errors
+            errors = 0 
+        
+        os.makedirs(scratchdir + os.path.sep + 'odt')
 
-        #print "Theme: %s" % self.m_engine.m_theme
-
-        shutil.copy(shorte_get_startup_path() + "/templates/odt/%s.odt" % (self.m_engine.m_theme), scratchdir + os.path.sep + 'odt')
+        template_file = shorte_get_startup_path() + "/templates/odt/%s.odt" % (self.m_engine.m_theme)
+        #print "TEMPLATE_FILE: %s" % template_file
+        #print "OUTPUT DIR: %s" % scratchdir + os.path.sep + 'odt'
+        shutil.copy(template_file, scratchdir + os.path.sep + 'odt')
        
-        unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
+        unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt/.")
 
         os.unlink("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme))
 

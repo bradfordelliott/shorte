@@ -11,8 +11,23 @@ This document describes the release history of the Shorte language.
 Minor bug fix release
 
 - Added support for checkboxes in lists similar to github
-- 
+- Fixed issue with the inlined tables and the use of the | character
+  as a divider. Updated to use ! as divider instead until I can
+  figure out a better way
+- HTML template
+    - Tidied up the formatting of C defines
+- ODT/PDF template
+    - Started moving some of the styles into the template document
+      itself to make them user-customizable instead of hard-coded
+      in src/templates/template_odt.py.
+- SQL template
+    - Cross referenced structure fields so that they are searchable.
 
+@table: title="Closed bugs"
+- Bug | Description
+- 54  | Issue with parsing of inline tables inside another structure
+        like a table. Dealt with this by introducing the ! separator
+        for inline tables until I can come up with a better syntax.
 
 @h3 Version 1.0.61 (Nov 25, 2013)
 Minor bug fix release.
