@@ -13,12 +13,12 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 
 def parse(contents, theme, settings):
-    #global g_shorte
+    global g_shorte
     
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
     output_dir = "build-output"
     parser = "shorte"
-    g_shorte = engine_t(output_dir, config, parser)
+    #g_shorte = engine_t(output_dir, config, parser)
     g_shorte.set_theme(theme)
 
     if(settings != None):
@@ -48,7 +48,7 @@ def parse(contents, theme, settings):
     g_shorte.set_template(template)
     content = g_shorte.generate_string('html_inline')
 
-    g_shorte.clear()
+    g_shorte.reset()
 
     return content
 

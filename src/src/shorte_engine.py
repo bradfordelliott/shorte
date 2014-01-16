@@ -78,12 +78,15 @@ class engine_t:
         self.m_config = ConfigParser.ConfigParser()
         self.m_config.read([config_file])
 
-    def clear(self):
+    def reset(self):
         self.m_pages = []
         self.m_images = []
         self.m_include_queue = []
         self.m_imagemaps = {}
         self.m_macros = {}
+
+        if(self.m_parser != None):
+            self.m_parser.reset()
 
     def get_doc_revision_history(self):
         return self.m_revision_history

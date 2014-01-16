@@ -159,7 +159,15 @@ class shorte_parser_t(parser_t):
         self.m_headers = []
 
             
-    
+    def reset(self):
+        self.m_headers = []
+        self.m_wiki_links = {}
+        self.m_links = []
+        self.m_urls = {}
+        self.m_snippets = {}
+        self.m_include_queue = []
+        self.m_pages = []
+
     def __search_and_replace(self, text):
 
         return self.m_engine.search_and_replace(text)
