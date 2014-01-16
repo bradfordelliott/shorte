@@ -24,7 +24,7 @@ from shorte_parser import *
 import platform
 import time
 
-from shorte_source_code import *
+from src.shorte_source_code import *
 
 try:
     from libs.cairo_access import cairo

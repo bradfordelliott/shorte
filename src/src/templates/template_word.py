@@ -4,7 +4,7 @@ import os
 import string
 from string import Template;
 
-from shorte_defines import *
+from src.shorte_defines import *
 from template import *
 
 EOL = "\r\n"

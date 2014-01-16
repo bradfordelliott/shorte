@@ -23,9 +23,9 @@ import time
 import datetime
 import base64
 
-from shorte_defines import *
+from src.shorte_defines import *
 from template import *
-from shorte_source_code import *
+from src.shorte_source_code import *
 
 template_html_tooltips = '''
     <style>
@@ -798,7 +798,7 @@ class template_html_t(template_t):
     def format_list_child(self, elem, start_tag, end_tag):
         source = ''
         if(elem.children != None):
-            if(elem.type == "checkbox"):
+            if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
                     prefix = '<input type="checkbox" checked onclick="return false;"></input>'
                 else:
@@ -815,7 +815,7 @@ class template_html_t(template_t):
                 source += self.format_list_child(elem.children[i], start_tag, end_tag)
             source += "%s</li>" % (end_tag)
         else:
-            if(elem.type == "checkbox"):
+            if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
                     prefix = "<input type='checkbox' checked onclick='return false;'></input>"
                 else:
@@ -2275,6 +2275,9 @@ $href_end
             elif(tag == "span"):
                 prefix += "<span style='%s'>" % (qualifier)
                 postfix += "</span>"
+            elif(tag in ("cross","strike")):
+                prefix += "<strike>"
+                postfix += "</strike>"
             elif(tag in ("hl", "hilite", "highlight")):
                 prefix += "<span style='background-color:yellow;'>"
                 postfix += "</span>"
@@ -2718,7 +2721,7 @@ $cnts
 
         return True
 
-    def generate_index(self, title, subtitle, theme, version, links):
+    def generate_index(self, title, subtitle, theme, version, links, as_string=False):
         
         cnts = "<h1>Table of Contents</h1>"
         
@@ -2787,6 +2790,9 @@ $cnts
              "html_tooltips" : template_html_tooltips
              })
         
+        if(as_string):
+            return contents
+
         file = open(self.m_engine.m_output_directory + "/index.html", "w")
         file.write(self._cleanup_html(contents))
         file.close()
@@ -3259,8 +3265,14 @@ div.tblkp  {margin:0px;padding:0px;}
         handle.write(self._cleanup_html(html))
         handle.close()
 
-    
-    def generate(self, theme, version, package):
+    def generate_string(self, theme, version, package):
+        
+        self.m_inline = True
+        package = "html_inline"
+        
+        return self.generate(theme, version, package, True)
+
+    def generate(self, theme, version, package, as_string=False):
 
         # Format the output pages
         pages = self.m_engine.m_parser.get_pages()
@@ -3322,7 +3334,10 @@ div.tblkp  {margin:0px;padding:0px;}
         
             
         # Now generate the document index
-        self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(), version=version, links=links)
+        if(as_string):
+            return self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(), version=version, links=links, as_string=True)
+        else:
+            self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(), version=version, links=links)
         
         # Generate the frameset index and TOC page
         if(self.is_inline() != True):

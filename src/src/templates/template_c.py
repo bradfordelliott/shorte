@@ -6,7 +6,7 @@ from string import Template;
 import shutil
 import datetime
 
-from shorte_defines import *
+from src.shorte_defines import *
 from template import *
 from src.parsers.cpp_parser import *
 

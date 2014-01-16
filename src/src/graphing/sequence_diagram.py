@@ -14,8 +14,7 @@
 #+----------------------------------------------------------------------------
 import os
 import re
-import shorte_defines
-from shorte_defines import *
+from src.shorte_defines import *
 import graph
 from graph import *
 

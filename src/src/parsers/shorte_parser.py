@@ -17,7 +17,7 @@
 import re
 import sys
 import os
-from shorte_source_code import *
+from src.shorte_source_code import *
 import platform
 import time
 from shorte_parser_base import parser_t
@@ -159,7 +159,15 @@ class shorte_parser_t(parser_t):
         self.m_headers = []
 
             
-    
+    def reset(self):
+        self.m_headers = []
+        self.m_wiki_links = {}
+        self.m_links = []
+        self.m_urls = {}
+        self.m_snippets = {}
+        self.m_include_queue = []
+        self.m_pages = []
+
     def __search_and_replace(self, text):
 
         return self.m_engine.search_and_replace(text)
@@ -2516,10 +2524,8 @@ def exists(s):
             do_nothing=1
 
         return eval_result
-
+    
     def parse(self, source_file):
-
-        #source_file = os.path.normpath(source_file)
 
         if(source_file == "result"):
             return None
@@ -2528,7 +2534,11 @@ def exists(s):
         source = open(source_file, "r")
         input = source.read()
         source.close()
-        
+
+        self.parse_string(input, source_file)
+
+    def parse_string(self, input, source_file="default.tpl"):
+
         # Strip any illegal characters
         input = re.sub("[’‘]", "'", input)
         input = re.sub("…", "", input)
@@ -2545,7 +2555,6 @@ def exists(s):
         
         expr = re.compile("<\?(.*?)\?>", re.DOTALL)
         input = expr.sub(self._evaluate_macros, input)
-
 
         source_file = self.m_engine.search_and_replace(source_file)
 

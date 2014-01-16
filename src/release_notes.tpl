@@ -11,6 +11,8 @@ This document describes the release history of the Shorte language.
 Minor bug fix release
 
 - Added support for checkboxes in lists similar to github
+    - Added support for actions within lists using the [a] and [ax]
+      prefixes.
 - Fixed issue with the inlined tables and the use of the | character
   as a divider. Updated to use ! as divider instead until I can
   figure out a better way
@@ -22,6 +24,8 @@ Minor bug fix release
       in src/templates/template_odt.py.
 - SQL template
     - Cross referenced structure fields so that they are searchable.
+- Cleanup of the sources to move some of the includes into the src subdirectory
+- Added support for XML-RPC server for web integration
 
 @table: title="Closed bugs"
 - Bug | Description

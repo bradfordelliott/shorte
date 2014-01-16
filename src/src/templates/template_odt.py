@@ -27,7 +27,7 @@ try:
 except:
     print "WARNING: Failed to load Image library"
 
-from shorte_defines import *
+from src.shorte_defines import *
 from template import *
 
 EOL = "\r\n"
@@ -119,6 +119,7 @@ class template_odt_t(template_t):
         self.m_styles["note"] = "shorte_note"
         self.m_styles["bold"] = "bold"
         self.m_styles["highlight"] = "shorte_highlight"
+        self.m_styles["strikethru"] = "shorte_strikethru"
         self.m_styles["underline"] = "shorte_underline"
         self.m_styles["italic"] = "shorte_italic"
         self.m_styles["table"] = {}
@@ -987,6 +988,9 @@ class template_odt_t(template_t):
         <style:text-properties fo:background-color="#ffff00"/>
     </style:style>
     
+    <style:style style:name="shorte_strikethru" style:family="text"><style:text-properties style:text-line-through-style="solid"/>
+    </style:style>
+    
 <style:style style:name="T8" style:family="text">
       <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold" officeooo:rsid="000885f5" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
@@ -1358,6 +1362,9 @@ class template_odt_t(template_t):
                 return "<text:span>%s</text:span>" % (replace)
             elif(tag == "hl"):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
+                postfix += "</text:span>"
+            elif(tag in ("cross","strike")):
+                prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["strikethru"]
                 postfix += "</text:span>"
             elif(tag == "table"):
                 table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['!', '|'])
