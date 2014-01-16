@@ -78,6 +78,13 @@ class engine_t:
         self.m_config = ConfigParser.ConfigParser()
         self.m_config.read([config_file])
 
+    def clear(self):
+        self.m_pages = []
+        self.m_images = []
+        self.m_include_queue = []
+        self.m_imagemaps = {}
+        self.m_macros = {}
+
     def get_doc_revision_history(self):
         return self.m_revision_history
 
@@ -285,6 +292,9 @@ class engine_t:
 
         #for link in self.m_parser.m_wiki_links:
         #    print "LINK: [%s]" % link
+
+    def parse_string(self, contents):
+        self.m_parser.parse_string(contents)
 
     def is_wiki_word(self, phrase):
         '''Returns the target link if the phrase is a wikiword
@@ -636,3 +646,37 @@ class engine_t:
             version = self.m_docversion
 
         self.m_template.generate(self.get_theme(), version, package)
+
+
+    def generate_string(self, package):
+        # First evaluate any code snippets
+        pages = self.m_parser.get_pages()
+
+        version = self.get_version()
+
+        for page in pages:
+
+            #print "NAME: %s" % page["source_file"]
+            tags = page["tags"]
+
+            for tag in tags:
+
+                tag.result = None
+            
+                if(self.tag_is_executable(tag.name)):
+                    source = tag.source 
+
+                    executor = code_executor_t()
+                    tag.result = executor.execute(tag.name, tag.source, tag.modifiers)
+                
+        # If the version number was not specified on the command
+        # line then use any @docversion one specified in one of
+        # the source files.
+        if(version == None):
+            version = self.m_docversion
+
+        output = self.m_template.generate_string(self.get_theme(), version, package)
+
+        return output
+
+            

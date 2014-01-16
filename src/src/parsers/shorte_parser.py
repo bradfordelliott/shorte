@@ -2516,10 +2516,8 @@ def exists(s):
             do_nothing=1
 
         return eval_result
-
+    
     def parse(self, source_file):
-
-        #source_file = os.path.normpath(source_file)
 
         if(source_file == "result"):
             return None
@@ -2528,7 +2526,11 @@ def exists(s):
         source = open(source_file, "r")
         input = source.read()
         source.close()
-        
+
+        self.parse_string(input, source_file)
+
+    def parse_string(self, input, source_file="default.tpl"):
+
         # Strip any illegal characters
         input = re.sub("[’‘]", "'", input)
         input = re.sub("…", "", input)
@@ -2545,7 +2547,6 @@ def exists(s):
         
         expr = re.compile("<\?(.*?)\?>", re.DOTALL)
         input = expr.sub(self._evaluate_macros, input)
-
 
         source_file = self.m_engine.search_and_replace(source_file)
 
