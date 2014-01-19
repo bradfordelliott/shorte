@@ -540,8 +540,15 @@ within an HTML document.
         if(obj.has_key('fields')):
             for field in obj['fields']:
 
-                desc = "TBD"
-                name = field["attrs"][1]["textblock"][0]['text']
+                if(field["attrs"][1].has_key("textblock")):
+                    name = field["attrs"][1]["textblock"][0]['text'].strip()
+                else:
+                    name = field["attrs"][1]["text"].strip()
+                
+                if(field["attrs"][2].has_key("textblock")):
+                    desc = self.format_textblock(field["attrs"][2]["textblock"])
+                else:
+                    desc = field["attrs"][2]["text"].strip()
                 
                 sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('${belongs_to}', '${name}', '', '${desc}');\n").substitute(
                         {"belongs_to" : self.m_prototype_uid,
