@@ -15,6 +15,10 @@ Minor bug fix release
       prefixes.
 - Cleanup of the sources to move some of the includes into the src subdirectory
 - Added support for XML-RPC server for web integration
+    - example file in server_test.py
+    - support for generating inline HTML docs (html_inline)
+      and PDF documents (pdf). More support will be added
+      to future releases.
 
 
 @h3 Version 1.0.61 (Nov 25, 2013)

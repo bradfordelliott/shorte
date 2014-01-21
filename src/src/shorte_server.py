@@ -12,9 +12,9 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
 
-def parse(contents, theme, settings):
+def parse(contents, package, theme, settings):
     global g_shorte
-    
+
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
     output_dir = "build-output"
     parser = "shorte"
@@ -36,21 +36,29 @@ def parse(contents, theme, settings):
 
     g_shorte.parse_string(contents)
     
-    g_shorte.set_package('html_inline')
+    g_shorte.set_package(package)
 
     indexer = indexer_t()
-    
-    template = template_html_t(g_shorte, indexer)
-    template.m_inline = True
-    template.set_template_dir('html_inline')
-    template.m_include_pdf = False
+
+    if(package == "html_inline"):
+        template = template_html_t(g_shorte, indexer)
+        template.m_inline = True
+        template.set_template_dir(package)
+        template.m_include_pdf = False
+    elif(package == "pdf"):
+        template = template_odt_t(g_shorte, indexer)
 
     g_shorte.set_template(template)
-    content = g_shorte.generate_string('html_inline')
+    content = g_shorte.generate_string(package)
 
     g_shorte.reset()
 
-    return content
+    info = {}
+    info["type"] = "text"
+    if(package == "pdf"):
+        info["type"] = "base64"
+    info["content"] = content
+    return info
 
 
 def shorte_server_start(ip, port):
@@ -63,6 +71,8 @@ def shorte_server_start(ip, port):
 
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
     output_dir = "build-output"
+    if(not os.path.isabs(output_dir)):
+        output_dir = "%s/%s" % (os.getcwd(), output_dir)
     parser = "shorte"
     g_shorte = engine_t(output_dir, config, parser)
 

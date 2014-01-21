@@ -172,6 +172,7 @@ test_conditionals:
 
 test_images:
 	python shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
+	python shorte.py -f examples/test.png -i "encode_images" 
 
 # This example is used to test the generation of mergefiles. A mergefile is a target that
 # assembles a list of shorte files into a single document. This is useful for diffing things
