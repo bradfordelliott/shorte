@@ -248,15 +248,10 @@ if(options.info):
     # passed via the -t flag. This is useful when generating
     # inline HTML documents.
     if(options.info == "encode_images"):
-        files = options.files.split(" ")
-        for file in files:
-            handle = open(file, "rb")
-            name = "data:object/png;base64," + base64.encodestring(handle.read())
-            name = name.replace("\n","")
-            handle.close()
-            print "FILE %s:\n%s" % (file, name)
 
-    sys.exit(0)
+        shorte.encode_images(options.files)
+
+        sys.exit(0)
 
 # If the user specified the -l option then an input
 # file containing a list of shorte files is being
@@ -336,18 +331,11 @@ else:
         shorte.parse_page(file)
 
 
+# Print any information that the user requested and
+# exit
 if(options.info):
 
-    if(options.info == "wikiwords"):
-        print "Summary of wiki words:"
-        print "----------------------"
-        links = shorte.m_parser.m_wiki_links
-        for link in links:
-            print '''  %-24s
-    - wikiword: %s,
-    - label:    %s,
-    - bookmark: %s''' % (link, links[link].wikiword, links[link].label, links[link].is_bookmark)
-
+    print shorte.info(options.info)
     sys.exit(0)
 
 # The caller may have selected multiple packages

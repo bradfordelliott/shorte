@@ -619,6 +619,32 @@ class engine_t:
         
         return text
 
+    def encode_images(self, files):
+        files = files.split(" ")
+        for file in files:
+            handle = open(file, "rb")
+            name = "data:object/png;base64," + base64.encodestring(handle.read())
+            name = name.replace("\n","")
+            handle.close()
+            print "FILE %s:\n%s" % (file, name)
+        
+    
+    def info(self, keys):
+        output = []
+
+        if("wikiwords" in keys):
+            output.append("Summary of wiki words:")
+            output.append("----------------------")
+            links = self.m_parser.m_wiki_links
+            for link in links:
+                output.append('''  %-24s
+    - wikiword: %s,
+    - label:    %s,
+    - bookmark: %s''' % (link, links[link].wikiword, links[link].label, links[link].is_bookmark))
+
+        return '\n'.join(output)
+            
+
     def generate(self, package):
         
 

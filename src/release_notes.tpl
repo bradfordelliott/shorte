@@ -26,6 +26,10 @@ Minor bug fix release
     - Cross referenced structure fields so that they are searchable.
 - Cleanup of the sources to move some of the includes into the src subdirectory
 - Added support for XML-RPC server for web integration
+    - example file in server_test.py
+    - support for generating inline HTML docs (html_inline)
+      and PDF documents (pdf). More support will be added
+      to future releases.
 
 @table: title="Closed bugs"
 - Bug | Description

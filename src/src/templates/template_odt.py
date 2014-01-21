@@ -3448,7 +3448,7 @@ class template_odt_t(template_t):
 
         return xml
    
-
+    
     def generate(self, theme, version, package):
         '''This method is called to generate the output
            ODT or PDF document
@@ -3555,6 +3555,8 @@ class template_odt_t(template_t):
             os.system(cmd)
 
             shutil.move(path_output, path_input)
+
+            return path_input
         
         if(package == PACKAGE_TYPE_PDF):
 
@@ -3563,7 +3565,7 @@ class template_odt_t(template_t):
                     params_oowriter,
                     path_converter,
                     path_input)
-            #print cmd
+            print cmd
             os.system(cmd)
             
             # If the output file doesn't exist then generate a failure since the macro failed
@@ -3571,4 +3573,20 @@ class template_odt_t(template_t):
             if(not os.path.exists(path_output)):
                 print "\nERROR: Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n" % path_output
                 sys.exit(-1)
+            
+            return path_output
+    
+    def generate_string(self, theme, version, package):
+       path_output = self.generate(theme, version, package)
 
+       #print "Output: %s" % path_output
+
+       handle = open(path_output, "rb")
+       contents = handle.read()
+       handle.close()
+
+       #print path_output
+
+       return base64.encodestring(contents)
+
+       #return "TBD"
