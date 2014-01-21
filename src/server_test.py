@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import xmlrpclib
 import datetime
 import base64
