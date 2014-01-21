@@ -45,7 +45,7 @@ def parse(contents, package, theme, settings):
         template.m_inline = True
         template.set_template_dir(package)
         template.m_include_pdf = False
-    elif(package == "pdf"):
+    elif(package in ("odt","pdf")):
         template = template_odt_t(g_shorte, indexer)
 
     g_shorte.set_template(template)
@@ -55,7 +55,7 @@ def parse(contents, package, theme, settings):
 
     info = {}
     info["type"] = "text"
-    if(package == "pdf"):
+    if(package in ("odt","pdf")):
         info["type"] = "base64"
     info["content"] = content
     return info

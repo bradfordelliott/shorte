@@ -3541,6 +3541,8 @@ class template_odt_t(template_t):
             os.system(cmd)
 
             shutil.move(path_output, path_input)
+
+            return path_input
         
         if(package == PACKAGE_TYPE_PDF):
 
@@ -3563,9 +3565,13 @@ class template_odt_t(template_t):
     def generate_string(self, theme, version, package):
        path_output = self.generate(theme, version, package)
 
+       #print "Output: %s" % path_output
+
        handle = open(path_output, "rb")
        contents = handle.read()
        handle.close()
+
+       #print path_output
 
        return base64.encodestring(contents)
 
