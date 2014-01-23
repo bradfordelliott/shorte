@@ -1582,6 +1582,13 @@ a C/C++ like define that looks like:
        
         if(tags.has_key("src")):
 
+            # First fetch the URL so that it can be converted
+            if("http://" in tags["src"]):
+                import urllib
+                image_path = self.m_engine.get_config("shorte", "scratchdir") + "/" + os.path.basename(tags["src"])
+                urllib.urlretrieve(tags["src"], image_path)
+                tags["src"] = image_path
+
             #print "src = %s" % tags["src"]
             input = os.path.abspath(tags["src"])
             dirname = os.path.dirname(input) + os.path.sep
@@ -1595,10 +1602,10 @@ a C/C++ like define that looks like:
             image["name"] = basename
             image["ext"] = ext
         
-            #print "Image:"
-            #print "  src:  %s" % image["src"]
-            #print "  name: %s" % image["name"]
-            #print "  ext:  %s" % image["ext"]
+            print "Image:"
+            print "  src:  %s" % image["src"]
+            print "  name: %s" % image["name"]
+            print "  ext:  %s" % image["ext"]
             #sys.exit(-1)
         
         if(tags.has_key("height")):

@@ -49,7 +49,14 @@ def parse(contents, package, theme, settings):
         template = template_odt_t(g_shorte, indexer)
 
     g_shorte.set_template(template)
-    content = g_shorte.generate_string(package)
+
+    try:
+        content = g_shorte.generate_string(package)
+
+        print content
+    except Exception as e:
+        content = e
+        print content
 
     g_shorte.reset()
 
