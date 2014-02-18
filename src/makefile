@@ -121,6 +121,7 @@ tests:
 	make test_images
 	make test_mergefile
 	make test_sql
+	make test_server
 
 THEME:=shorte
 
@@ -132,6 +133,7 @@ test_headings:
 
 test_textblocks:
 	python shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html+pdf"
+	python shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock_inline -p "html_inline+pdf"
 
 test_tables:
 	python shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
@@ -159,7 +161,8 @@ test_enums:
 	python shorte.py -f examples/enums.tpl -t "${THEME}" -p "html+pdf" -o build-output/enums
 
 test_bullets:
-	python shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html_inline+pdf" -o build-output/bullets
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
 	python shorte.py -f examples/cs_t100_api.h -t "${THEME}" -x cpp -p "html_inline" -o build-output/t100
@@ -183,6 +186,13 @@ test_mergefile:
 
 test_sql:
 	python shorte.py -f "examples/test.c examples/test.h" -t "${THEME}" -x cpp -o build-output/sql -p "sql"
+
+# This method is called to launch a test server and then generate several example documents.
+test_server:
+	python shorte.py --server --port=8400 &
+	python server_test.py --package="html_inline" --theme="cortina_web" --ip=127.0.0.1 --port=8400 > server_example.html
+	python server_test.py --package="html_inline+pdf" --theme="html=cortina_web;pdf=cortina_public" --zip --ip=127.0.0.1 --port=8400 > server_example2.zip
+	python server_test.py --shutdown --ip=127.0.0.1 --port=8400
 
 
 test_junk:
