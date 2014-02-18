@@ -108,8 +108,11 @@ parser.add_option("--srv", "--server",
                   action="store_true",dest="server",
                   help="Run a background XML-RPC server to process remote requests")
 parser.add_option("--port", "--port",
-                  action="store",dest="server_port",
+                  action="store",dest="server_port", default="8300",
                   help="The port number to start the XML-RPC server listening on")
+parser.add_option("--zip", "--zip",
+                  action="store", dest="zip",default=None,
+                  help="Create an archive of the output")
 
 
 #parser.add_option("-I", "--include",
@@ -122,7 +125,7 @@ from src.shorte_server import shorte_server_start
 # Run shorte as an XML-RPC server process instead of a command
 # line utility. This is required for web-server integration
 if(options.server):
-    shorte_server_start("127.0.0.1", 8300)
+    shorte_server_start("127.0.0.1", int(options.server_port))
     sys.exit(0)
 
 output_dir = options.output_dir
@@ -203,8 +206,6 @@ scratchdir = shorte.get_config("shorte", "scratchdir")
 if(not os.path.exists(scratchdir)):
     os.makedirs(scratchdir)
 
-shorte.set_theme(options.theme)
-
 if(options.name != None):
     shorte.set_title(options.name)
     shorte.set_subtitle(options.name)
@@ -215,32 +216,6 @@ if(options.working_directory != None):
 # Save the version number of the document
 # if it was specified.
 shorte.set_version(options.version)
-
-packages = []
-
-include_pdf = False
-inline = False
-
-package_list = options.package.split("+")
-
-# Handle any modifications required by the
-# input package selection. For example html+pdf
-# needs some modifications in order to include
-# a PDF link in the HTML documentation.
-for package in package_list:
-    if(package == "html"):
-        packages.append(PACKAGE_TYPE_HTML)
-        if('pdf' in package_list):
-            include_pdf = True
-
-    elif(package == "html_inline"):
-        inline = True
-        packages.append("html_inline")
-        if('pdf' in package_list):
-            include_pdf = True
-
-    else:
-        packages.append(package)
 
 if(options.info):
 
@@ -253,82 +228,7 @@ if(options.info):
 
         sys.exit(0)
 
-# If the user specified the -l option then an input
-# file containing a list of shorte files is being
-# passed. In this case the file needs to be parsed
-# to retrieve the list of input template files being
-# used in the generation of the document. The file
-# supports conditional defines so they need to be
-# expanded first to handle any files that should be
-# conditionally included.
-if(options.file_list):
-    handle = open(options.file_list, "rt")
-    contents = handle.read()
-    handle.close()
-        
-    tmp_macros = {}
-    if(options.macros):
-        macros = shorte.get_macros()
-        for macro in macros:
-            tmp_macros[macro] = macros[macro]
-
-    contents = '''
-def exists(s):
-    if(globals().has_key(s)):
-        return 1
-    return 0
-
-%s
-''' % contents
-
-    #print "[%s]" % contents
-
-    eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
-    contents = tmp_macros["result"]
-    #print "CONTENTS = [%s]" % contents
-    #sys.exit(-1)
-
-    handle = open("tmp.tpf", "wt")
-    handle.write("result += '''\n")
-    files = contents.strip().split("\n")
-
-    for fname in files:
-
-        fname = fname.strip()
-        if(fname == ""):
-            continue
-        elif(fname[0] == "#"):
-            continue
-
-        #print "FNAME: %s" % fname
-
-        if(os.path.isdir(fname)):
-
-            for root, dirs, paths in os.walk(fname):
-                for path in paths:
-                    (base, ext) = os.path.splitext(path)
-                    if(ext == ".tpl"):
-                        print "PATH: %s" % path
-
-        else:
-            tmp = fname
-            tmp = shorte.get_output_dir() + os.sep + os.path.basename(tmp)
-            tmp = re.sub("\.c$", ".tpl", tmp)
-            tmp = re.sub("\.h$", ".h.tpl", tmp)
-            tmp = re.sub("\\\\", "/", tmp)
-            handle.write("%s\n" % tmp)
-            shorte.parse_page(fname)
-    handle.write("'''\n")
-    handle.close()
-
-else:
-    files = options.files.split(" ")
-    for file in files:
-        rgx = re.compile("(\.tpl|\.txt|\.ste)")
-        output = rgx.sub(".html", file)
-
-        #print("output file: %s" % shorte.get_output_dir() + "/" + output);
-        shorte.parse_page(file)
+shorte.parse_pages(options.file_list, options.files, options.macros)
 
 
 # Print any information that the user requested and
@@ -338,55 +238,5 @@ if(options.info):
     print shorte.info(options.info)
     sys.exit(0)
 
-# The caller may have selected multiple packages
-# in the output, for example, html+pdf. Step through
-# the list of packages and generate the output.
-for pkg in packages:
-
-    #print "Package = %s" % pkg
-
-    shorte.set_package(pkg)
-    
-    indexer = indexer_t()
-    
-    # Associate an output template with the engine. This is used
-    # to format the output into a particular document type
-    if(pkg == PACKAGE_TYPE_WORD):
-        template = template_word_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_ODT):
-        template = template_odt_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_PDF):
-        template = template_odt_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_TEXT):
-        template = template_text_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_TWIKI):
-        template = template_twiki_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_MEDIAWIKI):
-        template = template_mediawiki_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_C):
-        template = template_c_t(shorte, indexer)
-        template.set_output_format(options.output_format)
-        template.allow_diagnostic_code(options.allow_diagnostic_code)
-    elif(pkg == PACKAGE_TYPE_VERA):
-        template = template_vera_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_SHORTE):
-        template = template_shorte_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_SWIG):
-        template = template_swig_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_LABVIEW):
-        template = template_labview_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_SQL):
-        template = template_sql_t(shorte, indexer)
-    elif(pkg == PACKAGE_TYPE_MERGEFILE):
-        template = template_mergefile_t(shorte, indexer)
-    else:
-        template = template_html_t(shorte, indexer)
-        template.m_inline = inline
-        template.set_template_dir(pkg)
-        template.m_include_pdf = include_pdf
-    
-    # Set the output template and generate the
-    # contents in the output directory
-    shorte.set_template(template)
-    shorte.generate(pkg)
+shorte.generate_packages(options.package, options.theme, options, options.zip)
 

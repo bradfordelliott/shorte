@@ -9,29 +9,52 @@ class list_item_t:
         self.children = None
         self.type = "list"
         self.checked = False
+        self.starred = False
+        self.priority = 0
 
     def set_text(self, text):
 
-        if(text.startswith("[x]")):
-            self.type = "checkbox"
-            self.checked = True
-            text = text[3:]
-        elif(text.startswith("[ ]")):
+        if(text.startswith("[")):
             self.type = "checkbox"
             self.checked = False
-            text = text[3:]
-        elif(text.startswith("[]")):
-            self.type = "checkbox"
-            self.checked = False
-            text = text[2:]
-        elif(text.startswith("[a]")):
-            self.type = "action"
-            self.checked = False
-            text = "*ACTION:* " + text[3:]
-        elif(text.startswith("[ax]")):
-            self.type = "action"
-            self.checked = True
-            text = "*ACTION:* @{cross," + text[4:] + "}"
+
+            pos = 1
+            modifier = ''
+            for i in range(0,len(text)):
+                if(text[i] == ']'):
+                    pos = i+1
+                    break
+                else:
+                    modifier += text[i]
+            
+            text = text[pos:]
+            start_tag = ""
+            end_tag = ""
+
+            for i in range(0, len(modifier)):
+                
+                if(modifier[i] == 'x'):
+                    self.checked = True
+                    start_tag += "@{cross,"
+                    end_tag += "}"
+
+                elif(modifier[i] == 'a'):
+                    self.type = "action"
+                    start_tag = "*ACTION:*" + start_tag
+
+                elif(modifier[i] in ('0', '1', '2', '3', '4', '5')):
+                    self.priority = int(modifier[i])
+
+                elif(modifier[i] == '*'):
+                    self.starred = True
+
+
+            text = start_tag + text + end_tag
+            text = text.strip()
+
+            #print "ITEM:"
+            #print "  TEXT: %s" % text
+            #print "  PRIORITY: %d" % self.priority
 
         self.text = text
 
@@ -130,6 +153,8 @@ class parser_t:
                     node.checked = item.checked
                     node.type = item.type
                     node.children = item.children
+                    node.starred = item.starred
+                    node.priority = item.priority
                     node.set_text(text)
                     nodes.append(node)
                     return (i+1, nodes)
@@ -151,6 +176,8 @@ class parser_t:
             node = list_item_t()
             node.checked = item.checked
             node.type = item.type
+            node.starred = item.starred
+            node.priority = item.priority
             node.set_text(text)
             node.children = item.children
             if(children != None):
@@ -175,7 +202,7 @@ class parser_t:
     def parse_list(self, source, modifiers):
 
         items = []
-        item = ""
+        item = []
         item_indent = 0
 
         for i in range(0, len(source)):
@@ -195,16 +222,16 @@ class parser_t:
                     j -= 1
 
                 if(not is_list_item):
-                    item += source[i]
+                    item.append(source[i])
                     continue
 
                 # Output the last item if it exists
-                if(item != ""):
+                if(len(item) != 0):
                     litem = list_item_t()
-                    litem.set_text(item)
+                    litem.set_text(''.join(item))
                     litem.indent = item_indent
                     items.append(litem)
-                item = ""
+                item = []
 
                 # Figure out the indent level of this item
                 item_indent = 0
@@ -217,11 +244,11 @@ class parser_t:
                 
 
             else:
-                item += source[i]
+                item.append(source[i])
 
-        if(item != ""):
+        if(len(item) != 0):
             litem = list_item_t()
-            litem.text = item
+            litem.text = ''.join(item)
             litem.indent = item_indent
             items.append(litem)
 
@@ -235,14 +262,14 @@ class parser_t:
     def get_indent_of_line(self, data, start_of_line):
 
         i = start_of_line
-        indent = ''
+        indent = []
         len_data = len(data)
 
         while(i < len_data and data[i] == ' '):
-            indent += '0'
+            indent.append('0')
             i += 1
         
-        return indent
+        return ''.join(indent)
 
 
     def parse_textblock(self, data):
@@ -514,7 +541,7 @@ class parser_t:
 
         tag = ""
         value = ""
-        string = ""
+        string = []
 
         #print "MODIFIERS: [%s]" % modifiers
 
@@ -547,12 +574,12 @@ class parser_t:
                 if(modifiers[i] == '"' and modifiers[i-1] != '\\'):
                     states.pop()
                 else:
-                    string += modifiers[i]
+                    string.append(modifiers[i])
 
             elif(state == STATE_VALUE):
                
-                value += string
-                string = ""
+                value += ''.join(string)
+                string = []
                 
                 if(modifiers[i] == '"'):
                     states.append(STATE_STRING)
@@ -571,8 +598,8 @@ class parser_t:
 
             i += 1
 
-        if(value != "" or string != ""):
-            value += string
+        if(value != "" or len(string) != 0):
+            value += ''.join(string)
             #print "tag = %s, value = %s" % (tag, value)
             tags[tag.strip()] = value.strip()
         elif(tag != ""):

@@ -60,6 +60,8 @@ class engine_t:
         self.m_include_queue = []
 
         self.m_search_and_replace = None
+        
+        self.m_source_code_analyzer = source_code_t()
 
         # Create the output directory if it doesn't exist already
         #print "OUTPUT_DIR: %s" % self.m_output_directory
@@ -75,8 +77,16 @@ class engine_t:
             self.m_parser.set_cpp_parser(cpp_parser_t(self))
 
         # Read the configuration file
+        import ConfigParser
         self.m_config = ConfigParser.ConfigParser()
         self.m_config.read([config_file])
+
+    def set_output_directory(self, output_dir):
+        self.m_output_directory = output_dir
+
+        if(not os.path.exists(self.m_output_directory)):
+            os.makedirs(self.m_output_directory)
+
 
     def reset(self):
         self.m_pages = []
@@ -232,7 +242,7 @@ class engine_t:
 
     def get_keyword_list(self, language):
 
-        code = source_code_t()
+        code = self.m_source_code_analyzer
         keywords = code.get_keyword_list(language)
 
         return keywords
@@ -350,6 +360,13 @@ class engine_t:
         name = image["name"]
         converter = image["converter"]
         output = image["src"]
+
+        if(not os.path.exists(output)):
+            print "ERROR: %s does not exist" % output
+            sys.exit(-1)
+        else:
+            print "PATH %s exists" % output
+            sys.exit(-1)
 
         if(converter == "inkscape"):
             input = image["src"]
@@ -642,6 +659,20 @@ class engine_t:
     - label:    %s,
     - bookmark: %s''' % (link, links[link].wikiword, links[link].label, links[link].is_bookmark))
 
+        elif("deprecated" in keys):
+            pages = self.m_parser.get_pages()
+
+            for page in pages:
+                print page["source_file"]
+                tags = page["tags"]
+
+                for tag in tags:
+                    if(tag.name == "prototype"):
+                        prototype = tag.contents
+                        if(prototype.has_key("deprecated")):
+                            output.append("%s is deprecated" % prototype["name"])
+
+
         return '\n'.join(output)
             
 
@@ -676,6 +707,64 @@ class engine_t:
 
         self.m_template.generate(self.get_theme(), version, package)
 
+    def eval_expr(self, clause):
+            macros = self.get_macros()
+
+            # Figure out the variables that are defined
+            # in the define list
+            expr = re.compile("([A-Za-z][A-Za-z0-9_]+)", re.DOTALL | re.IGNORECASE)
+
+            # If a variable is not set then set it
+            # to zero
+            matches = expr.search(clause)
+            while(matches != None):
+                var = matches.groups()[0]
+
+                if(not (var == "and" or
+                        var == "or" or
+                        var == "not")):
+                    if(not macros.has_key(var)):
+                        #print "EXPR = %s" % var
+                        macros[var] = 0
+
+                matches = expr.search(clause, matches.end() + 1)
+
+            # Evalulate the if check in the tag and
+            # exclude it if necessary
+            tmp_macros = {}
+            for macro in macros:
+                tmp_macros[macro] = macros[macro]
+
+            to_eval = '''
+def exists(s):
+    if(globals().has_key(s)):
+        return 1
+    return 0
+
+def value(s):
+    if(exists(s)):
+        return s
+    return 0
+
+if(%s):
+    result = 1
+else:
+    result = 0
+''' % clause
+
+            try:
+                eval(compile(to_eval, "example.py", "exec"), tmp_macros, tmp_macros)
+            except:
+                print to_eval
+                sys.exit(-1)
+
+            result = tmp_macros["result"]
+            #print "RESULT: %s = %s" % ("(" + define + ")", result)
+            if(int(result) == 0):
+                #print "DO I GET HERE?"
+                return False
+            
+            return True
 
     def generate_string(self, package):
         # First evaluate any code snippets
@@ -707,5 +796,181 @@ class engine_t:
         output = self.m_template.generate_string(self.get_theme(), version, package)
 
         return output
+
+    def parse_pages(self, file_list, files, macros):
+        # If the user specified the -l option then an input
+        # file containing a list of shorte files is being
+        # passed. In this case the file needs to be parsed
+        # to retrieve the list of input template files being
+        # used in the generation of the document. The file
+        # supports conditional defines so they need to be
+        # expanded first to handle any files that should be
+        # conditionally included.
+        if(file_list):
+            handle = open(file_list, "rt")
+            contents = handle.read()
+            handle.close()
+                
+            tmp_macros = {}
+            if(macros):
+                macros = self.get_macros()
+                for macro in macros:
+                    tmp_macros[macro] = macros[macro]
+        
+            contents = '''
+def exists(s):
+    if(globals().has_key(s)):
+        return 1
+    return 0
+
+%s
+        ''' % contents
+        
+            print "[%s]" % contents
+        
+            eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
+            contents = tmp_macros["result"]
+            #print "CONTENTS = [%s]" % contents
+            #sys.exit(-1)
+        
+            handle = open("tmp.tpf", "wt")
+            handle.write("result += '''\n")
+            files = contents.strip().split("\n")
+        
+            for fname in files:
+        
+                fname = fname.strip()
+                if(fname == ""):
+                    continue
+                elif(fname[0] == "#"):
+                    continue
+        
+                #print "FNAME: %s" % fname
+        
+                if(os.path.isdir(fname)):
+        
+                    for root, dirs, paths in os.walk(fname):
+                        for path in paths:
+                            (base, ext) = os.path.splitext(path)
+                            if(ext == ".tpl"):
+                                print "PATH: %s" % path
+        
+                else:
+                    tmp = fname
+                    tmp = self.get_output_dir() + os.sep + os.path.basename(tmp)
+                    tmp = re.sub("\.c$", ".tpl", tmp)
+                    tmp = re.sub("\.h$", ".h.tpl", tmp)
+                    tmp = re.sub("\\\\", "/", tmp)
+                    handle.write("%s\n" % tmp)
+                    self.parse_page(fname)
+            handle.write("'''\n")
+            handle.close()
+        
+        else:
+            files = files.split(" ")
+            for file in files:
+                rgx = re.compile("(\.tpl|\.txt|\.ste)")
+                output = rgx.sub(".html", file)
+        
+                #print("output file: %s" % shorte.get_output_dir() + "/" + output);
+                self.parse_page(file)
+        
+
+    def generate_packages(self, package_list, theme_list, options, zip_output=None):
+
+        inline = False
+        include_pdf = False
+
+        #print "package_list: %s" % package_list
+        #print "theme_list:   %s" % theme_list
+
+        package_list = package_list.split("+")
+        packages = []
+
+        # Handle any modifications required by the
+        # input package selection. For example html+pdf
+        # needs some modifications in order to include
+        # a PDF link in the HTML documentation.
+        for package in package_list:
+            if(package == "html"):
+                packages.append(PACKAGE_TYPE_HTML)
+                if('pdf' in package_list):
+                    include_pdf = True
+        
+            elif(package == "html_inline"):
+                inline = True
+                packages.append("html_inline")
+                if('pdf' in package_list):
+                    include_pdf = True
+        
+            else:
+                packages.append(package)
+    
+        for pkg in packages:
+            self.set_package(pkg)
+
+            if("=" in theme_list):
+                theme = theme_list
+                themes = theme.split(";")
+                for theme in themes:
+                    parts = theme.split("=")
+
+                    package = parts[0]
+                    theme = parts[1]
+
+                    if(package == pkg):
+                        self.set_theme(theme)
+            else:
+                self.set_theme(theme_list)
+
+            indexer = indexer_t()
+
+            # Associate an output template with the engine. This is used
+            # to format the output into a particular document type
+            if(pkg == PACKAGE_TYPE_WORD):
+                template = template_word_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_ODT):
+                template = template_odt_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_PDF):
+                template = template_odt_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_TEXT):
+                template = template_text_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_TWIKI):
+                template = template_twiki_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_MEDIAWIKI):
+                template = template_mediawiki_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_C):
+                template = template_c_t(self, indexer)
+                template.set_output_format(options.output_format)
+                template.allow_diagnostic_code(options.allow_diagnostic_code)
+            elif(pkg == PACKAGE_TYPE_VERA):
+                template = template_vera_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_SHORTE):
+                template = template_shorte_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_SWIG):
+                template = template_swig_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_LABVIEW):
+                template = template_labview_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_SQL):
+                template = template_sql_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_MERGEFILE):
+                template = template_mergefile_t(self, indexer)
+            else:
+                template = template_html_t(self, indexer)
+                template.m_inline = inline
+                template.set_template_dir(pkg)
+                template.m_include_pdf = include_pdf
+            
+            # Set the output template and generate the
+            # contents in the output directory
+            self.set_template(template)
+            self.generate(pkg)
+
+        if(zip_output != None):
+            zip_output = "test.zip"
+            print "ZIP_OUTPUT: %s" % zip_output
+            print "OUTPUT: %s" % self.m_output_directory
+            #zipper("%s/." % self.m_output_directory, zip_output)
+            zipper(self.m_output_directory, zip_output)
 
             

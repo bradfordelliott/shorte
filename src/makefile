@@ -165,7 +165,7 @@ test_bullets:
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
-	python shorte.py -f examples/cs_t100_api.h -t "${THEME}" -x cpp -p "html_inline" -o build-output/t100
+	python -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "cortina_web" -x cpp -p "html_inline" -o build-output/t100
 
 test_wikiwords:
 	python shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html+pdf" -o build-output/wikiwords

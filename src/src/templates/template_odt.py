@@ -69,22 +69,6 @@ def unzip_file_into_dir(file, dir):
             #print "  outfile = %s" % outfile
             outfile.write(zfobj.read(name))
             outfile.close()
-import zipfile, os
- 
- 
-def zipper(dir, zip_file):
-    zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
-    root_len = len(os.path.abspath(dir))
-    for root, dirs, files in os.walk(dir):
-        archive_root = os.path.abspath(root)[root_len:]
-        for f in files:
-            fullpath = os.path.join(root, f)
-            archive_name = os.path.join(archive_root, f)
-            #print f
-            zip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
-    zip.close()
-    return zip_file
- 
 
 class template_odt_t(template_t):
 
@@ -558,24 +542,26 @@ class template_odt_t(template_t):
         </style:paragraph-properties>
     </style:style>
 
-    <style:style style:name="para_list_level1" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_1"/>
+    <style:style style:name="para_list_level1" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_1">
+      <style:paragraph-properties fo:margin-left="0.3in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
+    </style:style>
     <style:style style:name="para_list_level2" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_2">
-      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
     <style:style style:name="para_list_level3" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_3">
-      <style:paragraph-properties fo:margin-left="0.7in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:paragraph-properties fo:margin-left="0.7in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
     <style:style style:name="para_list_level4" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_4">
-      <style:paragraph-properties fo:margin-left="0.9in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:paragraph-properties fo:margin-left="0.9in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
     <style:style style:name="para_list_level5" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_5">
-      <style:paragraph-properties fo:margin-left="1.1in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:paragraph-properties fo:margin-left="1.1in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
     <style:style style:name="para_list_level6" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_6">
-      <style:paragraph-properties fo:margin-left="1.3in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:paragraph-properties fo:margin-left="1.3in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
     <style:style style:name="para_list_level7" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_7">
-      <style:paragraph-properties fo:margin-left="1.5in" fo:margin-right="0in" fo:text-indent="-0.1575in" style:auto-text-indent="false"/>
+      <style:paragraph-properties fo:margin-left="1.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
 
     <style:style style:name="reserved" style:family="paragraph" style:parent-style-name="Standard">
@@ -657,110 +643,114 @@ class template_odt_t(template_t):
     <text:list-style style:name="shorte_ordered_list">
             <text:list-level-style-number text:level="1" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="1">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.27cm" fo:text-indent="-0.635cm" fo:margin-left="0.9cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.85in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-number>
-            <text:list-level-style-number text:level="2" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="1" text:display-levels="2">
+            <text:list-level-style-number text:level="2" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="a" text:display-levels="1">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.905cm" fo:text-indent="-0.635cm" fo:margin-left="1.905cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.05in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-number>
-            <text:list-level-style-number text:level="3" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="a">
+            <text:list-level-style-number text:level="3" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="i" text:display-levels="1">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.54cm" fo:text-indent="-0.635cm" fo:margin-left="2.54cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.25in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-number>
-            <text:list-level-style-number text:level="4" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix=")" style:num-format="i">
+            
+            <text:list-level-style-number text:level="4" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="1" text:display-levels="1">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.175cm" fo:text-indent="-0.635cm" fo:margin-left="3.175cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.45in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-number>
+
             <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.81cm" fo:text-indent="-0.635cm" fo:margin-left="3.81cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.55in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
                 <style:text-properties style:font-name="StarSymbol"/>
             </text:list-level-style-bullet>
             <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="4.445cm" fo:text-indent="-0.635cm" fo:margin-left="4.445cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.75in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
                 <style:text-properties style:font-name="StarSymbol"/>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char=".">
+            <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.08cm" fo:text-indent="-0.635cm" fo:margin-left="5.08cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.95in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
                 <style:text-properties style:font-name="StarSymbol"/>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char="&#94;">
+            <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.715cm" fo:text-indent="-0.635cm" fo:margin-left="5.715cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.05in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
                 <style:text-properties style:font-name="StarSymbol"/>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char="&#94;">
+            <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.35cm" fo:text-indent="-0.635cm" fo:margin-left="6.35cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.25in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
                 <style:text-properties style:font-name="StarSymbol"/>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char="&#94;">
+            <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.985cm" fo:text-indent="-0.635cm" fo:margin-left="6.985cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.45in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
                 <style:text-properties style:font-name="StarSymbol"/>
             </text:list-level-style-bullet>
         </text:list-style>
+
+
         <text:list-style style:name="shorte_unordered_list">
             <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.27cm" fo:text-indent="-0.635cm" fo:margin-left="1.27cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.75in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
             <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.905cm" fo:text-indent="-0.635cm" fo:margin-left="1.905cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.95in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+            <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.54cm" fo:text-indent="-0.635cm" fo:margin-left="2.54cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.15in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
+            <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.175cm" fo:text-indent="-0.635cm" fo:margin-left="3.175cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.35in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
+            <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.81cm" fo:text-indent="-0.635cm" fo:margin-left="3.81cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.55in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" text:bullet-char=".">
+            <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="4.445cm" fo:text-indent="-0.635cm" fo:margin-left="4.445cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.75in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+            <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.08cm" fo:text-indent="-0.635cm" fo:margin-left="5.08cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.95in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char=".">
+            <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char="#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.715cm" fo:text-indent="-0.635cm" fo:margin-left="5.715cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.05in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char=".">
+            <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.35cm" fo:text-indent="-0.635cm" fo:margin-left="6.35cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.25in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char=".">
+            <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.985cm" fo:text-indent="-0.635cm" fo:margin-left="6.985cm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.45in" fo:text-indent="0cm" fo:margin-left="0cm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
         </text:list-style>
@@ -1007,6 +997,21 @@ class template_odt_t(template_t):
         <style:background-image/>
       </style:graphic-properties>
     </style:style>
+
+<!-- This style is used to inline images such as the star icon inline with a particular character -->
+<style:style style:name="fr_inline" style:family="graphic" style:parent-style-name="Graphics">
+    <style:graphic-properties style:run-through="background" style:wrap="run-through"
+        style:number-wrapped-paragraphs="no-limit" style:vertical-pos="from-top"
+        style:vertical-rel="char" style:horizontal-pos="from-left"
+        style:horizontal-rel="char" fo:background-color="transparent"
+        style:background-transparency="100%" draw:fill="solid" style:shadow="none"
+        style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" draw:luminance="0%"
+        draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%"
+        draw:color-inversion="false" draw:image-opacity="100%"
+        draw:color-mode="standard"><style:background-image/>
+    </style:graphic-properties>
+</style:style>
+
     
     ''' + self.m_styles_extra
                    
@@ -1029,6 +1034,12 @@ class template_odt_t(template_t):
         output = '''<text:span text:style-name="hyperlink">%s</text:span>''' % tmp
         
         return output
+
+    def insert_inline_image(self, x, y, height, width, name):
+        self.m_image_id += 1
+        return '''<draw:frame draw:style-name="fr_inline" draw:name="graphics%d" text:anchor-type="char" svg:x="%fcm" svg:y="%fcm" svg:width="%fcm" svg:height="%fcm" draw:z-index="22">
+                   <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
+               </draw:frame>''' % (self.m_image_id+10, x, y, width, height, name)
 
 
     def get_index_name(self):
@@ -1366,6 +1377,9 @@ class template_odt_t(template_t):
             elif(tag in ("cross","strike")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["strikethru"]
                 postfix += "</text:span>"
+            elif(tag in ("star", "starred")):
+                prefix += self.insert_inline_image(x=-0.2, y=0.7, height=0.515, width=0.515, name="star_small.png")
+                
             elif(tag == "table"):
                 table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['!', '|'])
                 xml = "</text:p>"
@@ -1884,6 +1898,24 @@ class template_odt_t(template_t):
 
             xml += "</table:table-row>\n"
         xml += "</table:table>"
+        
+        
+        if(struct.has_key("example")):
+
+            language = struct["example"]["language"]
+            example = struct["example"]["parsed"]
+
+            example = self.format_source_code(language, example)
+
+            xml += string.Template('''
+            <text:p text:style-name="${param_style}">The following example demonstrates the usage of this method:</text:p>
+            <text:p text:style-name="${param_style}"></text:p>
+            ${example}
+            <text:p text:style-name="${param_style}"></text:p>
+''').substitute({
+    "example" : example,
+    "param_style" : "ShorteNormalText"
+    })
 
         return xml
 
@@ -2365,11 +2397,23 @@ class template_odt_t(template_t):
         if(elem.children != None):
 
             prefix = ''
-            if(elem.type == "checkbox"):
-                if(elem.checked == True):
-                    prefix = "&#10003; "
+
+            if(elem.starred == True):
+                prefix += self.insert_inline_image(-0.4, 0.5, 0.4, 0.4, "star_small.png")
+            elif(elem.priority > 0):
+                prefix += self.insert_inline_image(-0.4, 0.5, 0.4, 0.4, "pri_0%d.png" % elem.priority)
+
+
+            if(elem.type in ("checkbox", "action")):
+                if(len(prefix) != 0):
+                    x = -0.8
                 else:
-                    prefix = "&#10799; "
+                    x = -0.5
+
+                if(elem.checked == True):
+                    prefix += self.insert_inline_image(x, 0.5, 0.5, 0.5, "checked.png")
+                else:
+                    prefix += self.insert_inline_image(x, 0.5, 0.5, 0.5, "unchecked.png")
 
             source += '''<text:list-item>
                <text:p text:style-name="%s">%s</text:p>
@@ -2383,11 +2427,21 @@ class template_odt_t(template_t):
             source += "</text:list></text:list-item>"
         else:
             prefix = ''
-            if(elem.type == "checkbox"):
-                if(elem.checked == True):
-                    prefix = "&#10003; "
+            
+            if(elem.starred == True):
+                prefix += self.insert_inline_image(-0.4, 0.5, 0.4, 0.4, "star_small.png")
+            elif(elem.priority > 0):
+                prefix += self.insert_inline_image(-0.4, 0.5, 0.4, 0.4, "pri_0%d.png" % elem.priority)
+
+            if(elem.type in ("checkbox", "action")):
+                if(len(prefix) != 0):
+                    x = -0.8
                 else:
-                    prefix = "&#10799; "
+                    x = -0.5
+                if(elem.checked == True):
+                    prefix += self.insert_inline_image(x, 0.5, 0.5, 0.5, "checked.png")
+                else:
+                    prefix += self.insert_inline_image(x, 0.5, 0.5, 0.5, "unchecked.png")
 
             source += '''
     <text:list-item>
@@ -3309,6 +3363,14 @@ class template_odt_t(template_t):
             style = self.extract_style_section(xml, "STYLES.QUESTION.BEGIN", "STYLES.QUESTION.END")
             self.styles["question"] = self.extract_template(style, "$QUESTION_CONTENT")
 
+    def walk_backwards(self, contents, text, pos=0):
+
+        start = contents.rfind(contents, text, pos)
+
+        if(start != -1):
+            return start
+        return None
+
 
     def generate_index(self, title, theme, version):
 
@@ -3339,19 +3401,33 @@ class template_odt_t(template_t):
         #xml = re.sub("DOCUMENT_REVISION_HISTORY", self.__format_revision_history(self.m_engine.get_doc_revision_history(), False), xml)
 
         pages = self._doc_pages_to_xml()
+        #print pages
+        #sys.exit(-1)
 
         # Insert the contents into the document
         str = '''<text:h text:style-name="Heading_20_1" text:outline-level="1">[[INSERT_CONTENTS_HERE]]</text:h>'''
         pos = xml.find(str)
+        if(pos == -1):
+            print "WTF!!!"
+            sys.exit(-1)
         start = pos
         end = pos + len(str)
         tmp = xml[0:start]
         tmp += pages
         tmp += xml[end:len(xml)]
         xml = tmp
-        
-        # DEBUG BRAD: This isn't ready for primetime yet
-        xml = re.sub("<text:p.*?>\[\[STYLES.TEMPLATES.START\]\].*?\[\[STYLES.TEMPLATES.END\]\]</text:p>", "", xml)
+
+
+        # Search for the styles to strip. The expression looks like this:
+        #   re.sub("<text:p.*?>\[\[STYLES.TEMPLATES.START\]\].*?\[\[STYLES.TEMPLATES.END\]\]</text:p>", "", xml)
+        start = xml.find("[[STYLES.TEMPLATES.START]]", 0)
+        start = xml.find("<text:p", start - 100)
+        end = xml.find("[[STYLES.TEMPLATES.END]]", start)
+        end = xml.find("</text:p>", end)
+        end += 9
+        xml = xml[0:start]
+        xml += xml[end:]
+
 
         # Replace the automatic styles
         start = xml.find("<office:automatic-styles>")
@@ -3362,6 +3438,7 @@ class template_odt_t(template_t):
         postfix = xml[end:]
 
         xml = prefix + styles + self.get_styles() + postfix
+        
 
         # Now remove any blank paragraphs that got accidentally added
         #xml = xml.replace("<text:p text:style-name='shorte_standard'></text:p>", "<text:p text:style-name='shorte_standard'>empty</text:p>")
@@ -3371,9 +3448,12 @@ class template_odt_t(template_t):
         handle = open("%s/odt/content.xml" % scratchdir, "wt")
         handle.write(xml)
         handle.close()
+        
+        #print xml
+        #sys.exit(-1)
 
 
-        images = ["note", "tbd", "question", "warning"]
+        images = ["note", "tbd", "question", "warning", "star_small", "checked", "unchecked", "pri_01", "pri_02", "pri_03", "pri_04", "pri_05"]
         for path in images:
             # Add the note.png file
             png = shorte_get_startup_path() + "/templates/shared/%s.png" % path
@@ -3484,12 +3564,44 @@ class template_odt_t(template_t):
 
         pages = self.m_engine.m_parser.get_pages()
 
+        # The skip_if_pdf attribute is a modifier that can be used
+        # to exclude sections
+        skip_if_pdf = False # True if the skip_if_pdf attribute is set
+        skipped_tag = None  # The type of tag that had the skip_if_pdf attribute set
+
         for page in pages:
             
             tags = page["tags"]
-
             for tag in tags:
-            
+                #print "TAG: %s" % tag.name
+                #if(self.m_engine.tag_is_header(tag.name)):
+                #    print "  %s" % tag.source
+
+                # If there currently is a skip tag set then see if
+                # it the current tag is at or above it. If it is then unset
+                # the skip_in_pdf attribute
+                if(skipped_tag != None):
+                    # If this tag is equal to or greater priority than the skipped tag
+                    # then unset the skip attribute
+                    if(not self.m_engine.m_parser.is_child_tag(tag.name, skipped_tag)):
+                        skipped_tag = None
+                        skip_if_pdf = False
+
+                # Now see if the current tag has a skip attribute set and record it
+                if(tag.modifiers.has_key("skip_if_pdf")):
+                    skip_if_pdf = True
+                    # If there is currently a skip set then see if this one outweights
+                    # the one that is set.
+                    if(skipped_tag != None):
+                        if(not self.m_engine.m_parser.is_child_tag(tag.name, skipped_tag)):
+                            skipped_tag = tag.name
+                    else:
+                        skipped_tag = tag.name
+
+                # Only output the tag if the skip_in_pdf flag is not set.
+                if(skip_if_pdf):
+                    continue
+
                 if(self.m_engine.tag_is_header(tag.name)):
                     self.append_header(tag)
             
@@ -3560,7 +3672,7 @@ class template_odt_t(template_t):
         
         if(package == PACKAGE_TYPE_PDF):
 
-            cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\", \\\"1.0\\\", \\\"blah\\\")\"" % (
+            cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\")\"" % (
                     path_oowriter,
                     params_oowriter,
                     path_converter,

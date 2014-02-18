@@ -70,6 +70,33 @@ typedef enum
     yyy = 2,
 }blah;
 
+
+/** This is a description of mystruct
+ *
+ * @example
+ *   mystruct_t tmp;
+ *   tmp.a = 0;
+ */
+typedef struct
+{
+    /** This is a description of the field 'a' */
+    int a;
+
+    /** This is a description of field 'b' */
+    char* b;
+}mystruct_t;
+
+/** THis is a test
+ *
+ * @example: src="examples/mystruct2.c"
+ */
+typedef struct
+{
+    /** Test */
+    int y;
+
+}mystruct2_t;
+
 /**
  * The supported PRBS polynomials 
  *

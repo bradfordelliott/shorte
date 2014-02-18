@@ -4,7 +4,6 @@
 @body
 
 @h1 Text Blocks
-
 @text
 This is a test of a text block. I've added some quotes like '
 and " to ensure they get translated correctly in the PDF file.
@@ -35,10 +34,19 @@ An inline table after a list
 - Four | Five | Six
 }
 
-A final @{hl,highlighted paragraph} with some @{b,bold data}.
+A final @{hl,highlighted paragraph} with some @{b,bold data} and some @{star,starred text}.
 
-This is the end of the text block with some @{i, italic text}.
+This is the end of the text block with some @{i, italic text}. This is also a @{starred, starred} block of text.
 
 @table: title="This is a test"
 - One | Two
 - A   | B
+
+@note
+This is a test of a note.
+
+@c
+int main(void)
+{
+    return 0;
+}
