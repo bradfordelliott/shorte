@@ -14,21 +14,22 @@ help:
 	@${echo} ""
 	
 	@${echo} " tests        = run the test suite to generate the list of sample documents"
-	@${echo} "   test_hello      = A hello world example for shorte"
-	@${echo} "   test_headings   = test the use of heading tags"
-	@${echo} "   test_textblocks = test the @textblock tag"
-	@${echo} "   test_tables     = test the @table tag"
-	@${echo} "   test_code       = test the parsing of C code"
-	@${echo} "   test_code_quick = test the parsing of C code but"
-	@${echo} "                     only generate HTML for faster results"
-	@${echo} "   test_functions  = test the @prototype source code tag"
-	@${echo} "   test_enums      = test the @enum source code tag"
-	@${echo} "   test_bullets    = test the @ul and @ol list tags"
-	@${echo} "   test_wkiwords   = test the use of wikiwords"
-	@${echo} "   test_images     = test the use of images"
-	@${echo} "   test_mergefile  = test the generation of mergefiles used for diffing"
-	@${echo} "   test_sql        = test the generation of SQL databases to store source code annotations"
-	@${echo} "   test_defines    = test the formatting of defines"
+	@${echo} "   test_hello           = A hello world example for shorte"
+	@${echo} "   test_headings        = test the use of heading tags"
+	@${echo} "   test_textblocks      = test the @textblock tag"
+	@${echo} "   test_tables          = test the @table tag"
+	@${echo} "   test_code            = test the parsing of C code"
+	@${echo} "   test_code_quick      = test the parsing of C code but"
+	@${echo} "                          only generate HTML for faster results"
+	@${echo} "   test_functions       = test the @prototype source code tag"
+	@${echo} "   test_enums           = test the @enum source code tag"
+	@${echo} "   test_bullets         = test the @ul and @ol list tags"
+	@${echo} "   test_wkiwords        = test the use of wikiwords"
+	@${echo} "   test_images          = test the use of images"
+	@${echo} "   test_mergefile       = test the generation of mergefiles used for diffing"
+	@${echo} "   test_sql             = test the generation of SQL databases to store source code annotations"
+	@${echo} "   test_defines         = test the formatting of defines"
+	@${echo} "   test_extract_private = test for extracting private methods"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -122,6 +123,7 @@ tests:
 	make test_mergefile
 	make test_sql
 	make test_server
+	make test_extract_private
 
 THEME:=shorte
 
@@ -193,6 +195,10 @@ test_server:
 	python server_test.py --package="html_inline" --theme="cortina_web" --ip=127.0.0.1 --port=8400 > server_example.html
 	python server_test.py --package="html_inline+pdf" --theme="html=cortina_web;pdf=cortina_public" --zip --ip=127.0.0.1 --port=8400 > server_example2.zip
 	python server_test.py --shutdown --ip=127.0.0.1 --port=8400
+
+test_extract_private:
+	python shorte.py -s "cpp_parser.extract_private=1" -f examples/test.h -x cpp -o build-output/private_methods
+	python shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
 
 
 test_junk:

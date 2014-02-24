@@ -825,10 +825,18 @@ def exists(s):
 
 %s
         ''' % contents
+
+            contents = trim_blank_lines(contents)
         
-            print "[%s]" % contents
+            #print "[%s]" % contents
         
-            eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
+            try:
+                eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
+            except:
+                print "ERROR parsing example2.py in %s" % os.getcwd()
+                sys.exc_info()
+                raise
+
             contents = tmp_macros["result"]
             #print "CONTENTS = [%s]" % contents
             #sys.exit(-1)
