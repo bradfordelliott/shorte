@@ -40,3 +40,26 @@ This heading will be included because it ends up evaluating to
 1. This heading is a the same level @h2 so it breaks any conditional
 cascade caused by the @{b,if="DEBUG"} on the previous @{b,@h2} header.
 
+@h1: skip_if_pdf
+This section would only be included if the output template is PDF
+
+@h3 This is a subsection that should be skipped
+With some data underneath it
+
+@h1 This section should not be skipped in PDF docs
+blah blah blah
+
+@h2: skip_if_pdf
+But this heading should!!!
+
+@h3 This heading is also skipped
+
+@h2 But this heading shouldn't
+cause it doesn't have the skip_if_pdf tag
+
+@h3: skip_if_pdf
+This one is skipped
+
+@h3 But this one isn't
+
+

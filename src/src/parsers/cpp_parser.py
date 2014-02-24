@@ -91,11 +91,13 @@ class cpp_parser_t(shorte_parser_t):
 
         shorte_parser_t.__init__(self, engine)
 
-        c = source_code_t()
-        self.m_keywords = c.get_keyword_list("c")
+        code = self.m_engine.m_source_code_analyzer
+        self.m_keywords = code.get_keyword_list("c")
 
         self.m_author = "Unknown"
         self.m_file_brief = ""
+        self.m_find_reference = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
+        self.m_find_in_group  = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
             
 
     def is_keyword(self, source):
@@ -242,6 +244,16 @@ class cpp_parser_t(shorte_parser_t):
         struct["title"] = struct_name
         struct["caption"] = self.parse_textblock(comment["desc"])
         struct["max_cols"] = max_cols
+        example = comment["example"]
+        
+        if(comment.has_key("example") and comment["example"] != ""): 
+            code = self.m_engine.m_source_code_analyzer
+            language = "c"
+            tmp = code.parse_source_code(language, example)
+            struct["example"] = {}
+            struct["example"]["language"] = language
+            struct["example"]["parsed"] = tmp
+            struct["example"]["unparsed"] = example
         
 
         i = pos_saved
@@ -581,6 +593,7 @@ class cpp_parser_t(shorte_parser_t):
 
         return text
 
+
     def parse_cpp_func_comment(self, text):
         '''This method is called to parse a comment associated with a C/C++
            function in order to extract the associated fields.
@@ -602,17 +615,22 @@ class cpp_parser_t(shorte_parser_t):
         comment["deprecated"] = None
 
         # Strip off any \ref sequences since shorte doesn't use them
-        expr_ref = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
-        text = expr_ref.sub("", text)
-        
-        # Strip off any leading ingroup tag before the description
-        # since shorte doesn't support that right now.
-        expr_ingroup = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
-        matches = expr_ingroup.search(text)
-        if(matches != None):
-            comment["ingroup"] = matches.groups()[1]
-            #print "INGROUP: %s" % comment["ingroup"]
-            text = text.replace(matches.groups()[0], "")
+        extras = True
+        if(extras):
+            #expr_ref = self.m_find_reference
+            expr_ref = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
+            text = expr_ref.sub("", text)
+            
+            # Strip off any leading ingroup tag before the description
+            # since shorte doesn't support that right now.
+            #expr_ingroup = self.m_find_in_group
+            expr_ingroup = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
+
+            matches = expr_ingroup.search(text)
+            if(matches != None):
+                comment["ingroup"] = matches.groups()[1]
+                #print "INGROUP: %s" % comment["ingroup"]
+                text = text.replace(matches.groups()[0], "")
         
         # If there is no description assume the type is private
         if(len(text) == 0):
@@ -1138,7 +1156,7 @@ class cpp_parser_t(shorte_parser_t):
         pseudocode = source[pseudocode_start:pseudocode_end]
         #print "PSEUDOCODE: [%s]" % pseudocode
                     
-        code = source_code_t()
+        code = self.m_engine.m_source_code_analyzer
         language = "c"
 
         if(output_pseudocode):
@@ -1433,15 +1451,15 @@ class cpp_parser_t(shorte_parser_t):
         states.append(STATE_NORMAL)
         
         i = 0
-        source = ''
+        source = []
         tokens = []
         line = 1
 
         while i < len(input):
 
             if(input[i] == '\\'):
-                source += input[i]
-                source += input[i+1]
+                source.append(input[i])
+                source.append(input[i+1])
 
                 if(input[i+1] == '\n'):
                     line += 1
@@ -1452,38 +1470,39 @@ class cpp_parser_t(shorte_parser_t):
             state = states[-1]
 
             if(state == STATE_LINE_COMMENT):
-                source += input[i]
+                source.append(input[i])
                 if(input[i] == '\n'):
                     #print "APPENDING LINE COMMENT [%s]" % source
-                    tokens.append(my_token(TOKEN_LINE_COMMENT, source, line, i))
-                    source = ''
+                    word = ''.join(source)
+                    tokens.append(my_token(TOKEN_LINE_COMMENT, word, line, i))
+                    source = []
                     states.pop()
                    
             elif(state == STATE_COMMENT):
-                source += input[i]
+                source.append(input[i])
                 if(input[i] == '*' and input[i+1] == '/'):
                     #print "APPENDING COMMENT [%s]" % source
-                    source += input[i+1]
-                    tokens.append(my_token(TOKEN_COMMENT, source, line, i))
-                    source = ''
+                    source.append(input[i+1])
+                    tokens.append(my_token(TOKEN_COMMENT, ''.join(source), line, i))
+                    source = []
                     states.pop()
                     i += 2
 
             elif(state == STATE_STRING):
-                source += input[i]
+                source.append(input[i])
 
                 if(input[i] == '"'):
-                    tokens.append(my_token(TOKEN_STRING, source, line, i))
-                    source = ''
+                    tokens.append(my_token(TOKEN_STRING, ''.join(source), line, i))
+                    source = []
                     states.pop()
 
             elif(state == STATE_PREPROCESSOR):
-                source += input[i]
+                source.append(input[i])
 
                 if(input[i] == '\n'):
-                    tokens.append(my_token(TOKEN_PREPROCESSOR, source, line, i))
+                    tokens.append(my_token(TOKEN_PREPROCESSOR, ''.join(source), line, i))
                     states.pop()
-                    source = ''
+                    source = []
 
             elif(state == STATE_NORMAL):
 
@@ -1491,108 +1510,118 @@ class cpp_parser_t(shorte_parser_t):
                     states.append(STATE_PREPROCESSOR)
 
                 elif(input[i] == '/' and input[i+1] == '/'):
-                    source += '//'
+                    source.append('//')
                     states.append(STATE_LINE_COMMENT)
                     i += 2
                     continue
 
                 elif(input[i] == '/' and input[i+1] == '*'):
-                    source += '/*'
+                    source.append('/*')
                     states.append(STATE_COMMENT)
                     i += 2
                     continue
 
                 elif(input[i] == '"'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
-                    source += input[i]
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
+                    source.append(input[i])
                     states.append(STATE_STRING)
 
                 elif(input[i] == '('):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     tokens.append(my_token(TOKEN_OPEN_BRACKET, '(', line, i))
                 elif(input[i] == '['):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     tokens.append(my_token(TOKEN_OPEN_SQ_BRACKET, '[', line, i))
                 elif(input[i] == ']'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     tokens.append(my_token(TOKEN_CLOSE_SQ_BRACKET, ']', line, i))
                 elif(input[i] == '='):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     tokens.append(my_token(TOKEN_EQUALS, '=', line, i))
 
                 elif(input[i] == ';'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
                     tokens.append(my_token(TOKEN_SEMICOLON, ';', line, i))
-                    source = ''
+                    source = []
                 elif(input[i] == ')'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
                     tokens.append(my_token(TOKEN_CLOSE_BRACKET, ')', line, i))
-                    source = ''
+                    source = []
                 elif(input[i] == '{'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
                     tokens.append(my_token(TOKEN_OPEN_BRACE, '{', line, i))
-                    source = ''
+                    source = []
                 elif(input[i] == '}'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
                     tokens.append(my_token(TOKEN_CLOSE_BRACE, '}', line, i))
-                    source = ''
+                    source = []
                 elif(input[i] == ' '):
 
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     #tokens.append(my_token(TOKEN_WHITESPACE, input[i], line, i))
                     last_token = tokens[-1]
@@ -1602,12 +1631,13 @@ class cpp_parser_t(shorte_parser_t):
                         tokens.append(my_token(TOKEN_WHITESPACE, input[i], line, i))
                 
                 elif(input[i] == '\t'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     #tokens.append(my_token(TOKEN_WHITESPACE, input[i], line, i))
                     last_token = tokens[-1]
@@ -1618,12 +1648,13 @@ class cpp_parser_t(shorte_parser_t):
                     
                     
                 elif(input[i] == '\n'):
-                    if(source != ''):
-                        if(self.is_keyword(source)):
-                           tokens.append(my_token(TOKEN_KEYWORD, source, line, i))
+                    if(len(source) != 0):
+                        word = ''.join(source)
+                        if(self.is_keyword(word)):
+                           tokens.append(my_token(TOKEN_KEYWORD, word, line, i))
                         else:
-                           tokens.append(my_token(TOKEN_CODE, source, line, i))
-                        source = ''
+                           tokens.append(my_token(TOKEN_CODE, word, line, i))
+                        source = []
 
                     if(len(tokens) != 0):
                         last_token = tokens[-1]
@@ -1636,7 +1667,7 @@ class cpp_parser_t(shorte_parser_t):
                         tokens.append(my_token(TOKEN_WHITESPACE, input[i], line+1, i))
 
                 else:
-                    source += input[i]
+                    source.append(input[i])
 
             try:
                 if(input[i] == '\n'):

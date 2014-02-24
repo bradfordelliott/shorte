@@ -308,8 +308,8 @@ class shorte_parser_t(parser_t):
     
     def _parse_tag_data(self, tag_name, input, i):
 
-        tag_data = ""
-        tag_modifier = ""
+        tag_data = []
+        tag_modifier = []
 
         STATE_NORMAL     = 0
         STATE_COMMENT    = 1
@@ -353,7 +353,7 @@ class shorte_parser_t(parser_t):
                 #if(input[i] == '@'):
                 if((i == 0 and input[i] == '@') or (input[i] == '@' and input[i-1] == '\n')):
                     if(input[i+1] == '{'):
-                        tag_data += input[i]
+                        tag_data.append(input[i])
                     else:
                         break 
                    
@@ -364,18 +364,18 @@ class shorte_parser_t(parser_t):
                     # DEBUG BRAD: This is an attempt to strip
                     #             escape sequence backslashes
                     if(self.tag_is_source_code(tag_name)):
-                        tag_data += input[i]
+                        tag_data.append(input[i])
                     # DEBUG BRAD: Added this on Oct 19, 2013
                     else:
-                        tag_data += input[i]
+                        tag_data.append(input[i])
 
-                    tag_data += input[i+1]
+                    tag_data.append(input[i+1])
                     i+=2
                     continue
 
 
                 else:
-                    tag_data += input[i]
+                    tag_data.append(input[i])
 
             elif(state == STATE_MODIFIER):
                 
@@ -383,21 +383,21 @@ class shorte_parser_t(parser_t):
                     states.pop()
                 elif(input[i:i+3] == "'''"):
                     #print "DO I GET HERE?"
-                    tag_modifier += '"'
+                    tag_modifier.append('"')
                     states.append(STATE_MULTILINE_STRING )
                     i = i + 3
                     continue
                 else:
-                    tag_modifier += input[i]
+                    tag_modifier.append(input[i])
 
             elif(state == STATE_MULTILINE_STRING):
                 if(input[i:i+3] == "'''"):
                     states.pop()
                     i = i + 2
                     #print "MODIFIER: [%s]" % tag_modifier
-                    tag_modifier += '"'
+                    tag_modifier.append('"')
                 else:
-                    tag_modifier += input[i]
+                    tag_modifier.append(input[i])
 
             elif(state == STATE_COMMENT):
                 if(input[i] == '\n'):
@@ -408,7 +408,7 @@ class shorte_parser_t(parser_t):
 
         #print "TAG:\n  DATA: [%s]\n  MODIFIERS: [%s]" % (tag_data, tag_modifier)
 
-        return (i, tag_data, tag_modifier)
+        return (i, ''.join(tag_data), ''.join(tag_modifier))
     
 
     def parse_inline_image(self, matches):
@@ -446,6 +446,8 @@ class shorte_parser_t(parser_t):
             image["center"] = True
         if(tags.has_key("href")):
             image["href"] = tags["href"]
+
+        image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(src)
 
@@ -602,6 +604,7 @@ class shorte_parser_t(parser_t):
         image["imagemap"] = image_map
         image["imagemap_name"] = basename
         image["html"] = event_html
+        image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(image["src"])
 
@@ -694,6 +697,7 @@ class shorte_parser_t(parser_t):
         image["imagemap"] = image_map
         image["imagemap_name"] = basename
         image["html"] = self.parse_table(event_html, modifiers) 
+        image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(image["src"])
 
@@ -1343,6 +1347,7 @@ a C/C++ like define that looks like:
             struct["image"] = {}
             struct["image"]["path"] = image_name
             struct["image"]["map"] = image_map
+            struct["image"]["reference"] = self.m_current_file
 
         struct["record"] = record
 
@@ -1454,7 +1459,7 @@ a C/C++ like define that looks like:
 
                     function_prototype = section[10:len(section)].strip()
 
-                    code = source_code_t()
+                    code = self.m_engine.m_source_code_analyzer
                     prototype = code.parse_source_code(language, function_prototype)
                     vars["prototype"] = {}
                     vars["prototype"]["language"] = language
@@ -1541,7 +1546,7 @@ a C/C++ like define that looks like:
 
                     #print "EXAMPLE: [%s]" % example
 
-                    code = source_code_t()
+                    code = self.m_engine.m_source_code_analyzer
                     example = code.parse_source_code(language, example)
                     vars["example"] = {}
                     vars["example"]["language"] = language
@@ -1555,7 +1560,7 @@ a C/C++ like define that looks like:
 
                     #print "PSEUDOCODE: [%s]" % pseudocode
 
-                    code = source_code_t()
+                    code = self.m_engine.m_source_code_analyzer
                     pseudocode = code.parse_source_code(language, pseudocode)
                     vars["pseudocode"] = {}
                     vars["pseudocode"]["language"] = language
@@ -1623,6 +1628,8 @@ a C/C++ like define that looks like:
         if(tags.has_key("map")):
             image["imagemap"] = tags["map"]
 
+        image["reference"] = self.m_current_file
+
         self.m_engine.m_images.append(image["src"])
 
         return image
@@ -1669,6 +1676,8 @@ a C/C++ like define that looks like:
         if(tags.has_key("align")):
             obj["align"] = tags["align"]
 
+        obj["reference"] = self.m_current_file
+
         self.m_engine.m_images.append(obj["src"])
 
         return obj
@@ -1706,7 +1715,6 @@ a C/C++ like define that looks like:
             return self.m_snippets[name].strip()
 
         return "SNIPPET %s NOT FOUND" % name
-   
 
     def _parse_tag(self, page_title, name, data, modifiers):
         '''This method is used to parse the tag itself and expand
@@ -1904,7 +1912,7 @@ else:
 
 
         elif(self.tag_is_source_code(name)):
-            code = source_code_t()
+            code = self.m_engine.m_source_code_analyzer
         
             tag.source = data
             tag.contents = code.parse_source_code(name, data)
@@ -2172,7 +2180,7 @@ else:
 
         return input
 
-    def __is_child_tag(self, tag, predecessor):
+    def is_child_tag(self, tag, predecessor):
         '''This method is called by the __append_tags_if_not_excluded
            method to cascade tag exclusion from headers to child
            topics'''
@@ -2209,7 +2217,7 @@ else:
         else:
             if(excluded != None):
 
-                if(self.__is_child_tag(tag_name, excluded)):
+                if(self.is_child_tag(tag_name, excluded)):
                     #print "TAG %s EXCLUDED" % tag_name
                     pass
                 else:
@@ -2568,6 +2576,8 @@ def exists(s):
         #print "SOURCE_FILE = %s" % source_file
 
         self.m_current_file = source_file
+
+        #print "ONE"
         
         try:
 
@@ -2576,6 +2586,8 @@ def exists(s):
 
             # Replace any tabs
             input = input.replace("\t", TAB_REPLACEMENT)
+
+            #print "ONE_A"
 
             start = 0
             header = self.__parse_header(input)
@@ -2587,6 +2599,8 @@ def exists(s):
             version = header["version"]
             number = header["number"]
             revision_history = header["revision_history"]
+
+            #print "ONE_B"
             
             
             # If the title has not already been set
@@ -2703,6 +2717,7 @@ def exists(s):
                 
                 i = i+1
             
+            #print "TWO"
             
             if(tag_data != ""):
                 if(tag_name != ""):
@@ -2721,6 +2736,7 @@ def exists(s):
                         
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
+            #print "THREE"
             
             # Check to see if there were any includes found. If there are then
             # pop them off one at a time and process them
@@ -2732,6 +2748,8 @@ def exists(s):
             # Now walk the list of tags and cascade conditionals on headers
             #for tag in page["tags"]:
             #    print tag
+
+            #print "Finished parsing"
 
             self.m_pages.append(page)
 

@@ -308,14 +308,47 @@ def trim_leading_blank_lines(source):
     #print "End = %d" % end
 
     for i in range(start, end+1):
-        output += lines[i] + "\n"
+        output += (lines[i] + "\n")
 
     return output
 
+def trim_blank_lines2(source):
+    
+    lines = source.split('\n')
+
+    if(len(lines) == 1):
+        return source
+
+    output = []
+
+    # Find the index of first non-blank line
+    start = 0
+    for i in range(0, len(lines)):
+        tmp = lines[i].strip()
+        if(len(tmp) != 0):
+            break
+        start += 1
+
+    #print "Start = %d" % start
+
+    # Find the index of the last non-blank line
+    end = len(lines)-1
+    for i in range(len(lines)-1, 0, -1):
+        tmp = lines[i].strip()
+        if(len(tmp) != 0):
+            break
+        end -= 1 
+
+    #print "End = %d" % end
+
+    for i in range(start, end+1):
+        output.append(lines[i])
+
+    return '\n'.join(output)
 
 def trim_blank_lines(source):
     
-    lines = source.split("\n")
+    lines = source.split('\n')
 
     if(len(lines) == 1):
         return source
@@ -326,7 +359,7 @@ def trim_blank_lines(source):
     start = 0
     for i in range(0, len(lines)):
         tmp = lines[i].strip()
-        if(tmp != ""):
+        if(len(tmp) != 0):
             break
         start += 1
 
@@ -336,14 +369,14 @@ def trim_blank_lines(source):
     end = len(lines)-1
     for i in range(len(lines)-1, 0, -1):
         tmp = lines[i].strip()
-        if(tmp != ""):
+        if(len(tmp) != 0):
             break
         end -= 1 
 
     #print "End = %d" % end
 
     for i in range(start, end+1):
-        output += lines[i] + "\n"
+        output += (lines[i] + '\n')
 
     return output
 
@@ -353,7 +386,7 @@ def trim_leading_indent(source):
     source = trim_blank_lines(source)
 
     # Trim any leading indent from each line
-    lines = re.split("\n", source)
+    lines = source.split("\n")
     lines_out = []
 
     # Now figure out the indent of the first line
@@ -465,3 +498,20 @@ STATE_MCOMMENT = 5
 STATE_MODIFIER = 6
 STATE_INLINE_STYLING = 7
 STATE_XMLCOMMENT = 8
+
+def zipper(dir, zip_file):
+    import zipfile, os
+
+    print "%s" % zip_file
+
+    zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
+    root_len = len(os.path.abspath(dir))
+    for root, dirs, files in os.walk(dir):
+        archive_root = os.path.abspath(root)[root_len:]
+        for f in files:
+            fullpath = os.path.join(root, f)
+            archive_name = os.path.join(archive_root, f)
+            #print f
+            zip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
+    zip.close()
+    return zip_file

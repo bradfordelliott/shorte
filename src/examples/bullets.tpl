@@ -6,7 +6,9 @@
 @h1 List Tests
 
 @h2 An Unordered List
-Some text before the list
+Some text before the list that is really long and
+probably wraps across multiple lines just to ensure that
+the position of @{star,starred} text remains consistent.
 
 @ul
 - A
@@ -119,6 +121,15 @@ This is another example using the @ol tag:
 -[x] checked
     -[]  not checked
     -[x] checked
+-[*] Starred
+-[*x] Starred and checked
+-[*a] Starred action
+-[*ax] Starred complete action
+-[1] low priority item
+-[2] low priority item
+-[3] low priority item
+-[4a] Low priority action
+-[5a] High @{starred, priority} action
 
 @text
 This is a final example using the @ul tag:
@@ -128,6 +139,14 @@ This is a final example using the @ul tag:
 -[x] checked
     -[]  not checked
     -[x] checked
+- Priorities
+    -[1] low priority item
+    -[2] low priority item
+    -[3] low priority item
+    -[4a] Low priority action
+    -[5a] High priority action
+    -[1a*] Star @{star,overrides} priority
+
 
 @text
 A paragraph to end everything.

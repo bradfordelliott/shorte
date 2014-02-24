@@ -67,6 +67,19 @@
 int func1(int blah, bool* dummy);
 
 /**
+ * This is a private function that won't normally be extracted.
+ * It can be forcibly extracted by setting:
+ *
+ *    cpp_parser.extract_private=1
+ *
+ * @param blah  [I] - A parameter
+ * @param dummy [I] - Another parameter
+ *
+ * @private
+ */
+int private_func1(int blah, char* dummy);
+
+/**
  * This is the structure that gets passed to an application registered
  * interrupt handler.
  */

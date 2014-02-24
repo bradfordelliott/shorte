@@ -1,25 +1,47 @@
-
+#!/usr/bin/env python
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
+import shutil
+import os
 
 from src.shorte_defines import *
 from src.shorte_engine import *
 
-g_shorte = None 
+g_shorte = None
+g_server = None
+
+class shorte_server_t(SimpleXMLRPCServer):
+    def serve_forever(self):
+        self.quit = 0
+        while not self.quit:
+            self.handle_request()
 
 # Restrict to a particular path
 class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ('/RPC2',)
 
+def shutdown():
+    global g_server
+    g_server.quit = 1
+    return 1
 
-def parse(contents, package, theme, settings):
+def parse(contents, package, theme, settings, zip_output):
     global g_shorte
 
+    #print "Theme: %s" % theme
+    #print "Package: %s" % package
+
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
-    output_dir = "build-output"
+    output_dir = "scratch2"
+    if(not os.path.isabs(output_dir)):
+        output_dir = "%s/%s" % (os.getcwd(), output_dir)
+    try:
+        shutil.rmtree(output_dir, True)
+    except:
+        pass
+
+    os.makedirs(output_dir)
     parser = "shorte"
-    #g_shorte = engine_t(output_dir, config, parser)
-    g_shorte.set_theme(theme)
 
     if(settings != None):
         settings = settings.split(";")
@@ -34,47 +56,71 @@ def parse(contents, package, theme, settings):
                
                 g_shorte.set_config(sect, key, val)
 
+    g_shorte.set_output_directory(output_dir)
     g_shorte.parse_string(contents)
     
     g_shorte.set_package(package)
 
-    indexer = indexer_t()
+    info = {}
 
-    if(package == "html_inline"):
-        template = template_html_t(g_shorte, indexer)
-        template.m_inline = True
-        template.set_template_dir(package)
-        template.m_include_pdf = False
-    elif(package in ("odt","pdf")):
-        template = template_odt_t(g_shorte, indexer)
+    if(zip_output != ""):
+        g_shorte.generate_packages(package, theme, None, "test.zip")
 
-    g_shorte.set_template(template)
+        info["type"] = "zip"
+        content = "TBD"
+        handle = open("test.zip", "rb")
+        content = handle.read()
+        handle.close()
+        content = base64.encodestring(content)
+    else:
+        indexer = indexer_t()
 
-    try:
-        content = g_shorte.generate_string(package)
 
-        print content
-    except Exception as e:
-        content = e
-        print content
+        if(package == "html_inline"):
+            info["type"] = "text"
+            g_shorte.set_theme(theme)
+            template = template_html_t(g_shorte, indexer)
+            template.m_inline = True
+            template.set_template_dir(package)
+            g_shorte.set_template(template)
+            template.m_include_pdf = False
+            content = g_shorte.generate_string(package)
+        elif(package in ("odt","pdf")):
+            info["type"] = "base64"
+            g_shorte.set_theme(theme)
+            template = template_odt_t(g_shorte, indexer)
+            g_shorte.set_template(template)
+            content = g_shorte.generate_string(package)
+        else:
+            info["type"] = "text"
+            content = "???"
 
+    # Reset the engine to process the next request
     g_shorte.reset()
 
-    info = {}
-    info["type"] = "text"
-    if(package in ("odt","pdf")):
-        info["type"] = "base64"
+    #if(package in ("odt","pdf")):
+    #    info["type"] = "base64"
+    #elif(package in ("html_inline+pdf")):
+    #    info["type"] = "zip"
+    #    content = "TBD"
+    #    handle = open("test.zip", "rb")
+    #    content = handle.read()
+    #    handle.close()
+    #    content = base64.encodestring(content)
+
     info["content"] = content
     return info
 
 
 def shorte_server_start(ip, port):
     global g_shorte
+    global g_server
 
     print "Starting the shorte XML-RPC server on %s:%d" % (ip,port)
     # Create the server
-    server = SimpleXMLRPCServer((ip, port), requestHandler=RequestHandler)
-    server.register_introspection_functions()
+    g_server = shorte_server_t((ip, port), requestHandler=RequestHandler)
+    g_server.register_introspection_functions()
+    g_server.register_function(shutdown)
 
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
     output_dir = "build-output"
@@ -84,6 +130,6 @@ def shorte_server_start(ip, port):
     g_shorte = engine_t(output_dir, config, parser)
 
     # Register a test function
-    server.register_function(parse)
+    g_server.register_function(parse)
     
-    server.serve_forever()
+    g_server.serve_forever()

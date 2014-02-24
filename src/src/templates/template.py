@@ -24,6 +24,15 @@ class template_t:
         
         self.m_wikify = int(self.m_engine.get_config("wikify", "allow"))
         self.m_wikify_comments = int(self.m_engine.get_config("wikify", "allow_in_comments"))
+        
+        self.m_end_characters = list(string.punctuation)
+        self.m_end_characters.append(' ')
+        self.m_end_characters.append('\t')
+        self.m_end_characters.append('\r')
+        self.m_end_characters.append('\n')
+        # Can't use _ as a separator for wikiwords because we want to hyperlink
+        # C Code
+        self.m_end_characters.remove('_')
 
     def allow_wikify_comments(self):
         return self.m_wikify_comments
@@ -135,14 +144,7 @@ class template_t:
         
         # Figure out the list of punctuation characters that are used to
         # split up wikiwords.
-        end_characters = list(string.punctuation)
-        end_characters.append(' ')
-        end_characters.append('\t')
-        end_characters.append('\r')
-        end_characters.append('\n')
-        # Can't use _ as a separator for wikiwords because we want to hyperlink
-        # C Code
-        end_characters.remove('_')
+        end_characters = self.m_end_characters
 
         for i in data:
 
@@ -162,8 +164,8 @@ class template_t:
         output = ''
         for word in words:
             
-            if(debug):
-                print "    Checking [%s]" % word
+            #if(debug):
+            #    print "    Checking [%s]" % word
 
             if(word in end_characters):
                 output += word 

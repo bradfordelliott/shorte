@@ -303,7 +303,7 @@ class template_html_t(template_t):
         
         template_t.__init__(self, engine, indexer)
 
-        self.m_contents = ""
+        self.m_contents = []
         self.m_engine = engine
         self.m_indexer = indexer
         self.m_theme = ""
@@ -346,9 +346,12 @@ class template_html_t(template_t):
                 img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
                 handle.close()
             else:
-                img_src = "%spdf.png" % icon_location
+                if(len(icon_location) == 0):
+                    img_src = "css/pdf.png"
+                else:
+                    img_src = "%s/pdf.png" % icon_location
 
-            pdf = '''<span style='float:right;'><a href="%s.pdf"><img style='height:60px;' src="%s"/></a></span>''' % (pdf_path, img_src)
+            pdf = '''<span style='float:right;'><a href="%s.pdf"><img style='height:50px;padding-top:5px;' src="%s"/></a></span>''' % (pdf_path, img_src)
 
         return pdf
 
@@ -526,7 +529,7 @@ class template_html_t(template_t):
 
         keywords = self.m_engine.get_keyword_list(language)
 
-        output = ''
+        output = []
         keyword = ''
         pos_start = 0
 
@@ -553,28 +556,32 @@ class template_html_t(template_t):
                     #print "  substr:   {%s}" % source[pos_start:i]
                     if(keywords.has_key(keyword)):
                         #output += source[pos_start:i]
-                        output += "<span class='kw'>%s</span>" % keyword
+                        output.append("<span class='kw'>")
+                        output.append(keyword)
+                        output.append("</span>")
                     else:
-                        output += self.wikify(keyword, exclude_wikiwords)
+                        output.append(self.wikify(keyword, exclude_wikiwords))
 
                     keyword = ''
                 
                 pos_start = i+1
-                output += "%c" % c
+                output.append("%c" % c)
 
 
         if(keyword != ''):
             #output += source[pos_start:i+1]
             if(keywords.has_key(keyword)):
                 #output += source[pos_start:i]
-                output += "<span class='kw'>%s</span>" % keyword
+                output.append("<span class='kw'>")
+                output.append(keyword)
+                output.append("</span>")
             else:
-                output += self.wikify(keyword, exclude_wikiwords)
+                output.append(self.wikify(keyword, exclude_wikiwords))
             #print "  keyword2 = %s" % keyword
 
         #print "output = %s\n" % output
 
-        return output
+        return ''.join(output)
 
 
     def format_source_code(self, language, tags, exclude_wikiwords=[], show_line_numbers=True):
@@ -727,7 +734,8 @@ class template_html_t(template_t):
             img_src = re.sub("\n", "", img_src)
 
             handle.close()
-
+        else:
+            img_src = "css/" + img_src
 
         return note_template.substitute(
             {"contents" : content,
@@ -738,7 +746,7 @@ class template_html_t(template_t):
 
         content = self.format_textblock(tag)
 
-        img_src = "tbd.png"
+        img_src = "css/tbd.png"
         
         if(self.is_inline() == True):
             handle = open(shorte_get_startup_path() + "/templates/shared/tbd.png", "rb")
@@ -754,10 +762,9 @@ class template_html_t(template_t):
              "title"    : "TBD"})
     
     def format_question(self, tag):
+        content = self.format_textblock(tag)
 
-	content = self.format_textblock(tag)
-
-        img_src = "question.png"
+        img_src = "css/question.png"
 
         if(self.is_inline() == True):
             handle = open(shorte_get_startup_path() + "/templates/shared/question.png", "rb")
@@ -796,17 +803,28 @@ class template_html_t(template_t):
     
     
     def format_list_child(self, elem, start_tag, end_tag):
+        
         source = ''
+
         if(elem.children != None):
+            prefix = ''
+            
+            # DEBUG BRAD: Need to do this in such a way that it doesn't
+            #             re-link the image each time in the inlined version
+            if(elem.starred):
+                prefix = "<div class='star'></div>"
+
+            elif(elem.priority > 0):
+                prefix = "<div class='pri_0%d'></div>" % elem.priority
+
+
             if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
-                    prefix = '<input type="checkbox" checked onclick="return false;"></input>'
+                    prefix += '<input type="checkbox" checked onclick="return false;"></input>'
                 else:
-                    prefix = '<input type="checkbox" onclick="return false;"></input>'
-
-                source += "<li>%s %s" % (prefix, self.format_text(elem.get_text()))
-            else:
-                source += "<li>%s" % self.format_text(elem.get_text())
+                    prefix += '<input type="checkbox" onclick="return false;"></input>'
+            
+            source += "<li>%s %s" % (prefix, self.format_text(elem.get_text()))
 
             num_children = len(elem.children)
             source += start_tag
@@ -815,14 +833,22 @@ class template_html_t(template_t):
                 source += self.format_list_child(elem.children[i], start_tag, end_tag)
             source += "%s</li>" % (end_tag)
         else:
+            prefix = ''
+            # DEBUG BRAD: Need to do this in such a way that it doesn't
+            #             re-link the image each time in the inlined version
+            if(elem.starred):
+                prefix = "<div class='star'></div>"
+            
+            elif(elem.priority > 0):
+                prefix = "<div class='pri_0%d'></div>" % elem.priority
+
             if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
-                    prefix = "<input type='checkbox' checked onclick='return false;'></input>"
+                    prefix += "<input type='checkbox' checked onclick='return false;'></input>"
                 else:
-                    prefix = "<input type='checkbox' onclick='return false;'></input>"
-                source += "<li>%s " % prefix + self.format_text(elem.get_text()) + "</li>"
-            else:
-                source += "<li>" + self.format_text(elem.get_text()) + "</li>"
+                    prefix += "<input type='checkbox' onclick='return false;'></input>"
+
+            source += "<li>%s " % prefix + self.format_text(elem.get_text()) + "</li>"
 
         return source
     
@@ -1829,6 +1855,17 @@ within an HTML document.
            @return The HTML output of the structure
         '''
         
+        template_example = string.Template('''
+                <div style="margin-left:10px;">
+                    <div style="color: #396592; font-weight: bold;">Example:</div>
+                    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
+                        The following example demonstrates the use of this structure:<br>
+                    </div>
+                    ${example}
+                </div>
+            
+        ''');
+        
         html = ""
         
         if("caption" in struct):
@@ -1913,6 +1950,7 @@ within an HTML document.
             html += "</tr>\n"
 
             i+=1
+        
        
         #if(self.m_engine.get_config("html", "caption_struct") == "1"):
         #    if("caption" in struct):
@@ -1920,8 +1958,35 @@ within an HTML document.
         
 
         html += "</table><br/>"
+        
+        if(struct.has_key("example")):
 
+            example = struct["example"]["parsed"]
+            language = struct["example"]["language"]
+            
+            if(self.m_show_code_headers["example"]):
+                snippet_id = self.m_snippet_id
+                self.m_snippet_id += 1
+                code_header = template_code_header.substitute(
+                        {"id" : snippet_id,
+                         "style" : "margin-left:10px;margin-top:2px;"})
+                source = template_source.substitute({
+                    "id":     snippet_id,
+                    "source": self.format_source_code_no_lines(language, example)})
+            else:
+                code_header = ""
+                source = ""
+            
+            example = self.format_source_code(language, example)
 
+            code = template_code.substitute(
+                       {"contents" : example,
+                        "source"   : source,
+                        "code_header" : code_header,
+                        "template" : "code2",
+                        "result"   : ""})
+
+            html += template_example.substitute({"example" : code})
 
 
         return html
@@ -2281,6 +2346,9 @@ $href_end
             elif(tag in ("hl", "hilite", "highlight")):
                 prefix += "<span style='background-color:yellow;'>"
                 postfix += "</span>"
+            elif(tag in ("star", "starred")):
+                prefix += "<div class='star'>&nbsp;</div>"
+                postfix += ""
             elif(tag in "table"):
                 #print "PARSING INLINE TABLE"
                 #print "===================="
@@ -2298,9 +2366,9 @@ $href_end
             return
 
         # Convert an < and > characters
-        data = re.sub("<", "&lt;", data)
-        data = re.sub(">", "&gt;", data)
-        data = re.sub("-&gt;", "->", data)
+        data = data.replace("<", "&lt;")   # re.sub("<", "&lt;", data)
+        data = data.replace(">", "&gt;")   # re.sub(">", "&gt;", data)
+        data = data.replace("-&gt;", "->") # re.sub("-&gt;", "->", data)
         data = trim_blank_lines(data)
 
         #print "DATA: [%s]" % data
@@ -2381,40 +2449,40 @@ $href_end
 
         if(self.m_engine.get_config("html", "header_numbers") == "1"):
             if(tag == "h1"):
-                self.m_contents += "<h1>" + self.m_indexer.level1(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n"
+                self.m_contents.append("<h1>" + self.m_indexer.level1(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n")
 
             elif(tag == "h2"):
-                self.m_contents += "<h2>" + self.m_indexer.level2(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h2>\n"
+                self.m_contents.append("<h2>" + self.m_indexer.level2(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h2>\n")
 
             elif(tag == "h3"):
-                self.m_contents += "<h3>" + self.m_indexer.level3(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h3>\n"
+                self.m_contents.append("<h3>" + self.m_indexer.level3(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h3>\n")
 
             elif(tag == "h4"):
-                self.m_contents += "<h4>" + self.m_indexer.level4(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h4>\n"
+                self.m_contents.append("<h4>" + self.m_indexer.level4(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h4>\n")
             
             elif(tag == "h5"):
-                self.m_contents += "<h5>" + self.m_indexer.level5(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n"
+                self.m_contents.append("<h5>" + self.m_indexer.level5(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n")
 
             elif(tag == "h"):
-                self.m_contents += "<h6>" + data.strip() + "</h6>\n"
+                self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
         else:
             if(tag == "h1"):
-                self.m_contents += "<h1>" + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n"
+                self.m_contents.append("<h1>" + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n")
 
             elif(tag == "h2"):
-                self.m_contents += "<h2>" + data.strip() + "<a name='" + data.strip() + "'></a></h2>\n"
+                self.m_contents.append("<h2>" + data.strip() + "<a name='" + data.strip() + "'></a></h2>\n")
 
             elif(tag == "h3"):
-                self.m_contents += "<h3>" + data.strip() + "<a name='" + data.strip() + "'></a></h3>\n"
+                self.m_contents.append("<h3>" + data.strip() + "<a name='" + data.strip() + "'></a></h3>\n")
 
             elif(tag == "h4"):
-                self.m_contents += "<h4>" + data.strip() + "<a name='" + data.strip() + "'></a></h4>\n"
+                self.m_contents.append("<h4>" + data.strip() + "<a name='" + data.strip() + "'></a></h4>\n")
             
             elif(tag == "h5"):
-                self.m_contents += "<h5>" + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n"
+                self.m_contents.append("<h5>" + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n")
             
             elif(tag == "h"):
-                self.m_contents += "<h6>" + data.strip() + "</h6>\n"
+                self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
     
      
     def append_source_code(self, tag):
@@ -2455,12 +2523,12 @@ $href_end
             code_header = ""
             source = ""
 
-        self.m_contents += template_code.substitute(
+        self.m_contents.append(template_code.substitute(
                 {"contents"    : rc,
                  "source"      : source,
                  "code_header" : code_header,
                  "template"    : "code",
-                 "result"      : result})
+                 "result"      : result}))
 
     
     def append(self, tag):
@@ -2472,65 +2540,65 @@ $href_end
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_contents += "<p>" + self.format_text(tag.contents) + "</p>\n"
+            self.m_contents.append("<p>" + self.format_text(tag.contents) + "</p>\n")
         elif(name == "text"):
-            self.m_contents += self.format_textblock(tag)
+            self.m_contents.append(self.format_textblock(tag))
         elif(name == "pre"):
-            self.m_contents += "<pre style='margin-left:10px;'>" + self.format_text(tag.contents) + "</pre>\n"
+            self.m_contents.append("<pre style='margin-left:10px;'>" + self.format_text(tag.contents) + "</pre>\n")
         elif(name == "note"):
-            self.m_contents += self.format_note(tag, "Note", "note.png")
+            self.m_contents.append(self.format_note(tag, "Note", "note.png"))
         elif(name == "tbd"):
-            self.m_contents += self.format_tbd(tag)
+            self.m_contents.append(self.format_tbd(tag))
         elif(name == "question"):
-            self.m_contents += self.format_question(tag)
+            self.m_contents.append(self.format_question(tag))
         elif(name == "warning"):
-            self.m_contents += self.format_note(tag, "Warning", "warning.png")
+            self.m_contents.append(self.format_note(tag, "Warning", "warning.png"))
         elif(name == "table"):
-            self.m_contents += self.format_table(tag.source, tag.contents)
+            self.m_contents.append(self.format_table(tag.source, tag.contents))
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag.source, tag.contents)
+            self.m_contents.append(self.format_struct(tag.source, tag.contents))
         elif(name == "define"):
-            self.m_contents += self.format_define(tag)
+            self.m_contents.append(self.format_define(tag))
         elif(name == "ul"):
-            self.m_contents += self.format_list(tag.contents, False)
+            self.m_contents.append(self.format_list(tag.contents, False))
         elif(name == "ol"):
-            self.m_contents += self.format_list(tag.contents, True)
+            self.m_contents.append(self.format_list(tag.contents, True))
         elif(name == "checklist"):
-            self.m_contents += self.format_checklist(tag)
+            self.m_contents.append(self.format_checklist(tag))
         elif(name == "image"):
-            self.m_contents += self.format_image(tag.contents)
+            self.m_contents.append(self.format_image(tag.contents))
         elif(name == "imagemap"):
-            self.m_contents += self.format_imagemap(tag)
+            self.m_contents.append(self.format_imagemap(tag))
         elif(name == "prototype"):
-            self.m_contents += self.format_prototype(tag)
+            self.m_contents.append(self.format_prototype(tag))
         elif(name == "testcase"):
-            self.m_contents += self.format_testcase(tag)
+            self.m_contents.append(self.format_testcase(tag))
         elif(name == "testcasesummary"):
-            self.m_contents += self.format_testcase_summary(tag)
+            self.m_contents.append(self.format_testcase_summary(tag))
         elif(name == "enum"):
-            self.m_contents += self.format_enum(tag)
+            self.m_contents.append(self.format_enum(tag))
         elif(name == "acronyms"):
-            self.m_contents += self.format_acronyms(tag)
+            self.m_contents.append(self.format_acronyms(tag))
         elif(name == "questions"):
-            self.m_contents += self.format_questions(tag)
+            self.m_contents.append(self.format_questions(tag))
         elif(name == "functionsummary"):
-            self.m_contents += self.format_function_summary(tag)
+            self.m_contents.append(self.format_function_summary(tag))
         elif(name == "typesummary"):
-            self.m_contents += self.format_types_summary(tag)
+            self.m_contents.append(self.format_types_summary(tag))
         elif(name == "embed"):
-            self.m_contents += self.format_embedded_object(tag)
+            self.m_contents.append(self.format_embedded_object(tag))
         elif(name == "sequence"):
-            self.m_contents += self.format_sequence(tag)
+            self.m_contents.append(self.format_sequence(tag))
         elif(name == "columns"):
-            self.m_contents += "<div style='float:left;'>"
+            self.m_contents.append("<div style='float:left;'>")
             pass
         elif(name == "endcolumns"):
-            self.m_contents += "</div><div style='clear:both;'></div>"
+            self.m_contents.append("</div><div style='clear:both;'></div>")
         elif(name == "column"):
-            self.m_contents += "</div><div style='float:left;'>"
+            self.m_contents.append("</div><div style='float:left;'>")
             pass
         elif(name == "input"):
-            self.m_contents += self.format_input(tag)
+            self.m_contents.append(self.format_input(tag))
         else:
             print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
         
@@ -2545,7 +2613,7 @@ $href_end
 
     def get_contents(self):
         
-        return self.m_contents
+        return ''.join(self.m_contents)
         
     def get_css(self, basepath=""):
         
@@ -2604,7 +2672,7 @@ $href_end
         # contents since we want to be able to grab it when we generate
         # the index page.
         if(self.is_inline() != True):
-            self.m_contents = ""
+            self.m_contents = []
 
         vars["rightmenu"] = "" #right_menu
         vars["src"] = "<a href='%s'>%s</a>" % (os.path.basename(source_file), os.path.basename(source_file))
@@ -2612,7 +2680,7 @@ $href_end
         vars["theme"] = self.m_engine.get_theme();
         vars["date"] = self.m_engine.get_date()
         vars["css"] = self.get_css()
-        vars["pdf"] = self.include_pdf("../" + self.get_pdf_name())
+        vars["pdf"] = self.include_pdf("../" + self.get_pdf_name(), "css/")
         vars["link_index"] = "../index.html"
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
@@ -2780,7 +2848,7 @@ $cnts
              "date" : self.m_engine.get_date(),
              "version" : version,
              "css" : self.get_css("content/"),
-             "pdf" : self.include_pdf(self.get_pdf_name(), "content/"),
+             "pdf" : self.include_pdf(self.get_pdf_name(), "content/css"),
              "javascript" : javascript,
              "links" : txt_links,
              "link_index" : "index.html",
@@ -2807,9 +2875,48 @@ $cnts
     def _fix_css(self, contents):
 
         css = string.Template(contents)
+      
+        image_priority = []
+
+        for i in range(1,6):
+
+            if(self.is_inline()):
+                if(i == 1):
+                    image = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAB3RJTUUH3gEdAw8oy5h7YQAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAABUSURBVHjaY2CgBQh67njR5p3+/5gnnrsoNYsFRFzhvfvtFvcjhg8sXz5SaiATtX07auCogaMGjhpIHwPB5aHfS7t335l/3BD9JfjrCsNdattBGQAAYroXWdCS3CwAAAAASUVORK5CYII=);"
+                elif(i == 2):
+                    image = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAB3RJTUUH3gEdAxAgCBn9zQAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAAC2SURBVHjaY2CgBTj10efh8d9Wf2dstCqh1CwmEPGT/RnPd5ZjTL9Z37JSxUAGBkYgpA5gwRQSZjDiE2T5x/KP4cK7e3/IdCEE/P7992f3QuWE7ocSD/sva56g3IX/mf6xCL4TYhK4I8XKbcBNjoFM6AL//zH9g9DMf6liIKVg1MBRAweVgf+hJLDcARc8jGTaBc7LbD9FvzOzmDKw/mX4/+UZ24M/t5UO//3B9ZqB4TS1PUA6AADsozfbvru2LAAAAABJRU5ErkJggg==);"
+                elif(i == 3):
+                    image = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAB3RJTUUH3gEdAxARWcf99wAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAAENSURBVHjaY2CgBfhz1ufB/4uWPx9sdVxPqVlMYIL5BQ8Dy3E2RqanHAwMLJQbyPAfxmVE5lBgIAoAGcoNxRAe2Qb++//vb7C9guC9Ldab7m2x3ZDgrSlGqnvRAozxv6jQb25FpeO+DAw8DEJ8/AWkehkjBv79AwbiX2DcMLD+/f+f9ADFG6U/fv3/vXWibbGcJLP+nz/Crw2j1hZTZOCfP0x/9TTu+cvIP7Vl+OX1FihE0EAmQgr+/GX8yfAXGBR/GH4Q42WCBpIKRg0ctAbCS4D/UNY/KEYGxGUacML+/1f0OyOTyb//fzl+MjC8ZGD4q/GdgYEZmPre/f//T+YXw18JYLnB/53aviEKAAAbdFjo7hw6xgAAAABJRU5ErkJggg==);"
+                elif(i == 4):
+                    image = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAB3RJTUUH3gEdAxAzjKe8EwAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAAF+SURBVHjaY2CgMmAEEX86fR8w/3oj8foX52mxvlO2DF+/kG0gC4hg+vGch+H7GXamvypcDEyMFLmQCerQ/0gOpoaBSABsNCcQ84AtYKbEwP8M//9bywqyXS+1XfywwnL31DArh7/khCGymTysDCwqrFf9WJie8klxGi+m2MsgH/9lYPnJ8J+V4d9/BgwHEgplFnySv//++9XiZWAVqCGY+5WB+3He1huVJ27ewRsKTPgk//5n/KPG81pbi2t/hBHv+zgBHm6CcYTXQJD3/v5j/MPwD5j4/zP8+POXcBSxEFQBC9v///6LC4uy7MkNzGX791H4L4/cE8fOBdPINhBo4n8+Hl4WR7Fv5Uzf9okySGdcAYpiGMhEtIEQM4ER9f87OAj+/vtBchiSA4aMgf8hGQBa5gADi4EBZyaBK8JqIDiW/3OIfmNkNOH/94vrJwPDI4b/nLLfGZilGP6zMP9j+C/4l4FLEhgPwt/BpQeHwA8GRv3f/1m5f1Hbd1gBABu7hGqxxa64AAAAAElFTkSuQmCC);"
+                else:
+                    image = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUCAYAAACNiR0NAAAAB3RJTUUH3gEdAxELvb41zAAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAAHGSURBVHjatZTNaxNBGMbfndmPEBPDNklRsZroRdRGmgZCvGgUKQRDPAuC/4Pee7H0JtJL8xd4stdCwaLiKaQppSqe8uFJPQQie9hNZndeMxEk2a2G3aXvYZgPeOb5Pcw7AKdRdqXaxWLJ/HX33vFqelEJoyWLgfz8EYNWM0Iy2TPgOKHMkZmVJIWmJe4NFIOiAsTiAJQCDYI8radqGrRurWylAa9/BulN5d3behhBIITC1U77QeJb95qRL7QnMSAGRxbQDqUjMeOSxNxi8hzB/55zRKeavaK/uJx9ScfWd9hoc/3jh68+HU57Bb5kmgu5g8bTG18+PclEIhcDILtcCl1ZEeEKx9x97n5o8yKZKYbItquP7uQM4+FQ179vdDuv9o8OZy6Z63C6bImMSrHY2u33+8/Lw+GzcwtJzzP1JSgIbc7ZH7fc5N4E/CG7S5Vl8rp8/3EcMcm1CKvt7daDCyKgpqikNhhsRpuNS1Asid26X2SPqm3b1mTm2KY3w79d4Wo1zk9oPzxxOUHGVMqU8gXGo1ELej3A8xcs0HXA+FkG/T5iJmtJlCrj38dBVWVwcxl4ImGBYQAmkyas5Bmm02Y42n/Ub8QfojqXuKcBAAAAAElFTkSuQmCC);"
+
+            else:
+                image = "background: no-repeat url(pri_0%d.png);" % i
+
+            image_priority.append('''
+            div.pri_0%d
+            {
+                display:inline-block;
+                position:relative;
+                top:-10px;
+                padding:0px;
+                margin-right:-9px;
+                margin-left:-9px;
+                width:18px;
+                height:18px;
+                %s
+            }
+''' % (i,image))
+
+        if(self.is_inline()):
+            image_star = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAYAAADQWvz5AAAAB3RJTUUH3gEcBA8VLgNGkAAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAAKNSURBVHjaY2AgAJKDNUSTg1UkCKljIaRAT/mxMyPDP1YgczEFBjEzWBmyhv7+zQpU9xto0B+cKpnwGeNmycErL81gJyH628rRmIsXn1q8Bnnbcdtycn4Q4eT4KOJgwmBJtkEWBpzBjMxAD7L+ZzDV5fDHG0ZNOeJmksJf1f/+Y/j19y/L73//Wf8xMPz//vMX1285yXeeQA7Df6B1ynI//KZVCx//9+/Xf0YgYGL684+R8S8TIwMT89PXfLcY3ay4ubLCBPJsjN60s3P8YvjPCHHk//+MDIxMfxj+AV30BxjGjEDMxsoIlvsHsurvf4Yf3zkZjpwXrpy+6sMURpjTimO5DeL9/yySlPipywSMbCZgPIG8BfL8f5AqoEH//gLj7ieQ/5uB4dlzntPzNzAkTVn55QokfoEApO7Ypd8vDp/+P1dbiV9QTOCPGQPTP4hhbEAMNOwf0KAfX4AGfWP/c/w8Z3tqw/foXSd+vmREDyxGuAgzw4ouuYyPJ5n/vz/P8P/9RSC+xPD/9WmG/8/3M/xf3aOWD7EaRqLF2v//MIm/DMJCPCIsrH/BXgG54tcXiBzIhWJCDHoMDKwQPbiiHyShry7AqKH4PvI30JCfX4Fe+Sr248dn4Q//f0FUy4h/9vKxF+UhmI7CPbhM+Xnfa/34xsDw6YPs7QWbhO065rEaPH8hepwRGFvc3G8l7I3+2TEQAvvmck94d4T5/56ZEgvdLEXgNmsqcjBtmczX++og0//dM/jwZmAGexMWzttb5c8saFFLhuVnYIpDighGhqlVQiHX1stc8LQREkDWy4zMifEV1/z6Q+hKQvWt5aCEAzLg/3+YERCw7fD3azrqoveFBLjZ95969xymFwD5XuKCCC2f/AAAAABJRU5ErkJggg==);"
+        else:
+            image_star = "background: no-repeat url(star_small.png);"
         
         output = css.substitute({
-            "common" : '''
+            "common" : string.Template('''
   a {color: #FD4626;font-weight: bold;font-size:0.9em;}
   a:hover {color: #666;font-weight: bold;text-decoration: underline;}
   a img {border: none;}
@@ -3027,7 +3134,26 @@ $cnts
      margin-left: 25px;
      color: #396592;
   }
-  ''',
+
+
+  div.star
+  {
+      display:inline-block;
+      position:relative;
+      top:-10px;
+      padding:0px;
+      margin-right:-9px;
+      margin-left:-9px;
+      width:18px;
+      height:18px;
+      $star
+  }
+
+  ${priority}
+
+  ''').substitute({
+        "star" : image_star,
+        "priority" : ''.join(image_priority)}),
 
             "print_only" : '''
 body
@@ -3148,15 +3274,33 @@ div.tblkp  {margin:0px;padding:0px;}
         handle.write(css)
         handle.close()
 
+        outputdir += "/css/"
+
         shutil.copy(shorte_get_startup_path() + "/templates/shared/pdf.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/question.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/note.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/warning.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/tbd.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/star.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/star_small.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/pri_01.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/pri_02.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/pri_03.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/pri_04.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/pri_05.png", outputdir)
 
 
     def get_output_path(self, path):
 
+        #print "INPUT: %s" % path
+        #sys.stdout.flush()
+        #if(path.endswith(".tpl")):
+        #    output_file = path[0,-4] + ".html"
+
+        #print "OUTPUT: %s" % output_file
+        #sys.stdout.flush()
+        #sys.exit(-1)
+            
         # Strip off the extension
         output_file = re.sub(".tpl", ".html", path)
 
@@ -3169,7 +3313,7 @@ div.tblkp  {margin:0px;padding:0px;}
         handle.close()
         
         language = "c"
-        parser = source_code_t()
+        parser = self.m_engine.m_source_code_analyzer
         tags = parser.parse_source_code(language, contents)
 
         template = string.Template(self._load_template("index.html"))
@@ -3283,7 +3427,7 @@ div.tblkp  {margin:0px;padding:0px;}
             self.m_engine._mkdir(self.get_content_dir())
         
         page_names = {}
-        self.m_contents = ""
+        self.m_contents = []
         links = []
 
         for page in pages:

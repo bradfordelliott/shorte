@@ -6,19 +6,38 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-
-@h3 Version 1.0.62 (Jan xx, 2014)
+@h3 Version 1.0.62 (Feb 18, 2014)
 Minor bug fix release
 
 - Added support for checkboxes in lists similar to github
     - Added support for actions within lists using the [a] and [ax]
       prefixes.
+    - Added support for starred items using the [*] syntax
+    - Added support for priorities using the [1-5] syntax. For
+      example:
+          -[a3] is a priority 3 action where > is higher priority.
+- Added the skip_if_pdf modifier/attribute to tags so that a section
+  can be skipped in PDF documents. This is done because large PDFs
+  currently take a long time to generate and some sections can be
+  skipped and left only in the HTML version.
 - Fixed issue with the inlined tables and the use of the | character
   as a divider. Updated to use ! as divider instead until I can
   figure out a better way
+- Added support for examples associated with structure definitions.
+- Themes
+    - Updated to support mixing themes for individual packages. For
+      example, you can now do this:
+          - --theme="html=cortina_web;pdf=cortina"
 - HTML template
     - Tidied up the formatting of C defines
+    - Moved icons into the css directory to de-clutter
+      the content directory.
+    - Converted some string handling to use list comprehension
+      for performance
 - ODT/PDF template
+    - Updated convert_to_pdf.odt to add a status bar when
+      generating the output document. Also add arguments to skip
+      certain steps in the conversion.
     - Started moving some of the styles into the template document
       itself to make them user-customizable instead of hard-coded
       in src/templates/template_odt.py.
@@ -30,12 +49,18 @@ Minor bug fix release
     - support for generating inline HTML docs (html_inline)
       and PDF documents (pdf). More support will be added
       to future releases.
+    - Support for zipping generated results for cases where
+      there are multiple files in a package like (html+pdf)
+- Performance Profiling
+    - Updated to start profiling the parsers to improve performance
 
 @table: title="Closed bugs"
 - Bug | Description
 - 54  | Issue with parsing of inline tables inside another structure
         like a table. Dealt with this by introducing the ! separator
         for inline tables until I can come up with a better syntax.
+- 73  | Fixed an issue where the latest few sections of an ODT document
+        are not stripped correctly.
 
 @h3 Version 1.0.61 (Nov 25, 2013)
 Minor bug fix release.

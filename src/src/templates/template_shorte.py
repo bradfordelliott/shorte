@@ -35,7 +35,7 @@ class template_shorte_t(template_t):
         
         template_t.__init__(self, engine, indexer)
 
-        self.m_contents = ""
+        self.m_contents = []
         self.m_engine = engine
         self.m_indexer = indexer
         self.m_inline = False
@@ -351,17 +351,17 @@ $deprecated
         if(name == "#"):
             return
         elif(name == "prototype"):
-            self.m_contents += self.format_prototype(tag)
+            self.m_contents.append(self.format_prototype(tag))
         elif(name == "enum"):
-            self.m_contents += self.format_enum(tag)
+            self.m_contents.append(self.format_enum(tag))
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag)
+            self.m_contents.append(self.format_struct(tag))
         elif(name == "define"):
-            self.m_contents += self.format_define(tag)
+            self.m_contents.append(self.format_define(tag))
 
     def get_contents(self):
         
-        return self.m_contents
+        return ''.join(self.m_contents)
         
     def _load_template(self):
         
@@ -414,7 +414,7 @@ The following section describes the methods and structures
 exported by this module in greater detail.
 '''
 
-        self.m_contents = ''
+        self.m_contents = []
 
         self.m_num_prototypes = 0
         self.m_num_structs = 0
@@ -432,7 +432,7 @@ exported by this module in greater detail.
         
         # Format the output pages
         pages = self.m_engine.m_parser.get_pages()
-        self.m_contents = ""
+        self.m_contents = []
 
         for page in pages:
 
@@ -487,7 +487,7 @@ exported by this module in greater detail.
         page_names = {}
         
         # Format the output pages
-        self.m_contents = ""
+        self.m_contents = []
 
         tags = page["tags"]
         source_file = page["source_file"]
