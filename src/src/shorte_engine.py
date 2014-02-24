@@ -75,6 +75,7 @@ class engine_t:
             self.m_parser.set_cpp_parser(cpp_parser_t(self))
 
         # Read the configuration file
+        import ConfigParser
         self.m_config = ConfigParser.ConfigParser()
         self.m_config.read([config_file])
 

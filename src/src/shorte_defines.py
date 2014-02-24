@@ -1,7 +1,6 @@
 import platform
 import os
 import sys
-import ConfigParser
 
 if(platform.system() == "Linux"):
     python = "python"
@@ -441,7 +440,7 @@ def unescape_string(source):
     return source
 
 def shorte_get_config(section, key):
-
+    import ConfigParser
     config = ConfigParser.ConfigParser()
     config.read(shorte_get_startup_path() + "/shorte.cfg")
     #config.read("../../shorte.cfg")
