@@ -30,6 +30,7 @@ help:
 	@${echo} "   test_sql             = test the generation of SQL databases to store source code annotations"
 	@${echo} "   test_defines         = test the formatting of defines"
 	@${echo} "   test_extract_private = test for extracting private methods"
+	@${echo} "   test_revealjs        = test for reveal.js presentations"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -199,6 +200,9 @@ test_server:
 test_extract_private:
 	python shorte.py -s "cpp_parser.extract_private=1" -f examples/test.h -x cpp -o build-output/private_methods
 	python shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
+
+test_revealjs:
+	python shorte.py -f examples/presentation.tpl -p "reveal.js" -o build-output/presentation
 
 
 test_junk:

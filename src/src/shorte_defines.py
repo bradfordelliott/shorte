@@ -63,7 +63,7 @@ def shorte_get_startup_path():
     
     startup_path = os.path.dirname(argv0)
     if(startup_path == ""):
-        startup_path = "."
+        startup_path = os.getcwd()
     
     # Replace any Cygwin path references
     startup_path = startup_path.replace("/cygdrive/c/", "C:/")
@@ -269,6 +269,7 @@ PACKAGE_TYPE_SWIG        = "swig"
 PACKAGE_TYPE_LABVIEW     = "labview"
 PACKAGE_TYPE_MERGEFILE   = "mergefile"
 PACKAGE_TYPE_SQL         = "sql"
+PACKAGE_TYPE_REVEALJS    = "reveal.js"
 
 TAB_REPLACEMENT = "    "
 

@@ -21,6 +21,7 @@ from src.templates.template_labview import template_labview_t
 from src.templates.template_mergefile import template_mergefile_t
 from src.templates.template_sql import template_sql_t
 from src.templates.template_mediawiki import template_mediawiki_t
+from src.templates.template_revealjs import template_revealjs_t
 
 #+------------------------------------------------------------------------------
 #|
@@ -963,6 +964,8 @@ def exists(s):
                 template = template_sql_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_MERGEFILE):
                 template = template_mergefile_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_REVEALJS):
+                template = template_revealjs_t(self, indexer)
             else:
                 template = template_html_t(self, indexer)
                 template.m_inline = inline
