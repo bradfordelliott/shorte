@@ -223,6 +223,7 @@ a.name {color: black;}
 .reveal section.present{
     height:94%;
     overflow:auto;
-    margin-top:-20px;
-    padding-left:40px;
+    margin-top:35px;
+    padding-left:30px;
+    padding-right:30px;
 }
