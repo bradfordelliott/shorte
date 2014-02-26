@@ -8,17 +8,17 @@
 
         <link rel="stylesheet" href="reveal.js/css/reveal.css">
         <link rel="stylesheet" href="cortina.css" id="theme">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     </head>
 
     <body>
 
         <img src="css/images/cortina_background2.jpg" style="width:100%;height:100%;border:0px;text-decoration:none;z-index:-100;left:0px;top:0px;position:absolute;"></img>
-        <img src="css/images/logo.png" style="top:10px;left:10px;position:absolute;border:0px;text-decoration:none;z-index:-100;"></img>
-        <div class="reveal">
-
+        <a href="index.html"><img src="css/images/logo.png" style="top:10px;left:10px;position:absolute;border:0px;text-decoration:none;z-index:-100;"></img></a>
+        <div class="reveal" style="text-align:left;">
             <div class="slides">
                 <section data-background-transition="slide" data-background="css/images/cortina_background.jpg" style="background: rgba(255,255,255,0)">
-                    <h2 style="color:white;">$title</h2>
+                    <h2 style="color:white;margin-top:300px;">$title</h2>
                     <h3 style="color:white;">$subtitle</h3>
                 </section>
                 $contents
@@ -26,18 +26,19 @@
         </div>
 
         <script src="reveal.js/lib/js/head.min.js"></script>
-        <script src="reveal.js/js/reveal.min.js"></script>
+        <script src="reveal.js/js/reveal.js"></script>
 
         <script>
 
             // Full list of configuration options available here:
             // https://github.com/hakimel/reveal.js#configuration
             Reveal.initialize({
-                center: true,
+                center: false,
                 //rtl: true,
                 controls:true,
                 progress:true,
                 history:true,
+                slideNumber:true
 
                 //transition: 'linear',
                 // transitionSpeed: 'slow',

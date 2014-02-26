@@ -21,6 +21,8 @@ This is a tbd
 @question
 This is a question
 
+@h1 Another section
+
 @warning
 This is something to be careful about!!! It contains some really long
 text with a new paragraph
@@ -35,6 +37,8 @@ and even a table
 - One | Two
 - Three | Four
 }
+
+@h1 A final section
 
 @h4 A fourth heading
 Some more stuff here

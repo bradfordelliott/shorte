@@ -1877,7 +1877,8 @@ var Reveal = (function(){
 				indexString += ' - ' + indexv;
 			}
 
-			dom.slideNumber.innerHTML = indexString;
+		    var slidesTotal = toArray( document.querySelectorAll( HORIZONTAL_SLIDES_SELECTOR ) ).length;
+			dom.slideNumber.innerHTML = "Slide: " + (indexString + 1) + " of " + slidesTotal;
 		}
 
 	}

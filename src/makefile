@@ -203,6 +203,7 @@ test_extract_private:
 
 test_revealjs:
 	python shorte.py -f examples/presentation.tpl -p "reveal.js" -o build-output/presentation
+	python shorte.py -f examples/headings.tpl -p "reveal.js" -o build-output/presentation2
 
 
 test_junk:

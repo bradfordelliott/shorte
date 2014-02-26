@@ -3,13 +3,13 @@
  *********************************************/
 body {
   background: #f0f1eb;
-  background-color: #f0f1eb; }
+  background-color: #f0f1eb;}
 
 .reveal {
   font-family: "Arial", "Book Antiqua", Palatino, FreeSerif, serif;
   font-size: 1.8em;
   font-weight: normal;
-  color: black; }
+  color: black;}
 
 ::selection {
   color: white;
@@ -20,12 +20,12 @@ body {
 /*********************************************
  * HEADERS
  *********************************************/
-.reveal h1{font-size: 1.9em;padding: 0px;padding-bottom: 3px;margin: 0px;margin-top:10px;margin-left: 5px;color:#005CDB;font-variant:small-caps;font-weight:bold;}
-.reveal h2{font-size: 1.8em;font-weight: bold;color: #666;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;}
+.reveal h1{font-size: 1.9em;color:white;   padding: 0px;padding-bottom: 40px;margin: 0px;margin-top:-50px;margin-top:10px;margin-left: 5px;font-variant:small-caps;font-weight:bold;}
+.reveal h2{font-size: 1.6em;color: #005CDB;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;}
 .reveal h3{font-size: 1.3em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;}
-.reveal h4{font-size: 1.2em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
-.reveal h5{font-size: 1.2em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #A67F00;}
-.reveal h6{font-size: 1.2em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;text-decoration:underline;}
+.reveal h4{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
+.reveal h5{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #A67F00;}
+.reveal h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;text-decoration:underline;}
 
 
 a {color: #FD4626;font-weight: bold;font-size:0.9em;}
@@ -87,8 +87,7 @@ a.name {color: black;}
 .reveal table {
       *border-collapse: collapse; /* IE7 and lower */
       border-spacing: 0;
-      margin-left:auto;
-      margin-right:auto;
+      text-align:left;
   }
   
 .reveal  .bordered {
@@ -98,8 +97,6 @@ a.name {color: black;}
       -moz-border-radius: 6px;
       -webkit-border-radius: 6px;
       border-radius: 6px;
-      margin-left:auto;
-      margin-right:auto;
   }
   
 .reveal  .bordered td, .bordered th {
@@ -222,3 +219,9 @@ a.name {color: black;}
 /* Styling of text blocks */
 .reveal div.tblkps {margin-left:4px;margin-bottom:4px;font-size:1.0em;}
 .reveal div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
+
+.reveal section.present{
+    height:94%;
+    overflow:auto;
+    margin-top:-20px;
+}

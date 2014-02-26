@@ -203,9 +203,10 @@ class template_revealjs_t(template_html_t):
         if(os.path.exists(outputdir + "/cortina.css")):
             os.remove(outputdir + "/cortina.css")
 
+        ignore_patterns=('*.swp')
         shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/cortina/cortina.css", self.m_engine.m_output_directory)
-        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/cortina/css", self.m_engine.m_output_directory + "/css")
-        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/reveal.js", self.m_engine.m_output_directory + "/reveal.js")
+        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/cortina/css", self.m_engine.m_output_directory + "/css") # , ignore=shutil.ignore_patterns(*ignore_patterns))
+        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/reveal.js", self.m_engine.m_output_directory + "/reveal.js") # , ignore=shutil.ignore_patterns(*ignore_patterns))
 
     def generate_string(self, theme, version, package):
         
