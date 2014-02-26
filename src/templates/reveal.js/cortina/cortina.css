@@ -20,7 +20,7 @@ body {
 /*********************************************
  * HEADERS
  *********************************************/
-.reveal h1{font-size: 1.9em;color:white;   padding: 0px;padding-bottom: 40px;margin: 0px;margin-top:-50px;margin-top:10px;margin-left: 5px;font-variant:small-caps;font-weight:bold;}
+.reveal h1{font-size: 1.9em;color:#999;   padding: 0px;padding-bottom: 5px;margin: 0px;margin-top:-50px;margin-top:10px;margin-left: 5px;font-variant:small-caps;font-weight:bold;}
 .reveal h2{font-size: 1.6em;color: #005CDB;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;}
 .reveal h3{font-size: 1.3em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;}
 .reveal h4{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
@@ -224,4 +224,5 @@ a.name {color: black;}
     height:94%;
     overflow:auto;
     margin-top:-20px;
+    padding-left:40px;
 }
