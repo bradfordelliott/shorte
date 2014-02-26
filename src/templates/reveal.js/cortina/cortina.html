@@ -6,7 +6,7 @@
 
         <title>$title</title>
 
-        <link rel="stylesheet" href="reveal.js/css/reveal.css">
+        <link rel="stylesheet" href="http://home-ott/~belliott/projects/reveal.js/css/reveal.css">
         <link rel="stylesheet" href="cortina.css" id="theme">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     </head>
@@ -20,13 +20,15 @@
                 <section data-background-transition="slide" data-background="css/images/cortina_background.jpg" style="background: rgba(255,255,255,0)">
                     <h2 style="color:white;margin-top:300px;">$title</h2>
                     <h3 style="color:white;">$subtitle</h3>
+                    <h3 style="color:white;">Version $version ($date)</h3>
+                    <h3 style="color:white;">Created by $author</h3>
                 </section>
                 $contents
             </div>
         </div>
 
-        <script src="reveal.js/lib/js/head.min.js"></script>
-        <script src="reveal.js/js/reveal.js"></script>
+        <script src="http://home-ott/~belliott/projects/reveal.js/lib/js/head.min.js"></script>
+        <script src="http://home-ott/~belliott/projects/reveal.js/js/reveal.js"></script>
 
         <script>
 
@@ -38,9 +40,10 @@
                 controls:true,
                 progress:true,
                 history:true,
-                slideNumber:true
+                slideNumber:true,
+                mouseWheel:true,
 
-                //transition: 'linear',
+                transition: 'default',
                 // transitionSpeed: 'slow',
                 // backgroundTransition: 'slide'
             });

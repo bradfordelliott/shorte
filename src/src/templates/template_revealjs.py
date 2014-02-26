@@ -264,6 +264,9 @@ class template_revealjs_t(template_html_t):
         tpl = string.Template(self._load_template("cortina/cortina.html"))
         html = tpl.substitute({"title" : title,
                         "subtitle" : subtitle,
+                        "date" : self.m_engine.get_date(),
+                        "version" : self.m_engine.get_version(),
+                        "author" : self.m_engine.get_author(),
                         "contents" : self.get_contents()})
 
         output = open(output_file, "wt")
@@ -271,6 +274,20 @@ class template_revealjs_t(template_html_t):
         output.close()
 
         self.install_support_files(self.m_engine.m_output_directory)
+        
+        # Copy output images - really only required if we're generating
+        # an HTML document.
+        if(self.is_inline() != True):
+            pictures_copied = {}
+            for image in self.m_engine.m_images:
+            
+                if(pictures_copied.has_key(image)):
+                    continue
+
+                parts = os.path.split(image)
+                #print "IMAGE: [%s]" % image
+                shutil.copy(image, self.m_engine.m_output_directory + "/" + parts[1])
+                pictures_copied[image] = True
          
         # Now generate the document index
         #as_string = True

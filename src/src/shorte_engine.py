@@ -54,6 +54,7 @@ class engine_t:
         self.m_docversion = None
         self.m_package = ""
         self.m_docnumber = None
+        self.m_docauthor = None
         self.m_revision_history = None
 
         self.m_output_filename = None
@@ -139,6 +140,11 @@ class engine_t:
         if(self.m_docversion == None):
             return "N/A"
         return self.m_docversion
+
+    def get_author(self):
+        if(self.m_docauthor == None):
+            return "N/A"
+        return self.m_docauthor
 
     def get_date(self):
         return self.m_date

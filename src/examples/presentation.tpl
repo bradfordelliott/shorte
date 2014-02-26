@@ -1,5 +1,7 @@
 @doctitle This is a test
 @docsubtitle This is a subtitle
+@docauthor Brad Elliott
+@docversion 1.0
 
 @body
 @h1 The first heading
@@ -65,4 +67,4 @@ and even a table
 This is a test
 
 @h1 Slide 4
-@image: src="test.png"
+@image: src="examples/test.png"

@@ -105,6 +105,7 @@ class shorte_parser_t(parser_t):
             "doctitle"        : True,
             "docsubtitle"     : True,
             "docnumber"       : True,
+            "docauthor"       : True,
             "csource"         : True,
             "docrevisions"    : True,
             "docversion"      : True,
@@ -246,6 +247,7 @@ class shorte_parser_t(parser_t):
         header["subtitle"] = "undefined"
         header["version"] = "undefined"
         header["number"] = ""
+        header["author"] = None
         header["revision_history"] = None
         header["filename"] = None
         header["outdir"] = None
@@ -260,6 +262,8 @@ class shorte_parser_t(parser_t):
                 header["title"] = tag.contents
             elif(tag.name == "docsubtitle"):
                 header["subtitle"] = tag.contents
+            elif(tag.name == "docauthor"):
+                header["author"] = tag.contents
             elif(tag.name == "csource"):
                 header["csource"] = tag.contents
             elif(tag.name == "docversion"):
@@ -1903,6 +1907,7 @@ else:
              name == "docsubtitle" or
              name == "docversion" or
              name == "docnumber" or
+             name == "docauthor" or
              name == "title" or
              name == "csource"):
             tmp = data
@@ -2613,6 +2618,8 @@ def exists(s):
                 self.m_engine.m_docversion = version
             if(self.m_engine.m_docnumber == None):
                 self.m_engine.m_docnumber = number
+            if(self.m_engine.m_docauthor == None):
+                self.m_engine.m_docauthor = header["author"]
             if(self.m_engine.m_revision_history == None):
                 self.m_engine.m_revision_history = revision_history
             if(self.m_engine.m_output_filename == None):
