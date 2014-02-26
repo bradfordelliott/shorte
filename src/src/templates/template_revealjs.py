@@ -200,12 +200,12 @@ class template_revealjs_t(template_html_t):
         if(os.path.exists(outputdir + "/reveal.js")):
             shutil.rmtree(outputdir + "/reveal.js")
        
-        if(os.path.exists(outputdir + "/cortina.css")):
-            os.remove(outputdir + "/cortina.css")
+        if(os.path.exists(outputdir + "/%s.css" % self.m_engine.get_theme())):
+            os.remove(outputdir + "/%s.css" % self.m_engine.get_theme())
 
         ignore_patterns=('*.swp')
-        shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/cortina/cortina.css", self.m_engine.m_output_directory)
-        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/cortina/css", self.m_engine.m_output_directory + "/css") # , ignore=shutil.ignore_patterns(*ignore_patterns))
+        shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (self.m_engine.get_theme(), self.m_engine.get_theme()), self.m_engine.m_output_directory)
+        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/%s/css" % self.m_engine.get_theme(), self.m_engine.m_output_directory + "/css") # , ignore=shutil.ignore_patterns(*ignore_patterns))
         shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/reveal.js", self.m_engine.m_output_directory + "/reveal.js") # , ignore=shutil.ignore_patterns(*ignore_patterns))
 
     def generate_string(self, theme, version, package):
@@ -261,7 +261,7 @@ class template_revealjs_t(template_html_t):
         if(self.m_in_section):
             self.m_contents.append('</section>')
 
-        tpl = string.Template(self._load_template("cortina/cortina.html"))
+        tpl = string.Template(self._load_template("%s/%s.html" % (self.m_engine.get_theme(), self.m_engine.get_theme())))
         html = tpl.substitute({"title" : title,
                         "subtitle" : subtitle,
                         "date" : self.m_engine.get_date(),

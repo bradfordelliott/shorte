@@ -202,9 +202,9 @@ test_extract_private:
 	python shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
 
 test_revealjs:
-	python shorte.py -f examples/presentation.tpl -p "reveal.js" -o build-output/presentation
-	python shorte.py -f examples/headings.tpl -p "reveal.js" -o build-output/presentation2
-	python shorte.py -f examples/bullets.tpl -p "reveal.js" -o build-output/presentation3
+	python shorte.py -f examples/presentation.tpl -p "reveal.js" --theme=shorte -o build-output/presentation
+	python shorte.py -f examples/headings.tpl -p "reveal.js" --theme=shorte -o build-output/presentation2
+	python shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation3
 
 
 test_junk:

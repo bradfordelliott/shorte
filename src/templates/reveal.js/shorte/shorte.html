@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8">
+
+        <title>$title</title>
+
+        <link rel="stylesheet" href="http://home-ott/~belliott/projects/reveal.js/css/reveal.css">
+        <link rel="stylesheet" href="shorte.css" id="theme">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    </head>
+
+    <body>
+        <div style='background:white;height:100px;top:0px;position:absolute;width:100%;border-bottom:5px solid #999;'>
+            <a href="index.html"><img src="css/images/logo.png" style="top:10px;left:10px;height:80px;position:absolute;border:0px;text-decoration:none;z-index:100;"></img></a>
+        </div>
+        <div class="reveal" style="text-align:left;">
+            <div class="slides">
+                <section data-background-transition="slide" style="background: rgba(255,255,255,0.8)">
+                    <h2 style="margin-left:30px;color:#333;margin-top:200px;">$title</h2>
+                    <h3 style="margin-left:30px;color:#333;">$subtitle</h3>
+                    <h3 style="margin-left:30px;color:#333;">Version $version ($date)</h3>
+                    <h3 style="margin-left:30px;color:#333;">Created by $author</h3>
+                </section>
+                $contents
+            </div>
+        </div>
+
+        <script src="http://home-ott/~belliott/projects/reveal.js/lib/js/head.min.js"></script>
+        <script src="http://home-ott/~belliott/projects/reveal.js/js/reveal.js"></script>
+
+        <script>
+
+            // Full list of configuration options available here:
+            // https://github.com/hakimel/reveal.js#configuration
+            Reveal.initialize({
+                center: false,
+                //rtl: true,
+                controls:true,
+                progress:true,
+                history:true,
+                slideNumber:true,
+                mouseWheel:true,
+
+                transition: 'default',
+                // transitionSpeed: 'slow',
+                // backgroundTransition: 'slide'
+            });
+
+        </script>
+
+    </body>
+</html>
+
