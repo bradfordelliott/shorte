@@ -224,9 +224,9 @@ a.name {color: black;}
 
 .reveal section.present{
     border-radius: 8px;
-    height:94%;
+    height:100%;
     overflow:auto;
-    margin-top:30px;
+    margin:0px;padding:0px;
     background: rgba(255,255,255,0.85);
     border:5px solid #999;
     padding-left:30px;

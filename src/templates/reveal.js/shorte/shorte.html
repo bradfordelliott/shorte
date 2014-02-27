@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en">
 
     <head>
@@ -6,29 +6,57 @@
 
         <title>$title</title>
 
-        <link rel="stylesheet" href="http://home-ott/~belliott/projects/reveal.js/css/reveal.css">
+        <link rel="stylesheet" href="reveal.js/css/reveal.css">
         <link rel="stylesheet" href="shorte.css" id="theme">
+
+        <style>
+            html,
+            body {
+            	width: 100%;
+            	height: 100%;
+                margin:0px;
+                padding:0px;
+            }
+        </style>
+
+        <!--
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+        -->
+
     </head>
 
     <body>
-        <div style='background:white;height:100px;top:0px;position:absolute;width:100%;border-bottom:5px solid #999;'>
-            <a href="index.html"><img src="css/images/logo.png" style="top:10px;left:10px;height:80px;position:absolute;border:0px;text-decoration:none;z-index:100;"></img></a>
-        </div>
-        <div class="reveal" style="text-align:left;">
-            <div class="slides">
-                <section data-background-transition="slide" style="background: rgba(0,0,0,0.5);border:5px solid #333;">
-                    <h2 style="margin-left:30px;color:#999;margin-top:200px;">$title</h2>
-                    <h3 style="margin-left:30px;color:#999;">$subtitle</h3>
-                    <h3 style="margin-left:30px;color:#999;">Version $version ($date)</h3>
-                    <h3 style="margin-left:30px;color:#999;">Created by $author</h3>
-                </section>
-                $contents
-            </div>
-        </div>
+        <table style="height:100%;width:100%;">
+            <tr style="height:100px;width:100%;background-color:white;">
+                <td>
+                    <a href="index.html"><img src="css/images/logo.png" style="top:10px;left:10px;height:80px;border:0px;text-decoration:none;"></img></a>
+                </td>
+            </tr>
+            <tr style="height:auto;">
+                <td style="width:100%;height:auto;height:80%;">
+                    <div class="reveal" style="height:100% !important;height:100%;width:100%;margin:0px;padding:0px;">
+                        <div class="slides">
+                            <section data-background-transition="slide" style="background: rgba(255,255,255,0.5)">
+                                <h2 style="color:white;margin-top:300px;">$title</h2>
+                                <h3 style="color:white;">$subtitle</h3>
+                                <h3 style="color:white;">Version $version ($date)</h3>
+                                <h3 style="color:white;">Created by $author</h3>
+                            </section>
+                            $contents
+                        </div>
+                    </div>
+                </td>
+            </tr>
 
-        <script src="http://home-ott/~belliott/projects/reveal.js/lib/js/head.min.js"></script>
-        <script src="http://home-ott/~belliott/projects/reveal.js/js/reveal.js"></script>
+            <tr style="min-height:40px;height:40px;background-color:black;">
+                <td>
+                    Footer Content
+                </td>
+            </tr> 
+        </table>
+
+        <script src="reveal.js/lib/js/head.min.js"></script>
+        <script src="reveal.js/js/reveal.js"></script>
 
         <script>
 

@@ -221,9 +221,10 @@ a.name {color: black;}
 .reveal div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
 
 .reveal section.present{
-    height:94%;
+    border-radius: 8px;
+    height:100%;
     overflow:auto;
-    margin-top:35px;
+    margin:0px;padding:0px;
     padding-left:30px;
     padding-right:30px;
 }
