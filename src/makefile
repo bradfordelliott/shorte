@@ -125,6 +125,7 @@ tests:
 	make test_sql
 	make test_server
 	make test_extract_private
+	make test_revealjs
 
 THEME:=shorte
 
@@ -192,9 +193,11 @@ test_sql:
 
 # This method is called to launch a test server and then generate several example documents.
 test_server:
+	mkdir -p build-output/server_example
 	python shorte.py --server --port=8400 &
-	python server_test.py --package="html_inline" --theme="cortina_web" --ip=127.0.0.1 --port=8400 > server_example.html
-	python server_test.py --package="html_inline+pdf" --theme="html=cortina_web;pdf=cortina_public" --zip --ip=127.0.0.1 --port=8400 > server_example2.zip
+	sleep 1
+	python server_test.py --package="html_inline" --theme="cortina_web" --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example.html
+	python server_test.py --package="html_inline+pdf" --theme="html=cortina_web;pdf=cortina_public" --zip --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example2.zip
 	python server_test.py --shutdown --ip=127.0.0.1 --port=8400
 
 test_extract_private:

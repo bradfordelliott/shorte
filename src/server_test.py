@@ -49,12 +49,18 @@ parser.add_option("--port", "--port",
 (options, args) = parser.parse_args()
 
 addr = "http://%s:%d" % (options.ip, int(options.port))
-print "Connecting to %s" % addr
 proxy = xmlrpclib.ServerProxy(addr)
 
 if(options.shutdown):
+    print "Shutting down server"
     import sys
-    proxy.shutdown()
+    try:
+        proxy.shutdown()
+    except:
+        pass
+
+    print "Server shutdown"
+
     sys.exit(0)
 
 
