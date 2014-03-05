@@ -23,7 +23,8 @@ $result
 sql_template_code_header = string.Template(
 """
 <div class='code_header' style='width:80%;$style;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_$id');myoperations.display_code(e.innerHTML);">Add to Script</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_$id');myoperations.add_to_script(e.innerHTML);">Add to Script</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_$id');myoperations.copy_to_clipboard(e.innerHTML);">Copy to Clipboard</span>
 </div>
 """)
 
