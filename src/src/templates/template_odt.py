@@ -3622,11 +3622,7 @@ class template_odt_t(template_t):
             path_startup = shorte_get_startup_path()
             path_startup = path_startup.replace("/", "\\")
                 
-            if(sys.platform == "win32"):
-                # This is to workaround a path problem with spaces in windows
-                path_oowriter = "\"\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
-            else:
-                path_oowriter = "\"" + shorte_get_config("shorte", "path.oowriter.win32") + "\""
+            path_oowriter = shorte_get_config("shorte", "path.oowriter.win32")
 
         elif(sys.platform == "darwin"):
             path_startup = shorte_get_startup_path()
@@ -3641,14 +3637,30 @@ class template_odt_t(template_t):
             
         path_converter = "%s/templates/odt/convert_to_pdf.odt" % path_startup
         path_input = "%s" % (self.m_engine.get_output_dir() + "/" + self.get_index_name())
+        print "PLATFORM: %s" % sys.platform
 
-        if(sys.platform in ("cygwin", "win32")):
+        if(sys.platform in ("cygwin")):
 
             params_oowriter = ""
 
+            path_oowriter = path_oowriter
+            path_oowriter = path_oowriter.replace("\\", "/")
+            path_oowriter = path_oowriter.replace("C:/", "/cygdrive/c/")
+
             path_input = path_input.replace("/cygdrive/c/", "C:\\")
             path_input = path_input.replace("\\", "/")
+
+            path_converter = path_converter.replace("\\", "/")
+
+        elif(sys.platform in "win32"):
+            params_oowriter = ""
+
+            path_oowriter = path_oowriter
+            path_oowriter = path_oowriter.replace("/", "\\")
+            path_input = path_input.replace("/cygdrive/c/", "C:\\")
+            path_input = path_input.replace("/", "\\")
             path_converter = path_converter.replace("/", "\\")
+
 
         if(package == PACKAGE_TYPE_ODT):
 
@@ -3663,7 +3675,6 @@ class template_odt_t(template_t):
                 path_converter,
                 path_input)
 
-            #print cmd
             os.system(cmd)
 
             shutil.move(path_output, path_input)
@@ -3672,13 +3683,27 @@ class template_odt_t(template_t):
         
         if(package == PACKAGE_TYPE_PDF):
 
-            cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\")\"" % (
+            #print "PATH_OOWRITER: %s" % path_oowriter
+            import subprocess
+
+            cmd = '''"%s" %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\")\"''' % (
                     path_oowriter,
                     params_oowriter,
                     path_converter,
                     path_input)
-            print cmd
-            os.system(cmd)
+            print "Command: %s" % cmd
+            #if(sys.platform == "cygwin"):
+            #    os.system(cmd)
+            #else:
+            #    subprocess.call(cmd)
+            try:
+                if(sys.platform == "win32"):
+                    subprocess.call(cmd)
+                else:
+                    subprocess.call(cmd, shell=True)
+            except:
+                print sys.exc_info()
+                raise
             
             # If the output file doesn't exist then generate a failure since the macro failed
             path_output = path_input.replace("odt", "pdf")

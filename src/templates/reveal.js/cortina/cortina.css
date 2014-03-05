@@ -217,7 +217,7 @@ a.name {color: black;}
 .reveal div.snippet span.ln {color: #C0C0C0;}
 
 /* Styling of text blocks */
-.reveal div.tblkps {margin-left:4px;margin-bottom:4px;font-size:1.0em;}
+.reveal div.tblkps {margin-left:4px;margin-bottom:20px;font-size:1.0em;}
 .reveal div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
 
 .reveal section.present{

@@ -20,6 +20,13 @@ $source
 $result
 """)
 
+sql_template_code_header = string.Template(
+"""
+<div class='code_header' style='width:80%;$style;'>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_$id');myoperations.display_code(e.innerHTML);">Add to Script</span>
+</div>
+""")
+
 class template_sql_t(template_t):
 
     def __init__(self, engine, indexer):
@@ -459,6 +466,7 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'method', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
         
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        html.set_template_code_header(sql_template_code_header)
         html.m_wikiword_path_prefix = False
         help = html.format_prototype(tag)
         

@@ -326,8 +326,13 @@ class template_html_t(template_t):
 
         self.m_snippet_id = 1
 
+        self.m_template_code_header = template_code_header
+
     def is_inline(self):
         return self.m_inline
+
+    def set_template_code_header(self, template):
+        self.m_template_code_header = template
 
     def get_pdf_name(self):
         name = self.m_engine.get_document_name()
@@ -1256,7 +1261,7 @@ class template_html_t(template_t):
             if(self.m_show_code_headers["example"]):
                 snippet_id = self.m_snippet_id
                 self.m_snippet_id += 1
-                code_header = template_code_header.substitute(
+                code_header = self.m_template_code_header.substitute(
                         {"id" : snippet_id,
                          "style" : "margin-left:10px;margin-top:2px;"})
                 source = template_source.substitute({
@@ -1287,7 +1292,7 @@ class template_html_t(template_t):
             if(self.m_show_code_headers["pseudocode"]):
                 snippet_id = self.m_snippet_id
                 self.m_snippet_id += 1
-                code_header = template_code_header.substitute(
+                code_header = self.m_template_code_header.substitute(
                         {"id" : snippet_id,
                          "style" : "margin-left:10px;margin-top:2px;"})
                 source = template_source.substitute({"id": snippet_id, "source": self.format_source_code_no_lines(language, pseudocode)})
@@ -1967,7 +1972,7 @@ within an HTML document.
             if(self.m_show_code_headers["example"]):
                 snippet_id = self.m_snippet_id
                 self.m_snippet_id += 1
-                code_header = template_code_header.substitute(
+                code_header = self.m_template_code_header.substitute(
                         {"id" : snippet_id,
                          "style" : "margin-left:10px;margin-top:2px;"})
                 source = template_source.substitute({
@@ -2515,7 +2520,7 @@ $href_end
         if(self.m_show_code_headers["code"]):
             snippet_id = self.m_snippet_id
             self.m_snippet_id += 1
-            code_header = template_code_header.substitute(
+            code_header = self.m_template_code_header.substitute(
                     {"id" : snippet_id,
                      "style" : "margin-left:30px;margin-top:10px;width:100%;"})
             source = template_source.substitute({"id": snippet_id, "source": source})

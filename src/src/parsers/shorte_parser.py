@@ -244,7 +244,7 @@ class shorte_parser_t(parser_t):
         header["toc"] = False
         header["numbered"] = False
         header["title"] = "undefined"
-        header["subtitle"] = "undefined"
+        header["subtitle"] = ""
         header["version"] = "undefined"
         header["number"] = ""
         header["author"] = None
@@ -2619,7 +2619,8 @@ def exists(s):
             if(self.m_engine.m_docnumber == None):
                 self.m_engine.m_docnumber = number
             if(self.m_engine.m_docauthor == None):
-                self.m_engine.m_docauthor = header["author"]
+                if(header.has_key("author")):
+                    self.m_engine.m_docauthor = header["author"]
             if(self.m_engine.m_revision_history == None):
                 self.m_engine.m_revision_history = revision_history
             if(self.m_engine.m_output_filename == None):
