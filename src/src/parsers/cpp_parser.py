@@ -70,8 +70,12 @@ def TARGET(tokens):
 
     return skip
 
-
-
+class field_t:
+    def __init__(self):
+        self.name = ""
+        self.desc = ""
+        self.desc_source = ""
+        self.type = ""
 
 
 def my_token(typ, data, line, pos):
@@ -98,6 +102,7 @@ class cpp_parser_t(shorte_parser_t):
         self.m_file_brief = ""
         self.m_find_reference = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
         self.m_find_in_group  = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
+        self.m_file_src = ""
             
 
     def is_keyword(self, source):
@@ -168,6 +173,8 @@ class cpp_parser_t(shorte_parser_t):
         desc.reverse()
         desc = " ".join(desc)
 
+        start_of_struct = token["line"] + 1
+
         if(not desc.startswith("/**")):
             return None
 
@@ -213,7 +220,6 @@ class cpp_parser_t(shorte_parser_t):
             token = tokens[i]
             data = token["data"]
 
-        rows = self.parse_struct_fields(struct_body)
 
         # Walk to the semicolon ending the struct
         while(not self.match_token(token, TOKEN_SEMICOLON)):
@@ -230,6 +236,9 @@ class cpp_parser_t(shorte_parser_t):
                     SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE, TOKEN_CLOSE_BRACE]))
 
             struct_name = tokens[k+1]["data"]
+        
+        fields = self.parse_struct_fields2(struct_body, struct_name, start_of_struct)
+        rows = self.parse_struct_fields(struct_body)
 
 
         max_cols = 0
@@ -237,6 +246,7 @@ class cpp_parser_t(shorte_parser_t):
             cols = len(row["cols"])
             if(cols > max_cols):
                 max_cols = cols
+        
 
         struct = {}
         struct["rows"] = rows
@@ -258,6 +268,15 @@ class cpp_parser_t(shorte_parser_t):
 
         i = pos_saved
         token = tokens[i]
+
+        #print "STRUCT ROWS"
+        for row in rows:
+            name = row["cols"][1]["text"]
+            desc = row["cols"][2]["text"].strip()
+            #print "name: %s" % name
+            #print "desc: %s" % desc
+            if(0 == len(desc)):
+                WARNING("Missing description of struct field %s" % name)
 
         while(not self.match_token(token, TOKEN_CLOSE_BRACE)):
 
@@ -445,6 +464,82 @@ class cpp_parser_t(shorte_parser_t):
         #print rows
         #sys.exit(-1)
         return rows
+
+    def parse_struct_fields2(self, text, struct_name, start_of_struct):
+
+        fields = []
+        states = []
+
+        states.append(STATE_NORMAL)
+
+        i = 0
+        comment = ''
+        data = ''
+        field = field_t()
+
+        while(i < len(text)):
+
+            state = states[-1]
+
+            if(state == STATE_NORMAL):
+                if(text[i] == '/' and text[i+1] == '*' and text[i+2] == '*'):
+                    states.append(STATE_COMMENT)
+                    comment = ''
+                    i += 3
+                    continue
+
+                else:
+                    if(text[i] == ';'):
+                        parts = data.strip().split(' ')
+                        parts2 = []
+                        for part in parts:
+                            tmp = part.strip()
+                            if(len(tmp) != 0):
+                                parts2.append(tmp)
+
+                        #print "FIELD: %s - [%s]" % (data.strip(), parts2[1])
+                        field = field_t()
+                        field.name = parts2[1]
+                        field.desc_source = comment
+                        field.desc = self.parse_textblock(trim_leading_blank_lines(comment))
+                        field.type = parts2[0]
+                        fields.append(field)
+
+                        data = ''
+                    else:
+                        data += text[i]
+
+            elif(state == STATE_COMMENT):
+
+                if(text[i] == '*' and text[i+1] == '/'):
+                    i += 2
+                    states.pop()
+                    continue
+                else: 
+                    comment += text[i]
+
+            i += 1
+
+        if(len(data.strip())):
+            parts = data.strip().split(' ')
+            parts2 = []
+            for part in parts:
+                tmp = part.strip()
+                if(len(tmp) != 0):
+                    parts2.append(tmp)
+
+            field = field_t()
+            field.name = parts2[1]
+            field.desc_source = comment
+            field.desc = self.parse_textblock(trim_leading_blank_lines(comment))
+            field.type = parts2[0]
+            fields.append(field)
+
+        for field in fields:
+            if(0 == len(field.desc)):
+                WARNING("Field %s.%s has no description in %s:%d" % (struct_name,field.name, self.m_source_file, start_of_struct))
+                
+        return fields
     
     def parse_struct_fields(self, text):
         '''This method is called to parse the individual fields within a
@@ -1063,6 +1158,8 @@ class cpp_parser_t(shorte_parser_t):
             k -= 1
             token = tokens[k]
 
+        start_of_func = token["line"] + 1
+
         desc.reverse()
         desc = " ".join(desc)
 
@@ -1191,14 +1288,21 @@ class cpp_parser_t(shorte_parser_t):
         new_params = []
 
         for param in func_comment["params"]:
-            #print "PARAM: %s" % param
 
             for p in params:
+
                 if(p["name"] == param):
                     desc = func_comment["params"][param]["desc"]
                     p["desc"] = desc
                     p["desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
                     p["io"] = func_comment["params"][param]["io"]
+
+        # Check the list of parameter definitions and generate
+        # a warning if a comment is missing.
+        for param in params:
+            #print "PARAM: %s" % param["name"]
+            if(not func_comment["params"].has_key(param["name"])):
+                WARNING("%s missing parameter definition for %s in %s:%d" % (function["name"], param["name"], self.m_source_file, start_of_func))
 
 
         #if(len(new_params) > 0):
@@ -1718,6 +1822,8 @@ class cpp_parser_t(shorte_parser_t):
         return page
 
     def parse(self, source_file):
+
+        self.m_source_file = source_file
 
         input = self.load_source_file(source_file)
 

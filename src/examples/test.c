@@ -1,4 +1,6 @@
 
+#define my_test2 0 /* TODO ccw consider making this dynamic */
+
 /**
  * A definition to parse with a description
  * that should act like a text block that
@@ -213,3 +215,4 @@ int my_test21(int blah)
 {
     return FALSE;
 }
+

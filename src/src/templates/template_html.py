@@ -1097,7 +1097,7 @@ class template_html_t(template_t):
         template_prototype = string.Template("""
         <div>
             <div style="color: #396592; font-weight: bold;">Prototype:</div>
-            <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc; font-family:courier new;">
+            <div style="margin-left: 15px; margin-right:15px; font-family:courier new;">
                 ${prototype}
             </div>
         </div>
@@ -1203,8 +1203,30 @@ class template_html_t(template_t):
         if(prototype.has_key("prototype")):
             language = prototype["prototype"]["language"]
             example = prototype["prototype"]["parsed"]
+            
+            if(self.m_show_code_headers.has_key("prototype") and self.m_show_code_headers["prototype"]):
+                snippet_id = self.m_snippet_id
+                self.m_snippet_id += 1
+                code_header = self.m_template_code_header.substitute(
+                        {"id" : snippet_id,
+                         "style" : "margin-left:10px;margin-top:2px;background-color:transparent;"})
+                source = template_source.substitute({
+                    "id":     snippet_id,
+                    "source": self.format_source_code_no_lines(language, example)})
+            else:
+                code_header = ""
+                source = ""
 
-            function["prototype"] = self.format_source_code(language, example, exclude_wikiwords, False)
+            example = self.format_source_code(language, example, exclude_wikiwords, False)
+
+            code = template_code.substitute(
+                    {"contents"    : example,
+                     "source"      : source,
+                     "code_header" : code_header,
+                     "template"    : "code2",
+                     "result"      : ""})
+
+            function["prototype"] = code
             function["prototype"] = template_prototype.substitute(function)
 
         if(prototype.has_key("params") and (len(prototype["params"]) > 0)):
@@ -1263,7 +1285,7 @@ class template_html_t(template_t):
                 self.m_snippet_id += 1
                 code_header = self.m_template_code_header.substitute(
                         {"id" : snippet_id,
-                         "style" : "margin-left:10px;margin-top:2px;"})
+                         "style" : "margin-left:10px;margin-top:2px;background-color:transparent;"})
                 source = template_source.substitute({
                     "id":     snippet_id,
                     "source": self.format_source_code_no_lines(language, example)})
@@ -3114,6 +3136,11 @@ $cnts
       margin-right:15px;
       background-color:#f0f0f0;
       border:1px solid #ccc;
+  }
+  div.code3
+  {
+      font-family: courier new;
+      font-size: 0.9em;
   }
   
   div.code a

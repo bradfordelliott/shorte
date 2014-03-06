@@ -1,4 +1,21 @@
 
+/** the class keeps a doubly linked list of all instances of the class that have been created
+ * insertion at the tail.  This list is used by the classes instance iterator
+ * class_iterator_func refer to cs_mx_class_instances_iterator
+ */
+typedef struct cs_mx_handle_table_entry_tag
+{
+    /** This is a field */
+    int one;
+} head, tail;
+
+struct cs_mx_handle_table_entry_tag * head, * tail;
+
+
+typedef struct tag_name struct_alias;
+struct tag_name struct_instance_1;
+struct_alias struct_instance_2;
+
 /**
  * This is a description of my function
  *
@@ -64,7 +81,7 @@
  * @see
  *     my_test21
  */
-int func1(int blah, bool* dummy);
+int func1(int blah2, bool* dummy);
 
 /**
  * This is a private function that won't normally be extracted.
@@ -96,6 +113,7 @@ typedef struct {
                                   *   register for a node */
     cs_uint8         slice;      /**< For interrupts with multiple instances,
                                   *   which instance has interrupted. */
+    cs_uint8 xxx;
 } cs_t100_irq_handler_data_t;
 
 
@@ -141,7 +159,24 @@ typedef struct {
  *     cs4224_diags_show_status(0, 3, CS4224_STATUS_GLOBAL);
  */
 cs_status cs4224_diags_show_status(
-    cs_uint32 slice_start,
+    cs_uint32 slice_start2,
     cs_uint32 slice_end,
     cs_uint16 sections_to_display);
+
+
+/** This one should show up */
+#define my_test2 0 /* TODO ccw consider making this dynamic */
+
+/**
+ * This one shouldn't show up
+ *
+ * @private
+ */
+#define my_test3 9
+
+
+#define my_test4 0 /* This one shouldn't show up either because it has no header */
+
+
+
 

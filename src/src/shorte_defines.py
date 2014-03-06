@@ -516,3 +516,18 @@ def zipper(dir, zip_file):
             zip.write(fullpath, archive_name, zipfile.ZIP_DEFLATED)
     zip.close()
     return zip_file
+
+def WARNING(message):
+    if(sys.platform == "win32"):
+        import console_utils as con
+        default_colors = con.get_text_attr()
+        con.set_text_attr(con.FOREGROUND_RED)
+        sys.stdout.write("WARNING: ")
+        con.set_text_attr(default_colors)
+        sys.stdout.flush()
+        sys.stdout.write("%s\n" % message)
+        sys.stdout.flush()
+    else:
+        print "\033[91mWARNING:\033[0m %s" % message
+
+

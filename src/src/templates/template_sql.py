@@ -467,6 +467,7 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'method', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
         
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        html.m_show_code_headers["prototype"] = True
         html.set_template_code_header(sql_template_code_header)
         html.m_wikiword_path_prefix = False
         help = html.format_prototype(tag)
