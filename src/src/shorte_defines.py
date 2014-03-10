@@ -528,6 +528,33 @@ def WARNING(message):
         sys.stdout.write("%s\n" % message)
         sys.stdout.flush()
     else:
-        print "\033[91mWARNING:\033[0m %s" % message
+        print "\033[93mWARNING:\033[0m %s" % message
 
+def ERROR(message):
+    if(sys.platform == "win32"):
+        import console_utils as con
+        default_colors = con.get_text_attr()
+        con.set_text_attr(con.FOREGROUND_RED)
+        sys.stdout.write("WARNING: ")
+        con.set_text_attr(default_colors)
+        sys.stdout.flush()
+        sys.stdout.write("%s\n" % message)
+        sys.stdout.flush()
+    else:
+        print "\033[91mERROR:\033[0m %s" % message
+
+def FATAL(message):
+    if(sys.platform == "win32"):
+        import console_utils as con
+        default_colors = con.get_text_attr()
+        con.set_text_attr(con.FOREGROUND_RED)
+        sys.stdout.write("WARNING: ")
+        con.set_text_attr(default_colors)
+        sys.stdout.flush()
+        sys.stdout.write("%s\n" % message)
+        sys.stdout.flush()
+    else:
+        print "\033[91mFATAL:\033[0m %s" % message
+
+    sys.exit(-1)
 
