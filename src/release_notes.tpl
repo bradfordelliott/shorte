@@ -9,21 +9,24 @@ This document describes the release history of the Shorte language.
 @h3 Version 1.0.62 (Feb 18, 2014)
 Minor bug fix release
 
-- Added support for checkboxes in lists similar to github
-    - Added support for actions within lists using the [a] and [ax]
-      prefixes.
-    - Added support for starred items using the [*] syntax
-    - Added support for priorities using the [1-5] syntax. For
-      example:
-          -[a3] is a priority 3 action where > is higher priority.
-- Added the skip_if_pdf modifier/attribute to tags so that a section
-  can be skipped in PDF documents. This is done because large PDFs
-  currently take a long time to generate and some sections can be
-  skipped and left only in the HTML version.
-- Fixed issue with the inlined tables and the use of the | character
-  as a divider. Updated to use ! as divider instead until I can
-  figure out a better way
-- Added support for examples associated with structure definitions.
+- Syntax:
+    - Added support for checkboxes in lists similar to github
+        - Added support for actions within lists using the [a] and [ax]
+          prefixes.
+        - Added support for starred items using the [*] syntax
+        - Added support for priorities using the [1-5] syntax. For
+          example:
+              -[a3] is a priority 3 action where > is higher priority.
+    - Added the skip_if_pdf modifier/attribute to tags so that a section
+      can be skipped in PDF documents. This is done because large PDFs
+      currently take a long time to generate and some sections can be
+      skipped and left only in the HTML version.
+    - Fixed issue with the inlined tables and the use of the | character
+      as a divider. Updated to use ! as divider instead until I can
+      figure out a better way
+    - Added support for examples associated with structure definitions.
+    - Added support for multi-line comments via the \#\* ... \*\# syntax
+
 - Themes
     - Updated to support mixing themes for individual packages. For
       example, you can now do this:
