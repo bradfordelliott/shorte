@@ -135,7 +135,7 @@ This is another example using the @ol tag:
 This is a final example using the @ul tag:
 
 @ul
--[]  Not checked
+-[]  [[A link]]
 -[x] checked
     -[]  not checked
     -[x] checked
