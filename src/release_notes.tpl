@@ -43,6 +43,8 @@ Minor bug fix release
       in src/templates/template_odt.py.
 - SQL template
     - Cross referenced structure fields so that they are searchable.
+    - Added *Add to Script* and *Copy to Clipboard* options on the prototype
+      and examples to make them more usable within CS Explorer.
 - Cleanup of the sources to move some of the includes into the src subdirectory
 - Added support for XML-RPC server for web integration
     - example file in server_test.py
