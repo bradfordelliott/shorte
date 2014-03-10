@@ -82,7 +82,7 @@
     THis is a test
 
 @h3 my_function2
-@prototype:
+@prototype
 -- function: my_function2
 -- description:
     This is a description of my function with some more text
@@ -110,7 +110,7 @@
 
 
 @h3 my_function3
-@prototype:
+@prototype
 -- function: my_function3
 -- prototype:
     void my_function3(void)

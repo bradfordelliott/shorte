@@ -348,14 +348,16 @@ class shorte_parser_t(parser_t):
                     
                     # parse any comments
                     if(input[i] == '#'):
-                        if(input[i+1] == '*'):
-                            states.append(STATE_MCOMMENT)
-                            i = i + 2
-                        else:
-                            states.append(STATE_COMMENT)
-                            i = i + 1
+                        states.append(STATE_COMMENT)
+                        i = i + 1
+                        continue
+                    
+                    elif(input[i:i+4] == '<!--'):
+                        states.append(STATE_MCOMMENT)
+                        i += 3
                         continue
                 
+                    
                 # DEBUG BRAD: This is an attempt to skip
                 #             inline @ so they don't need to
                 #             be escaped
@@ -409,9 +411,9 @@ class shorte_parser_t(parser_t):
                     tag_modifier.append(input[i])
 
             elif(state == STATE_MCOMMENT):
-                if(input[i] == '*' and input[i+1] == '#'):
+                if(input[i:i+3] == '-->'):
                     states.pop()
-                    i += 1
+                    i += 2
             elif(state == STATE_COMMENT):
                 if(input[i] == '\n'):
                     states.pop()
@@ -1859,7 +1861,7 @@ else:
         tag.line = linenum
             
         if(len(data) == 0):
-            if(not tag.name in ("image")):
+            if(not tag.name in ('image', 'functionsummary', 'typesummary', 'embed', 'columns', 'column', 'endcolumns', 'inkscape')):
                 WARNING("Tag '%s' at %s:%d has no body, may cause parsing errors" % (tag.name, tag.file, tag.line))
 
         if(self.tag_is_header(name)):
@@ -2340,8 +2342,9 @@ else:
                         
                         tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
 
-                        for tag in tags:
-                            tag.line = saved_line + 1
+                        if(tags != None):
+                            for tag in tags:
+                                tag.line = saved_line + 1
                             
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -2354,11 +2357,11 @@ else:
                 elif(state == STATE_NORMAL):
 
                     if(input[i] == '#'):
-                        if(input[i+1] == '*'):
-                            states.append(STATE_MCOMMENT)
-                            i += 1
-                        else:
-                            states.append(STATE_COMMENT)
+                        states.append(STATE_COMMENT)
+
+                    elif(input[i:i+4] == '<!--'):
+                        states.append(STATE_MCOMMENT)
+                        i += 3
                        
                     # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line and isn't
                     #             followed by an {
@@ -2375,8 +2378,10 @@ else:
                                 saved_line = self.m_current_line
                                 (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
                                 tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-                                for tag in tags:
-                                    tag.line = saved_line + 1
+
+                                if(tags != None):
+                                    for tag in tags:
+                                        tag.line = saved_line + 1
                     
                                 excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -2395,9 +2400,9 @@ else:
                     states.pop()
                 
                 elif(state == STATE_MCOMMENT):
-                    if(input[i] == '*' and input[i+1] == '#'):
+                    if(input[i:i+3] == '-->'):
                         states.pop()
-                        i += 1
+                        i += 2
                     
                 elif(state == STATE_COMMENT):
                     if(input[i] == '\n'):
@@ -2411,8 +2416,10 @@ else:
                     saved_line = self.m_current_line
                     (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
                     tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-                    for tag in tags:
-                        tag.line = saved_line + 1
+
+                    if(tags != None):
+                        for tag in tags:
+                            tag.line = saved_line + 1
                     
                     excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
                             
@@ -2420,8 +2427,10 @@ else:
                     saved_line = self.m_current_line 
                     (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
                     tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-                    for tag in tags:
-                        tag.line = saved_line + 1
+
+                    if(tags != None):
+                        for tag in tags:
+                            tag.line = saved_line + 1
 
                     excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -2498,11 +2507,10 @@ else:
             elif(state == STATE_NORMAL):
 
                 if(input[i] == '#'):
-                    if(input[i+1] == '*'):
-                        states.append(STATE_MCOMMENT)
-                        i += 1
-                    else:
-                        states.append(STATE_COMMENT)
+                    states.append(STATE_COMMENT)
+                elif(input[i:i+4] == '<!--'):
+                    states.append(STATE_MCOMMENT)
+                    i += 3
                     
                 # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line
                 #elif(input[i] == '@'):
@@ -2530,9 +2538,9 @@ else:
                 states.pop()
 
             elif(state == STATE_MCOMMENT):
-                if(input[i] == '*' and input[i+1] == '#'):
+                if(input[i:i+3] == '-->'):
                     states.pop()
-                    i += 1
+                    i += 2
             
             elif(state == STATE_COMMENT):
                 if(input[i] == '\n'):
@@ -2735,8 +2743,9 @@ def exists(s):
 
                         tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
 
-                        for tag in tags:
-                            tag.line = saved_line + 1
+                        if(tags != None):
+                            for tag in tags:
+                                tag.line = saved_line + 1
 
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -2749,11 +2758,11 @@ def exists(s):
                 elif(state == STATE_NORMAL):
 
                     if(input[i] == '#'):
-                        if(input[i+1] == '*'):
-                            states.append(STATE_MCOMMENT)
-                            i += 1
-                        else:
-                            states.append(STATE_COMMENT)
+                        states.append(STATE_COMMENT)
+
+                    elif(input[i:i+4] == '<!--'):
+                        states.append(STATE_MCOMMENT)
+                        i += 3
                         
                     # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line
                     #elif(input[i] == '@'):
@@ -2771,8 +2780,9 @@ def exists(s):
                                 (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
                                 tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
 
-                                for tag in tags:
-                                    tag.line = saved_line + 1
+                                if(tags != None):
+                                    for tag in tags:
+                                        tag.line = saved_line + 1
                             
                                 excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -2791,9 +2801,9 @@ def exists(s):
                     states.pop()
                 
                 elif(state == STATE_MCOMMENT):
-                    if(input[i] == '*' and input[i+1] == '#'):
+                    if(input[i:i+3] == '-->'):
                         states.pop()
-                        i += 1
+                        i += 2
                 elif(state == STATE_COMMENT):
                     if(input[i] == '\n'):
                         states.pop()
@@ -2810,8 +2820,9 @@ def exists(s):
                     (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
                     tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
 
-                    for tag in tags:
-                        tag.line = saved_line + 1
+                    if(tags != None):
+                        for tag in tags:
+                            tag.line = saved_line + 1
 
                     excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -2822,8 +2833,10 @@ def exists(s):
                         saved_line = self.m_current_line
                         (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
                         tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
-                        for tag in tags:
-                            tag.line = saved_line + 1
+
+                        if(tags != None):
+                            for tag in tags:
+                                tag.line = saved_line + 1
                         
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 

@@ -274,6 +274,7 @@ $example
 $pseudocode
 $seealso
 $deprecated
+$heading
 ''')
         function = {}
         function["name"] = prototype["name"]
@@ -283,6 +284,7 @@ $deprecated
         function["params"] = ''
         function["returns"] = prototype["returns"]
         function["pseudocode"] = ''
+        function["heading"] = ''
 
         if(prototype.has_key("prototype")):
             function["prototype"] = '''
@@ -333,6 +335,14 @@ $deprecated
 ''' % (prototype["deprecated"])
         else:
             function["deprecated"] = ''
+        
+        if(prototype.has_key("heading") and prototype["heading"] != ""):
+            function["heading"] = '''
+-- heading:
+%s
+''' % (prototype["heading"])
+        else:
+            function["heading"] = ''
 
         topic = topic_t({"name"   : prototype["name"],
                          "file"   : file,

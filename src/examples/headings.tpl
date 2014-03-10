@@ -3,11 +3,23 @@
 
 @body
 
+# This is a comment
+
+<!--
+@h1 Blah blah blah
+This is a multi-line comment
+blah blah blah
+-->
+
 @h1 Heading 1
 Some text here
 
+A multiline comment looks like \<!-- my comment here!!! -->.
+
+<!--
 @h2 Heading 2
 Some more text here
+-->This is some more text
 
 @h3 Heading 3
 Blah blah blah

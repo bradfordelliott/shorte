@@ -14,7 +14,11 @@ class list_item_t:
 
     def set_text(self, text):
 
-        if(text.startswith("[")):
+        #print "LIST ITEM TEXT: %s" % text
+
+        # See if it starts with an action [] but make sure
+        # it isn't a hyperlink
+        if(not text.startswith("[[") and text.startswith("[")):
             self.type = "checkbox"
             self.checked = False
 
@@ -204,6 +208,7 @@ class parser_t:
         items = []
         item = []
         item_indent = 0
+        #print "PARSING LIST: [%s]" % source
 
         for i in range(0, len(source)):
 

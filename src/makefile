@@ -31,6 +31,7 @@ help:
 	@${echo} "   test_defines         = test the formatting of defines"
 	@${echo} "   test_extract_private = test for extracting private methods"
 	@${echo} "   test_revealjs        = test for reveal.js presentations"
+	@${echo} "   test_comments        = test for single and multi-line comment handling"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -143,7 +144,9 @@ test_tables:
 	python shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
 
 test_code:
+	python shorte.py -f examples/code.tpl -t "${THEME}" -x cpp -o build-output/code.tpl -p "html+pdf"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
+	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p shorte
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html+pdf"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
     # DEBUG BRAD: This target is currently failing. Not sure how easy it will be to fix.

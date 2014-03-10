@@ -1,7 +1,20 @@
 
+class myclass
+{
+public:
+    myclass(void)
+    {
+    }
+};
+
 /** the class keeps a doubly linked list of all instances of the class that have been created
  * insertion at the tail.  This list is used by the classes instance iterator
  * class_iterator_func refer to cs_mx_class_instances_iterator
+ *
+ * @example
+ *    tail.one = 0;
+ *
+ * @heading blah
  */
 typedef struct cs_mx_handle_table_entry_tag
 {
@@ -96,11 +109,13 @@ int func1(int blah2, bool* dummy);
  */
 int private_func1(int blah, char* dummy);
 
+
 /**
  * This is the structure that gets passed to an application registered
  * interrupt handler.
  */
 typedef struct {
+    /** Hello ! */
     cs_t100_handle_t dev_id;     /**< Device Handle value */
     cs_t100_handle_t irq_handle; /**< IRQ Handle Value */
 /* start bugzilla 28081 */

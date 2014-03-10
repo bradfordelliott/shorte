@@ -351,9 +351,11 @@ class engine_t:
             output = output.replace("/cygdrive/c/", "C:/")
             input = input.replace("/cygdrive/c/", "C:/")
 
+        if(not os.path.exists(PATH_INKSCAPE)):
+            FATAL("%s not found, cannot convert" % PATH_INKSCAPE)
+
         cmd = '''%s -e "%s" "%s"''' % (PATH_INKSCAPE, output, input)
         print cmd
-        
         
         # Need a shorte delay after running inkscape because of
         # a race condition on windows
@@ -369,11 +371,7 @@ class engine_t:
         output = image["src"]
 
         if(not os.path.exists(output)):
-            print "ERROR: %s does not exist" % output
-            sys.exit(-1)
-        else:
-            print "PATH %s exists" % output
-            sys.exit(-1)
+            FATAL("Image source file %s does not exist, cannot convert" % output)
 
         if(converter == "inkscape"):
             input = image["src"]
@@ -381,7 +379,7 @@ class engine_t:
             image["src"] = output
             image["ext"] = ".png"
 
-            print "output: %s" % output
+            #print "output: %s" % output
 
             # If we've found the source image than remove it from
             # the list of images

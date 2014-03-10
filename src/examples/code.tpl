@@ -335,18 +335,18 @@ puts "Hello world!"
 
 @h3 my_function
 @prototype: language="c"
-- function: my_function()
-- description:
+-- function: my_function()
+-- description:
     This is a description of my function with some more text
     and blah blah blah. I'm sure if I put enough text here then
     it will likely wrap but I'm not absolutely sure. We'll see
     what it looks like when it is actually formatted. For kicks
     we'll link to the EPT acronym
-- prototype:
+-- prototype:
     int my_function(int val1 [], int val2 [][5]);
-- returns:
+-- returns:
     TRUE on success, FALSE on failure
-- params:
+-- params:
     -- val1 | I |
         1 = blah blah
             and more blah blah
@@ -360,7 +360,7 @@ puts "Hello world!"
         
         *2* = blah blah blah
 
-- example:
+-- example:
     rc = my_function(val);
 
     if(rc != 0)
@@ -368,7 +368,7 @@ puts "Hello world!"
         printf("Uh oh, something bad happened!\n");
     }
 
-- pseudocode:
+-- pseudocode:
 
     // Blah blah blah
     _call_sub_function()
@@ -395,23 +395,24 @@ puts "Hello world!"
         }
     }
 
-- see also:
+-- see also:
     THis is a test
 
+
 @h3 my_function2
-@prototype:
-- function: my_function2
-- description:
+@prototype
+-- function: my_function2
+-- description:
     This is a description of my function with some more text
     and blah blah blah. I'm sure if I put enough text here then
     it will likely wrap but I'm not absolutely sure. We'll see
     what it looks like when it is actually formatted. For kicks
     we'll link to the EPT acronym
-- prototype:
+-- prototype:
     cs_status my_function2(int val1 [], int val2 [][5]);
-- returns:
+-- returns:
     TRUE on success, FALSE on failure
-- params:
+-- params:
     -- val1 | I |
         1 = blah blah
             and more blah blah
@@ -424,6 +425,7 @@ puts "Hello world!"
         *1* = blah blah
         
         *2* = blah blah blah
+
 @h1 Acronyms
 
 @acronyms

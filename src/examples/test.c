@@ -48,6 +48,8 @@
  * -r A reserved row
  * -  This is a test
  * }
+ *
+ * @heading My Heading
  */
 typedef enum
 {
@@ -208,11 +210,25 @@ int my_test(int blah, bool* dummy)
 }
 
 
-/** This is another test function
- * @param blah [I] - This si a test
+/**
+ * This is another test function
+ *     @param blah [I] - This si a test
+ *
+ * @heading Blah Blah
  */
 int my_test21(int blah)
 {
     return FALSE;
+}
+
+int my_undocumented_function(int main)
+{
+}
+
+/**
+ * @private
+ */
+int my_private_function(void)
+{
 }
 

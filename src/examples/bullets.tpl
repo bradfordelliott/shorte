@@ -82,7 +82,8 @@ This is a test
 @warning
 This is some random warning!
 
-@note This is a third note
+@note
+This is a third note
 
 @tbd
 This is TBD

@@ -62,7 +62,7 @@ With some more data
 - Reserved  ||     | XXX  | tmp
 
 
-@table: 
+@table
 - Header    ||     | Blah | Blah
 - one
 -* two

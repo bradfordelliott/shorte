@@ -25,8 +25,10 @@ Minor bug fix release
       as a divider. Updated to use ! as divider instead until I can
       figure out a better way
     - Added support for examples associated with structure definitions.
-    - Added support for multi-line comments via the \#\* ... \*\# syntax
-
+    - Added support for multi-line comments via the \<!-- --> syntax
+    - Lexers
+        - Updated the VIM lexer (syntax/vim/syntax/tpl.vim) to improve
+          some of the parsing.
 - Themes
     - Updated to support mixing themes for individual packages. For
       example, you can now do this:

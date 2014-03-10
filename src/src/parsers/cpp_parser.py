@@ -77,6 +77,17 @@ class field_t:
         self.desc_source = ""
         self.type = ""
 
+class comment_t:
+    def __init__(self):
+        self.params = {}
+        self.returns = ""
+        self.example = ""
+        self.private = False
+        self.see_also = None
+        self.deprecated = None
+        self.heading = ""
+
+
 
 def my_token(typ, data, line, pos):
     t = {}
@@ -101,7 +112,7 @@ class cpp_parser_t(shorte_parser_t):
         self.m_author = "Unknown"
         self.m_file_brief = ""
         self.m_find_reference = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
-        self.m_find_in_group  = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
+        self.m_find_in_group  = re.compile("([@\\\]\s*(ingroup|heading)(.*?)\n)", re.DOTALL)
         self.m_file_src = ""
             
 
@@ -178,14 +189,14 @@ class cpp_parser_t(shorte_parser_t):
         if(not desc.startswith("/**")):
             return None
 
-        comment = self.parse_cpp_func_comment(desc)
+        (comment,comment2) = self.parse_cpp_func_comment(desc)
         extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
         if(extract_private == "1"):
             extract_private = True
         else:
             extract_private = False
 
-        if(not extract_private and True == comment["private"]):
+        if(not extract_private and True == comment2.private):
             raise Exception("Not outputting private structures")
 
         # Determine if this is a typedef'ed enum or not. That will
@@ -247,13 +258,14 @@ class cpp_parser_t(shorte_parser_t):
             if(cols > max_cols):
                 max_cols = cols
         
-
         struct = {}
         struct["rows"] = rows
         struct["fields"] = rows
         struct["title"] = struct_name
         struct["caption"] = self.parse_textblock(comment["desc"])
         struct["max_cols"] = max_cols
+        struct["heading"] = comment2.heading
+
         example = comment["example"]
         
         if(comment.has_key("example") and comment["example"] != ""): 
@@ -702,14 +714,20 @@ class cpp_parser_t(shorte_parser_t):
         comment = {}
 
         text = self.format_comment(text, strip_single_line_comments=False)
+
+        comment2 = comment_t()
+
         comment["params"] = {}
         comment["returns"] = ""
         comment["example"] = ""
         comment["private"] = False
         comment["see_also"] = None
         comment["deprecated"] = None
+        comment["heading"] = ""
 
         # Strip off any \ref sequences since shorte doesn't use them
+        # Also search for any heading references used to group the
+        # generated output.
         extras = True
         if(extras):
             #expr_ref = self.m_find_reference
@@ -719,26 +737,33 @@ class cpp_parser_t(shorte_parser_t):
             # Strip off any leading ingroup tag before the description
             # since shorte doesn't support that right now.
             #expr_ingroup = self.m_find_in_group
-            expr_ingroup = re.compile("([@\\\]\s*ingroup(.*?)\n)", re.DOTALL)
+            expr_ingroup = re.compile("([@\\\]\s*(ingroup|heading)(.*)\n*)", re.DOTALL)
 
+            #print "TEXT: [%s]" % text
             matches = expr_ingroup.search(text)
             if(matches != None):
-                comment["ingroup"] = matches.groups()[1]
-                #print "INGROUP: %s" % comment["ingroup"]
+                comment["heading"] = matches.groups()[2].strip()
+                comment2.heading = matches.groups()[2].strip()
+                #print "HEADING: %s" % comment["heading"]
                 text = text.replace(matches.groups()[0], "")
         
         # If there is no description assume the type is private
         if(len(text) == 0):
             comment["private"] = True
+            comment2.private = True
 
         matches = re.search("(.*?)(@[^{]|\\\)", text, re.DOTALL)
 
         if(matches != None):
             comment["desc"] = self.format_text(matches.groups()[0])
+            comment2.desc = self.format_text(matches.groups()[0])
             comment["description"] = self.parse_textblock(trim_leading_blank_lines(matches.groups()[0]))
+            comment2.description = self.parse_textblock(trim_leading_blank_lines(matches.groups()[0]))
         else:
             comment["desc"] = self.format_text(text)
+            comment2.desc = self.format_text(text)
             comment["description"] = self.parse_textblock(trim_leading_blank_lines(text))
+            comment2.description = self.parse_textblock(trim_leading_blank_lines(text))
 
         #print "COMMENT:"
         #print comment["desc"]
@@ -746,6 +771,7 @@ class cpp_parser_t(shorte_parser_t):
         matches = re.search("[@\\\]private", text, re.DOTALL)
         if(matches != None):
             comment["private"] = True
+            comment2.private = True
 
         expr_param = re.compile("[@\\\]param *([^ ]*) *(([^@]|@{)*)", re.DOTALL)
 
@@ -764,6 +790,10 @@ class cpp_parser_t(shorte_parser_t):
             comment["params"][name]["desc"] = desc
             comment["params"][name]["io"] = io
 
+            comment2.params[name] = {}
+            comment2.params[name]["desc"] = desc
+            comment2.params[name]["io"] = io
+
             #print "name = %s (%s)" % (name, desc)
             matches = expr_param.search(text, matches.end())
         
@@ -773,24 +803,28 @@ class cpp_parser_t(shorte_parser_t):
         if(matches != None):
             desc = self.format_text(matches.groups()[0])
             comment["returns"] = desc
+            comment2.returns = desc
         
         expr_example = re.compile("[@\\\]example *([^@]*)", re.DOTALL)
         matches = expr_example.search(text)
         if(matches != None):
             desc = matches.groups()[0]
             comment["example"] = desc
+            comment2.example = desc
         
         expr_see_also = re.compile("[@\\\]see *([^@]*)", re.DOTALL)
         matches = expr_see_also.search(text)
         if(matches != None):
             comment["see_also"] = matches.groups()[0]
+            comment2.see_also = matches.groups()[0]
 
         expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
         matches = expr_deprecated.search(text)
         if(matches != None):
             comment["deprecated"] = matches.groups()[0]
+            comment2.deprecated = matches.groups()[0]
         
-        return comment
+        return (comment,comment2)
 
     # Parse a C++ enumeration and store it
     def parse_cpp_enum(self, tokens, i):
@@ -827,7 +861,7 @@ class cpp_parser_t(shorte_parser_t):
         if(not desc.startswith("/**")):
             return None
 
-        comment = self.parse_cpp_func_comment(desc)
+        (comment,comment2) = self.parse_cpp_func_comment(desc)
 
         #print "DESC: %s" % desc
 
@@ -890,6 +924,8 @@ class cpp_parser_t(shorte_parser_t):
         # DEBUG BRAD: Not ready yet to treat enums as text blocks
         table["caption"] = self.parse_textblock(text)
         #table["caption"] = text
+
+        table["heading"] = comment["heading"]
 
         max_cols = 0
         for row in rows:
@@ -1053,14 +1089,16 @@ class cpp_parser_t(shorte_parser_t):
             #(i, src) = self.walk_backwards(i-1, tokens, TARGET([TOKEN_COMMENT]), SKIP([TOKEN_WHITESPACE]))
             (i, src) = self.walk_backwards(i-1, tokens, TARGET([TOKEN_COMMENT]), SKIP([]))
 
-            comment = self.parse_cpp_func_comment(src)
-            define["desc"] = comment["desc"]
-            define["description"] = comment["description"]
-            define["private"] = comment["private"]
+            (comment,comment2) = self.parse_cpp_func_comment(src)
+            define["desc"] = comment2.desc
+            define["description"] = comment2.description
+            define["private"] = comment2.private
+            define["heading"] = comment2.heading
         except:
             define["desc"] = ""
             define["description"] = ""
             define["private"] = True
+            define["heading"] = ""
 
         if(not extract_private and True == define["private"]):
             raise Exception ("not outputting private defines")
@@ -1098,6 +1136,7 @@ class cpp_parser_t(shorte_parser_t):
         function["prototype"] = ""
         function["params"] = []
         function["returns"] = ""
+        function["heading"] = ""
         params = ''
 
         # Search backwards till we find the closing
@@ -1166,12 +1205,15 @@ class cpp_parser_t(shorte_parser_t):
         if(not desc.startswith("/**")):
             return None
         
-        func_comment = self.parse_cpp_func_comment(desc)
+        (func_comment,func_comment2) = self.parse_cpp_func_comment(desc)
 
-        function["see_also"] = func_comment["see_also"]
+        function["see_also"] = func_comment2.see_also
 
-        if(func_comment["deprecated"] != None):
-            function["deprecated"] = func_comment["deprecated"]
+        if(func_comment2.deprecated != None):
+            function["deprecated"] = func_comment2.deprecated
+
+        if(func_comment2.heading != None):
+            function["heading"] = func_comment2.heading
 
         extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
         if(extract_private == "1"):
@@ -1185,13 +1227,13 @@ class cpp_parser_t(shorte_parser_t):
         else:
             output_pseudocode = False
 
-        if(not extract_private and True == func_comment["private"]):
+        if(not extract_private and True == func_comment2.private):
             raise Exception("Not outputting private functions")
 
-        function["desc"] = func_comment["desc"]
-        function["desc2"] = self.parse_textblock(func_comment["desc"])
-        function["returns"] = func_comment["returns"]
-        example = func_comment["example"]
+        function["desc"] = func_comment2.desc
+        function["desc2"] = self.parse_textblock(func_comment2.desc)
+        function["returns"] = func_comment2.returns
+        example = func_comment2.example
 
         # Build up the prototype
         prototype = ''
@@ -1287,21 +1329,21 @@ class cpp_parser_t(shorte_parser_t):
         params = function["params"]
         new_params = []
 
-        for param in func_comment["params"]:
+        for param in func_comment2.params:
 
             for p in params:
 
                 if(p["name"] == param):
-                    desc = func_comment["params"][param]["desc"]
+                    desc = func_comment2.params[param]["desc"]
                     p["desc"] = desc
                     p["desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
-                    p["io"] = func_comment["params"][param]["io"]
+                    p["io"] = func_comment2.params[param]["io"]
 
         # Check the list of parameter definitions and generate
         # a warning if a comment is missing.
         for param in params:
             #print "PARAM: %s" % param["name"]
-            if(not func_comment["params"].has_key(param["name"])):
+            if(not func_comment2.params.has_key(param["name"])):
                 WARNING("%s missing parameter definition for %s in %s:%d" % (function["name"], param["name"], self.m_source_file, start_of_func))
 
 

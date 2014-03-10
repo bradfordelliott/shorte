@@ -3669,7 +3669,7 @@ class template_odt_t(template_t):
 
             path_output = path_output + "_copy.odt"
 
-            cmd = "%s %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"" % (
+            cmd = '''"%s" %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.UpdateTOC(\\\"%s\\\")\"''' % (
                 path_oowriter,
                 params_oowriter,
                 path_converter,
