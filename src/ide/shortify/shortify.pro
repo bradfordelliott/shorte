@@ -35,7 +35,7 @@ FORMS    += mainwindow.ui \
 
 DEFINES += SCI_NAMESPACE
 
-INCLUDEPATH +=  3rdparty/scintilla/qt/ScintillaEditBase 3rdparty/scintilla/include 3rdparty/scintilla/src 3rdparty/scintilla/lexlib
+INCLUDEPATH +=  3rdparty/scintilla/qt/ScintillaEditBase 3rdparty/scintilla/include 3rdparty/scintilla/src 3rdparty/scintilla/lexlib 3rdparty/sqlite3
 
 unix: {
     mac: {
@@ -43,11 +43,44 @@ unix: {
         #QMAKE_LIBS += ../support/drivers/cs_usb_driver.so
         #DEFINES += SQLITE_HAS_CODEC CODEC_TYPE=CODEC_TYPE_AES256
         LIBS += -framework ScintillaEditBase
-        QMAKE_LFLAGS += -F../gringo/3rdparty/scintilla/bin
+        QMAKE_LFLAGS += -F../shortify/3rdparty/scintilla/bin
 
         libScintillaEditBase.path = Contents/Frameworks
-        libScintillaEditBase.files = ../gringo/3rdparty/scintilla/bin/ScintillaEditBase.framework
+        libScintillaEditBase.files = ../shortify/3rdparty/scintilla/bin/ScintillaEditBase.framework
         QMAKE_BUNDLE_DATA += libScintillaEditBase
         QMAKE_LFLAGS_SONAME = -Wl,-install_name,@executable_path/../Frameworks/
     }
+}
+
+win32: {
+    win32-g++: {
+        QMAKE_LIBS += -L../shortify/3rdparty/scintilla/bin/ -lScintillaEditBase3
+    } else {
+        QMAKE_LIBS += ../shortify/3rdparty/scintilla/bin/ScintillaEditBase3.lib
+    }
+
+    DEFINES += SCINTILLA_QT=1 SCI_LEXER=1 _CRT_SECURE_NO_DEPRECATE=1
+}
+
+# Build the Scintilla DLL in MinGW
+win32-g++: {
+
+scintillalib.target = scintilla
+
+CONFIG(release, debug|release) {
+    scintillalib.commands = cd ../shortify/3rdparty/scintilla/qt/ScintillaEditBase && \
+                        ${QMAKE} ScintillaEditBase.pro -r -spec win32-g++ && \
+                        mingw32-make -f Makefile release release-install && \
+                        echo "Done building debug scintilla.";
+} else {
+    scintillalib.commands = cd ../shortify/3rdparty/scintilla/qt/ScintillaEditBase && \
+                        ${QMAKE} ScintillaEditBase.pro -r -spec win32-g++ && \
+                        mingw32-make -f Makefile debug debug-install && \
+                        echo "Done building debug scintilla.";
+}
+
+scintillalib.depends =
+QMAKE_EXTRA_TARGETS += scintillalib
+PRE_TARGETDEPS = scintilla
+
 }

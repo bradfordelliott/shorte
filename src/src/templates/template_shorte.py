@@ -172,11 +172,12 @@ $caption
 - Enum Name | Enum Value | Enum Description
 $values
 """)
-
-        if(tag.heading == None):
-            heading = '@h4 %s' % title
+        add_heading = shorte_get_config("shorte", "header_add_to_enum")
+        if(tag.heading == None and ("None" != add_heading)):
+            heading = '@%s %s' % (add_heading, title)
         else:
             heading = ''
+        heading = ''
             
         vars = {}
         vars["name"] = title
@@ -197,10 +198,13 @@ $caption
 
         vars = {}
 
-        if(tag.heading == None):
-            heading = '@h4 %s' % tag.contents["name"]
+        add_heading = shorte_get_config("shorte", "header_add_to_define")
+        if(tag.heading == None and ("None" != add_heading)):
+            heading = '@%s %s' % (add_heading, tag.contents["name"])
         else:
             heading = ''
+
+        heading = ''
 
         vars["name"] = tag.contents["name"]
         vars["heading"] = heading
@@ -222,8 +226,6 @@ $caption
 
         table = tag.contents
 
-        print "TITLE: %s" % table["title"]
-        
         if(table.has_key("title")):
             title = table["title"]
         else:
@@ -238,11 +240,18 @@ $caption
 
         values = ''
 
-        for row in table["rows"]:
+        fields = "fields"
+        attributes = "attrs"
+        if(table.has_key("rows")):
+            fields = "rows"
+            attributes = "cols"
 
-            bits = row["cols"][0]["text"]
-            name = row["cols"][1]["text"]
-            desc = row["cols"][2]["text"]
+
+        for row in table[fields]:
+
+            bits = row[attributes][0]["text"]
+            name = row[attributes][1]["text"]
+            desc = row[attributes][2]["text"]
             desc = desc.replace("#", "\#")
 
             values += '''- %s | %s | %s
@@ -259,14 +268,19 @@ $values
 
         vars = {}
 
-        if(tag.heading == None):
-            heading = '@h4 %s' % title
+        add_heading = shorte_get_config("shorte", "header_add_to_struct")
+        if(tag.heading == None and ("None" != add_heading)):
+            heading = '@%s %s' % (add_heading,title)
+            parent = ''
         else:
             heading = ''
+            parent = tag.heading
+        heading = ''
 
         #print "HEADING: %s" % heading
 
         vars["name"] = title
+        vars["parent"] = parent
         vars["title"] = title
         vars["heading"] = heading
         vars["caption"] = caption
@@ -297,10 +311,12 @@ $seealso
 $deprecated
 $heading
 ''')
-        if(tag.heading == None):
-            title = '@h4 %s' % prototype["name"]
+        add_heading = shorte_get_config("shorte", "header_add_to_prototype")
+        if(tag.heading == None and ("None" != add_heading)):
+            title = '@%s %s' % (add_heading,prototype["name"])
         else:
             title = ''
+        title = ''
 
         function = {}
         function["title"] = title
@@ -332,7 +348,6 @@ $heading
 -- params:
     %s
 ''' % output
-
 
 
         if(prototype.has_key("example")):
@@ -388,20 +403,24 @@ $heading
             output += " "
         output += tag.contents.strip() + "\n"
 
-        print "HEADER"
-        print "  name: [%s]" % tag.name
-        print "  data: [",  tag.contents , "]"
+        #print "HEADER"
+        #print "  name: [%s]" % tag.name
+        #print "  data: [",  tag.contents , "]"
         #print "  output: %s" % output
 
         return output + "\n"
 
     def format_tag(self, tag):
-        #print "FORMAT TAG"
+        if(tag.name in "text"):
+            if(0 == len(tag.source.strip())):
+                return ''
+
         output = "@%s" % tag.name
         if(tag.modifiers):
             output += ": %s" % tag.modifiers
         else:
-            output += " "
+            pass
+
         output += "\n"
         output += tag.source + "\n"
 
@@ -413,7 +432,7 @@ $heading
         #print tag
         name = tag.name
 
-        print("Appending tag %s" % name)
+        #print("Appending tag %s" % name)
 
         if(name == "#"):
             return
@@ -506,7 +525,7 @@ $heading
         self.m_package = package
         self.m_inline = True
 
-        print "template_shorte.py::generate()"
+        #print "template_shorte.py::generate()"
         
         page_names = {}
         
@@ -564,7 +583,7 @@ $heading
         self.m_package = "tpl"
         self.m_inline = True
 
-        print "template_shorte.py::generate_buffer()"
+        #print "template_shorte.py::generate_buffer()"
         
         page_names = {}
         

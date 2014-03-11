@@ -1566,6 +1566,7 @@ a C/C++ like define that looks like:
                     vars["example"] = {}
                     vars["example"]["language"] = language
                     vars["example"]["parsed"] = example 
+                    vars["example"]["unparsed"] = section[8:len(section)]
 
                 elif(section.startswith("pseudocode:")):
                     
@@ -2258,14 +2259,17 @@ else:
         input = source.read()
         source.close()
         
+        # If the include is a source file then first convert it
+        # to shorte format.
         if(source_file.endswith(".c") or source_file.endswith(".h")):
-            page = self.m_cpp_parser.parse_buffer(input, source_file)
 
             indexer = indexer_t()
+
+            #print "Parsing buffer"
+            page = self.m_cpp_parser.parse_buffer(input, source_file)
             template = template_shorte_t(self.m_engine, indexer)
             input = template.generate_buffer(page)
-            #return page["tags"]
-        
+
         # DEBUG BRAD: Removed this line since it breaks
         #             links within included files
         #self.m_current_file = source_file

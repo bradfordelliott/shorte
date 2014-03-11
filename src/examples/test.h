@@ -10,6 +10,10 @@
  *
  * @text
  * Blah blah blah
+ *
+ * @h2 Function Summary
+ * @functionsummary
+ * @text
  */
 
 class myclass

@@ -50,6 +50,7 @@ TOKEN_EQUALS        = (18, "EQUALS", "=")
 TOKEN_OPEN_SQ_BRACKET = (19, "OPEN_SQBRACKET", "[")
 TOKEN_CLOSE_SQ_BRACKET = (20, "CLOSE_SQBRACKET", "]")
 TOKEN_WHITESPACE    = (21, "SPACE", " ")
+TOKEN_INVALID       = (0xff, "INVALID", "")
 
 def TYPE(token):
     return token["type"][0]
@@ -114,6 +115,7 @@ class cpp_parser_t(shorte_parser_t):
         self.m_find_reference = re.compile("([@\\\]ref\s+[A-Za-z][A-Za-z0-9_]+)", re.DOTALL)
         self.m_find_in_group  = re.compile("([@\\\]\s*(ingroup|heading)(.*?)\n)", re.DOTALL)
         self.m_file_src = ""
+        self.m_source_file = None
             
 
     def is_keyword(self, source):
@@ -1021,6 +1023,10 @@ class cpp_parser_t(shorte_parser_t):
             token = tokens[i]
             src += token["data"]
 
+            if(token["type"][0] == TOKEN_INVALID[0]):
+                i -= 1
+                continue
+
             #print("TOKEN: [%s]" % token["data"])
             if(skip.has_key(token["type"])):
                 i -= 1
@@ -1042,6 +1048,10 @@ class cpp_parser_t(shorte_parser_t):
 
             token = tokens[i]
             src += token["data"]
+
+            if(token["type"][0] == TOKEN_INVALID[0]):
+                i += 1 
+                continue
 
             #print("TOKEN: [%s]" % token["data"])
             if(skip.has_key(token["type"])):
@@ -1139,6 +1149,8 @@ class cpp_parser_t(shorte_parser_t):
         function["heading"] = ""
         params = ''
 
+        #print "PARSING FUNCTION"
+
         # Search backwards till we find the closing
         # bracket. If we hit anything other than a comment
         # or whitespace then it is probably not a function
@@ -1153,7 +1165,7 @@ class cpp_parser_t(shorte_parser_t):
         # Find the function name
         (i, src) = self.walk_backwards(i, tokens, TARGET([TOKEN_CODE]), SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE]))
         function["name"] = src.strip()
-        #print "NAME: [%s]" % function["function_name"]
+        #print "NAME: [%s]" % function["name"]
 
         # Find the function return type
         (i, src) = self.walk_backwards(i, tokens, TARGET([TOKEN_CODE, TOKEN_KEYWORD]), SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE]))
@@ -1198,6 +1210,8 @@ class cpp_parser_t(shorte_parser_t):
             token = tokens[k]
 
         start_of_func = token["line"] + 1
+
+
 
         desc.reverse()
         desc = " ".join(desc)
@@ -1248,8 +1262,6 @@ class cpp_parser_t(shorte_parser_t):
 
         prototype = re.sub(" *([\(\)\[\]]) *", "\\1", prototype)
 
-
-        #print "PROTOTYPE: [%s]" % prototype
 
         i = pos_definition
         token = tokens[i]
@@ -1344,6 +1356,9 @@ class cpp_parser_t(shorte_parser_t):
         for param in params:
             #print "PARAM: %s" % param["name"]
             if(not func_comment2.params.has_key(param["name"])):
+                if(None == self.m_source_file):
+                    self.m_source_file = self.m_current_file
+
                 WARNING("%s missing parameter definition for %s in %s:%d" % (function["name"], param["name"], self.m_source_file, start_of_func))
 
 
@@ -1383,12 +1398,12 @@ class cpp_parser_t(shorte_parser_t):
 
                     # Don't want to treat this as a comment
                     # for another type so mark it as invalid
-                    token["type"] = "invalid"
+                    token["type"] = TOKEN_INVALID
                     page["tags"].extend(tags)
                     #print text
                     continue
 
-            elif(self.match_token(token, TOKEN_KEYWORD, "struct")):
+            if(self.match_token(token, TOKEN_KEYWORD, "struct")):
                 try:
                     (i,struct) = self.parse_cpp_struct(tokens, i)
                 except:
@@ -1411,7 +1426,7 @@ class cpp_parser_t(shorte_parser_t):
                         page["tags"].append(tag)
                         parent = tag
 
-                    print "Found structure %s" % struct["title"]
+                    #print "Found structure %s" % struct["title"]
                     tag = tag_t()
                     tag.name = "struct"
                     tag.contents = struct
@@ -1547,12 +1562,13 @@ class cpp_parser_t(shorte_parser_t):
                     do_nothing=1
 
                 try:
+                    start_i = i
                     (i, function) = self.parse_cpp_function(tokens, i, source, is_prototype)
                 except:
                     #import traceback
                     #tb = sys.exc_info()[2]
                     #traceback.print_tb(tb)
-                    #print "Encountered Exception parsing what looked like C++ function"
+                    #print "Encountered Exception parsing what looked like C++ function at %s" % (source[start_i:start_i+100])
                     function = None
                     i += 1
                     

@@ -224,7 +224,7 @@ static void ColouriseShorteDoc(unsigned int startPos,
                 printf("In comment block!\n");
                 if(sc.chPrev == '?' && sc.ch == '>')
                 {
-                    sc.SetForwardState(SCE_SHORTE_DEFAULT);
+                    sc.ForwardSetState(SCE_SHORTE_DEFAULT);
                     break;
                 }
                 break;

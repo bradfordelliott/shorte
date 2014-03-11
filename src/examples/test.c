@@ -2,8 +2,15 @@
  *
  * @brief
  * This is some random data about this file here
+ *
  */
 
+/**
+ * @h1 Test.c
+ * @h2 Function Summary: test.c
+ * @functionsummary
+ * @text
+ */
 
 #define my_test2 0 /* TODO ccw consider making this dynamic */
 

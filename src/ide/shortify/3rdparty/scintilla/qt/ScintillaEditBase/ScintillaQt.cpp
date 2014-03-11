@@ -8,7 +8,9 @@
 // Additions Copyright (c) 2011 Archaeopteryx Software, Inc. d/b/a Wingware
 // ScintillaQt.cpp - Qt specific subclass of ScintillaBase
 
-#include <QtMacExtras>
+#if defined(Q_OS_MAC)
+    #include <QtMacExtras>
+#endif
 
 #include "PlatQt.h"
 #include "ScintillaQt.h"

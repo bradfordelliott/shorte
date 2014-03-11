@@ -476,10 +476,15 @@ def unescape_string(source):
     source = source.replace("<br/>", '\n')
     return source
 
+g_config = None
+
 def shorte_get_config(section, key):
-    import ConfigParser
-    config = ConfigParser.ConfigParser()
-    config.read(shorte_get_startup_path() + "/shorte.cfg")
+    global g_config
+    #print "GET CONFIG ", g_config
+    if(g_config == None):
+        import ConfigParser
+        g_config = ConfigParser.ConfigParser()
+        g_config.read(shorte_get_startup_path() + "/shorte.cfg")
     #config.read("../../shorte.cfg")
 
     # If searching for a path then make sure
@@ -490,8 +495,37 @@ def shorte_get_config(section, key):
             key += ".linux"
         else:
             key += ".win32"
+
+
+    val = g_config.get(section, key)
+
+    #print "  %s.%s = %s" % (section, key, val)
+    return val
+
+def shorte_set_config(section, key, val):
+    global g_config
+
+    #print "SET CONFIG ", g_config
+
+    if(g_config == None):
+        import ConfigParser
+        g_config = ConfigParser.ConfigParser()
+        g_config.read(shorte_get_startup_path() + "/shorte.cfg")
+
+    # If searching for a path then make sure
+    # to append the OS to get the correct
+    # path
+    if(section == "paths"):
+        if(platform.system == "Linux"):
+            key += ".linux"
+        else:
+            key += ".win32"
+
+    #print "  %s.%s = %s" % (section, key, val)
         
-    return config.get(section, key)
+    g_config.set(section, key, val)
+    #config.write(shorte_get_startup_path() + "/shorte.cfg")
+
         
 
 STATE_NORMAL   = 1
