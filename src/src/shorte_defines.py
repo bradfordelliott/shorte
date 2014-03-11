@@ -55,6 +55,9 @@ class tag_t:
         self.category = ""
         self.page = None
 
+        # The heading that this tag belongs to (if applicable)
+        self.heading = None
+
 g_tools = tools_t()
 
 def shorte_get_startup_path():

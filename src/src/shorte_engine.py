@@ -704,6 +704,14 @@ class engine_t:
                     executor = code_executor_t()
                     tag.result = executor.execute(tag.name, tag.source, tag.modifiers)
                 
+                #if(tag.name == "struct"):
+                #    #if(len(tag.contents["heading"])):
+                #    print "FOUND A STRUCT, heading = %s" % tag.contents["heading"]
+                #    tags.remove(tag)
+
+                #    if(tag.heading != None):
+                #        tags.remove(tag.heading)
+                
         # If the version number was not specified on the command
         # line then use any @docversion one specified in one of
         # the source files.

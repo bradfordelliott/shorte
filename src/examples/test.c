@@ -1,3 +1,9 @@
+/** @file test.c
+ *
+ * @brief
+ * This is some random data about this file here
+ */
+
 
 #define my_test2 0 /* TODO ccw consider making this dynamic */
 

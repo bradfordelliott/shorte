@@ -165,17 +165,22 @@ class template_shorte_t(template_t):
 ''' % (name, val, desc)
 
         template = string.Template("""
-@h4 $name
-
+$heading
 @enum: name="$name" caption='''
 $caption
 '''
 - Enum Name | Enum Value | Enum Description
 $values
-        """)
+""")
 
+        if(tag.heading == None):
+            heading = '@h4 %s' % title
+        else:
+            heading = ''
+            
         vars = {}
         vars["name"] = title
+        vars["heading"] = heading
         vars["caption"] = caption
         vars["values"] = values
 
@@ -184,15 +189,21 @@ $values
     def format_define(self, tag):
 
         template = string.Template("""
-@h4 $name
-
+$heading
 @define: name="$name" value="$value" description='''
 $caption
 '''
         """)
 
         vars = {}
+
+        if(tag.heading == None):
+            heading = '@h4 %s' % tag.contents["name"]
+        else:
+            heading = ''
+
         vars["name"] = tag.contents["name"]
+        vars["heading"] = heading
         val = tag.contents["desc"]
         val = re.sub("\|", "\\\\\\|", val)
         vars["caption"] = trim_leading_indent(val)
@@ -210,6 +221,8 @@ $caption
         self.m_num_structs += 1
 
         table = tag.contents
+
+        print "TITLE: %s" % table["title"]
         
         if(table.has_key("title")):
             title = table["title"]
@@ -236,18 +249,26 @@ $caption
 ''' % (bits, name, desc)
 
         template = string.Template("""
-@h4 $name
-
+$heading
 @struct: name="$name" title="$title" caption='''
 $caption
 '''
 - Type | Name | Description
 $values
-        """)
+""")
 
         vars = {}
+
+        if(tag.heading == None):
+            heading = '@h4 %s' % title
+        else:
+            heading = ''
+
+        #print "HEADING: %s" % heading
+
         vars["name"] = title
         vars["title"] = title
+        vars["heading"] = heading
         vars["caption"] = caption
         vars["values"] = values
 
@@ -260,7 +281,7 @@ $values
         self.m_num_prototypes += 1
        
         template = string.Template('''
-@h4 $name
+$title
 @prototype
 -- function:
     $name
@@ -276,7 +297,13 @@ $seealso
 $deprecated
 $heading
 ''')
+        if(tag.heading == None):
+            title = '@h4 %s' % prototype["name"]
+        else:
+            title = ''
+
         function = {}
+        function["title"] = title
         function["name"] = prototype["name"]
         function["example"] = ''
         function["prototype"] = ''
@@ -351,12 +378,42 @@ $heading
         index.append(topic)
         
         return template.substitute(function)
+
+    def format_header(self, tag):
+
+        output = "@%s" % tag.name
+        if(tag.modifiers):
+            output += ": %s\n" % tag.modifiers
+        else:
+            output += " "
+        output += tag.contents.strip() + "\n"
+
+        print "HEADER"
+        print "  name: [%s]" % tag.name
+        print "  data: [",  tag.contents , "]"
+        #print "  output: %s" % output
+
+        return output + "\n"
+
+    def format_tag(self, tag):
+        #print "FORMAT TAG"
+        output = "@%s" % tag.name
+        if(tag.modifiers):
+            output += ": %s" % tag.modifiers
+        else:
+            output += " "
+        output += "\n"
+        output += tag.source + "\n"
+
+        return output
+
     
     def append(self, tag):
         
+        #print tag
         name = tag.name
 
-        #print("Appending tag %s" % name)
+        print("Appending tag %s" % name)
 
         if(name == "#"):
             return
@@ -368,6 +425,11 @@ $heading
             self.m_contents.append(self.format_struct(tag))
         elif(name == "define"):
             self.m_contents.append(self.format_define(tag))
+        elif(name in ("h1", "h2", "h3", "h4", "h5")):
+            self.m_contents.append(self.format_header(tag))
+        else:
+            #print "name: %s" % name
+            self.m_contents.append(self.format_tag(tag))
 
     def get_contents(self):
         
@@ -392,37 +454,43 @@ $heading
         vars["project"] = "Your project here"
         vars["description"] = file_brief
         vars["code" ] = self.get_contents()
-        vars["header"] = '''
-@h2 %s
-@text
-%s
-'''% (title, file_brief)
 
-        if(self.m_num_prototypes > 0):
-            vars["header"] += '''
-@h3 Function Summary
-@text
-This section summarizes the methods exported by this module
-
-@functionsummary
-'''
+        vars["header"] = ''
         
-        if(self.m_num_structs > 0 or self.m_num_enums > 0):
-            vars["header"] += '''
-@h3 Types Summary
-@text
-This section summarizes the types exported by this module
-
-@typesummary
-'''
-
-        if(self.m_num_prototypes > 0 or self.m_num_enums > 0 or self.m_num_structs > 0):
-            vars["header"] += '''
-@h3 Methods and Structures
-@text
-The following section describes the methods and structures
-exported by this module in greater detail.
-'''
+#        auto_summary = self.m_engine.get_config("shorte", "auto_summarize")
+#
+#        if("1" == auto_summary):
+#            vars["header"] = '''
+#@h2 %s
+#@text
+#%s
+#'''% (title, file_brief)
+#
+#            if(self.m_num_prototypes > 0):
+#                vars["header"] += '''
+#@h3 Function Summary
+#@text
+#This section summarizes the methods exported by this module
+#
+#@functionsummary
+#'''
+#            
+#            if(self.m_num_structs > 0 or self.m_num_enums > 0):
+#                vars["header"] += '''
+#@h3 Types Summary
+#@text
+#This section summarizes the types exported by this module
+#
+#@typesummary
+#'''
+#    
+#            if(self.m_num_prototypes > 0 or self.m_num_enums > 0 or self.m_num_structs > 0):
+#                vars["header"] += '''
+#@h3 Methods and Structures
+#@text
+#The following section describes the methods and structures
+#exported by this module in greater detail.
+#'''
 
         self.m_contents = []
 
@@ -437,6 +505,8 @@ exported by this module in greater detail.
 
         self.m_package = package
         self.m_inline = True
+
+        print "template_shorte.py::generate()"
         
         page_names = {}
         
@@ -493,6 +563,8 @@ exported by this module in greater detail.
 
         self.m_package = "tpl"
         self.m_inline = True
+
+        print "template_shorte.py::generate_buffer()"
         
         page_names = {}
         

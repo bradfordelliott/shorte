@@ -1,4 +1,17 @@
 
+/**
+ * @h1 Section 1!!!!
+ * This is a test block with some random data here. For
+ * some reason this breaks the parsing of func1
+ *
+ * @table
+ * - One | Two
+ * - Three | Four
+ *
+ * @text
+ * Blah blah blah
+ */
+
 class myclass
 {
 public:
@@ -13,8 +26,6 @@ public:
  *
  * @example
  *    tail.one = 0;
- *
- * @heading blah
  */
 typedef struct cs_mx_handle_table_entry_tag
 {
@@ -25,9 +36,23 @@ typedef struct cs_mx_handle_table_entry_tag
 struct cs_mx_handle_table_entry_tag * head, * tail;
 
 
+
 typedef struct tag_name struct_alias;
 struct tag_name struct_instance_1;
 struct_alias struct_instance_2;
+
+/**
+ * @h2 Section 2!!!!
+ * This is a test block with some random data here. For
+ * some reason this breaks the parsing of func1
+ *
+ * @table
+ * - One | Two
+ * - Three | Four
+ *
+ * @text
+ * Blah blah blah
+ */
 
 /**
  * This is a description of my function

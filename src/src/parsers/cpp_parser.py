@@ -1365,28 +1365,59 @@ class cpp_parser_t(shorte_parser_t):
             
             #print "TOKEN: [%s] (%s) %d" % (token["data"], token["type"][1], token["line"])
 
-            if(self.match_token(token, TOKEN_KEYWORD, "struct")):
-                #print "Found structure"
+            # This is an alternative way of documenting the source code. In
+            # this case the users inserts headings directly into the sources
+            # which gets interpreted as code.
+            if(token["type"] == TOKEN_COMMENT and 
+                (("@h1" in token["data"] or 
+                  "@h2" in token["data"] or
+                  "@h3" in token["data"] or
+                  "@h4" in token["data"] or
+                  "@h5" in token["data"]))):
+                    text = self.format_comment(token["data"], strip_single_line_comments=False)
 
+                    shorte = shorte_parser_t(self.m_engine)
+                    shorte.parse_string(text, "blah.h")
+                    tags = shorte.m_pages[0]["tags"]
+                    i += 1
+
+                    # Don't want to treat this as a comment
+                    # for another type so mark it as invalid
+                    token["type"] = "invalid"
+                    page["tags"].extend(tags)
+                    #print text
+                    continue
+
+            elif(self.match_token(token, TOKEN_KEYWORD, "struct")):
                 try:
                     (i,struct) = self.parse_cpp_struct(tokens, i)
                 except:
                     struct = None
                     i += 1
+
+                header = shorte_get_config("shorte", "header_add_to_prototype")
+                if(header == "None"):
+                    header = None
                 
                 if(struct != None):
-                    tag = tag_t()
-                    tag.name = "h3"
-                    tag.contents = struct["title"]
-                    tag.source = ""
-                    tag.modifiers = {}
-                    page["tags"].append(tag)
+                    parent = None
 
+                    if(header != None):
+                        tag = tag_t()
+                        tag.name = header
+                        tag.contents = struct["title"]
+                        tag.source = ""
+                        tag.modifiers = {}
+                        page["tags"].append(tag)
+                        parent = tag
+
+                    print "Found structure %s" % struct["title"]
                     tag = tag_t()
                     tag.name = "struct"
                     tag.contents = struct
                     tag.source = ""
                     tag.modifiers = {}
+                    tag.heading = parent
                     page["tags"].append(tag)
 
             elif(token["type"] == TOKEN_PREPROCESSOR):
@@ -1402,11 +1433,25 @@ class cpp_parser_t(shorte_parser_t):
                         i += 1
 
                     if(define != None):
+                        
+                        parent = None
+
+                        header = shorte_get_config("shorte", "header_add_to_define")
+                        if(header != "None"):
+                            tag = tag_t()
+                            tag.name = header
+                            tag.contents = define["name"]
+                            tag.source = define["name"]
+                            tag.modifiers = {}
+                            page["tags"].append(tag)
+                            parent = tag
+
                         tag = tag_t()
                         tag.name = "define"
                         tag.contents = define
                         tag.source = ""
                         tag.modifiers = {}
+                        tag.heading = parent
                         page["tags"].append(tag)
 
                 else:
@@ -1447,18 +1492,26 @@ class cpp_parser_t(shorte_parser_t):
                 #print enum
                 
                 if(enum != None):
-                    tag = tag_t()
-                    tag.name = "h3"
-                    tag.contents = enum["title"]
-                    tag.source = ""
-                    tag.modifiers = {}
-                    page["tags"].append(tag)
+
+                    parent = None
+
+                    header = shorte_get_config("shorte", "header_add_to_enum")
+
+                    if(header != "None"):
+                        tag = tag_t()
+                        tag.name = header
+                        tag.contents = enum["title"]
+                        tag.source = ""
+                        tag.modifiers = {}
+                        page["tags"].append(tag)
+                        parent = tag
 
                     tag = tag_t()
                     tag.name = "enum"
                     tag.contents = enum
                     tag.source = ""
                     tag.modifiers = {}
+                    tag.heading = parent
                     page["tags"].append(tag)
 
             elif(self.match_token(token, TOKEN_OPEN_BRACE, "{") or self.match_token(token, TOKEN_SEMICOLON, ";")):
@@ -1535,18 +1588,26 @@ class cpp_parser_t(shorte_parser_t):
                                 #sys.exit(-1)
                         i += 1
                 else:
-                    tag = tag_t()
-                    tag.name = "h3"
-                    tag.contents = function["name"]
-                    tag.source = ""
-                    tag.modifiers = {}
-                    page["tags"].append(tag)
+
+                    parent = None
+
+                    header = shorte_get_config("shorte", "header_add_to_prototype")
+                    
+                    if(header != "None"):
+                        tag = tag_t()
+                        tag.name = header
+                        tag.contents = function["name"]
+                        tag.source = ""
+                        tag.modifiers = {}
+                        page["tags"].append(tag)
+                        parent = tag
 
                     tag = tag_t()
                     tag.name = "prototype"
                     tag.contents = function
                     tag.source = ""
                     tag.modifiers = {}
+                    tag.heading = parent 
                     page["tags"].append(tag)
 
             i += 1
@@ -1568,18 +1629,6 @@ class cpp_parser_t(shorte_parser_t):
         page["links"] = []
 
 
-        tag = tag_t()
-        tag.name = "h1"
-        tag.contents = source_file
-        tag.source = ""
-        tag.modifiers = {}
-        page["tags"].append(tag)
-
-        tag = tag_t()
-        tag.name = "functionsummary"
-        tag.contents = ""
-        tag.modifiers = self.parse_modifiers('src="%s"' % source_file)
-        page["tags"].append(tag)
         tag = {}
 
         STATE_NORMAL     = 0
@@ -1844,7 +1893,36 @@ class cpp_parser_t(shorte_parser_t):
                 tokens.append(tokens_in[i])
 
         self.parse_tokens(page, tokens, input)
-                
+        
+        auto_summary = self.m_engine.get_config("shorte", "auto_summarize")
+        if("1" == auto_summary): 
+            idx = 0
+
+            summary = string.Template('''
+@h2 $name
+$brief
+
+@h3 Function Summary
+This section summarizes the methods exported by this module
+
+@functionsummary
+
+@h3 Types Summary
+This section summarizes the types exported by this module
+@typesummary
+
+@h3 Methods and Structures
+The following section describes the methods and structures exported by this module in greater detail
+''').substitute({"name" : source_file,
+                 "brief" : self.m_file_brief})
+                    
+            shorte = shorte_parser_t(self.m_engine)
+            shorte.parse_string(summary, "blah.h")
+            tags = shorte.m_pages[0]["tags"]
+
+            tags.extend(page["tags"])
+            page["tags"] = tags
+
         page["file_brief"] = self.m_file_brief
         page["file_author"] = self.m_author
 

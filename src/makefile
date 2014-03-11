@@ -144,6 +144,7 @@ test_tables:
 	python shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
 
 test_code:
+	python shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html"
 	python shorte.py -f examples/code.tpl -t "${THEME}" -x cpp -o build-output/code.tpl -p "html+pdf"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p shorte
