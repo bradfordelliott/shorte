@@ -6,7 +6,7 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.62 (Feb 18, 2014)
+@h3 Version 1.0.62 (Mar 13, 2014)
 Minor bug fix release
 
 - Syntax:
@@ -60,6 +60,9 @@ Minor bug fix release
       there are multiple files in a package like (html+pdf)
 - Performance Profiling
     - Updated to start profiling the parsers to improve performance
+- Shortify
+    - Started creation of an IDE for demonstrating the capabilities
+      of shorte.
 
 @table: title="Closed bugs"
 - Bug | Description
