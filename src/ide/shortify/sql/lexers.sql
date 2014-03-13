@@ -120,7 +120,9 @@ INSERT INTO Settings (key,value,description) VALUES('lexer.shorte.17',  '0x66AA2
 -- #define SCE_SHORTE_CODE_BLOCK 17
 -- #define SCE_SHORTE_LINK 18
 INSERT INTO Settings (key,value,description) VALUES('lexer.shorte.18',  'hotspot=1;color=0x00ff00',   'Hyperlink');
+
 -- #define SCE_SHORTE_INLINE_TAG 19
+INSERT INTO Settings (key,value,description) VALUES('lexer.shorte.19',  '0xff0000', 'Keyword');
 
 
 ---------------------------------------------------------------------

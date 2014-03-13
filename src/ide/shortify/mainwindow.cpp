@@ -29,7 +29,20 @@ void MainWindow::init(void)
     g_settings = new SettingsManager();
     g_settings->load("settings.db");
 
-    QMessageBox::information(this, "Default Chip", g_settings->get("default.chip"));
+    this->setStyleSheet(CS_GUI_GET_GLOBAL_SETTING("theme.main_content_stylesheet"));
+
+    QMenu* menu_file = this->ui->menuBar->addMenu("File");
+    QMenu* menu_edit = this->ui->menuBar->addMenu("Edit");
+
+    menu_edit->addAction("Settings", this, SLOT( on_action_edit_settings()));
+
+    for(int i = 0; i < this->ui->widget->count(); i++)
+    {
+        QString stylesheet = this->ui->widget->get_tabs()->widget(i)->styleSheet();
+        stylesheet = CS_GUI_GET_GLOBAL_SETTING("theme.main_tab_content_stylesheet") + stylesheet;
+        this->ui->widget->get_tabs()->widget(i)->setStyleSheet(stylesheet);
+    }
+    //QMessageBox::information(this, "Default Chip", g_settings->get("default.chip"));
 
 }
 
@@ -134,14 +147,27 @@ void MainWindow::on_m_button_run_clicked()
         working_directory = this->ui->m_working_directory->text();
     }
 
-    QString command = QString("/usr/bin/python /Users/belliott/usr/work/shorte/src/shorte.py -f %1 -p \"%2\" -t \"%3\" -w \"%4\"").arg(path_input).arg(package).arg(theme).arg(working_directory);
+    QString output_directory = working_directory + "/build-output/";
+
+    QString path_python = CS_GUI_GET_GLOBAL_SETTING("path.python");
+    QString path_shorte = CS_GUI_GET_GLOBAL_SETTING("path.shorte");
+
+    QString command = QString("\"%1\" \"%2\" -f \"%3\" -p \"%4\" -t \"%5\" -w \"%6\" -o \"%7\"").arg(path_python).arg(path_shorte).arg(path_input).arg(package).arg(theme).arg(working_directory).arg(output_directory);
     QProcess process(this);
+
+    QStringList env = QProcess::systemEnvironment();
+    env << "PYTHONHOME=" << CS_GUI_GET_GLOBAL_SETTING("env.pythonhome");
+    env << "PYTHONPATH=" << CS_GUI_GET_GLOBAL_SETTING("env.pythonpath");
+    process.setEnvironment(env);
+
     process.setProcessChannelMode(QProcess::MergedChannels);
     process.start(command);
     bool finished = process.waitForFinished();
 
+    this->ui->m_log_window->appendHtml(command + "<br/>");
+
     if(!finished)
-    {
+    {    
         QString output = convert_output_to_html(process.errorString());
         this->ui->m_log_window->appendHtml(output);
     }
@@ -151,6 +177,8 @@ void MainWindow::on_m_button_run_clicked()
         this->ui->m_log_window->appendHtml(output);
     }
     process.close();
+
+    WidgetEditor::open_in_file_browser(output_directory);
 
     tmp->close();
 
@@ -170,4 +198,25 @@ void MainWindow::on_m_button_open_clicked()
 void MainWindow::on_m_button_save_clicked()
 {
     this->ui->widget->save_file();
+}
+
+#include "widgets/common/settings/dialogsettingsmanager.h"
+
+void MainWindow::on_action_edit_settings()
+{
+    DialogSettingsManager dlg(this);
+    QMap<QString,QString> settings;
+
+    g_settings->get_globals(settings);
+    dlg.set_keys("global", settings);
+    dlg.set_database(g_settings);
+
+    if(QDialog::Accepted == dlg.exec())
+    {
+
+    }
+    else
+    {
+
+    }
 }

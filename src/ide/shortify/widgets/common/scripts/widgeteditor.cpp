@@ -106,6 +106,11 @@ void WidgetEditor::show_tab_bar(bool show)
     }
 }
 
+QTabWidget* WidgetEditor::get_tabs(void)
+{
+    return ui->m_tabs;
+}
+
 void WidgetEditor::show_whitespace(bool show, int index)
 {
     if(show)
@@ -1517,6 +1522,7 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
 
     QAction* action_clone_file = menu->addAction("Clone File");
     QAction* action_reload_file = menu->addAction("Reload");
+    QAction* action_copy_to_clipboard = menu->addAction("Copy File to Clipboard");
 
 
     QAction* action_open_in_file_browser = NULL;
@@ -1529,6 +1535,8 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
         action_open_in_file_browser = menu->addAction("Show in Explorer");
         action_copy_path_to_clipboard = menu->addAction("Copy path to Clipboard");
     }
+
+    QAction* action_tabs_to_spaces = menu->addAction("Convert Tabs to Spaces");
 
     QMenu* eol_menu = menu->addMenu("End of lines");
 
@@ -1580,6 +1588,11 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
         // Get a copy of the current file
         clone(CURRENT_DOC);
     }
+    else if(action_result == action_copy_to_clipboard)
+    {
+        QClipboard *clipboard = QApplication::clipboard();
+        clipboard->setText(get_text(), QClipboard::Clipboard);
+    }
     else if(action_result == action_reload_file)
     {
         reload(CURRENT_DOC);
@@ -1630,6 +1643,12 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
     {
         QClipboard *clipboard = QApplication::clipboard();
         clipboard->setText(path, QClipboard::Clipboard);
+    }
+    else if(action_result == action_tabs_to_spaces)
+    {
+        QString text = get_text();
+        text = text.replace("\t", "    ");
+        set_text(text);
     }
 
 
@@ -1770,5 +1789,25 @@ bool WidgetEditor::clear_no_warning(int index)
 void WidgetEditor::set_lexer(int lexer, int index)
 {
     setup_styles(lexer, index);
+}
+
+void WidgetEditor::open_in_file_browser(const QString& path)
+{
+#ifdef Q_OS_MAC
+        QStringList args;
+            args << "-e";
+            args << "tell application \"Finder\"";
+            args << "-e";
+            args << "activate";
+            args << "-e";
+            args << "select POSIX file \""+path+"\"";
+            args << "-e";
+            args << "end tell";
+            QProcess::startDetached("osascript", args);
+#else
+        QStringList args;
+        args << "/select," << QDir::toNativeSeparators(path);
+        QProcess::startDetached("explorer", args);
+#endif
 }
 

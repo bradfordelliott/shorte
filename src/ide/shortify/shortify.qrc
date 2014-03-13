@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>resources/close_square.png</file>
+        <file>resources/close_square_hover.png</file>
+        <file>resources/tabs_background.png</file>
+        <file>resources/toolbar_background.png</file>
+    </qresource>
+</RCC>

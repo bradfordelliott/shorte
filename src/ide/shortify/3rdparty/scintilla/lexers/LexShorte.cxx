@@ -221,8 +221,7 @@ static void ColouriseShorteDoc(unsigned int startPos,
         {
             case SCE_SHORTE_COMMENTBLOCK:
             {
-                printf("In comment block!\n");
-                if(sc.chPrev == '?' && sc.ch == '>')
+                if(sc.chPrev == '-' && sc.ch == '>')
                 {
                     sc.ForwardSetState(SCE_SHORTE_DEFAULT);
                     break;
@@ -255,6 +254,7 @@ static void ColouriseShorteDoc(unsigned int startPos,
             }
             case SCE_SHORTE_INLINE_TAG:
             {
+                printf("In inline tag, ch=%c\n", sc.ch);
                 if(sc.ch == '}')
                 {
                     sc.ForwardSetState(SCE_SHORTE_DEFAULT);
@@ -540,7 +540,6 @@ static void ColouriseShorteDoc(unsigned int startPos,
                 if(sc.chNext == '{')
                 {
                     sc.SetState(SCE_SHORTE_INLINE_TAG);
-                    sc.Forward(2);
                 }
                 else
                 {

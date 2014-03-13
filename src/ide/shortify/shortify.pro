@@ -17,13 +17,15 @@ SOURCES += main.cpp\
     3rdparty/sqlite3/sqlite3secure.c \
     widgets/common/settings/settingsmanager.cpp \
     widgets/common/scripts/widgeteditor.cpp \
-    widgets/common/widgetfiledownloader.cpp
+    widgets/common/widgetfiledownloader.cpp \
+    widgets/common/settings/dialogsettingsmanager.cpp
 
 HEADERS  += mainwindow.h \
     widgets/common/settings/settingsmanager.h \
     widgets/common/scripts/widgeteditor.h \
     widgets/common/widgetfiledownloader.h \
-    gui_types.h
+    gui_types.h \
+    widgets/common/settings/dialogsettingsmanager.h
 
 FORMS    += mainwindow.ui \
     widgets/common/scripts/dialogrunadvanced.ui \
@@ -31,7 +33,8 @@ FORMS    += mainwindow.ui \
     widgets/common/scripts/widgeteditor.ui \
     widgets/common/scripts/widgetgotopanel.ui \
     widgets/common/scripts/widgetscriptlibrary.ui \
-    widgets/common/scripts/widgettoolspanel.ui
+    widgets/common/scripts/widgettoolspanel.ui \
+    widgets/common/settings/dialogsettingsmanager.ui
 
 DEFINES += SCI_NAMESPACE
 
@@ -71,11 +74,13 @@ CONFIG(release, debug|release) {
     scintillalib.commands = cd ../shortify/3rdparty/scintilla/qt/ScintillaEditBase && \
                         ${QMAKE} ScintillaEditBase.pro -r -spec win32-g++ && \
                         mingw32-make -f Makefile release release-install && \
+                        cp -f ../../bin/ScintillaEditBase3.dll $$OUT_PWD/. && \
                         echo "Done building debug scintilla.";
 } else {
     scintillalib.commands = cd ../shortify/3rdparty/scintilla/qt/ScintillaEditBase && \
                         ${QMAKE} ScintillaEditBase.pro -r -spec win32-g++ && \
                         mingw32-make -f Makefile debug debug-install && \
+                        cp -f ../../bin/ScintillaEditBase3.dll $$OUT_PWD/. && \
                         echo "Done building debug scintilla.";
 }
 
@@ -84,3 +89,9 @@ QMAKE_EXTRA_TARGETS += scintillalib
 PRE_TARGETDEPS = scintilla
 
 }
+
+SUBDIRS += \
+    3rdparty/scintilla/qt/ScintillaEditBase/ScintillaEditBase.pro
+
+RESOURCES += \
+    shortify.qrc

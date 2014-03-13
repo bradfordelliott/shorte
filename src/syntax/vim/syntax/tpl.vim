@@ -22,7 +22,7 @@ endif
 "syn region StringBlock start=/'''/ end=/'''/ contained
 syn region Values start=/"/ end=/"/ contained
 syn region Keys start=/[ :][A-Za-z]*/ end=/=/ contained
-syn region Tags start=/^@\(acronyms\|\|define\|struct\|enum\|vector\|inkscape\|embed\|image\|python\|text\|perl\|code\|checklist\|c\|shell\|table\|ul\|prototype\|note\|questions\|question\|bash\|vera\|verilog\|tcl\|java\|pre\|ol\|functionsummary\|testcasesummary\|testcase\|include\|typesummary\|sequence\)/ end=/$/ contains=Keys,Values,StringBlock 
+syn region Tags start=/^@\(acronyms\|\|define\|struct\|enum\|vector\|inkscape\|embed\|image\|python\|text\|perl\|code\|checklist\|c\|shell\|table\|ul\|prototype\|note\|questions\|question\|bash\|vera\|verilog\|tcl\|java\|pre\|ol\|functionsummary\|testcasesummary\|testcase\|include\|typesummary\|sequence\)/ end=/$/ contains=Keys,Values,StringBlock  keepend
 syn region Headings excludenl start=/^@\(h1\|h2\|h3\|h4\|h5\)/ end=/$/ keepend contains=Keys,Values
 
 " Highlighting for single line tags such as @p that don't take any

@@ -9,6 +9,7 @@
 #include <QDragMoveEvent>
 #include <QDragLeaveEvent>
 #include <QDropEvent>
+#include <QTabWidget>
 
 #include "Scintilla.h"
 #include "gui_types.h"
@@ -40,6 +41,8 @@ public:
      * @param show [I] - true to show the tabs or false to hide them.
      */
     void show_tab_bar(bool show);
+
+    QTabWidget* get_tabs(void);
 
     /**
      * This method is called to show or hide whitespace characters
@@ -183,6 +186,7 @@ public:
     QString directory_of(int index=CURRENT_DOC);
     QString path_of(int index=CURRENT_DOC);
 
+    static void open_in_file_browser(const QString& path);
 
 signals:
     void signal_hotspot_activated(const QString& text);

@@ -29,6 +29,8 @@ private slots:
 
     void on_m_button_save_clicked();
 
+    void on_action_edit_settings();
+
 private:
     QString convert_output_to_html(const QString& input);
 
