@@ -23,6 +23,7 @@ class WidgetEditor : public QWidget
     Q_OBJECT
     
 public:
+
     /**
      * Constructor for the editor
      *
@@ -41,6 +42,11 @@ public:
      * @param show [I] - true to show the tabs or false to hide them.
      */
     void show_tab_bar(bool show);
+
+    void show_tools_panel(bool show);
+
+    void unsplit(int index);
+    void split(int index);
 
     QTabWidget* get_tabs(void);
 
@@ -72,6 +78,8 @@ public:
      *         operation was cancelled then QString::null is returned.
      */
     QString open_file();
+
+
 
     /**
      * Navigate to the specified line in the current document.
@@ -140,7 +148,7 @@ public:
      * @param forward [I] - true to search forward in the document, falst
      *                      to search backward.
      */
-    void find_text(const QString& text, int index=CURRENT_DOC, bool forward=true);
+    bool find_text(const QString& text, int index=CURRENT_DOC, bool forward=true);
 
     QString doc_title(int index=CURRENT_DOC);
     void append_text(const QString& contents, int index=CURRENT_DOC);
@@ -215,11 +223,32 @@ private slots:
     void receive_command(uptr_t wParam, sptr_t lParam);
     void on_actionFind_Selection_triggered();
 
-    void on_m_tabs_tabCloseRequested(int index);
+    void on_m_tabs_tabCloseRequested(int index=CURRENT_DOC);
 
     void on_script_changed(const QString& path);
 
     void on_m_tabs_customContextMenuRequested(const QPoint &pos);
+
+    /* Actions for the tools panel */
+    void on_close_tools_panel(void);
+
+    /* Actions for the Goto panel */
+    void on_goto_line(int line);
+
+    /* Actions for the find panel */
+    void on_find_next(const QString& text);
+    void on_find_last(const QString& text);
+    void on_find_replace(
+        const QString& search_text,
+        const QString& replace_text,
+        bool replace_forward,
+        bool replace_all);
+
+    void on_m_button_split_clicked();
+
+    void on_m_button_unsplit_clicked();
+
+    void on_m_button_split_horizontal_clicked();
 
 private:
     void load_lexer_styles(int index, const QString& lexer_prefix, int num_styles);

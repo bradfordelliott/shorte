@@ -42,8 +42,22 @@ void MainWindow::init(void)
         stylesheet = CS_GUI_GET_GLOBAL_SETTING("theme.main_tab_content_stylesheet") + stylesheet;
         this->ui->widget->get_tabs()->widget(i)->setStyleSheet(stylesheet);
     }
+
+    menu_edit->addAction("Find", this, SLOT(on_action_find()));
+
     //QMessageBox::information(this, "Default Chip", g_settings->get("default.chip"));
 
+    on_pushButton_clicked();
+    this->setWindowState(this->windowState() ^ Qt::WindowMaximized);
+
+    QList<int> sizes;
+    int height = this->ui->splitter->height();
+
+    sizes.append(height * 0.80);
+    sizes.append(height * 0.20);
+
+    this->ui->splitter->setSizes(sizes);
+    this->ui->widget->show_tools_panel(false);
 }
 
 MainWindow::~MainWindow()
@@ -219,4 +233,9 @@ void MainWindow::on_action_edit_settings()
     {
 
     }
+}
+
+void MainWindow::on_action_find(void)
+{
+    this->ui->widget->show_tools_panel(true);
 }

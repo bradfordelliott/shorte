@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QFont>
 #include <QClipboard>
+#include <QSplitter>
 
 #include "widgeteditor.h"
 #include "ui_widgeteditor.h"
@@ -18,6 +19,9 @@ QString CS_GUI_GET_GLOBAL_SETTING(const QString& name);
 void CS_GUI_SET_GLOBAL_SETTING(const QString& name, const QString& data);
 
 QMap<QString, QVariant> m_properties;
+
+#include "widgets/common/scripts/widgetgotopanel.h"
+#include "widgets/common/scripts/widgetfindpanel.h"
 
 WidgetEditor::WidgetEditor(bool allow_tabs, QWidget *parent) :
     QWidget(parent),
@@ -62,6 +66,37 @@ WidgetEditor::WidgetEditor(bool allow_tabs, QWidget *parent) :
     m_properties["SETCARETLINEBACK"] = 0xf0f0f0;
 
     m_properties["EOLMODE"] = SC_EOL_LF;
+
+    WidgetGotoPanel* panel_goto = new WidgetGotoPanel(this);
+
+    if(!connect(panel_goto, SIGNAL(signal_go_to_line(int)),
+           this,
+            SLOT(on_goto_line(int))))
+    {
+        QMessageBox::information(this, "Failed connecting", "Failed connecting");
+    }
+
+    WidgetFindPanel* panel_find = new WidgetFindPanel(this);
+    panel_find->show_close_button(false);
+
+    connect(panel_find, SIGNAL(signal_text_entered(const QString&)),
+           this,
+            SLOT(on_find_next(const QString&)));
+
+    connect(panel_find, SIGNAL(signal_find_last(const QString&)),
+           this,
+            SLOT(on_find_last(const QString&)));
+
+    connect(panel_find, SIGNAL(signal_replace(const QString&, const QString&, bool, bool)),
+            this,
+            SLOT(on_find_replace(const QString&, const QString&, bool, bool)));
+
+    connect(this->ui->m_tools_panel, SIGNAL(signal_close_panel()),
+            this,
+            SLOT(on_close_tools_panel()));
+    this->ui->m_tools_panel->add_page("Goto", panel_goto);
+    this->ui->m_tools_panel->add_page("Find", panel_find);
+
 }
 
 WidgetEditor::~WidgetEditor()
@@ -137,23 +172,40 @@ void WidgetEditor::on_script_changed(const QString& path)
 
 sptr_t WidgetEditor::call(int document_index, unsigned int iMessage, uptr_t wParam, sptr_t lParam)
 {
-    ScintillaEditBase* sci = NULL;
+    QSplitter* splitter = NULL;
 
     if(document_index != CURRENT_DOC)
     {
-        sci = (ScintillaEditBase*)this->ui->m_tabs->widget(document_index);
+        splitter = (QSplitter*)this->ui->m_tabs->widget(document_index);
     }
     else
     {
-        sci = (ScintillaEditBase*)this->ui->m_tabs->currentWidget();
+        splitter = (QSplitter*)this->ui->m_tabs->currentWidget();
     }
 
-    if(sci != NULL)
+    sptr_t result = NULL;
+
+    for(int i = 0; i < splitter->count(); i++)
     {
-        return sci->send(iMessage, wParam, lParam);
+        if(i > 0)
+        {
+            if(iMessage == SCI_SETTEXT ||
+               iMessage == SCI_INSERTTEXT ||
+               iMessage == SCI_APPENDTEXT)
+            {
+                break;
+            }
+        }
+
+        ScintillaEditBase* sci = (ScintillaEditBase*)splitter->widget(i);
+
+        if(sci != NULL)
+        {
+            result = sci->send(iMessage, wParam, lParam);
+        }
     }
 
-    return NULL;
+    return result;
 }
 
 void WidgetEditor::define_marker(int document_index, int marker, int markerType, int fore, int back) {
@@ -529,8 +581,12 @@ void WidgetEditor::setup_styles(int lexer, int index)
 
 int WidgetEditor::create_document(const QString& title, const QString& contents, e_cs_script_type type)
 {
+    QSplitter* splitter = new QSplitter(this);
     ScintillaEditBase *sci = new ScintillaEditBase(this);
-    int index = this->ui->m_tabs->addTab(sci, title);
+
+    splitter->addWidget(sci);
+
+    int index = this->ui->m_tabs->addTab(splitter, title);
     this->ui->m_tabs->setCurrentIndex(index);
     QString init_data;
 
@@ -1206,14 +1262,14 @@ void WidgetEditor::on_actionFind_Selection_triggered() {
 }
 
 
-void WidgetEditor::find_text(const QString& text, int index, bool forward)
+bool WidgetEditor::find_text(const QString& text, int index, bool forward)
 {
     const int indicatorHightlightCurrentWord = INDIC_CONTAINER;
     int lenDoc = call(index, SCI_GETLENGTH);
 
     if(lenDoc <= 0)
     {
-        return;
+        return false;
     }
 
     // Set the format of the selection
@@ -1276,7 +1332,18 @@ void WidgetEditor::find_text(const QString& text, int index, bool forward)
             call(index, SCI_SETSELECTIONSTART, indexOf);
             call(index, SCI_SETSELECTIONEND, indexOf+text.length());
         }
+        else
+        {
+            return false;
+        }
     }
+
+    return true;
+}
+
+void WidgetEditor::on_goto_line(int line)
+{
+    highlight_line(line, CURRENT_DOC);
 }
 
 void WidgetEditor::goto_line(int line, int index)
@@ -1374,6 +1441,23 @@ void WidgetEditor::on_m_tabs_tabCloseRequested(int index)
 
 void WidgetEditor::close_document(int index)
 {
+    if(index == CURRENT_DOC)
+    {
+        for(int i = 0; i < this->ui->m_tabs->count(); i++)
+        {
+            if(this->ui->m_tabs->widget(i) == this->ui->m_tabs->currentWidget())
+            {
+                index = i;
+                break;
+            }
+        }
+    }
+
+    if(index != -1)
+    {
+        return;
+    }
+
     QString path = this->ui->m_tabs->widget(index)->property("path").toString();
 
     m_scripts_watcher->removePath(path);
@@ -1520,6 +1604,9 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
     QAction* action_lexer_html = submenu->addAction("HTML");
     QAction* action_lexer_shorte = submenu->addAction("Shorte");
 
+    QAction* action_close_file = menu->addAction("Close File");
+    QAction* action_close_all_files = menu->addAction("Close All Files");
+
     QAction* action_clone_file = menu->addAction("Clone File");
     QAction* action_reload_file = menu->addAction("Reload");
     QAction* action_copy_to_clipboard = menu->addAction("Copy File to Clipboard");
@@ -1532,7 +1619,13 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
     QDir tmp;
     if(tmp.exists(path))
     {
+#ifdef Q_OS_MAC
+        action_open_in_file_browser = menu->addAction("Show in Finder");
+#elif defined(Q_OS_WIN)
         action_open_in_file_browser = menu->addAction("Show in Explorer");
+#else
+        action_open_in_file_browser = menu->addAction("Show in File Browser");
+#endif
         action_copy_path_to_clipboard = menu->addAction("Copy path to Clipboard");
     }
 
@@ -1622,7 +1715,7 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
     // Open the file in Explorer
     else if(action_result == action_open_in_file_browser)
     {
-#ifdef Q_OS_MAC
+#if defined(Q_OS_MAC)
         QStringList args;
             args << "-e";
             args << "tell application \"Finder\"";
@@ -1633,10 +1726,47 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
             args << "-e";
             args << "end tell";
             QProcess::startDetached("osascript", args);
-#else
+#elif defined(Q_OS_WIN)
         QStringList args;
         args << "/select," << QDir::toNativeSeparators(path);
         QProcess::startDetached("explorer", args);
+#else
+        QStringList args;
+
+        QProcess process;
+        process.start("xdg-mime query default inode/directory");
+        bool finished = process.waitForFinished();
+        if(finished)
+        {
+            QString data;
+            data.append(process.readAll());
+
+            args.clear();
+            args << QDir::toNativeSeparators(path);
+
+            if(data.contains("nautilus"))
+            {
+                QProcess::startDetached("nautilus", args);
+            }
+            else if(data.contains("thunar"))
+            {
+                QProcess::startDetached("thunar", args);
+            }
+            else if(data.contains("konqueror"))
+            {
+                QProcess::startDetached("konqueror", args);
+            }
+            else
+            {
+                finished = false;
+            }
+        }
+        process.close();
+
+        if(!finished)
+        {
+            QDesktopServices::openUrl(QUrl("file:///" + QDir::toNativeSeparators(path)));
+        }
 #endif
     }
     else if(action_result == action_copy_path_to_clipboard)
@@ -1649,6 +1779,17 @@ void WidgetEditor::on_m_tabs_customContextMenuRequested(const QPoint &pos)
         QString text = get_text();
         text = text.replace("\t", "    ");
         set_text(text);
+    }
+    else if(action_result == action_close_file)
+    {
+        on_m_tabs_tabCloseRequested();
+    }
+    else if(action_result == action_close_all_files)
+    {
+        while(this->ui->m_tabs->count())
+        {
+            on_m_tabs_tabCloseRequested();
+        }
     }
 
 
@@ -1811,3 +1952,151 @@ void WidgetEditor::open_in_file_browser(const QString& path)
 #endif
 }
 
+void WidgetEditor::on_find_next(const QString& text)
+{
+    find_text(text, CURRENT_DOC, true);
+}
+
+void WidgetEditor::on_find_last(const QString& text)
+{
+    find_text(text, CURRENT_DOC, false);
+}
+
+void WidgetEditor::on_find_replace(
+    const QString& search_text,
+    const QString& replace_text,
+    bool replace_forward,
+    bool replace_all)
+{
+    while(find_text(search_text, CURRENT_DOC, replace_forward))
+    {
+        call(CURRENT_DOC, SCI_REPLACESEL,
+               search_text.length(), (sptr_t)replace_text.toStdString().c_str());
+
+        if(!replace_all)
+        {
+            break;
+        }
+    }
+}
+
+void WidgetEditor::on_close_tools_panel(void)
+{
+    this->ui->m_tools_panel->setVisible(false);
+}
+
+void WidgetEditor::show_tools_panel(bool show)
+{
+    this->ui->m_tools_panel->setVisible(show);
+}
+
+void WidgetEditor::unsplit(int index)
+{
+
+}
+
+void WidgetEditor::split(int document_index)
+{
+    ScintillaEditBase* sci = NULL;
+
+    if(document_index != CURRENT_DOC)
+    {
+        sci = (ScintillaEditBase*)this->ui->m_tabs->widget(document_index);
+    }
+    else
+    {
+        sci = (ScintillaEditBase*)this->ui->m_tabs->currentWidget();
+    }
+}
+
+void WidgetEditor::on_m_button_split_clicked()
+{
+    QSplitter* splitter = NULL;
+
+    splitter = (QSplitter*)this->ui->m_tabs->currentWidget();
+
+    if(splitter == NULL)
+    {
+        return;
+    }
+
+    ScintillaEditBase *sci = (ScintillaEditBase*)splitter->widget(0);
+    void* ptr = (void*)sci->send(SCI_GETDOCPOINTER, 0, 0);
+
+    // Create the new split
+    sci = new ScintillaEditBase(this);
+    sci->send(SCI_SETDOCPOINTER, 0, (sptr_t)ptr);
+
+    splitter->addWidget(sci);
+    splitter->setOrientation(Qt::Vertical);
+
+    /* Set common styles */
+    call(CURRENT_DOC, SCI_STYLESETFONT, STYLE_DEFAULT , (sptr_t)"Courier New");
+    call(CURRENT_DOC, SCI_STYLESETSIZE, STYLE_DEFAULT , 10);
+    /* Apply the default styles */
+    call(CURRENT_DOC, SCI_STYLECLEARALL);
+    call(CURRENT_DOC, SCI_SETEOLMODE, m_properties["EOLMODE"].toInt());
+    setup_styles(SCLEX_SHORTE);
+
+    //call(CURRENT_DOC, SCI_INSERTTEXT, 0, (sptr_t)(void *)init_data.toStdString().c_str());
+
+    //ui->actionLatin_1->setChecked(true);
+
+    connect(sci, SIGNAL(notify(SCNotification *)), this, SLOT(receive_notify(SCNotification *)));
+    connect(sci, SIGNAL(command(uptr_t, sptr_t)), this, SLOT(receive_command(uptr_t, sptr_t)));
+}
+
+void WidgetEditor::on_m_button_unsplit_clicked()
+{
+    QSplitter* splitter = (QSplitter*)this->ui->m_tabs->currentWidget();
+
+    if(splitter == NULL)
+    {
+        return;
+    }
+
+    // Don't allow removing the base editor widget. Only remove
+    // splits.
+    if(splitter->count() > 1)
+    {
+        ScintillaEditBase* sci = (ScintillaEditBase*)splitter->widget(splitter->count() - 1);
+        delete sci;
+    }
+}
+
+void WidgetEditor::on_m_button_split_horizontal_clicked()
+{
+    QSplitter* splitter = NULL;
+
+    splitter = (QSplitter*)this->ui->m_tabs->currentWidget();
+
+    if(splitter == NULL)
+    {
+        return;
+    }
+
+    ScintillaEditBase *sci = (ScintillaEditBase*)splitter->widget(0);
+    void* ptr = (void*)sci->send(SCI_GETDOCPOINTER, 0, 0);
+
+    // Create the new split
+    sci = new ScintillaEditBase(this);
+    sci->send(SCI_SETDOCPOINTER, 0, (sptr_t)ptr);
+
+    splitter->addWidget(sci);
+    splitter->setOrientation(Qt::Horizontal);
+
+    /* Set common styles */
+    call(CURRENT_DOC, SCI_STYLESETFONT, STYLE_DEFAULT , (sptr_t)"Courier New");
+    call(CURRENT_DOC, SCI_STYLESETSIZE, STYLE_DEFAULT , 10);
+    /* Apply the default styles */
+    call(CURRENT_DOC, SCI_STYLECLEARALL);
+    call(CURRENT_DOC, SCI_SETEOLMODE, m_properties["EOLMODE"].toInt());
+    setup_styles(SCLEX_SHORTE);
+
+    //call(CURRENT_DOC, SCI_INSERTTEXT, 0, (sptr_t)(void *)init_data.toStdString().c_str());
+
+    //ui->actionLatin_1->setChecked(true);
+
+    connect(sci, SIGNAL(notify(SCNotification *)), this, SLOT(receive_notify(SCNotification *)));
+    connect(sci, SIGNAL(command(uptr_t, sptr_t)), this, SLOT(receive_command(uptr_t, sptr_t)));
+}

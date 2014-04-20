@@ -140,6 +140,7 @@ This is a final example using the @ul tag:
 -[x] checked
     -[]  not checked
     -[x] checked
+        -@{done, BE: This item is completed}
 - Priorities
     -[1] low priority item
     -[2] low priority item

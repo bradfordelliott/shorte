@@ -18,23 +18,28 @@ SOURCES += main.cpp\
     widgets/common/settings/settingsmanager.cpp \
     widgets/common/scripts/widgeteditor.cpp \
     widgets/common/widgetfiledownloader.cpp \
-    widgets/common/settings/dialogsettingsmanager.cpp
+    widgets/common/settings/dialogsettingsmanager.cpp \
+    widgets/common/scripts/widgettoolspanel.cpp \
+    widgets/common/scripts/widgetgotopanel.cpp \
+    widgets/common/scripts/widgetfindpanel.cpp
 
 HEADERS  += mainwindow.h \
     widgets/common/settings/settingsmanager.h \
     widgets/common/scripts/widgeteditor.h \
     widgets/common/widgetfiledownloader.h \
     gui_types.h \
-    widgets/common/settings/dialogsettingsmanager.h
+    widgets/common/settings/dialogsettingsmanager.h \
+    widgets/common/scripts/widgettoolspanel.h \
+    widgets/common/scripts/widgetgotopanel.h \
+    widgets/common/scripts/widgetfindpanel.h
 
 FORMS    += mainwindow.ui \
-    widgets/common/scripts/dialogrunadvanced.ui \
-    widgets/common/scripts/scripts.ui \
     widgets/common/scripts/widgeteditor.ui \
     widgets/common/scripts/widgetgotopanel.ui \
     widgets/common/scripts/widgetscriptlibrary.ui \
     widgets/common/scripts/widgettoolspanel.ui \
-    widgets/common/settings/dialogsettingsmanager.ui
+    widgets/common/settings/dialogsettingsmanager.ui \
+    widgets/common/scripts/widgetfindpanel.ui
 
 DEFINES += SCI_NAMESPACE
 

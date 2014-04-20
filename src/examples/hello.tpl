@@ -17,9 +17,19 @@ and tables:
 @{table,
 -t My Table
 -h Column One ! Column Two
+-s Column One ! Column Two
 -  Three      ! Four
+-r Three      ! Four
 }
 
 This is some random stuff here with a link to [[->Example: Dynamic Reconfiguration, dynamically reconfigure something]]
 
 This is some more data
+
+@ul
+- ONe
+- Two
+- Three
+
+@include "examples/headings.tpl"
+@include "examples/images.tpl"

@@ -10,6 +10,9 @@
  * @h2 Function Summary: test.c
  * @functionsummary
  * @text
+ * @table: name="This is my table!"
+ * - Blah  | Blah 
+ * - Three | Four
  */
 
 #define my_test2 0 /* TODO ccw consider making this dynamic */

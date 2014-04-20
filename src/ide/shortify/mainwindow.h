@@ -31,6 +31,8 @@ private slots:
 
     void on_action_edit_settings();
 
+    void on_action_find();
+
 private:
     QString convert_output_to_html(const QString& input);
 

@@ -4,5 +4,8 @@
         <file>resources/close_square_hover.png</file>
         <file>resources/tabs_background.png</file>
         <file>resources/toolbar_background.png</file>
+        <file>resources/split_window.png</file>
+        <file>resources/unsplit_window.png</file>
+        <file>resources/split_window_horizontal.png</file>
     </qresource>
 </RCC>

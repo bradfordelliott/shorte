@@ -6,7 +6,7 @@
     #include "cairo.h"
 #else
     #define CAIRO_FORMAT_ARGB24 1
-    #define CAIRO_FORMAT_ARGB32 5 
+    #define CAIRO_FORMAT_ARGB32 0 
     #define CAIRO_FORMAT_RGB24 2
     #define CAIRO_FORMAT_A8 3
     #define CAIRO_FORMAT_A1 4
@@ -92,9 +92,11 @@
     public:
         cairo(int width, int height)
         {
-            m_cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+            m_cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
             m_cairo_image   = cairo_create(m_cairo_surface);
-            cairo_set_source_rgb(m_cairo_image, 1, 1, 1);
+
+            // Create with a transparent background
+            cairo_set_source_rgba(m_cairo_image, 1, 1, 1, 0);
             cairo_rectangle(m_cairo_image, 0, 0, width, height);
             cairo_fill(m_cairo_image);
         }
@@ -117,7 +119,7 @@
             int            row;
             cairo_status_t status;
     
-            cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width_destination, height_destination);
+            cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width_destination, height_destination);
             
             // Set the height/width of the surfaces
             height_source = cairo_image_surface_get_height(m_cairo_surface);
@@ -323,7 +325,7 @@ class cairo{
     public:
         cairo(int width, int height)
         {
-            m_cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+            m_cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
             m_cairo_image = cairo_create(m_cairo_surface);
         }
         
@@ -357,7 +359,7 @@ class cairo{
             int            row;
             cairo_status_t status;
     
-            cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width_destination, height_destination);
+            cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width_destination, height_destination);
             
             // Set the height/width of the surfaces
             height_source = cairo_image_surface_get_height(m_cairo_surface);

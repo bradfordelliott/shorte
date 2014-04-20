@@ -12,7 +12,7 @@ class WidgetGotoPanel : public QWidget
     Q_OBJECT
 
 signals:
-    void signal_go_to_line(int line_number, const QString& path);
+    void signal_go_to_line(int line_number);
 
 public:
     explicit WidgetGotoPanel(QWidget *parent = 0);

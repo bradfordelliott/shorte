@@ -341,6 +341,11 @@ class shorte_parser_t(parser_t):
                 self.m_current_line += 1
 
             state = states[-1]
+                
+            if(input[i:i+4] == '<!--'):
+                states.append(STATE_MCOMMENT)
+                i += 4
+                continue
 
             if(state == STATE_NORMAL):
 
@@ -351,12 +356,6 @@ class shorte_parser_t(parser_t):
                         states.append(STATE_COMMENT)
                         i = i + 1
                         continue
-                    
-                    elif(input[i:i+4] == '<!--'):
-                        states.append(STATE_MCOMMENT)
-                        i += 3
-                        continue
-                
                     
                 # DEBUG BRAD: This is an attempt to skip
                 #             inline @ so they don't need to
@@ -695,7 +694,6 @@ class shorte_parser_t(parser_t):
         
         if(sys.platform == "cygwin" or sys.platform == "win32"):
             basename = basename.replace("/cygdrive/c/", "C:/")
-        
         
         (sequence_img, image_map, event_html) = sequence_diagram.generate_diagram(
             events=events,
@@ -2337,6 +2335,11 @@ else:
                
                 state = states[-1]
 
+                if(input[i:i+4] == '<!--'):
+                    states.append(STATE_MCOMMENT)
+                    i += 4
+                    continue
+
                 if(state == STATE_INTAG):
 
                     if(input[i] == ' ' or input[i] == ':' or input[i] == '\t' or input[i] == '\n'):
@@ -2363,10 +2366,6 @@ else:
                     if(input[i] == '#'):
                         states.append(STATE_COMMENT)
 
-                    elif(input[i:i+4] == '<!--'):
-                        states.append(STATE_MCOMMENT)
-                        i += 3
-                       
                     # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line and isn't
                     #             followed by an {
                     #elif(input[i] == '@'):
@@ -2491,6 +2490,11 @@ else:
                 self.m_current_line += 1
            
             state = states[-1]
+                
+            if(input[i:i+4] == '<!--'):
+                states.append(STATE_MCOMMENT)
+                i += 4
+                continue
 
             if(state == STATE_INTAG):
 
@@ -2512,9 +2516,6 @@ else:
 
                 if(input[i] == '#'):
                     states.append(STATE_COMMENT)
-                elif(input[i:i+4] == '<!--'):
-                    states.append(STATE_MCOMMENT)
-                    i += 3
                     
                 # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line
                 #elif(input[i] == '@'):
@@ -2736,6 +2737,11 @@ def exists(s):
                 #    self.m_current_line += 1
                
                 state = states[-1]
+                
+                if(input[i:i+4] == '<!--'):
+                    states.append(STATE_MCOMMENT)
+                    i += 4
+                    continue
 
                 if(state == STATE_INTAG):
 
@@ -2764,10 +2770,6 @@ def exists(s):
                     if(input[i] == '#'):
                         states.append(STATE_COMMENT)
 
-                    elif(input[i:i+4] == '<!--'):
-                        states.append(STATE_MCOMMENT)
-                        i += 3
-                        
                     # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line
                     #elif(input[i] == '@'):
                     elif((i == 0 and input[i] == '@') or (input[i] == '@' and input[i-1] == '\n')):
