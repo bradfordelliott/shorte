@@ -11,5 +11,5 @@ help:
 # Build shorte and the cairo plugin used for generating
 # images
 shorte:
-	cd libs/unix && make
+	cd ${cairo_path} && make
 

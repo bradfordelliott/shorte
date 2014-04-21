@@ -807,11 +807,11 @@ class template_word_t(template_t):
     <w:pStyle w:val="Code"/>
 </w:pPr>'''
 
-        prototype = tag["contents"]
+        prototype = tag.contents
         
         file = "blah"
         function = {}
-        function["function_name"] = self.format_text(prototype["function_name"])
+        function["function_name"] = self.format_text(prototype["name"])
         function["function_example"] = ''
         function["function_pseudocode"] = ''
         function["function_prototype"] = ''
@@ -820,14 +820,14 @@ class template_word_t(template_t):
         function["function_returns"] = ''
         function["function_see_also"] = ''
 
-        if(prototype.has_key("function_desc")):
-            function["function_desc"] = self.format_text(prototype["function_desc"])
+        if(prototype.has_key("desc")):
+            function["function_desc"] = self.format_text(prototype["desc"])
 
-        if(prototype.has_key("function_prototype")):
-            function["function_prototype"] = prototype["function_prototype"]
+        if(prototype.has_key("prototype")):
+            function["function_prototype"] = prototype["prototype"]
 
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
+        if(prototype.has_key("params")):
+            params = prototype["params"]
 
             table = {}
             table["max_cols"] = 4 
@@ -836,10 +836,10 @@ class template_word_t(template_t):
 
             param_template = string.Template("""
                         <text:p text:style-name="prototype_indent">
-                            <text:span text:style-name="prototype_param_name">${param_name}</text:span>
-                            <text:span>${param_io}</text:span>
+                            <text:span text:style-name="prototype_param_name">${name}</text:span>
+                            <text:span>${io}</text:span>
                             <text:span>-</text:span>
-                            <text:span>${param_desc}</text:span>
+                            <text:span>${desc}</text:span>
                         </text:p>
                         """)
 
@@ -849,23 +849,23 @@ class template_word_t(template_t):
                 row = {}
                 row["is_header"] = False
                 row["cols"] = []
-                row["cols"].append(param["param_name"])
-                row["cols"].append(param["param_io"])
+                row["cols"].append(param["name"])
+                row["cols"].append(param["io"])
                 row["cols"].append("-")
-                row["cols"].append(param["param_desc"])
+                row["cols"].append(param["desc"])
 
                 table["rows"].append(row)
                 
                 tmp = ''
-                for val in param["param_desc"]:
+                for val in param["desc"]:
                     if(len(val) == 2):
                         tmp += '''%s = %s\n''' % (val[0], self.format_text(val[1]))
                     else:
                         tmp += self.format_text(val)
 
-                param["param_desc"] = tmp
+                param["desc"] = tmp
 
-                param["param_desc"] = self.format_text(param["param_desc"])
+                param["desc"] = self.format_text(param["desc"])
 
                 output += param_template.substitute(param)
 
@@ -874,7 +874,7 @@ class template_word_t(template_t):
             
             #print "output = %s" % output
 
-        if(prototype.has_key("function_returns")):
+        if(prototype.has_key("returns")):
         
             xml = '''
 <text:p text:style-name="prototype">
@@ -883,11 +883,11 @@ class template_word_t(template_t):
 <text:p text:style-name="prototype_indent">
     %s
 </text:p>
-''' % prototype["function_returns"]
+''' % prototype["returns"]
 
             function["function_returns"] = xml
 
-        if(prototype.has_key("function_see_also")):
+        if(prototype.has_key("see_also")):
             xml = '''
 <text:p text:style-name="prototype">
     <text:span text:style-name="prototype_bold">See Also:</text:span>
@@ -895,14 +895,14 @@ class template_word_t(template_t):
 <text:p text:style-name="prototype_indent">
     %s
 </text:p>
-''' % self.format_text(prototype["function_see_also"])
+''' % self.format_text(prototype["see_also"])
 
             function["function_see_also"] = xml
 
-        if(prototype.has_key("function_example")):
+        if(prototype.has_key("example")):
 
-            language = prototype["function_example"]["language"]
-            example = prototype["function_example"]["parsed"]
+            language = prototype["example"]["language"]
+            example = prototype["example"]["parsed"]
 
             example = self.format_source_code(language, example)
         
@@ -919,10 +919,10 @@ class template_word_t(template_t):
             function["function_example"] = xml
         
         
-        if(prototype.has_key("function_pseudocode")):
+        if(prototype.has_key("pseudocode")):
 
-            language = prototype["function_pseudocode"]["language"]
-            example = prototype["function_pseudocode"]["parsed"]
+            language = prototype["pseudocode"]["language"]
+            example = prototype["pseudocode"]["parsed"]
             example = self.format_source_code(language, example)
         
             xml = '''
@@ -938,7 +938,7 @@ class template_word_t(template_t):
             function["function_pseudocode"] = xml
 
 
-        topic = topic_t({"name"   : prototype["function_name"],
+        topic = topic_t({"name"   : prototype["name"],
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)

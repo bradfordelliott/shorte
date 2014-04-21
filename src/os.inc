@@ -6,6 +6,7 @@ cairo_path := libs/unix
 echo       := echo
 mkdir      := mkdir
 archive    := tar -czf shorte.linux64.${version}.tar.gz *
+libdir     := libs/unix
 
 ifeq ("$(uname)", "Darwin")
     SHELL      := /bin/bash
@@ -13,6 +14,7 @@ ifeq ("$(uname)", "Darwin")
     echo       := echo
 	mkdir      := mkdir
 	archive    := tar -czf shorte.osx.${version}.tar.gz *
+    libdir     := libs/osx
 endif
 
 ifeq ("$(uname)", "CYGWIN_NT-6.1")
@@ -20,6 +22,7 @@ ifeq ("$(uname)", "CYGWIN_NT-6.1")
     echo       := echo
 	mkdir      := mkdir
 	archive    := tar -czf shorte.${version}.tar.gz *
+    libdir     := libs/cygwin
 endif
 
 ifeq ("$(uname)", "windows32")
@@ -27,4 +30,5 @@ ifeq ("$(uname)", "windows32")
     echo       := gecho
 	mkdir      := gmkdir
 	archive    := zip -R shorte.win32.${version}.zip *
+    libdir     := libs/win32
 endif

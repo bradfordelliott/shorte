@@ -32,6 +32,8 @@ help:
 	@${echo} "   test_extract_private = test for extracting private methods"
 	@${echo} "   test_revealjs        = test for reveal.js presentations"
 	@${echo} "   test_comments        = test for single and multi-line comment handling"
+	@${echo} "   test_sequences       = test for sequence diagrams"
+	@${echo} "   test_templates       = test all the templates"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -128,11 +130,18 @@ tests:
 	make test_server
 	make test_extract_private
 	make test_revealjs
+	make test_mx
+	make test_templates
 
 THEME:=shorte
 
+test_mx:
+	python shorte.py -f SRSA.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -w "examples/mx" -o build-output/mx
+
 test_hello:
-	python shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
+#	python shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
+#	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
+	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
@@ -145,11 +154,11 @@ test_tables:
 	python shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
 
 test_api_reference:
-	python shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html" -s "shorte.auto_summarize=0"
+	python shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html+pdf" -s "shorte.auto_summarize=0"
 	python shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "shorte"
 
 test_code:
-	python shorte.py -f examples/code.tpl -t "${THEME}" -x cpp -o build-output/code.tpl -p "html+pdf"
+	python shorte.py -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html+pdf"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p shorte
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html+pdf"
@@ -165,6 +174,7 @@ test_code_quick:
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
+	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "txt"
 
 test_functions:
 	python shorte.py -f examples/functions.tpl -t "${THEME}" -o build-output/functions -p "html+pdf"
@@ -174,7 +184,8 @@ test_enums:
 
 test_bullets:
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
-	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
+#	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
 	python -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "cortina_web" -x cpp -p "html_inline" -o build-output/t100
@@ -209,13 +220,30 @@ test_server:
 	python server_test.py --shutdown --ip=127.0.0.1 --port=8400
 
 test_extract_private:
-	python shorte.py -s "cpp_parser.extract_private=1" -f examples/test.h -x cpp -o build-output/private_methods
+	python shorte.py -s "cpp_parser.extract_private=1" -f examples/test.h -x cpp -p "html+pdf" -o build-output/private_methods
 	python shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
 
 test_revealjs:
 	python shorte.py -f examples/presentation.tpl -p "reveal.js" --theme=shorte -o build-output/presentation
 	python shorte.py -f examples/headings.tpl -p "reveal.js" --theme=shorte -o build-output/presentation2
 	python shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation3
+
+test_sequences:
+	python shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
+	python shorte.py -f examples/sequences.tpl -p "html+pdf" --theme=cortina -o build-output/sequences_pdf
+
+test_templates:
+#	python shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
+#	python shorte.py -f examples/template_test.tpl -p "word" -o build-output/template_tests/word
+#	python shorte.py -f examples/template_test.tpl -p "odt" -o build-output/template_tests/odt
+#	python shorte.py -f examples/template_test.tpl -p "mergefile" -o build-output/template_tests/mergefile
+#	python shorte.py -f examples/template_test.tpl -p "html" -o build-output/template_tests/html
+#	python shorte.py -f examples/template_test.tpl -p "reveal.js" -o build-output/template_tests/revealjs
+#	python shorte.py -f examples/template_test.tpl -p "twiki" -o build-output/template_tests/twiki
+#	python shorte.py -f examples/template_test.tpl -p "mediawiki" -o build-output/template_tests/mediawiki
+	python shorte.py -f examples/template_test.tpl -p "c" -o build-output/template_tests/c
+	python shorte.py -f examples/template_test.tpl -p "shorte" -o build-output/template_tests/shorte
+	python shorte.py -f examples/template_test.tpl -p "sql" -o build-output/template_tests/sql
 
 
 test_junk:
@@ -247,7 +275,7 @@ docs:
 
 # This target is used to package up shorte into a tarball
 # for distribution
-release:
+release: release_notes
 	rm -rf ../build-output
 	${mkdir} -p ../build-output
 	cp -r *.py ../build-output
@@ -260,14 +288,16 @@ release:
 	cp -r syntax ../build-output
 	cp -r src ../build-output/.
 	cp build-output/release_notes/index.html ../build-output/release_notes.html
-	-rm -rf ../build-output/src/templates/*.pyc
-	-rm -rf ../build-output/src/graphing/*.pyc
-	-rm -rf ../build-output/src/parsers/*.pyc
+	find ../build-output -name "*.pyc" -delete
+	find ../build-output -name "*.swp" -delete
+	find ../build-output -name "bar.png" -delete
+	find ../build-output -name "line.png" -delete
 	cp -r libs ../build-output/.
-	-rm -rf ../build-output/libs/cygwin
-	-rm -rf ../build-output/libs/osx
-	-rm -rf ../build-output/libs/*.pyc
-	-rm -rf ../build-output/libs/win32
+#	-rm -rf ../build-output/libs/cygwin
+#	-rm -rf ../build-output/libs/osx
+#	-rm -rf ../build-output/libs/win32
+	-rm -rf ../build-output/libs/win32/Release
+	-rm -rf ../build-output/libs/win32/_cairo_access*
 	-rm -rf ../build-output/libs/*.dll
 	-rm -rf ../build-output/libs/*.pdb
 	-rm -rf ../build-output/libs/*.lib
@@ -295,13 +325,13 @@ release:
 	-rm -rf ../build-output/templates/odt/cortina_public.backup.odt
 	-rm -rf ../build-output/templates/odt/page_header_logo.png
 	cp -r examples ../build-output/.
-	-rm ../build-output/examples/.*.swp
 	-rm ../build-output/examples/*.swf
 	-rm -rf ../build-output/examples/blah.tpl
 	-rm -rf ../build-output/examples/code.tpl
 	-rm -rf ../build-output/examples/simple.tpl
 	-rm -rf ../build-output/examples/hello.tpl
 	-rm -rf ../build-output/examples/cs_t100*
+	-rm -rf ../build-output/examples/mx
 	-rm -rf ../build-output/examples/ideas.tpl
 	-rm -rf ../build-output/examples/imagemap.tpl
 	-rm -rf ../build-output/examples/mdio.tpl

@@ -360,8 +360,8 @@ $heading
 
 
         if(prototype.has_key("example")):
-            from src.shorte_source_code import *
-            func = prototype_t()
+            import src.shorte_source_code
+            func = src.shorte_source_code.prototype_t()
             func.example = prototype["example"]
             function["example"] = self.format_object_example(func)
         

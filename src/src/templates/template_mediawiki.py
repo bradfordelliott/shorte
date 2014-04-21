@@ -376,8 +376,9 @@ class template_mediawiki_t(template_html.template_html_t):
             self.m_contents += "<sticky>" + self.format_list(tag.contents, False) + "</sticky>"
         elif(name == "ol"):
             self.m_contents += "<sticky>" + self.format_list(tag.contents, True) + "</sticky>"
-        elif(name == "prototype"):
-            self.m_contents += "<sticky>" + self.format_prototype(tag) + "</sticky>"
+        else:
+            WARNING("Tag %s not supported in template_mediawiki" % name)
+
         #else:
         #    print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
         

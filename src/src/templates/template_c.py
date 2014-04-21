@@ -153,8 +153,8 @@ class template_c_t(template_t):
     
     def format_prototype(self, tag):
 
-        modifiers = tag["modifiers"]
-        prototype = tag["contents"]
+        modifiers = tag.modifiers
+        prototype = tag.contents
 
         comment_pseudocode = True
 
@@ -236,13 +236,13 @@ ${prototype}
 """)
 
         templates["param"][HEADER_STYLE_KERNEL] = string.Template("""
- *  @${param_name} [${param_io}] - ${param_desc}""")
+ *  @${name} [${io}] - ${desc}""")
 
         templates["param"][HEADER_STYLE_SHORTE] = string.Template("""
-//|     ${param_name} [${param_io}] - ${param_desc}""")
+//|     ${name} [${io}] - ${desc}""")
         
         templates["param"][HEADER_STYLE_DOXYGEN] = string.Template("""
- *  @param ${param_name} [${param_io}] - ${param_desc}""")
+ *  @param ${name} [${io}] - ${desc}""")
 
     
         template_prototype = string.Template("""${function_prototype}
@@ -251,7 +251,7 @@ ${prototype}
         
         file = "blah"
         function = {}
-        function["function_name"] = prototype["function_name"]
+        function["function_name"] = prototype["name"]
         function["function_example"] = ''
         function["prototype"] = ''
         function["function_desc"] = ''
@@ -260,20 +260,20 @@ ${prototype}
         function["function_returns"] = ''
         function["pseudocode"] = ''
 
-        if(prototype.has_key("function_desc")):
-            function["function_desc"] = self._format_desc(prototype["function_desc"])
-            function["function_desc_header"] = self._format_desc_header(prototype["function_desc"])
+        if(prototype.has_key("desc")):
+            function["function_desc"] = self._format_desc(prototype["desc"])
+            function["function_desc_header"] = self._format_desc_header(prototype["desc"])
 
-        if(prototype.has_key("function_prototype")):
+        if(prototype.has_key("prototype")):
 
             # Replace any semicolons
-            code = prototype["function_prototype"]["unparsed"]
+            code = prototype["prototype"]["unparsed"]
             code = re.sub(";", "", code)
 
             function["prototype"] = code
 
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
+        if(prototype.has_key("params")):
+            params = prototype["params"]
 
             output = ''
             for param in params:
@@ -284,25 +284,25 @@ ${prototype}
                     prefix = " *      "
 
                 tmp = ''
-                for val in param["param_desc"]:
+                for val in param["desc"]:
                     if(len(val) == 2):
                         tmp += self.format_comment("%s = %s" % (val[0], val[1]), prefix)
                     else:
                         tmp += self.format_comment("%s" % (val), prefix)
 
 
-                param["param_desc"] = tmp
+                param["desc"] = tmp
 
                 output += templates["param"][self.m_header_style].substitute(param)
 
             function["function_params"] = output
 
-        if(prototype.has_key("function_returns")):
-            function["function_returns"] = prototype["function_returns"]
+        if(prototype.has_key("returns")):
+            function["function_returns"] = prototype["returns"]
 
         function["pseudocode"] = self._format_pseudocode(prototype, comment_pseudocode)
                 
-        topic = topic_t({"name"   : prototype["function_name"],
+        topic = topic_t({"name"   : prototype["name"],
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
