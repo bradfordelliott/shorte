@@ -6,6 +6,33 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.63 (Apr xx, 2014)
+- Templates
+    - Cleaned up some of the images and added icons for text doc links
+    - ODT/PDF
+        - Re-worked the ODT template to move some of the styles out into
+          python modules to accomodate the changes for alternate templates
+        - Added the "widths" attribute to tables to allow for user control
+          of column widths.
+    - HTML
+        - Removed the jquery from the HTML templates
+        - Scaled some of the images for tags like @note to fix poor
+          scaling in IE
+    - Added support for "html+txt" template
+- Shortify
+    - Prototype editor for shorte (to work on Scintilla lexer)
+- Graphing
+    - Minor tweaks to the paths of the graphing scripts
+- Parsers
+    - Some cleanup of the parsers to make them more maintainable
+      by converting programming types to classes.
+- Syntax
+    - Updated tables to add a "widths" attribute to specify column widths
+      in the HTML/ODT/PDF templates
+    - Reworked programming types (enum, struct, define) to be more maintainable
+      and support similar attributes (still a work in progress).
+
+
 @h3 Version 1.0.62 (Mar 13, 2014)
 Minor bug fix release
 
