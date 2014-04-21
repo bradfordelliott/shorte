@@ -204,6 +204,9 @@ class template_word_t(template_t):
 
     def format_text(self, data):
 
+        if(data == None):
+            return
+
         data = self.xmlize(data)
         
         # Collapse multiple spaces
@@ -266,7 +269,57 @@ class template_word_t(template_t):
   </w:tblGrid>
 '''
 
-        for row in struct["fields"]:
+        xml += '''
+            <w:tr>
+                <w:tc>
+                  <w:tcPr>
+                    <w:tcW w:w="4778" w:type="dxa"/>
+                    <w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/>
+                  </w:tcPr>
+                  <w:p>
+                    <w:pPr>
+                      <w:rPr>
+                          <w:b/>
+                      </w:rPr>
+                      <w:ind w:left="0"/>
+                    </w:pPr>
+                    <w:r><w:t>Type</w:t></w:r>
+                  </w:p>
+                </w:tc>
+                <w:tc>
+                  <w:tcPr>
+                    <w:tcW w:w="4778" w:type="dxa"/>
+                    <w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/>
+                  </w:tcPr>
+                  <w:p>
+                    <w:pPr>
+                      <w:rPr>
+                          <w:b/>
+                      </w:rPr>
+                      <w:ind w:left="0"/>
+                    </w:pPr>
+                    <w:r><w:t>Name</w:t></w:r>
+                  </w:p>
+                </w:tc>
+                <w:tc>
+                  <w:tcPr>
+                    <w:tcW w:w="4778" w:type="dxa"/>
+                    <w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/>
+                  </w:tcPr>
+                  <w:p>
+                    <w:pPr>
+                      <w:rPr>
+                          <w:b/>
+                      </w:rPr>
+                      <w:ind w:left="0"/>
+                    </w:pPr>
+                    <w:r><w:t>Description</w:t></w:r>
+                  </w:p>
+                </w:tc>
+            </w:tr>
+'''
+
+        for field in struct.fields:
 
             xml += "    <w:tr>\n";
             
@@ -274,15 +327,23 @@ class template_word_t(template_t):
 
             is_subheader = False
             is_caption = False
-            is_reserved = row["is_reserved"]
+            is_reserved = field["is_reserved"]
 
-            if(row.has_key("is_header") and row["is_header"] == True):
+            if(field.has_key("is_header") and field["is_header"] == True):
                 is_header = True
             else:
                 is_header = False
 
-            for col in row["attrs"]:
-            
+            for attr in field["attrs"]:
+
+                if(is_dict(attr)):
+                    if(attr.has_key("textblock")):
+                        attr = self.format_textblock(attr["textblock"],False)
+                    else:
+                        attr = attr["text"]
+                else:
+                    attr = ''
+
                 if(is_header):
                     xml += '''
                 <w:tc>
@@ -300,7 +361,7 @@ class template_word_t(template_t):
                     %s
                   </w:p>
                 </w:tc>
-''' % (col_width, self.format_text(col))
+''' % (col_width, attr)
 
                 elif(is_subheader or is_reserved):
                     xml += '''
@@ -315,7 +376,7 @@ class template_word_t(template_t):
                     %s
                   </w:p>
                 </w:tc>
-''' % (col_width, self.format_text(col))
+''' % (col_width, attr)
                         
                 elif(is_caption):
                     xml += '''
@@ -330,7 +391,7 @@ class template_word_t(template_t):
                     %s
                   </w:p>
                 </w:tc>
-''' % (col_width, self.format_text(col))
+''' % (col_width, attr)
                 else:
                     xml += '''
                 <w:tc>
@@ -344,7 +405,7 @@ class template_word_t(template_t):
                     %s
                   </w:p>
                 </w:tc>
-''' % (col_width, self.format_text(col))
+''' % (col_width, attr)
 
             xml += "</w:tr>\n"
                         
@@ -522,9 +583,12 @@ class template_word_t(template_t):
 
         return xml
 
-    def format_textblock(self, tag):
+    def format_textblock(self, tag, wrap=True):
 
-        paragraphs = tag.contents
+        if(isinstance(tag, tag_t)):
+            paragraphs = tag.contents
+        else:
+            paragraphs = tag
 
         xml = ''
         
@@ -541,7 +605,11 @@ class template_word_t(template_t):
                 xml += self.format_list(p["text"], False)
                 blah = ""
             else:
-                xml += "<w:p>%s</w:p>" % self.format_text(text)
+                if(wrap):
+                    xml += "<w:p>%s</w:p>" % self.format_text(text)
+                else:
+                    xml += "%s" % self.format_text(text)
+
         
         return xml
 
@@ -590,7 +658,7 @@ class template_word_t(template_t):
     def format_list_child(self, elem, level):
 
         source = ''
-        if(elem.has_key("children")):
+        if(elem.children != None):
             source += '''
 <w:p>
    <w:pPr>
@@ -605,11 +673,11 @@ class template_word_t(template_t):
    <w:r>
     <w:t>%s</w:t>
    </w:r>
-</w:p>''' % (level, elem["text"])
+</w:p>''' % (level, elem.get_text())
             
-            num_children = len(elem["children"])
+            num_children = len(elem.children)
             for i in range(0, num_children):
-                source += self.format_list_child(elem["children"][i], level+1) 
+                source += self.format_list_child(elem.children[i], level+1) 
             
         else:
             source += '''
@@ -627,7 +695,7 @@ class template_word_t(template_t):
     <w:t>%s</w:t>
    </w:r>
 </w:p>
-'''% (level, self.format_text(elem["text"]))
+'''% (level, self.format_text(elem.get_text()))
 
         return source
 

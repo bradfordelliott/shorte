@@ -8,6 +8,7 @@ import datetime
 
 from src.shorte_defines import *
 from template import *
+import template_html
 
 
 code_template = string.Template(
@@ -41,63 +42,12 @@ note_template = string.Template(
     </div>
 """)
 
-class template_mediawiki_t(template_t):
+class template_mediawiki_t(template_html.template_html_t):
 
     def __init__(self, engine, indexer):
         
-        template_t.__init__(self, engine, indexer)
+        template_html.template_html_t.__init__(self, engine, indexer)
 
-        self.m_contents = ""
-        self.m_engine = engine
-        self.m_indexer = indexer
-        self.m_theme = ""
-        self.m_template_dir = shorte_get_startup_path() + "/templates/text/"
-        self.m_inline = False
-
-    def format_keywords(self, language, source):
-
-        keywords = self.m_engine.get_keyword_list(language)
-
-        output = ''
-        keyword = ''
-        pos_start = 0
-
-        #print "input = %s" % source
-
-        for i in range(0, len(source)):
-
-            c = source[i]
-
-            if((ord(c) >= 97 and ord(c) < 122) or (ord(c) == 95)):
-                keyword += c 
-            else:
-                if(keyword != ''):
-                    #print "  keyword1: {%s}" % keyword
-                    #print "  substr:   {%s}" % source[pos_start:i]
-                    if(keywords.has_key(keyword)):
-                        #output += source[pos_start:i]
-                        output += "<span style='color:blue;'>%s</span>" % keyword
-                    else:
-                        output += keyword
-
-                    keyword = ''
-                
-                pos_start = i+1
-                output += "%c" % c
-
-
-        if(keyword != ''):
-            #output += source[pos_start:i+1]
-            if(keywords.has_key(keyword)):
-                #output += source[pos_start:i]
-                output += "<span style='color:blue;'>%s</span>" % keyword
-            else:
-                output += keyword
-            #print "  keyword2 = %s" % keyword
-
-        #print "output = %s\n" % output
-
-        return output
     
     def format_source_code(self, language, tags, source=""):
 
@@ -141,304 +91,8 @@ class template_mediawiki_t(template_t):
                 line += 1
                 output += "<span style='color:#c0c0c0;'>%03d&nbsp;&nbsp;</span>" % (line)
 
-        #sys.exit(-1)
-
         return output
 
-
-
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    format_note()
-    #|
-    #| DESCRIPTION:
-    #|    This method is called to format a note tag
-    #|
-    #| PARAMETERS:
-    #|    content (I) - The content associated with the note tag
-    #|
-    #| RETURNS:
-    #|    The note data formatted as HTML.
-    #|
-    #+-----------------------------------------------------------------------------
-    def format_note(self, content):
-
-        handle = open(shorte_get_startup_path() + "/templates/shared/note.png", "rb")
-        img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-        img_src = re.sub("\n", "", img_src)
-
-        handle.close()
-
-        return note_template.substitute(
-            {"contents" : self.format_text(content),
-             "image"    : img_src})
-
-            
-    def format_checklist(self, tag):
-        
-        list = tag.contents
-
-        source = ''
-
-        if(tag.modifiers.has_key("title")):
-            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag.modifiers["title"] 
-
-        source += "<ul style='list-style-type:none'>"
-
-        for elem in list:
-            caption = ''
-            if(elem.has_key("caption")):
-                caption = " <span style='color:#999;font-style:italic;'>(%s)</span>" % elem["caption"]
-
-            source += "<li><input type='checkbox' name='%s' %s/>%s%s</li>" % (elem["name"], elem["checked"], elem["name"], caption)
-
-        source += "</ul>"
-
-        if(tag.modifiers.has_key("caption")):
-            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag.modifiers["title"] 
-
-        return source
-    
-    def format_list_child(self, elem, ordered, start_tag, end_tag):
-        source = ''
-                
-        if(ordered):
-            start_tag += "#"
-        else:
-            start_tag += "*"
-
-        if(elem.children != None):
-            source += start_tag
-            source += "%s" % self.format_text(elem.text)
-            num_children = len(elem.children)
-            #print "num_children = %d" % num_children
-            if(num_children != 0):
-                source += "\n"
-            for i in range(0, num_children):
-                source += self.format_list_child(elem.children[i], ordered, start_tag, end_tag)
-            source += end_tag
-        else:
-            source += start_tag + self.format_text(elem.text) + end_tag
-
-        return source
-    
-    def format_list(self, list, ordered=False, indent=0):
-
-        start_tag = ""
-        end_tag = "\n"
-
-        source = start_tag
-
-        for elem in list:
-            source += self.format_list_child(elem, ordered, start_tag, end_tag)
-
-        source += end_tag
-
-        return source
-    
-    def format_textblock(self, tag):
-
-        paragraphs = tag.contents
-        html = ''
-
-        if(is_array(paragraphs)):
-            for p in paragraphs:
-                indent  = p["indent"]
-                text    = p["text"]
-                is_code = p["code"]
-                is_list = p["list"]
-
-                #print "Indent: [%d], text: [%s]" % (indent, text)
-
-                if(is_code):
-                    style = "margin-left:%dpx;background-color:#eee;border:1px solid #ccc;" % (30 )
-                else:
-                    style = "margin-left:%dpx;" % (20 + (indent * 10))
-
-                if(is_code):
-                    #html += "<div class='code'><div class='snippet' style='white-space:pre'>" + self.format_text(text) + "</div></div>\n"
-                    html += self.format_text(text) + "\n"
-                elif(is_list):
-                    html += self.format_list(p["text"], False, indent)
-                else:
-                    #html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;%s'>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
-                    html += self.format_text(text, expand_equals_block=True) + "\n"
-        else:
-            #html += "<div style='margin-left:20px;margin-bottom:10px;font-size:1.0em;'>" + self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
-            html += self.format_text(paragraphs, expand_equals_block=True) + "</div>\n"
-
-        return html
-    
-    
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    ()
-    #|
-    #| DESCRIPTION:
-    #|    
-    #| 
-    #| PARAMETERS:
-    #|    
-    #| 
-    #| RETURNS:
-    #|    
-    #|
-    #+-----------------------------------------------------------------------------
-    def format_prototype(self, tag):
-        
-        template = string.Template("""
-<sticky>
-        <div style='margin-left:30px;border:1px solid #ccc;'>
-        <div>
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Function:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${function_name}</p>
-            </div>
-        </div>
-        <div>
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${function_desc}</p>
-            </div>
-        </div>
-        <div style="font-size: 0.9em;">
-            <div style="margin-left: 10px; margin-top: 10px;">
-                ${function_prototype}
-                
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Params:</div>
-                    <div style="margin-left: 0px;">
-                        <table style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px; border: 0px;">
-                            ${function_params}
-                        </table>
-                    </div>
-                </div>
-                
-                ${function_returns}
-                ${function_example}
-                ${function_pseudocode}
-                
-            </div>
-            
-        </div>
-        </div>
-</sticky>
-
-""")
-    
-        template_prototype = string.Template("""
-        <div>
-            <div style="color: #396592; font-weight: bold;">Prototype:</div>
-            <div style="font-family: courier;padding:10px;">
-                ${function_prototype}
-            </div>
-        </div>
-        """);
-
-        template_example = string.Template('''
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Example:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;">
-                        The following example demonstrates the use of this method:<br><br>
-                    </div>
-                    <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc;">
-                        ${function_example}
-                    </div>
-                </div>
-            
-        ''');
-        
-        template_pseudocode = string.Template('''
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Pseudocode:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;">
-                        The following pseudocode describes the implementation of this method:<br><br>
-                    </div>
-                    <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc; font-family:courier;">
-                        ${function_pseudocode}
-                    </div>
-                </div>
-            
-        ''')
-        
-        prototype = tag.contents
-        
-        file = "blah"
-        function = {}
-        function["function_name"] = prototype["function_name"]
-        function["function_example"] = ''
-        function["function_pseudocode"] = ''
-        function["function_prototype"] = ''
-        function["function_desc"] = ''
-        function["function_params"] = ''
-        function["function_returns"] = ''
-
-        if(prototype.has_key("function_desc")):
-            function["function_desc"] = prototype["function_desc"]
-
-        if(prototype.has_key("function_prototype")):
-            function["function_prototype"] = template_prototype.substitute(prototype)
-
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
-            
-            param_template = string.Template("""
-                        <tr>
-                            <td style="border: 0px;"><b>${param_name}</b></td>
-                            <td style="font-family: courier; border: 0px;">${param_io}</td>
-                            <td style="border: 0px;">-</td>
-                            <td style="border: 0px;">${param_desc}</td>
-                        </tr>""")
-
-            output = ''
-            for param in params:
-
-                output += param_template.substitute(param)
-
-            function["function_params"] = output
-
-        if(prototype.has_key("function_returns")):
-
-            src = '''
-<div>
-    <div style="color: #396592; font-weight: bold;">Returns:</div>
-    <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${function_returns}</p>
-</div>
-''' % prototype["function_returns"]
-
-            function["function_returns"] = src
-
-        if(prototype.has_key("function_example")):
-
-            example = prototype["function_example"]["parsed"]
-            language = prototype["function_example"]["language"]
-
-            example = self.format_source_code(language, example)
-            function["function_example"] = example
-            function["function_example"] = template_example.substitute(function)
-        
-        if(prototype.has_key("function_pseudocode")):
-
-            example = prototype["function_pseudocode"]["parsed"]
-            language = prototype["function_pseudocode"]["language"]
-
-            example = self.format_source_code(language, example)
-            function["function_pseudocode"] = example
-            function["function_pseudocode"] = template_pseudocode.substitute(function)
-
-
-        topic = topic_t({"name"   : prototype["function_name"],
-                         "file"   : file,
-                         "indent" : 3});
-        index.append(topic)
-        
-        return template.substitute(function)
-    
-    
-
-    
     def format_table(self, source, table):
 
         html = '\n'
@@ -500,80 +154,6 @@ class template_mediawiki_t(template_t):
         return html
 
     
-    def format_struct(self, source, struct):
-        
-        html = '''
-
-<sticky>
-<table class='tb'>
-
-'''
-        
-        if("title" in struct):
-            html += "<tr><th colspan='%d' style='background-color:#444;font-weight:bold;color:white;border:1px solid black;'>%s</th></tr>\n" % (struct["max_cols"], struct["title"])
-       
-        ## If the structure has an image associated with it then
-        ## display it as part of the HTML describing the structure.
-        #if(struct.has_key("image")):
-
-        #    name = struct["image"]["path"]
-        #    
-        #    # If inlining is turned on then we need to embed the image
-        #    # into the generated output HTML file.
-        #    if(self.m_inline == True):
-        #        handle = open(name, "rb")
-        #        name = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-        #        handle.close()
-
-        #    
-        #    html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct["max_cols"], "Diagram")
-        #    html += struct["image"]["map"]
-        #    html += "<tr><th colspan='%d' style='border: 1px solid black;padding:10px;'><img src='%s' usemap='#diagram_%s'></img></th></tr>" % (struct["max_cols"], name, struct["image"]["path"])
-
-        i = 0
-
-        for field in struct["fields"]:
-            
-            if(i == 0):
-                is_header = True
-            else:
-                is_header = False
-
-            is_reserved = field["is_reserved"]
-
-            if(is_header):
-                html += "    <tr class='header'>\n";
-            else:
-                html += "<tr>\n"
-            
-            for attr in field["attrs"]:
-
-                attr = self.format_text(attr)
-
-                if(is_header):
-                    html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
-                elif(is_reserved):
-                    html += "      <td colspan='%d' style='background-color:#eee; color:#999;'>%s</td>\n" % (1, attr)
-                else:
-                    html += "      <td colspan='%d'>%s</td>\n" % (1, attr)
-            
-            html += "</tr>\n"
-
-            i+=1
-        
-        if("caption" in struct):
-            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
-
-        html += '''
-</table>
-<br/>
-</sticky>
-
-'''
-
-        return html
-
-
     def _expand_links(self, matches):
 
         data = matches.groups()[0]
@@ -712,22 +292,7 @@ class template_mediawiki_t(template_t):
 
         return self.format_image(image)
 
-    def format_text(self, data, expand_equals_block=False):
-
-        # Collapse multiple spaces
-        data = re.sub('\n', " ", data)
-        data = re.sub('\r', " ", data)
-        data = re.sub(" +", " ", data)
-
-        # Replace any links
-        data = re.sub(r'\[\[(->)?(.*?)\]\]', r'\2', data)
-        
-        if(expand_equals_block):
-            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
-       
-        return data
-
-
+    
     def append_header(self, tag, data, file):
 
         data = self.format_text(data)
@@ -802,21 +367,17 @@ class template_mediawiki_t(template_t):
         elif(name == "pre"):
             self.m_contents += "<pre style='margin-left:30px;'>" + self.format_text(tag.contents) + "</pre>\n"
         elif(name == "note"):
-            self.m_contents += self.format_note(self.format_text(tag.contents))
+            self.m_contents += "<sticky>" + self.format_note(self.format_text(tag.contents)) + "</sticky>"
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag.source, tag.contents)
+            self.m_contents += "<sticky>" + self.format_struct(tag.source, tag.contents) + "</sticky>"
         elif(name == "ul"):
-            self.m_contents += self.format_list(tag.contents, False)
+            self.m_contents += "<sticky>" + self.format_list(tag.contents, False) + "</sticky>"
         elif(name == "ol"):
-            self.m_contents += self.format_list(tag.contents, True)
-        #elif(name == "checklist"):
-        #    self.m_contents += self.format_checklist(tag)
-        #elif(name == "image"):
-        #    self.m_contents += self.format_image(tag["contents"])
+            self.m_contents += "<sticky>" + self.format_list(tag.contents, True) + "</sticky>"
         elif(name == "prototype"):
-            self.m_contents += self.format_prototype(tag)
+            self.m_contents += "<sticky>" + self.format_prototype(tag) + "</sticky>"
         #else:
         #    print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
         

@@ -8,6 +8,7 @@ import datetime
 
 from src.shorte_defines import *
 from template import *
+import template_html
 
 
 code_template = string.Template(
@@ -61,11 +62,11 @@ note_template = string.Template(
     </sticky>
 """)
 
-class template_twiki_t(template_t):
+class template_twiki_t(template_html.template_html_t):
 
     def __init__(self, engine, indexer):
         
-        template_t.__init__(self, engine, indexer)
+        template_html.template_html_t.__init__(self, engine, indexer)
 
         self.m_contents = ""
         self.m_engine = engine
@@ -473,8 +474,8 @@ class template_twiki_t(template_t):
 
 '''
         
-        if("title" in struct):
-            html += "<tr><th colspan='%d' style='background-color:#444;font-weight:bold;color:white;border:1px solid black;'>%s</th></tr>\n" % (struct["max_cols"], struct["title"])
+        html += "<tr><th colspan='%d' style='background-color:#444;font-weight:bold;color:white;border:1px solid black;'>%s</th></tr>\n" % (struct.max_cols, struct.name)
+        html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct.max_cols, struct.description)
        
         ## If the structure has an image associated with it then
         ## display it as part of the HTML describing the structure.
@@ -496,7 +497,7 @@ class template_twiki_t(template_t):
 
         i = 0
 
-        for field in struct["fields"]:
+        for field in struct.fields:
             
             if(i == 0):
                 is_header = True
@@ -512,7 +513,14 @@ class template_twiki_t(template_t):
             
             for attr in field["attrs"]:
 
-                attr = self.format_text(attr)
+                if(is_dict(attr)):
+                    #print "IS DICT"
+                    if(attr.has_key("textblock")):
+                        attr = self.format_textblock(attr["textblock"])
+                    else:
+                        attr = attr["text"]
+                else:
+                    attr = ''
 
                 if(is_header):
                     html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
@@ -525,8 +533,6 @@ class template_twiki_t(template_t):
 
             i+=1
         
-        if("caption" in struct):
-            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
 
         html += '''
 </table>
@@ -675,18 +681,6 @@ class template_twiki_t(template_t):
         image = self.m_engine.m_parser.parse_inline_image(matches)
 
         return self.format_image(image)
-
-    def format_text(self, data):
-
-        # Collapse multiple spaces
-        data = re.sub('\n', " ", data)
-        data = re.sub('\r', " ", data)
-        data = re.sub(" +", " ", data)
-
-        # Replace any links
-        data = re.sub(r'\[\[(->)?(.*?)\]\]', r'\2', data)
-       
-        return data
 
 
     def append_header(self, tag, data, file):

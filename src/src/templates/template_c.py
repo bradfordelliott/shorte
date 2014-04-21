@@ -387,20 +387,20 @@ $fields
     
     def format_struct(self, tag):
         
-        struct = tag["contents"]
+        struct = tag.contents
 
         define_prefix = ''
-        if(tag["modifiers"].has_key('define_prefix')):
-            define_prefix = tag["modifiers"]["define_prefix"]
+        if(tag.modifiers.has_key('define_prefix')):
+            define_prefix = tag.modifiers["define_prefix"]
 
         header = ''
         module = ''
 
-        header = struct["record"].to_c(self.m_format, define_prefix, self.m_comment_style, self.m_header_style)
+        header = struct.record.to_c(self.m_format, define_prefix, self.m_comment_style, self.m_header_style)
         #header = struct["record"].to_c("native", define_prefix, self.m_comment_style, self.m_header_style)
 
         if(self.m_allow_diagnostic_code):
-            module = struct["record"].to_c_support_routines()
+            module = struct.record.to_c_support_routines()
 
         struct = {}
         struct["header"] = header
