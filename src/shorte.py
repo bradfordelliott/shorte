@@ -113,7 +113,9 @@ parser.add_option("--port", "--port",
 parser.add_option("--zip", "--zip",
                   action="store", dest="zip",default=None,
                   help="Create an archive of the output")
-
+parser.add_option("--resize", "--resize_image",
+                  action="store", dest="resize", default=None,
+                  help="Resize an input image")
 
 #parser.add_option("-I", "--include",
 #                  action="store",type="string",dest="include",
@@ -135,6 +137,10 @@ if(output_dir == None):
 if(options.about):
     version_string = "<<VERSION>>"
     print "Shorte Version %s" % version_string
+    sys.exit(0)
+
+if(options.resize):
+    shorte_image_resize(options.resize, "%s/%s" % (output_dir, os.path.basename(options.resize)), 50, 50)
     sys.exit(0)
 
 if(not os.path.isabs(output_dir)):

@@ -105,12 +105,12 @@ class template_text_t(template_t):
             
     def format_checklist(self, tag):
         
-        list = tag["contents"]
+        list = tag.contents
 
         source = ''
 
-        if(tag["modifiers"].has_key("title")):
-            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag["modifiers"]["title"] 
+        if(tag.modifiers.has_key("title")):
+            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag.modifiers["title"] 
 
         source += "<ul style='list-style-type:none'>"
 
@@ -123,23 +123,36 @@ class template_text_t(template_t):
 
         source += "</ul>"
 
-        if(tag["modifiers"].has_key("caption")):
-            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag["modifiers"]["title"] 
+        if(tag.modifiers.has_key("caption")):
+            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag.modifiers["title"] 
 
         return source
-    
+
+    def parse_inline_styling(self, matches):
+
+
+        data = matches.groups()[0].strip()
+        parts = data.split(",")
+        if(len(parts) == 1):
+            tag = parts[0]
+            replace = tag
+        elif(len(parts) > 1):
+            tag = parts[0]
+            replace = ''.join(parts[1:])
+        
+        return replace
     
     def format_list_child(self, elem, indent, ordered=False, start=0):
         source = ''
 
         if(ordered):
-            if(elem.has_key("children")):
+            if(elem.children != None):
                 if(indent > 0):
-                    source += "%*s%s. %s\n" % (indent, " ", start, elem["text"])
+                    source += "%*s%s. %s\n" % (indent, " ", start, self.format_text(elem.text))
                 else:
-                    source += "%s. %s\n" % (start, elem["text"])
+                    source += "%s. %s\n" % (start, self.format_text(elem.text))
 
-                num_children = len(elem["children"])
+                num_children = len(elem.children)
                 
                 is_num = False
                 is_char = False
@@ -153,30 +166,30 @@ class template_text_t(template_t):
 
                 for i in range(0, num_children):
                     if(is_num):
-                        source += self.format_list_child(elem["children"][i], indent+4, ordered, start)
+                        source += self.format_list_child(elem.children[i], indent+4, ordered, start)
                     else:
-                        source += self.format_list_child(elem["children"][i], indent+4, ordered, chr(start))
+                        source += self.format_list_child(elem.children[i], indent+4, ordered, chr(start))
                     start += 1
             else:
                 if(indent > 0):
-                    source += "%*s%s. %s\n" % (indent, " ", start, elem["text"])
+                    source += "%*s%s. %s\n" % (indent, " ", start, self.format_text(elem.text))
                 else:
-                    source += "%s. %s\n" % (start, elem["text"])
+                    source += "%s. %s\n" % (start, self.format_text(elem.text))
         else:
-            if(elem.has_key("children")):
+            if(elem.children):
                 if(indent > 0):
-                    source += "%*s- %s\n" % (indent, " ", elem["text"])
+                    source += "%*s- %s\n" % (indent, " ", self.format_text(elem.text))
                 else:
-                    source += "- %s\n" % (elem["text"])
+                    source += "- %s\n" % (self.format_text(elem.text))
 
-                num_children = len(elem["children"])
+                num_children = len(elem.children)
                 for i in range(0, num_children):
-                    source += self.format_list_child(elem["children"][i], indent+4)
+                    source += self.format_list_child(elem.children[i], indent+4)
             else:
                 if(indent > 0):
-                    source += "%*s- %s\n" % (indent, " ", elem["text"])
+                    source += "%*s- %s\n" % (indent, " ", self.format_text(elem.text))
                 else:
-                    source += "- %s\n" % (elem["text"])
+                    source += "- %s\n" % (self.format_text(elem.text))
 
         return source
     
@@ -194,7 +207,7 @@ class template_text_t(template_t):
     
     def format_textblock(self, tag):
 
-        paragraphs = tag["contents"]
+        paragraphs = tag.contents
         output = ''
 
         for p in paragraphs:
@@ -209,13 +222,13 @@ class template_text_t(template_t):
             elif(is_list):
                 output += self.format_list(text)
             else:
-                output += text + "\n"
+                output += self.format_text(text) + "\n"
 
         return output
 
     def format_questions(self, tag):
 
-        questions = tag["contents"]
+        questions = tag.contents
 
         output = "\n"
         for question in questions:
@@ -411,6 +424,7 @@ class template_text_t(template_t):
                 for col in row["cols"]:
 
                     txt = self.format_text(col["text"])
+                    txt = txt.replace("\n", " ")
                     
                     if(is_subheader):
                         html += ("%-" + "%d" % (col_widths[col_num] + 3) + "s | ") % (txt)
@@ -424,7 +438,7 @@ class template_text_t(template_t):
                     html += "\n"
                     for col in row["cols"]:
 
-                        html += "-"
+                        html += "+"
 
                         for k in range(0, col_widths[col_num] + 3):
                             html += "-"
@@ -433,6 +447,8 @@ class template_text_t(template_t):
                             html += "-"
 
                         col_num += 1
+
+                    html += "+"
 
 
             html += "\n"
@@ -652,6 +668,14 @@ class template_text_t(template_t):
 
         if(data == None):
             return
+        
+        # Now convert any *phrase* to bold
+        bold = re.compile("\*(.*?)\*", re.DOTALL)
+        data = bold.sub("\\1", data)
+
+        # Convert any inline styling blocks
+        expr = re.compile("@\{(.*?)\}", re.DOTALL)
+        data = expr.sub(self.parse_inline_styling, data)
 
         # Collapse multiple spaces
         data = re.sub('\n', " ", data)
@@ -659,20 +683,22 @@ class template_text_t(template_t):
 
         # Replace any links
         data = re.sub(r'\[\[(->)?(.*?)\]\]', r'\2', data)
+
+        output = data
        
-        words = re.split(r' ', data)
+        #words = re.split(r' ', data)
 
-        line_length = 0
-        output = ''
+        #line_length = 0
+        #output = ''
 
-        for word in words:
+        #for word in words:
 
-            output += word + ' '
-            line_length += (len(word) + 1)
-            
-            if(line_length > 80):
-                line_length = 0
-                output += '\n'
+        #    output += word + ' '
+        #    line_length += (len(word) + 1)
+        #    
+        #    if(line_length > 80):
+        #        line_length = 0
+        #        output += '\n'
 
         return output
 
@@ -693,20 +719,18 @@ class template_text_t(template_t):
 
         elif(tag == "h3"):
             tmp = '''\n%s %s\n''' % (self.m_indexer.level3(tag, data.strip(), file) + ". " , data.strip())
-            header_char = ''
+            header_char = '-'
         
         elif(tag == "h4"):
             tmp = '''\n%s %s\n''' % (self.m_indexer.level4(tag, data.strip(), file) + ". " , data.strip())
-            header_char = ''
-
-        print "HEADER: %s" % tmp
+            header_char = '-'
 
         length = len(tmp)
         header = ''
 
         for i in range(0, length - 1):
             header += header_char
-        header += "\n"
+        header += "\n\n"
 
         self.m_contents += tmp + header
     
@@ -714,8 +738,8 @@ class template_text_t(template_t):
     def append_source_code(self, tag):
 
         rc = ''
-        rc += self.format_source_code(tag["name"], tag["contents"])
-        result = tag["result"]
+        rc += self.format_source_code(tag.name, tag.contents)
+        result = tag.result
 
         if(result != None):
             self.m_contents += code_template.substitute(
@@ -728,30 +752,30 @@ class template_text_t(template_t):
     
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_contents += self.format_text(tag["contents"]) + "\n"
+            self.m_contents += self.format_text(tag.contents) + "\n"
         elif(name == "pre"):
-            self.m_contents += self.format_text(tag["contents"]) + "\n"
+            self.m_contents += self.format_text(tag.contents) + "\n"
         elif(name == "note"):
             self.m_contents += self.format_note(tag, "NOTE:")
         elif(name == "tbd"):
             self.m_contents += self.format_note(tag, "TBD:")
         elif(name == "table"):
-            self.m_contents += self.format_table(tag["source"], tag["contents"])
+            self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
         #elif(name == "struct"):
-        #    self.m_contents += self.format_struct(tag["source"], tag["contents"])
+        #    self.m_contents += self.format_struct(tag.source, tag.contents)
         elif(name == "ul"):
-            self.m_contents += self.format_list(tag["contents"], False)
+            self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_contents += self.format_list(tag["contents"], True)
+            self.m_contents += self.format_list(tag.contents, True)
         elif(name == "questions"):
             self.m_contents += self.format_questions(tag)
 
@@ -761,8 +785,12 @@ class template_text_t(template_t):
         #    self.m_contents += self.format_image(tag["contents"])
         #elif(name == "prototype"):
         #    self.m_contents += self.format_prototype(tag)
+        elif(name in ("functionsummary", "typesummary")):
+            WARNING("Unsupported tag %s" % name)
+        elif(name in ("define", "enum", "struct", "prototype")):
+            WARNING("Unsupported tag %s" % name)
         else:
-            print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
+            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
         
 
     def get_contents(self):
@@ -793,7 +821,9 @@ class template_text_t(template_t):
 
     def get_index_name(self):
 
-        return "index.html"
+        #return "index.txt"
+        name = self.m_engine.get_document_name()
+        return "%s.txt" % name
 
     def generate_index(self, title, theme, version):
         
@@ -812,7 +842,7 @@ Table of Contents
             # make sure that all links point back to the
             # main document.
             if(self.m_inline == True):
-                file = "index.txt"
+                file = self.get_index_name()
             
             #print "indent = %s" % indent
 
@@ -841,7 +871,7 @@ Table of Contents
         #     "version" : version,
         #     "css" : self.get_css()})
         
-        file = open(self.m_engine.m_output_directory + "/index.txt", "w")
+        file = open(self.m_engine.m_output_directory + "/%s" % self.get_index_name(), "wt")
         file.write(cnts)
         file.close()
 
@@ -878,10 +908,10 @@ Table of Contents
 
             for tag in tags:
 
-                if(self.m_engine.tag_is_header(tag["name"])):
-                    self.append_header(tag["name"], tag["contents"], output_file)
+                if(self.m_engine.tag_is_header(tag.name)):
+                    self.append_header(tag.name, tag.contents, output_file)
 
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
 
                 else:

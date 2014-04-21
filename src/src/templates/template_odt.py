@@ -110,18 +110,6 @@ class template_odt_t(template_t):
         self.m_styles["table"]["style"] = "shorte_table"
         self.m_styles["table"]["column"] = "shorte_table.A"
         self.m_styles["table"]["cell"] = {}
-        self.m_styles["table"]["cell"]["title"] = "ShorteNormalText" #"shorte_table.title"
-        self.m_styles["table"]["cell"]["title_text"] = "ShorteNormalText" # "shorte_para_white_bold"
-        self.m_styles["table"]["cell"]["header"] = "ShorteNormalText" # "shorte_table.header"
-        self.m_styles["table"]["cell"]["header_text"] = "ShorteNormalText" # "shorte_table.header_text"
-        self.m_styles["table"]["cell"]["subheader"] = "shorte_table.subheader"
-        self.m_styles["table"]["cell"]["subheader_text"] = "ShorteNormalText"
-        self.m_styles["table"]["cell"]["reserved"] = "shorte_table.reserved"
-        self.m_styles["table"]["cell"]["reserved_text"] = "reserved"
-        self.m_styles["table"]["cell"]["normal"] = "shorte_table.normal_cell"
-        self.m_styles["table"]["cell"]["normal_text"] = "ShorteNormalText"
-        
-
         self.m_styles["table"]["row"] = {}
 
         self.m_styles["para"] = {}
@@ -221,9 +209,9 @@ class template_odt_t(template_t):
         self.m_styles["headings"][HEADING1] = "Heading_20_1"
         self.m_styles["headings"][HEADING2] = "Heading_20_2"
         self.m_styles["headings"][HEADING3] = "Heading_20_3"
-        self.m_styles["headings"][HEADING4] = "shorte_heading_4"
+        self.m_styles["headings"][HEADING4] = "Heading_20_4"
         self.m_styles["headings"][HEADING5] = "Heading_20_5"
-        self.m_styles["headings"][HEADING6] = "shorte_heading_6"
+        self.m_styles["headings"][HEADING6] = "Heading_20_6"
 
         self.m_styles_extra = ''
         self.m_table_id = 0
@@ -254,77 +242,27 @@ class template_odt_t(template_t):
 
         self.extract_styles(xml);
 
+        # For tracking custom column styles
+        self.m_column_styles = {}
+        self.m_unique_col_id = 0
+
     def get_styles(self):
-        return '''
-
-    <style:style style:name="shorte_standard" style:family="paragraph" style:class="text">
-        <!--<style:paragraph-properties fo:margin-top="0.356cm" fo:margin-bottom="0.356cm" style:contextual-spacing="false" fo:line-height="115%" fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>-->
-        <style:paragraph-properties fo:margin-top="0.156cm" fo:margin-left="0.1cm" fo:margin-bottom="0.156cm" style:contextual-spacing="false" fo:line-height="115%" fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
-        <style:text-properties style:use-window-font-color="true" style:font-name="Arial1" fo:font-size="12pt" fo:language="en" fo:country="CA" style:font-name-asian="Calibri" style:font-size-asian="11pt" style:font-name-complex="Calibri" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA"/>
-    </style:style>
+        path = shorte_get_startup_path() + "/templates/odt/"
+        if(not path in sys.path):
+            sys.path.append(path)
     
-    <style:style style:name="shorte_standard_indented" style:family="paragraph" style:class="text">
-        <style:paragraph-properties fo:margin-top="0.356cm" fo:margin-left="0.5cm" fo:margin-bottom="0.356cm" style:contextual-spacing="false" fo:line-height="115%" fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
-        <style:text-properties use-window-font-color="true" style:font-name="Arial1" fo:font-size="12pt" fo:language="en" fo:country="CA" style:font-name-asian="Calibri" style:font-size-asian="11pt" style:font-name-complex="Calibri" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA"/>
-    </style:style>
-    
-    <style:style style:name="shorte_heading_1" style:display-name="Heading 1" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:master-page-name="" style:default-outline-level="1">
-      <style:paragraph-properties fo:margin-top="0.0835in" fo:margin-left="-0.15in" fo:margin-bottom="0.15in" fo:keep-together="always" style:page-number="auto" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#0063A5" style:font-name="Arial2" fo:font-size="14pt" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-size-asian="14pt" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-size-complex="14pt" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_2" style:display-name="Heading 2" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="2">
-      <style:paragraph-properties fo:margin-top="0.08535in" fo:margin-left="-0.15in" fo:margin-bottom="0.1in" fo:keep-together="always" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#000000" style:font-name="Arial2" fo:font-size="13pt" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-size-asian="13pt" style:font-weight-asian="bold" style:font-size-complex="13pt" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_2_break" style:display-name="Heading 2 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="2">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-left="-0.15in" fo:margin-bottom="0.1in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#000000" style:font-name="Arial2" fo:font-size="13pt" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-size-asian="13pt" style:font-weight-asian="bold" style:font-size-complex="13pt" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_3" style:display-name="Heading 3" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="3">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-left="-0.15in" fo:margin-bottom="0.1in" fo:keep-together="always" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#948a54" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_3_break" style:display-name="Heading 3 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="3">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-left="-0.15in" fo:margin-bottom="0.1in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#948a54" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_4" style:display-name="Heading 4" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="4">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-bottom="0in" fo:margin-left="-0.15in" fo:keep-together="always" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#909090" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-style-complex="italic" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_4_break" style:display-name="Heading 4 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="4">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-bottom="0in" fo:margin-left="-0.15in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#909090" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-style-complex="italic" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_5" style:display-name="Heading 5" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="5">
-      <style:paragraph-properties fo:margin-top="0.139in" fo:margin-bottom="0in" fo:margin-left="-0.15in" fo:keep-together="always" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#303030" style:font-name="Arial2" fo:font-weight="bold" style:font-name-asian="Times New Roman" style:font-style-asian="italic" style:font-weight-asian="bold" style:font-name-complex="Times New Roman" style:font-style-complex="italic" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_5_break" style:display-name="Heading 5 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="None">
-      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-bottom="0in" fo:margin-left="-0.15in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties
-        fo:color="#000000"
-        style:font-name="Arial2"
-        fo:font-size="13pt"
-        style:font-weight="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_6" style:display-name="Heading 6" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="None">
-      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-bottom="0.1in" fo:margin-left="-0.08in" fo:keep-together="always" fo:keep-with-next="always"/>
-      <style:text-properties
-        fo:color="#000000"
-        style:font-name="Arial2"
-        fo:font-size="11pt"
-        fo:font-weight="bold"
-        style:font-name-asian="Times New Roman" style:text-underline-style="solid" style:text-underline-color="font-color" style:font-size-asian="13pt" style:font-weight-asian="bold" style:font-size-complex="13pt" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="shorte_heading_6_break" style:display-name="Heading 6 Break" style:family="paragraph" style:parent-style-name="Standard" style:next-style-name="Standard" style:class="text" style:default-outline-level="None">
-      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-bottom="0.1in" fo:margin-left="-0.15in" fo:keep-together="always" fo:break-before="page" fo:keep-with-next="always"/>
-      <style:text-properties fo:color="#000000" style:font-name="Arial2" fo:font-size="12pt" style:font-weight="bold"/>
-    </style:style>
+        module = shorte_get_startup_path() + "/templates/odt/%s.py" % (self.m_engine.m_theme)
+        basename = os.path.basename(module)
+        module = os.path.splitext(basename)[0]
+        import_str = "from templates.odt.%s import *" % module
+        #print "IMPORT_STR: %s" % import_str
+        exec(import_str)
+        
+        custom_styles = custom_styles()
 
-    <style:style style:name="shorte_table" style:family="table">
-      <style:table-properties style:width="6.5in" table:align="margins" style:writing-mode="lr-tb" fo:margin-bottom="0.1282in"/>
-    </style:style>
+        doc_styles = {}
+        doc_styles["outline"] = custom_styles.outline_styles()
+        doc_styles["custom"] = custom_styles.custom_styles() + '''
     <style:style style:name="shorte_table.A" style:family="table-column">
       <style:table-column-properties style:column-width="3.25in" style:rel-column-width="32767*"/>
     </style:style>
@@ -339,74 +277,10 @@ class template_odt_t(template_t):
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.header" style:family="table-cell">
-      <style:table-cell-properties
-            fo:background-color="#D0D0D0"
-            fo:padding="0.0182in"
-            fo:border-top="0.008in solid #C0C0C0"
-            fo:border-bottom="0.008in solid #C0C0C0"
-            fo:border-left="0.008in solid #C0C0C0"
-            fo:border-right="0.008in solid #C0C0C0" >
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table.subheader" style:family="table-cell">
-      <style:table-cell-properties
-         fo:background-color="#E1E8EF"
-         fo:padding="0.0182in"
-         fo:border="0.008in solid #C0C0C0">
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table.reserved" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#f0f0f0" fo:padding="0.0182in" fo:border="0.008in solid #C0C0C0">
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table.reserved_text" style:family="paragraph" style:class="text">
-        <style:paragraph-properties
-            fo:margin-top="0.156cm"
-            fo:margin-left="0.156cm"
-            fo:margin-bottom="0.156cm"
-            style:contextual-spacing="false"
-            fo:line-height="115%"
-            fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
-        <style:text-properties fo:color="#c0c0c0"/>
-    </style:style>
-    <style:style style:name="shorte_table.title" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#0057A6" fo:padding="0.0282in"
-        fo:border-top="0.008in solid #0057A6"
-        fo:border-bottom="0.00in solid #d0d0d0"
-        fo:border-left="0.008in solid #0057A6"
-        fo:border-right="0.008in solid #0057A6"
-        >
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table.title_text" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0.05in" fo:margin-left="0.05in" fo:margin-bottom="0.05in"/>
-      <style:text-properties fo:color="#ffffff" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
     <style:style style:name="shorte_table.A2" style:family="table-cell">
       <style:table-cell-properties fo:padding="0.0182in"
           fo:border-left="0.008in solid #C0C0C0" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.008in solid #C0C0C0"/>
     </style:style>
-    <style:style style:name="shorte_table.normal_cell" style:family="table-cell">
-      <style:table-cell-properties fo:padding="0.0182in"
-          fo:border-left="0.008in solid #C0C0c0" fo:border-right="0.008in solid #C0C0C0" fo:border-top="0.008in solid #C0C0C0" fo:border-bottom="0.008in solid #C0C0C0"/>
-    </style:style>
-    <style:style style:name="shorte_table.normal_text" style:family="paragraph" style:class="text">
-        <style:paragraph-properties
-            fo:margin-top="0.156cm"
-            fo:margin-left="0.156cm"
-            fo:margin-bottom="0.156cm"
-            style:contextual-spacing="false"
-            fo:line-height="115%"
-            fo:orphans="2" fo:widows="2" style:writing-mode="lr-tb"/>
-        <style:text-properties style:use-window-font-color="true" style:font-name="Arial1" fo:font-size="12pt" fo:language="en" fo:country="CA" style:font-name-asian="Calibri" style:font-size-asian="11pt" style:font-name-complex="Calibri" style:font-size-complex="11pt" style:language-complex="ar" style:country-complex="SA"/>
-    </style:style>
-
-
 
     <style:style style:name="shorte_table_rounded.top_left" style:family="table-cell">
         <style:table-cell-properties style:vertical-align="middle" fo:background-color="transparent" fo:padding="0.0cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.05pt solid #c0c0c0">
@@ -514,10 +388,6 @@ class template_odt_t(template_t):
     <style:style style:name="ShorteNormalText" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0in" fo:padding-top="0in" fo:padding-bottom="0in" fo:margin-bottom="0in"/>
     </style:style>
-    <style:style style:name="shorte_table.header_text" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:padding-top="0in" fo:padding-bottom="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
     
     <style:style style:name="shorte_spacer" style:family="paragraph">
       <style:paragraph-properties fo:padding-top="0in" fo:padding-bottom="0in" fo:margin-top="0in" fo:margin-bottom="0in"/>
@@ -540,28 +410,6 @@ class template_odt_t(template_t):
             fo:border-bottom="none" style:shadow="none">
             <style:background-image/>
         </style:paragraph-properties>
-    </style:style>
-
-    <style:style style:name="para_list_level1" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_1">
-      <style:paragraph-properties fo:margin-left="0.3in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
-    </style:style>
-    <style:style style:name="para_list_level2" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_2">
-      <style:paragraph-properties fo:margin-left="0.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
-    </style:style>
-    <style:style style:name="para_list_level3" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_3">
-      <style:paragraph-properties fo:margin-left="0.7in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
-    </style:style>
-    <style:style style:name="para_list_level4" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_4">
-      <style:paragraph-properties fo:margin-left="0.9in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
-    </style:style>
-    <style:style style:name="para_list_level5" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_5">
-      <style:paragraph-properties fo:margin-left="1.1in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
-    </style:style>
-    <style:style style:name="para_list_level6" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_6">
-      <style:paragraph-properties fo:margin-left="1.3in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
-    </style:style>
-    <style:style style:name="para_list_level7" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_7">
-      <style:paragraph-properties fo:margin-left="1.5in" fo:margin-right="0in" fo:text-indent="0in" style:auto-text-indent="false"/>
     </style:style>
 
     <style:style style:name="reserved" style:family="paragraph" style:parent-style-name="Standard">
@@ -639,128 +487,16 @@ class template_odt_t(template_t):
       <style:text-properties fo:color="#000000" font-name="Courier New" fo:font-size="9pt"/>
     </style:style>
     
-
-    <text:list-style style:name="shorte_ordered_list">
-            <text:list-level-style-number text:level="1" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="1">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.85in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-number>
-            <text:list-level-style-number text:level="2" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="a" text:display-levels="1">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.05in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-number>
-            <text:list-level-style-number text:level="3" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="i" text:display-levels="1">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.25in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-number>
-            
-            <text:list-level-style-number text:level="4" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix="." style:num-format="1" text:display-levels="1">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.45in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-number>
-
-            <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.55in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-                <style:text-properties style:font-name="StarSymbol"/>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.75in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-                <style:text-properties style:font-name="StarSymbol"/>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.95in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-                <style:text-properties style:font-name="StarSymbol"/>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.05in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-                <style:text-properties style:font-name="StarSymbol"/>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.25in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-                <style:text-properties style:font-name="StarSymbol"/>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.45in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-                <style:text-properties style:font-name="StarSymbol"/>
-            </text:list-level-style-bullet>
-        </text:list-style>
-
-
-        <text:list-style style:name="shorte_unordered_list">
-            <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.75in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="0.95in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.15in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.35in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.55in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.75in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.95in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char="#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.05in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.25in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-            <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
-                <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.45in" fo:text-indent="0cm" fo:margin-left="0cm"/>
-                </style:list-level-properties>
-            </text:list-level-style-bullet>
-        </text:list-style>
-    
     <style:style style:name="shorte_para_white_bold" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
       <style:text-properties fo:color="#ffffff" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
 
     <style:style style:name="shorte_frame_note" style:family="graphic" style:parent-style-name="Graphics">
+        <style:graphic-properties style:run-through="foreground" style:wrap="run-through" style:number-wrapped-paragraphs="no-limit" style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="from-left" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
+    </style:style>
+    
+    <style:style style:name="fr2" style:family="graphic" style:parent-style-name="Graphics">
         <style:graphic-properties style:run-through="foreground" style:wrap="run-through" style:number-wrapped-paragraphs="no-limit" style:vertical-pos="from-top" style:vertical-rel="paragraph" style:horizontal-pos="from-left" style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%" draw:color-mode="standard"/>
     </style:style>
 
@@ -814,6 +550,16 @@ class template_odt_t(template_t):
     <style:table-column-properties style:rel-column-width="800*"/>
     </style:style>
     <style:style style:name="shorte_enum_col3" style:family="table-column">
+    <style:table-column-properties style:rel-column-width="4200*"/>
+    </style:style>
+    
+    <style:style style:name="shorte_struct_col1" style:family="table-column">
+    <style:table-column-properties style:rel-column-width="1400*"/>
+    </style:style>
+    <style:style style:name="shorte_struct_col2" style:family="table-column">
+    <style:table-column-properties style:rel-column-width="2600cm*"/>
+    </style:style>
+    <style:style style:name="shorte_struct_col3" style:family="table-column">
     <style:table-column-properties style:rel-column-width="4200*"/>
     </style:style>
     
@@ -1014,6 +760,11 @@ class template_odt_t(template_t):
 
     
     ''' + self.m_styles_extra
+        
+        for style in self.m_column_styles:
+            doc_styles["custom"] += self.m_column_styles[style]
+
+        return doc_styles
                    
     def format_wikiword(self, wikiword, link_word):
         '''This method is called to format a wikiword. It is called by
@@ -1289,7 +1040,7 @@ class template_odt_t(template_t):
         data = """
 %s
 <text:p text:style-name="Standard">
-<draw:frame draw:style-name="fr1" draw:name="graphics%d" text:anchor-type="character" %s %s draw:z-index="0">
+<draw:frame draw:style-name="fr_inline" draw:name="graphics%d" text:anchor-type="character" %s %s draw:z-index="0">
     <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
 </draw:frame>
 </text:p>
@@ -1371,7 +1122,10 @@ class template_odt_t(template_t):
             # Don't fully support span yet, need to figure out a way to support it
             elif(tag == "span"):
                 return "<text:span>%s</text:span>" % (replace)
-            elif(tag == "hl"):
+            elif(tag in ("hl", "hilite", "highlight")):
+                prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
+                postfix += "</text:span>"
+            elif(tag in ("done", "complete")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
                 postfix += "</text:span>"
             elif(tag in ("cross","strike")):
@@ -1514,23 +1268,23 @@ class template_odt_t(template_t):
         table = {}
         table["title"] = {
                 "cell" : "shorte_table.title",
-                "text" : "shorte_table.title_text"
+                "text" : "shorte_table_title" # "shorte_table.title_text"
                 }
         table["header"] = {
                 "cell" : "shorte_table.header",
-                "text" : "shorte_table.header_text"
+                "text" : "shorte_table_heading" # "shorte_table.header_text"
                 }
         table["subheader"] = {
                 "cell" : "shorte_table.subheader",
-                "text" : "shorte_table.normal_text"
+                "text" : "shorte_table_subheading" # "shorte_table.normal_text"
                 }
         table["reserved"] = {
                 "cell" : "shorte_table.reserved",
-                "text" : "shorte_table.reserved_text"
+                "text" : "shorte_table_reserved" # "shorte_table.reserved_text"
                 }
         table["default"] = {
                 "cell" : "shorte_table.normal_cell",
-                "text" : "shorte_table.normal_text"
+                "text" : "shorte_table_standard" # "shorte_table.normal_text"
                 }
 
         return table
@@ -1555,7 +1309,7 @@ class template_odt_t(template_t):
             odt = ''
 
         return odt
-
+    
     def __table_format_column_styles(self, table, style, title):
         '''This is an internal method used to format the column
            styles section of the table'''
@@ -1667,7 +1421,53 @@ class template_odt_t(template_t):
 
         return xml
 
+    def add_column_styles(self, widths, title):
+        '''This method is used to create new custom column styles
+           to be added to the custom stylesheet
+
+           @param widths [I] - The list of column widths
+           @param title  [I] - The title associated with the table
+
+           @return The table columns to insert into the document.
+        '''
+        total_width = 0
+        for width in widths:
+            total_width += width
+        
+        #print "Total width: %f" % total_width
+
+        output = ''
+        styles = ''
+        col_index = 0
+        for width in widths:
+            style_name = "shorte_col%d_%d" % (self.m_unique_col_id, col_index)
+
+            relative_width = (width/(total_width * 1.0)) * 1000
+            #print "Relative width of %f: %f" % (width,relative_width)
+
+            styles += '''
+            <style:style style:name="%s" style:family="table-column">
+                <style:table-column-properties style:rel-column-width="%fcm*"/>
+            </style:style>
+''' % (style_name, relative_width)
             
+            output += '<table:table-column table:style-name="%s"/>' % style_name
+
+            col_index += 1
+
+        self.m_column_styles[self.m_unique_col_id] = styles
+
+        self.m_unique_col_id += 1
+            
+        xml = '''
+<table:table table:name="shorte_table_%d" table:style-name="%s">
+%s
+%s
+''' % (self.m_table_id, self.m_styles["table"]["style"], output, title)
+
+        return xml
+
+
     def __format_table(self, source, table, format_text=True, table_style_name="default"):    
         '''This method is called to format the contents of a table and
            generate the XML output necessary for inserting into the ODT
@@ -1687,7 +1487,12 @@ class template_odt_t(template_t):
             #xml += self.format_caption("Caption: %s" % table["caption"])
 
         title = self.__table_format_title(table, style)
-        xml += self.__table_format_column_styles(table, style, title)
+
+        if(table.has_key("widths")):
+            xml += self.add_column_styles(table["widths"], title)
+        else:
+            xml += self.__table_format_column_styles(table, style, title)
+        #xml += self.__table_format_column_styles(table, style, title)
 
         self.m_table_id += 1
 
@@ -1797,9 +1602,9 @@ class template_odt_t(template_t):
     def format_define(self, tag):
         
         define = tag.contents
-        name   = self.format_text(define["name"])
-        value  = self.format_text(define["value"])
-        desc   = self.format_textblock(define["description"])
+        name   = self.format_text(define.name)
+        value  = self.format_text(define.value)
+        desc   = self.format_textblock(define.description)
 
         xml = '''
 <text:p text:style-name="%s">%s = %s</text:p>
@@ -1841,26 +1646,34 @@ class template_odt_t(template_t):
         
         xml = ''
         
-        if("caption" in struct):
-            xml += self.format_textblock(struct["caption"])
-        elif("description" in struct):
-            xml += self.format_textblock(struct["description"])
+        xml += self.format_textblock(struct.description)
         
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        title = self.__table_format_title(struct, style)
-        xml += self.__table_format_column_styles(struct, style, title)
+        title = self.__table_format_title({"title" : struct.name, "max_cols" : struct.max_cols}, style)
+        xml += '''
+<table:table table:name="shorte_table_%d" table:style-name="%s">
+<table:table-column table:style-name="%s"/>
+<table:table-column table:style-name="%s"/>
+<table:table-column table:style-name="%s"/>
+%s
+''' % (self.m_table_id, self.m_styles["table"]["style"],
+       "shorte_struct_col1",
+       "shorte_struct_col2",
+       "shorte_struct_col3",
+       title)
+        #xml += self.__table_format_column_styles(struct, style, title)
 
         self.m_table_id += 1
             
         xml += '''<table:table-row>'''
-        xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Type       ")
+        xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Field Type")
         xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Field Name")
         xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
         xml += "</table:table-row>\n"
 
-        for field in struct["fields"]:
+        for field in struct.fields:
             
             xml += '''
     <table:table-row>
@@ -1900,10 +1713,10 @@ class template_odt_t(template_t):
         xml += "</table:table>"
         
         
-        if(struct.has_key("example")):
+        if(struct.example != None):
 
-            language = struct["example"]["language"]
-            example = struct["example"]["parsed"]
+            language = struct.example["language"]
+            example = struct.example["parsed"]
 
             example = self.format_source_code(language, example)
 
@@ -1931,28 +1744,24 @@ class template_odt_t(template_t):
            @return The XML snippet defining the enum
         '''
 
-        table = tag.contents
+        enum = tag.contents
         
-        if(shorte_get_config("html", "show_enum_values") == "1"):
+        if(shorte_get_config("shorte", "show_enum_values") == "1"):
             show_enum_vals = True
-            max_cols = table["max_cols"]
+            max_cols = enum.max_cols
         else:
             show_enum_vals = False
-            max_cols = table["max_cols"] - 1
+            max_cols = enum.max_cols - 1
 
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        title = self.__table_format_title(table, style)
+        title = self.__table_format_title({"title" : enum.name, "max_cols" : max_cols}, style)
         
         xml = ''
+        title = ''
 
-        if("caption" in table):
-            #print "CAPTION: [", table["caption"], "]"
-            xml += self.format_textblock(table["caption"])
-        if("description" in table):
-            #print "DESCRIPTION: [", table["description"], "]"
-            xml += self.format_textblock(table["description"])
+        xml += self.format_textblock(enum.description)
 
         if(show_enum_vals):
             xml += '''
@@ -1980,7 +1789,7 @@ class template_odt_t(template_t):
 %s
 ''' % (self.m_table_id, self.m_styles["table"]["style"],
        "shorte_enum_col1",
-       "shorte_enum_col2",
+       "shorte_enum_col3",
        title)
         
             xml += '''<table:table-row>'''
@@ -1993,7 +1802,7 @@ class template_odt_t(template_t):
         i = 0
         
 
-        for row in table["rows"]:
+        for row in enum.values:
             
             # If this is the first row and it is a header
             # then skip it as it is likely just the table
@@ -2236,12 +2045,12 @@ class template_odt_t(template_t):
 <text:p text:style-name="shorte_standard">
 <draw:frame draw:style-name="shorte_note_frame" draw:name="Frame%d" text:anchor-type="as_character" style:rel-width="80%%" draw:z-index="13">
           <draw:text-box fo:min-height="0.2in" fo:min-width="0.7902in">
-            <text:p text:style-name="shorte_standard_indented">
-              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="0.05in" svg:y="0.05in" svg:width="0.3592in" svg:height="0.3592in" draw:z-index="14">
+            <text:p text:style-name="shorte_note_title">
+              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.5cm" svg:y="-0.5cm" svg:width="1.15cm" svg:height="1.15cm" draw:z-index="14">
                 <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
               </draw:frame>
               <text:s text:c="4"/>
-            <text:span text:style-name="T8">%s</text:span>
+            <text:span text:style-name="shorte_note_title">%s</text:span>
             </text:p>
 %s
           </draw:text-box>
@@ -2256,21 +2065,24 @@ class template_odt_t(template_t):
         #print self.styles[label]
         #print "----"
         #print ""
+        #print "NOTE OUTPUT A"
+        #print xml
+        #print "----"
 
-        xml = tmp.substitute({
+        xml2 = tmp.substitute({
             "%s_TITLE" % type.upper() : label,
             "FRAME"      : "Frame%d" % (self.m_frame_id+10),
             "GRAPHIC"    : "Graphic%d" % (self.m_image_id+10),
             "%s_CONTENT" % type.upper() : source})
 
-        #print "NOTE OUTPUT"
-        #print xml
+        #print "NOTE OUTPUT B"
+        #print xml2
         #print "----"
 
         self.m_frame_id += 1
         self.m_image_id += 1
 
-        return xml
+        return xml2
     
     def format_question(self, source):
         
@@ -2607,8 +2419,8 @@ class template_odt_t(template_t):
             
             elif(summary_type == "types"):
                 name = ''
-                if(obj.has_key("title")):
-                    name = obj["title"]
+
+                name = obj.name
                 text = self.wikify(name)
 
                 style = self.m_styles["table"]["cell"]["fname"]
@@ -2626,11 +2438,8 @@ class template_odt_t(template_t):
                 style = self.m_styles["table"]["cell"]["fdesc"]
                 cols.append({"span":1, 'text':'', "style": style, "text-style": text_style})
 
-                desc = ''
-                if(obj.has_key("caption")):
-                    desc = obj["caption"]
-                elif("description" in obj):
-                    desc = obj["description"]
+                desc = obj.description
+
                 #    desc = '</text:p>' + self.format_textblock(obj["caption"], style=text_style, indent_style="summary_indent", list_style="summary_list_level") + "<text:p>"
                 #elif("description" in obj):
                 #    desc = '</text:p>' + self.format_textblock(obj["description"], style=text_style, indent_style="summary_indent", list_style="summary_list_level") + "<text:p>"
@@ -2936,7 +2745,7 @@ class template_odt_t(template_t):
             function["see_also"] = xml
         
         
-        if(prototype.has_key("deprecated")):
+        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
             is_deprecated = True
 
             xml = string.Template('''
@@ -2957,7 +2766,7 @@ class template_odt_t(template_t):
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "deprecated" : self.format_text(prototype["deprecated"]),
+    "deprecated" : self.format_text(prototype["deprecated_msg"]),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -3163,9 +2972,9 @@ class template_odt_t(template_t):
         elif(name == "note"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="note", label="Note")
         elif(name == "tbd"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="tbd", label="TBD")
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="tbd", label="TBD", image="tbd.png")
         elif(name == "question"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="question", label="Question")
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="question", label="Question", image="question.png")
         elif(name == "warning"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag, type="warning", label="Warning", image="warning.png")
         elif(name == "questions"):
@@ -3251,12 +3060,7 @@ class template_odt_t(template_t):
                     print "Unsupported heading type"
                     sys.exit(-1)
 
-                if(heading["Type"] == HEADING6):
-                    xml += '''
-<text:p text:style-name="%s">%s</text:p>
-''' % (header_type, heading["Title"])
-                else:
-                    xml += '''
+                xml += '''
 <text:h text:style-name="%s" text:outline-level="%s">%s</text:h>
 ''' % (header_type, heading["Type"], heading["Title"])
 
@@ -3371,6 +3175,7 @@ class template_odt_t(template_t):
             return start
         return None
 
+    #def update_attribute(self, xml, name, block, attribute):
 
     def generate_index(self, title, theme, version):
 
@@ -3394,6 +3199,7 @@ class template_odt_t(template_t):
         xml = re.sub("DOCUMENT_TITLE", self.get_title(), xml)
         xml = re.sub("DOCUMENT_SUBTITLE", self.m_engine.get_subtitle(), xml)
         xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_version(), xml)
+        xml = re.sub("DOCUMENT_CUSTOMER", "N/A", xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
         xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_number(), xml)
 
@@ -3417,16 +3223,24 @@ class template_odt_t(template_t):
         tmp += xml[end:len(xml)]
         xml = tmp
 
-
         # Search for the styles to strip. The expression looks like this:
         #   re.sub("<text:p.*?>\[\[STYLES.TEMPLATES.START\]\].*?\[\[STYLES.TEMPLATES.END\]\]</text:p>", "", xml)
         start = xml.find("[[STYLES.TEMPLATES.START]]", 0)
+        #print "START: %d" % start
         start = xml.find("<text:p", start - 100)
         end = xml.find("[[STYLES.TEMPLATES.END]]", start)
         end = xml.find("</text:p>", end)
+        #print "END: %d" % end
         end += 9
-        xml = xml[0:start]
-        xml += xml[end:]
+
+        tmp = xml[0:start]
+        tmp += xml[end:]
+
+        xml = tmp
+
+        #print "TEMPLATE"
+        #print xml
+        #sys.exit(0)
 
 
         # Replace the automatic styles
@@ -3434,15 +3248,39 @@ class template_odt_t(template_t):
         end   = xml.find("</office:automatic-styles>")
 
         prefix = xml[0:start+25]
-        styles = xml[start+25:end]
-        postfix = xml[end:]
+        prefix += "\n\n"
+        #print "PREFIX"
+        #print prefix
 
-        xml = prefix + styles + self.get_styles() + postfix
+        styles = xml[start+25:end]
+        styles += "\n\n"
+        
+        #print "STYLES" 
+        #print styles
+
+        postfix = xml[end:]
+        postfix += "\n\n"
+
+        #print "POSTFIX"
+        #print postfix
+
+        doc_styles = self.get_styles()
+
+        #print "DOCSTYLES"
+        #print doc_styles["custom"]
+        #sys.exit(0)
+
+        xml = prefix + styles + doc_styles["custom"] + postfix
+        #xml = prefix + styles + postfix
         
 
         # Now remove any blank paragraphs that got accidentally added
         #xml = xml.replace("<text:p text:style-name='shorte_standard'></text:p>", "<text:p text:style-name='shorte_standard'>empty</text:p>")
         xml = xml.replace("<text:p text:style-name='shorte_standard'></text:p>", "")
+
+        #print "XML"
+        #print xml
+        #sys.exit(0)
 
         xml = re.sub("__NEWLINE__", '\\\\n', xml)
         handle = open("%s/odt/content.xml" % scratchdir, "wt")
@@ -3494,8 +3332,11 @@ class template_odt_t(template_t):
         xml = re.sub("DOCUMENT_TITLE", self.get_title(), xml)
         xml = re.sub("DOCUMENT_SUBTITLE", self.m_engine.get_subtitle(), xml, 0)
         xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_version(), xml)
+        xml = re.sub("DOCUMENT_CUSTOMER", "N/A", xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
         xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_number(), xml)
+
+        xml = re.sub("<text:outline-style style:name=\"Outline\">.*?</text:outline-style>", doc_styles["outline"], xml)
         
         ## Replace the automatic styles
         #start = xml.find("<office:automatic-styles>")
@@ -3637,7 +3478,7 @@ class template_odt_t(template_t):
             
         path_converter = "%s/templates/odt/convert_to_pdf.odt" % path_startup
         path_input = "%s" % (self.m_engine.get_output_dir() + "/" + self.get_index_name())
-        print "PLATFORM: %s" % sys.platform
+        #print "PLATFORM: %s" % sys.platform
 
         if(sys.platform in ("cygwin")):
 

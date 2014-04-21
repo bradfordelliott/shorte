@@ -95,8 +95,8 @@ class template_word_t(template_t):
 
         output = ''
 
-        output += self.format_source_code(tag["name"], tag["contents"])
-        result = tag["result"]
+        output += self.format_source_code(tag.name, tag.contents)
+        result = tag.result
 
         if(result != None):
             # Convert any HTML tags in the input source
@@ -524,7 +524,7 @@ class template_word_t(template_t):
 
     def format_textblock(self, tag):
 
-        paragraphs = tag["contents"]
+        paragraphs = tag.contents
 
         xml = ''
         
@@ -1029,10 +1029,10 @@ $box_end
         
         for tag in tags:
 
-            struct = tag["contents"]
+            struct = tag.contents
 
-            if(tag["hierarchy"] != hierarchy):
-                hierarchy = tag["hierarchy"]
+            if(tag.hierarchy != hierarchy):
+                hierarchy = tag.hierarchy
                 row = self._table_row()
                 cols = []
                 style = "" # self.m_styles["table"]["cell"]["fhier"]
@@ -1080,39 +1080,39 @@ $box_end
     
     def format_sequence(self, tag):
 
-        image = tag["contents"]
+        image = tag.contents
         output = self.format_image(image, False)
-        output += self.format_table("", tag["contents"]["html"])
+        output += self.format_table("", tag.contents["html"])
 
         return output
 
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         if(name == "#"):
             return
         if(name in "p"):
-            data = self.format_text(tag["contents"])
+            data = self.format_text(tag.contents)
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<w:p>%s</w:p>" % data
         elif(name == "text"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_textblock(tag)
         elif(name == "pre"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_pre(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_pre(tag.contents)
         elif(name == "note"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_note(tag.contents)
         elif(name == "table"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_table(tag["source"], tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_table(tag.source, tag.contents)
         elif(name == "ul"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag["contents"], False)
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag["contents"], True)
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_list(tag.contents, True)
         elif(name == "checklist"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_checklist(tag)
         elif(name == "image"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<w:p><w:r><w:t>%s</w:t></w:r></w:p>" % self.format_image(tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += "<w:p><w:r><w:t>%s</w:t></w:r></w:p>" % self.format_image(tag.contents)
         elif(name == "struct"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag["source"], tag["contents"])
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag.source, tag.contents)
         elif(name == "prototype"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_prototype(tag)
         elif(name == "question"):
@@ -1141,7 +1141,7 @@ $box_end
         elif(name == "embed"):
             print "WARNING: Skipping embed for now"
         else:
-            print "Undefined tag: %s [%s]" % (name, tag["source"]); sys.exit(-1)
+            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
  
 
     def _doc_pages_to_xml(self):
@@ -1227,10 +1227,10 @@ $box_end
 
             for tag in tags:
             
-                if(self.m_engine.tag_is_header(tag["name"])):
-                    self.append_header(tag["name"], tag["contents"], "blah")
+                if(self.m_engine.tag_is_header(tag.name)):
+                    self.append_header(tag.name, tag.contents, "blah")
                 
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
 
                 else:

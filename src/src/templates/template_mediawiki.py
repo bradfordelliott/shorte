@@ -208,16 +208,18 @@ class template_mediawiki_t(template_t):
         else:
             start_tag += "*"
 
-        if(elem.has_key("children")):
+        if(elem.children != None):
             source += start_tag
-            source += "%s" % self.format_text(elem["text"])
-            num_children = len(elem["children"])
+            source += "%s" % self.format_text(elem.text)
+            num_children = len(elem.children)
             #print "num_children = %d" % num_children
+            if(num_children != 0):
+                source += "\n"
             for i in range(0, num_children):
-                source += self.format_list_child(elem["children"][i], ordered, start_tag, end_tag)
+                source += self.format_list_child(elem.children[i], ordered, start_tag, end_tag)
             source += end_tag
         else:
-            source += start_tag + self.format_text(elem["text"]) + end_tag
+            source += start_tag + self.format_text(elem.text) + end_tag
 
         return source
     
@@ -755,11 +757,11 @@ class template_mediawiki_t(template_t):
     
     def append_source_code(self, tag):
 
-        rc = ''
+        rc = '\n'
         rc += self.format_source_code(tag.name, tag.contents, tag.source)
         result = tag.result
 
-        self.m_contents += rc
+        self.m_contents += rc + "\n"
         return ''
 
         if(result != None):

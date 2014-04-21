@@ -16,7 +16,7 @@
 @h1 A list of enums
 
 @h4 e_my_test
-@enum: name="e_my_test" caption='''
+@enum: name="e_my_test" description='''
 This is a test enum
 - A list entry
 - Another list
@@ -25,6 +25,7 @@ This is a test enum
 
 Another paragraph
 '''
+-- values:
 - Name                       | Value | Description
 - LEEDS_VLT_SUPPLY_1V_TX     | 0x0   |  1V supply TX 
 - LEEDS_VLT_SUPPLY_1V_RX     | 0x1   |  1V supply RX 
@@ -38,9 +39,10 @@ Another paragraph
 
 @h4 e_cs4224_loopback
 
-@enum: name="e_cs4224_loopback" caption='''
+@enum: name="e_cs4224_loopback" description='''
 The loopback interface point
 '''
+-- values:
 - Enum Name                       | Enum Value | Enum Description
 - CS4224_LOOPBK_DIGITAL_NEAR_DATA | 0x1        | Digital Near data loopback. Deprecated, replaced by CS4224_LOOPBK_DUPLEX_NEAR_DATA
 - CS4224_LOOPBK_DUPLEX_NEAR_DATA  | 0x1        | Duplex Near data loopback
@@ -50,9 +52,10 @@ The loopback interface point
         
 @h4 e_cs4224_loopback_interface
 
-@enum: name="e_cs4224_loopback_interface" caption='''
+@enum: name="e_cs4224_loopback_interface" description='''
 The loopback interface
 '''
+-- values:
 - Enum Name          | Enum Value | Enum Description
 - CS4224_LOOPBK_HOST | 0x1        | Loopback on the host interface
 - CS4224_LOOPBK_LINE | 0x3        | Loopback on the line interface
@@ -60,7 +63,7 @@ The loopback interface
         
 @h4 cs4224_diags_duplex_loopback_state_t
 
-@struct: name="cs4224_diags_duplex_loopback_state_t" title="cs4224_diags_duplex_loopback_state_t" caption='''
+@struct: name="cs4224_diags_duplex_loopback_state_t" description='''
 This structure is used to store state information
 that is used when enabling the line or host side duplex
 near or far loopbacks.
@@ -72,6 +75,7 @@ near or far loopbacks.
 
 And a new *paragraph*
 '''
+-- fields:
 - Type | Name | Description
 - cs_uint8 | initialized |  initialize flag 
 - cs_uint16 | stx0_misc |

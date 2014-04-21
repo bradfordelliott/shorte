@@ -84,11 +84,10 @@ class comment_t:
         self.returns = ""
         self.example = ""
         self.private = False
-        self.see_also = None
-        self.deprecated = None
+        self.see_also = ""
+        self.deprecated = False
+        self.deprecated_msg = ""
         self.heading = ""
-
-
 
 def my_token(typ, data, line, pos):
     t = {}
@@ -192,14 +191,6 @@ class cpp_parser_t(shorte_parser_t):
             return None
 
         (comment,comment2) = self.parse_cpp_func_comment(desc)
-        extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
-        if(extract_private == "1"):
-            extract_private = True
-        else:
-            extract_private = False
-
-        if(not extract_private and True == comment2.private):
-            raise Exception("Not outputting private structures")
 
         # Determine if this is a typedef'ed enum or not. That will
         # determine where we look for the struct name or type
@@ -260,6 +251,16 @@ class cpp_parser_t(shorte_parser_t):
             if(cols > max_cols):
                 max_cols = cols
         
+        struct2 = struct_t()
+        struct2.fields = rows
+        struct2.name = struct_name
+        struct2.description = self.parse_textblock(comment["desc"])
+        struct2.comment = comment2
+        struct2.private = comment2.private
+        struct2.deprecated = comment2.deprecated
+        struct2.deprecated_msg = comment2.deprecated_msg
+        struct2.max_cols = max_cols
+
         struct = {}
         struct["rows"] = rows
         struct["fields"] = rows
@@ -267,6 +268,7 @@ class cpp_parser_t(shorte_parser_t):
         struct["caption"] = self.parse_textblock(comment["desc"])
         struct["max_cols"] = max_cols
         struct["heading"] = comment2.heading
+        struct["private"] = comment2.private
 
         example = comment["example"]
         
@@ -278,6 +280,7 @@ class cpp_parser_t(shorte_parser_t):
             struct["example"]["language"] = language
             struct["example"]["parsed"] = tmp
             struct["example"]["unparsed"] = example
+            struct2.example = struct["example"]
         
 
         i = pos_saved
@@ -313,7 +316,7 @@ class cpp_parser_t(shorte_parser_t):
         #print "    STRUCT: %s" % struct
         
 
-        return (i, struct)
+        return (i, struct, struct2)
 
 
     def parse_enum_values(self, text):
@@ -723,8 +726,9 @@ class cpp_parser_t(shorte_parser_t):
         comment["returns"] = ""
         comment["example"] = ""
         comment["private"] = False
-        comment["see_also"] = None
-        comment["deprecated"] = None
+        comment["see_also"] = ""
+        comment["deprecated"] = False
+        comment["deprecated_msg"] = ""
         comment["heading"] = ""
 
         # Strip off any \ref sequences since shorte doesn't use them
@@ -823,8 +827,11 @@ class cpp_parser_t(shorte_parser_t):
         expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
         matches = expr_deprecated.search(text)
         if(matches != None):
-            comment["deprecated"] = matches.groups()[0]
-            comment2.deprecated = matches.groups()[0]
+            comment["deprecated"] = True
+            comment["deprecated_msg"] = matches.groups()[0]
+            comment2.deprecated = True
+            comment2.deprecated_msg = matches.groups()[0]
+
         
         return (comment,comment2)
 
@@ -919,6 +926,12 @@ class cpp_parser_t(shorte_parser_t):
             enum_name = tokens[k+1]["data"]
 
         text = "%s" % trim_leading_indent(comment["desc"])
+
+        enum = enum_t()
+        enum.name = enum_name
+        enum.values = rows
+        enum.comment = comment2
+
         table = {}
         table["rows"] = rows
         table["title"] = enum_name
@@ -929,6 +942,12 @@ class cpp_parser_t(shorte_parser_t):
 
         table["heading"] = comment["heading"]
 
+        enum.description = table["caption"]
+        enum.private = comment2.private
+        enum.deprecated = comment2.deprecated
+        enum.deprecated_msg = comment2.deprecated_msg
+
+        #print enum
         max_cols = 0
         for row in rows:
             cols = len(row["cols"])
@@ -936,7 +955,9 @@ class cpp_parser_t(shorte_parser_t):
                 max_cols = cols
         table["max_cols"] = max_cols
 
-        return (i, table)
+        enum.max_cols = max_cols
+
+        return (i, table, enum)
 
 
     # This method is called to a single parameter out of
@@ -1070,19 +1091,13 @@ class cpp_parser_t(shorte_parser_t):
         start = i
         end = False
         
-        extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
-        if(extract_private == "1"):
-            extract_private = True
-        else:
-            extract_private = False
-
-        define = {}
-        define["name"] = ''
-        define["desc"] = ''
-        define["source"] = token["data"]
+        define = define_t()
+        define.name = ''
+        define.description = ''
+        define.source = token["data"]
 
         parts = token["data"].split(" ")
-        define["name"] = parts[1].strip()
+        define.name = parts[1].strip()
         parts.pop(0)
         parts.pop(0)
         val = ' '.join(parts)
@@ -1090,7 +1105,7 @@ class cpp_parser_t(shorte_parser_t):
         if(val[-1] == '\n'):
             val = val[0:-1]
 
-        define["value"] = val
+        define.value = val
 
         try:
             # Search backwards till we find something that
@@ -1100,19 +1115,15 @@ class cpp_parser_t(shorte_parser_t):
             (i, src) = self.walk_backwards(i-1, tokens, TARGET([TOKEN_COMMENT]), SKIP([]))
 
             (comment,comment2) = self.parse_cpp_func_comment(src)
-            define["desc"] = comment2.desc
-            define["description"] = comment2.description
-            define["private"] = comment2.private
-            define["heading"] = comment2.heading
+            define.desc = comment2.desc
+            define.description = comment2.description
+            define.private = comment2.private
+            define.heading = comment2.heading
         except:
-            define["desc"] = ""
-            define["description"] = ""
-            define["private"] = True
-            define["heading"] = ""
-
-        if(not extract_private and True == define["private"]):
-            raise Exception ("not outputting private defines")
-
+            define.desc = ""
+            define.description = ""
+            define.private = True
+            define.heading = ""
 
         return (start+1,define)
 
@@ -1223,8 +1234,9 @@ class cpp_parser_t(shorte_parser_t):
 
         function["see_also"] = func_comment2.see_also
 
-        if(func_comment2.deprecated != None):
-            function["deprecated"] = func_comment2.deprecated
+        function["deprecated"] = func_comment2.deprecated
+        function["deprecated_msg"] = func_comment2.deprecated_msg
+        function["private"] = func_comment2.private
 
         if(func_comment2.heading != None):
             function["heading"] = func_comment2.heading
@@ -1373,6 +1385,12 @@ class cpp_parser_t(shorte_parser_t):
         num_tokens = len(tokens)
         i = 0
         last_token = None
+        
+        extract_private = self.m_engine.get_config("cpp_parser", "extract_private")
+        if(extract_private == "1"):
+            extract_private = True
+        else:
+            extract_private = False
 
         while i < num_tokens:
 
@@ -1404,9 +1422,14 @@ class cpp_parser_t(shorte_parser_t):
                     continue
 
             if(self.match_token(token, TOKEN_KEYWORD, "struct")):
+                start_i = i 
                 try:
-                    (i,struct) = self.parse_cpp_struct(tokens, i)
+                    (i,struct,struct2) = self.parse_cpp_struct(tokens, i)
                 except:
+                    import traceback
+                    tb = sys.exc_info()[2]
+                    traceback.print_tb(tb)
+                    print "Encountered Exception parsing what looked like C++ struct at %s" % (source[start_i:start_i+100])
                     struct = None
                     i += 1
 
@@ -1415,25 +1438,29 @@ class cpp_parser_t(shorte_parser_t):
                     header = None
                 
                 if(struct != None):
-                    parent = None
 
-                    if(header != None):
+                    if(struct["private"] and not extract_private):
+                        pass
+                    else:
+                        parent = None
+
+                        if(header != None):
+                            tag = tag_t()
+                            tag.name = header
+                            tag.contents = struct2.name
+                            tag.source = ""
+                            tag.modifiers = {}
+                            page["tags"].append(tag)
+                            parent = tag
+
+                        #print "Found structure %s" % struct["title"]
                         tag = tag_t()
-                        tag.name = header
-                        tag.contents = struct["title"]
+                        tag.name = "struct"
+                        tag.contents = struct2
                         tag.source = ""
                         tag.modifiers = {}
+                        tag.heading = parent
                         page["tags"].append(tag)
-                        parent = tag
-
-                    #print "Found structure %s" % struct["title"]
-                    tag = tag_t()
-                    tag.name = "struct"
-                    tag.contents = struct
-                    tag.source = ""
-                    tag.modifiers = {}
-                    tag.heading = parent
-                    page["tags"].append(tag)
 
             elif(token["type"] == TOKEN_PREPROCESSOR):
                 text = token["data"]
@@ -1448,26 +1475,29 @@ class cpp_parser_t(shorte_parser_t):
                         i += 1
 
                     if(define != None):
-                        
-                        parent = None
 
-                        header = shorte_get_config("shorte", "header_add_to_define")
-                        if(header != "None"):
+                        if(define.private and not extract_private):
+                            pass
+                        else: 
+                            parent = None
+
+                            header = shorte_get_config("shorte", "header_add_to_define")
+                            if(header != "None"):
+                                tag = tag_t()
+                                tag.name = header
+                                tag.contents = define.name
+                                tag.source = define.name
+                                tag.modifiers = {}
+                                page["tags"].append(tag)
+                                parent = tag
+
                             tag = tag_t()
-                            tag.name = header
-                            tag.contents = define["name"]
-                            tag.source = define["name"]
+                            tag.name = "define"
+                            tag.contents = define
+                            tag.source = define.source
                             tag.modifiers = {}
+                            tag.heading = parent
                             page["tags"].append(tag)
-                            parent = tag
-
-                        tag = tag_t()
-                        tag.name = "define"
-                        tag.contents = define
-                        tag.source = ""
-                        tag.modifiers = {}
-                        tag.heading = parent
-                        page["tags"].append(tag)
 
                 else:
                     i += 1
@@ -1499,35 +1529,36 @@ class cpp_parser_t(shorte_parser_t):
             elif(self.match_token(token, TOKEN_KEYWORD, "enum")):
                 #print "Found enum"
                 try:
-                    (i,enum) = self.parse_cpp_enum(tokens, i)
+                    (i,enum,enum2) = self.parse_cpp_enum(tokens, i)
                 except:
                     i += 1
                     enum = None
 
                 #print enum
-                
                 if(enum != None):
+                    if(enum2.private and not extract_private):
+                        pass
+                    else:
+                        parent = None
 
-                    parent = None
+                        header = shorte_get_config("shorte", "header_add_to_enum")
 
-                    header = shorte_get_config("shorte", "header_add_to_enum")
+                        if(header != "None"):
+                            tag = tag_t()
+                            tag.name = header
+                            tag.contents = enum2.name
+                            tag.source = ""
+                            tag.modifiers = {}
+                            page["tags"].append(tag)
+                            parent = tag
 
-                    if(header != "None"):
                         tag = tag_t()
-                        tag.name = header
-                        tag.contents = enum["title"]
+                        tag.name = "enum"
+                        tag.contents = enum2
                         tag.source = ""
                         tag.modifiers = {}
+                        tag.heading = parent
                         page["tags"].append(tag)
-                        parent = tag
-
-                    tag = tag_t()
-                    tag.name = "enum"
-                    tag.contents = enum
-                    tag.source = ""
-                    tag.modifiers = {}
-                    tag.heading = parent
-                    page["tags"].append(tag)
 
             elif(self.match_token(token, TOKEN_OPEN_BRACE, "{") or self.match_token(token, TOKEN_SEMICOLON, ";")):
                 #print "Found possible function"
@@ -1960,6 +1991,9 @@ The following section describes the methods and structures exported by this modu
     def parse(self, source_file):
 
         self.m_source_file = source_file
+
+        if(source_file.endswith(".tpl")):
+            FATAL("%s does not look like a C/C++ file, please specify the correct parser" % source_file)
 
         input = self.load_source_file(source_file)
 

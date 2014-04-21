@@ -309,7 +309,8 @@ class template_html_t(template_t):
         self.m_theme = ""
         self.m_template_dir = shorte_get_startup_path() + "/templates/"
         self.m_inline = False
-        self.m_include_pdf = False
+        self.m_include_link = False
+        self.m_include_link_type = 'pdf'
         self.m_wikiword_path_prefix = True
         
         self.m_show_code_headers = {}
@@ -341,22 +342,27 @@ class template_html_t(template_t):
 
         return name
 
-    def include_pdf(self, pdf_path, icon_location=""):
+    def include_link(self, pdf_path, icon_location=""):
 
         pdf = ''
-        if(self.m_include_pdf):
+
+        doc_type = self.m_include_link_type
+
+        icon = '%s.png' % doc_type
+
+        if(self.m_include_link):
             img_src = ''
             if(self.is_inline() == True):
-                handle = open(shorte_get_startup_path() + "/templates/shared/pdf.png", "rb")
+                handle = open(shorte_get_startup_path() + "/templates/shared/50x50/%s" % icon, "rb")
                 img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
                 handle.close()
             else:
                 if(len(icon_location) == 0):
-                    img_src = "css/pdf.png"
+                    img_src = "css/%s" % icon
                 else:
-                    img_src = "%s/pdf.png" % icon_location
+                    img_src = "%s/%s" % (icon_location,icon)
 
-            pdf = '''<span style='float:right;'><a href="%s.pdf"><img style='height:50px;padding-top:5px;' src="%s"/></a></span>''' % (pdf_path, img_src)
+            pdf = '''<span style='float:right;'><a href="%s.%s"><img style='height:50px;padding-top:5px;' src="%s"/></a></span>''' % (pdf_path, doc_type, img_src)
 
         return pdf
 
@@ -733,54 +739,13 @@ class template_html_t(template_t):
 
         content = self.format_textblock(tag)
         
-        if(self.is_inline() == True):
-            handle = open(shorte_get_startup_path() + "/templates/shared/%s" % img_src, "rb")
-            img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-            img_src = re.sub("\n", "", img_src)
-
-            handle.close()
-        else:
-            img_src = "css/" + img_src
+        img_src = self.insert_image(img_src)
 
         return note_template.substitute(
             {"contents" : content,
              "image"    : img_src,
              "title"    : label})
     
-    def format_tbd(self, tag):
-
-        content = self.format_textblock(tag)
-
-        img_src = "css/tbd.png"
-        
-        if(self.is_inline() == True):
-            handle = open(shorte_get_startup_path() + "/templates/shared/tbd.png", "rb")
-            img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-            img_src = re.sub("\n", "", img_src)
-
-            handle.close()
-
-
-        return note_template.substitute(
-            {"contents" : content,
-             "image"    : img_src,
-             "title"    : "TBD"})
-    
-    def format_question(self, tag):
-        content = self.format_textblock(tag)
-
-        img_src = "css/question.png"
-
-        if(self.is_inline() == True):
-            handle = open(shorte_get_startup_path() + "/templates/shared/question.png", "rb")
-            img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-            handle.close()
-
-        return note_template.substitute(
-            {"contents" : content,
-             "image"    : img_src,
-             "title"    : "Question"})
-            
     def format_checklist(self, tag):
         
         list = tag.contents
@@ -968,10 +933,14 @@ class template_html_t(template_t):
             struct = tag.contents
 
             desc = ''
-            if(struct.has_key("caption")):
-                desc = self.format_textblock(struct["caption"])
-            elif(struct.has_key("description")):
-                desc = self.format_textblock(struct["description"])
+            name = ''
+
+            if(tag.name == "enum"):
+                desc = self.format_textblock(struct.description)
+                name = struct.name
+            else:
+                desc = self.format_textblock(struct.description)
+                name = struct.name
 
             html += string.Template('''
 <tr valign=top>
@@ -982,7 +951,7 @@ class template_html_t(template_t):
     <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
     <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'>$desc</td>
 </tr>
-''').substitute({"type": tag.name, "name" : self.format_text(struct["title"]), "desc" : desc})
+''').substitute({"type": tag.name, "name" : self.format_text(name), "desc" : desc})
         
         html += '</table><br/>'
 
@@ -1046,27 +1015,19 @@ class template_html_t(template_t):
 
         return html
     
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    ()
-    #|
-    #| DESCRIPTION:
-    #|    
-    #| 
-    #| PARAMETERS:
-    #|    
-    #| 
-    #| RETURNS:
-    #|    
-    #|
-    #+-----------------------------------------------------------------------------
     def format_prototype(self, tag):
+        '''This method is called to format a prototype within an HTML
+           document.
 
-        
+           @param self [I] - The instance of the formatter class
+           @param tag  [I] - The tag containing the prototype
+
+           @return The prototype formatted as HTML
+        '''
+
         template = string.Template("""
         <div class="bordered" style="margin-top:10px;${background}">
-        <div style='background-color:#ccc;padding:10px;'><b>Function:</b> ${name}</div>
+        <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name}</div>
         <div>
             <div style="margin-left: 10px;">
                 <div style="color: #396592; font-weight: bold;">Description:</div>
@@ -1340,12 +1301,19 @@ class template_html_t(template_t):
             function["see_also"] = template_see_also.substitute(params)
         
         is_deprecated = False
-        if(prototype.has_key("deprecated")):
+        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
+            #print "prototype.deprecated = %s" % prototype["deprecated"]
+            #print "         .msg        = %s" % prototype["deprecated_msg"]
             params = {}
-            params["deprecated"] = self.format_text(prototype["deprecated"])
+            params["deprecated"] = self.format_text(prototype["deprecated_msg"])
             function["deprecated"] = template_deprecated.substitute(params)
             is_deprecated = True
-        
+
+        is_private = False
+        function["private"] = ""
+        if(prototype.has_key("private") and prototype["private"] == True):
+            function["private"] = self.insert_image("lock.png", height=20,width=20,wrap=True)
+
         if(prototype.has_key("called_by")):
             params = {}
             params["called_by"] = self.format_text(prototype["called_by"])
@@ -1416,13 +1384,23 @@ class template_html_t(template_t):
     def format_table(self, source, table):
         
         #html = "<div class='tb'><table class='tb'>\n"
-        html = "<table class='bordered'>"
+
+        if(table.has_key("width")):
+            width = 'width="100%"'
+        else:
+            width = ''
+
+        html = "<table class='bordered' %s>" % width
 
         if("title" in table):
-
             html += "<tr><th colspan='%d'>%s</th></tr>\n" % (table["max_cols"], table["title"])
 
         i = 0
+
+        max_cols = table["max_cols"]
+        widths = []
+        if(table.has_key("widths")):
+            widths = table["widths"]
 
         for row in table["rows"]:
             
@@ -1450,7 +1428,16 @@ class template_html_t(template_t):
             elif(row["is_spacer"]):
                 html += "<td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
             else: 
+                cindex = 0
                 for col in row["cols"]:
+
+                    # If this is the first row that has all columns
+                    if(max_cols == len(row["cols"]) and len(widths) != 0):
+                        width='width="%d%%"' % widths[cindex]
+                    else:
+                        width = ''
+
+                    cindex += 1
 
                     if(col.has_key("textblock")):
                         tag = tag_t() 
@@ -1467,15 +1454,15 @@ class template_html_t(template_t):
                         colspan = ''
 
                     if(is_header == True):
-                        html += "<td %s class='header'>%s</td>\n" % (colspan, text)
+                        html += "<td %s %s class='header'>%s</td>\n" % (colspan, width, text)
                     elif(is_subheader == True):
-                        html += "<td %s class='subheader'>%s</td>\n" % (colspan, text)
+                        html += "<td %s %s class='subheader'>%s</td>\n" % (colspan, width, text)
                     elif(is_reserved == True):
-                        html += "<td %s class='reserved'>%s</td>\n" % (colspan, text)
+                        html += "<td %s %s class='reserved'>%s</td>\n" % (colspan, width, text)
                     elif(is_crossed == True):
-                        html += "<td %s class='reserved'><strike>%s</strike></td>\n" % (colspan, text)
+                        html += "<td %s %s class='reserved'><strike>%s</strike></td>\n" % (colspan, width, text)
                     else:
-                        html += "<td %s>%s</td>\n" % (colspan, text)
+                        html += "<td %s %s>%s</td>\n" % (colspan, width, text)
             
             html += "</tr>\n"
 
@@ -1714,6 +1701,24 @@ within an HTML document.
         return html
     
     
+    def insert_image(self, img_src, height=50, width=50, wrap=False, float="", title=""):
+
+        if(self.is_inline() == True):
+            handle = open(shorte_get_startup_path() + "/templates/shared/%dx%d/%s" % (height,width,img_src), "rb")
+            img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
+            img_src = re.sub("\n", "", img_src)
+
+            handle.close()
+        else:
+            img_src = "css/" + img_src
+
+        if(wrap):
+            if(float == "right"):
+                return "<img src='%s' title='%s' style='float:right;'></img>" % (img_src,title)
+            return "<img src='%s' title='%s'></img>" % (img_src,title)
+
+        return img_src
+
     def format_enum(self, tag):
         '''This method is called to format an enum for display within an
            HTML document.
@@ -1724,54 +1729,53 @@ within an HTML document.
            @return The HTML snippet defining the enum
            '''
 
+        enum = tag.contents
 
-        table = tag.contents
-        #print table
+        # The name of the enumeration
+        name = enum.name
+        
+        style = ''
+        if(enum.deprecated):
+            style = "style=\"background: url('css/images/deprecated.png') center;\"";
 
-        if(self.m_engine.get_config("html", "show_enum_values") == "1"):
+        img = ''
+        
+        if(enum.deprecated):
+            img += self.insert_image("icon_error.png", height=20, width=20, wrap=True, float="right", title="This enum is deprecated")
+
+        if(enum.private == True):
+            img += self.insert_image("lock.png", height=20, width=20, wrap=True, float="right", title="This enum is private")
+        
+        
+        if(self.m_engine.get_config("shorte", "show_enum_values") == "1"):
             show_enum_vals = True
-            max_cols = table["max_cols"]
+            max_cols = enum.max_cols
         else:
             show_enum_vals = False
-            max_cols = table["max_cols"] - 1
+            max_cols = enum.max_cols - 1
 
-        show_enum_vals = False
+        values = '<table class="bordered" style="margin-left:5px">'
         
-        html = ''
-        
-        # Append the caption/description
-        if("caption" in table):
-            html += self.format_textblock(table["caption"])
-        elif("description" in table):
-            html += self.format_textblock(table["description"])
-
-
-        html += "<table class='bordered'>\n"
-
-        if("title" in table):
-
-            html += "<tr><th colspan='%d'>%s</th></tr>\n" % (max_cols, table["title"])
+        values += "<tr><th colspan='%d'>Enum Values</th></tr>\n" % (enum.max_cols)
 
         i = 0
 
         if(show_enum_vals):
-            html += '''
+            values += '''
 <tr class='header'>
   <td>Name</td>
   <td>Value</td>
   <td>Description</td>
-  </tr>'''
+</tr>'''
         else:
-            html += '''
+            values += '''
 <tr class='header'>
   <td>Name</td>
   <td>Description</td>
-  </tr>'''
+</tr>'''
         
 
-        for row in table["rows"]:
-
-            
+        for row in enum.values:
             is_subheader = row["is_subheader"]
             is_header    = row["is_header"]
             is_reserved  = row["is_reserved"]
@@ -1779,21 +1783,21 @@ within an HTML document.
             # If this is the first row and it is a header
             # then skip it as it is likely just the table
             # header.
-            if(i == 0 and is_header):
-                i+=1
-                continue
+            #if(i == 0 and is_header):
+            #    i+=1
+            #    continue
 
             if(is_header):
-                html += "    <tr class='header'>\n";
+                values += "    <tr class='header'>\n";
             elif(row["is_caption"]):
-                html += "    <tr class='caption'>\n";
+                values += "    <tr class='caption'>\n";
             else:
-                html += "<tr>\n"
+                values += "<tr valign=top>\n"
 
             if(row["is_caption"]):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (max_cols, self.format_text(row["cols"][0]["text"]))
+                values += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (max_cols, self.format_text(row["cols"][0]["text"]))
             elif(row["is_spacer"]):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
+                values += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
             else: 
 
                 col_index = 0
@@ -1822,27 +1826,46 @@ within an HTML document.
                         continue
                     
                     if(is_header == True):
-                        html += "      <td colspan='%d' class='header'>%s</td>\n" % (colspan, text)
+                        values += "      <td colspan='%d' class='header'>%s</td>\n" % (colspan, text)
                     elif(is_subheader == True):
-                        html += "      <td colspan='%d' class='subheader'>%s</td>\n" % (colspan, text)
+                        values += "      <td colspan='%d' class='subheader'>%s</td>\n" % (colspan, text)
                     elif(is_reserved == True):
-                        html += "      <td colspan='%d' class='reserved'>%s</td>\n" % (colspan, text)
+                        values += "      <td colspan='%d' class='reserved'>%s</td>\n" % (colspan, text)
                     else:
-                        html += "      <td colspan='%d'>%s</td>\n" % (colspan, text)
+                        values += "      <td colspan='%d'>%s</td>\n" % (colspan, text)
 
                     col_index += 1
             
-            html += "</tr>\n"
+            values += "</tr>\n"
 
             i+=1
 
-        #if(self.m_engine.get_config("html", "caption_enum") == "1"):
-        #    if("caption" in table):
-        #        html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
+        values += "</table>"
 
-        html += "</table><br/>"
-        
+        html = string.Template('''
+<div class='bordered' $style>
+<div style='background-color:#ccc;padding:10px;'><b>Enum:</b> ${name}$img</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Values:</div>
+        <div style="margin:0px;">${values}</div>
+    </div>
+</div>
+</div><br/>''').substitute({
+    "style"  : style,
+    "img"    : img,
+    "name"   :  name,
+    "values" : values,
+    "desc"   : self.format_textblock(enum.description)})
+
         return html
+
 
     def format_define(self, tag):
 
@@ -1864,12 +1887,56 @@ within an HTML document.
     </div>
 </div>
 </div><br/>''').substitute({
-    "name" : define["name"],
-    "value" : self.format_textblock(define["value"]),
-    "desc" : self.format_textblock(define["description"])})
+    "name" : define.name,
+    "value" : self.format_textblock(define.value),
+    "desc" : self.format_textblock(define.description)})
 
         return html
 
+    def format_object_example(self, obj):
+
+        if(obj.example == None):
+            return ''
+        
+        template_example = string.Template('''
+                <div style="margin-left:10px;">
+                    <div style="color: #396592; font-weight: bold;">Example:</div>
+                    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
+                        The following example demonstrates the use of this ${type}:<br>
+                    </div>
+                    ${example}
+                </div>
+            
+        ''');
+            
+        example  = obj.example["parsed"]
+        language = obj.example["language"]
+        
+        if(self.m_show_code_headers["example"]):
+            snippet_id = self.m_snippet_id
+            self.m_snippet_id += 1
+            code_header = self.m_template_code_header.substitute(
+                    {"id" : snippet_id,
+                     "style" : "margin-left:10px;margin-top:2px;"})
+            source = template_source.substitute({
+                "id":     snippet_id,
+                "source": self.format_source_code_no_lines(language, example)})
+        else:
+            code_header = ""
+            source = ""
+        
+        example = self.format_source_code(language, example)
+
+        code = template_code.substitute(
+                   {"contents" : example,
+                    "source"   : source,
+                    "code_header" : code_header,
+                    "template" : "code2",
+                    "result"   : ""})
+
+        return template_example.substitute({"example" : code, "type" : obj.type})
+        
+    
     # Called for format a structure for HTML output 
     def format_struct(self, source, struct):
         '''This method is called to format the contents of an @struct tag
@@ -1882,36 +1949,24 @@ within an HTML document.
            @return The HTML output of the structure
         '''
         
-        template_example = string.Template('''
-                <div style="margin-left:10px;">
-                    <div style="color: #396592; font-weight: bold;">Example:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
-                        The following example demonstrates the use of this structure:<br>
-                    </div>
-                    ${example}
-                </div>
-            
-        ''');
         
         html = ""
         
-        if("caption" in struct):
-            html += self.format_textblock(struct["caption"])
-        elif("description" in struct):
-            html += self.format_textblock(struct["description"])
-        
         html += "<table class='bordered'>\n"
         
-        if("title" in struct):
-            html += "<tr><th colspan='%d'>%s</th></tr>\n" % (struct["max_cols"], struct["title"])
+        if(struct.private == True):
+            img = "<img src='css/lock.png'></img>"
+        else:
+            img = ''
+        html += "<tr><th colspan='%d'>%sStructure Fields</th></tr>\n" % (struct.max_cols, img)
        
 
         # If the structure has an image associated with it then
         # display it as part of the HTML describing the structure.
-        if(struct.has_key("image")):
+        if(struct.image != None):
 
-            map_name = struct["title"]
-            name = struct["image"]["path"]
+            map_name = struct.name
+            name = struct.image["path"]
             
             # If inlining is turned on then we need to embed the image
             # into the generated output HTML file.
@@ -1923,9 +1978,9 @@ within an HTML document.
                 name = os.path.basename(name)
 
             
-            html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct["max_cols"], "Diagram")
-            html += struct["image"]["map"]
-            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none'></img></th></td>" % (struct["max_cols"], name, struct["title"])
+            html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.max_cols, "Diagram")
+            html += struct.image["map"]
+            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none'></img></th></td>" % (struct.max_cols, name, struct.name)
         
         html += '''
 <tr class='header'>
@@ -1936,7 +1991,7 @@ within an HTML document.
 
         i = 0
 
-        for field in struct["fields"]:
+        for field in struct.fields:
             
             is_header = False
 
@@ -1979,43 +2034,35 @@ within an HTML document.
             i+=1
         
        
-        #if(self.m_engine.get_config("html", "caption_struct") == "1"):
-        #    if("caption" in struct):
-        #        html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
-        
-
         html += "</table><br/>"
+
+        html_example = self.format_object_example(struct)
         
-        if(struct.has_key("example")):
-
-            example = struct["example"]["parsed"]
-            language = struct["example"]["language"]
-            
-            if(self.m_show_code_headers["example"]):
-                snippet_id = self.m_snippet_id
-                self.m_snippet_id += 1
-                code_header = self.m_template_code_header.substitute(
-                        {"id" : snippet_id,
-                         "style" : "margin-left:10px;margin-top:2px;"})
-                source = template_source.substitute({
-                    "id":     snippet_id,
-                    "source": self.format_source_code_no_lines(language, example)})
-            else:
-                code_header = ""
-                source = ""
-            
-            example = self.format_source_code(language, example)
-
-            code = template_code.substitute(
-                       {"contents" : example,
-                        "source"   : source,
-                        "code_header" : code_header,
-                        "template" : "code2",
-                        "result"   : ""})
-
-            html += template_example.substitute({"example" : code})
-
-
+        style = ''
+        html = string.Template('''
+<div class='bordered' $style>
+<div style='background-color:#ccc;padding:10px;'><b>Struct:</b> ${name}$img</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Fields:</div>
+        <div style="margin:0px;">${values}</div>
+    </div>
+</div>
+${example}
+</div><br/>''').substitute({
+    "style"  : style,
+    "img"    : img,
+    "name"   : struct.name,
+    "values" : html,
+    "example": html_example,
+    "desc"   : self.format_textblock(struct.description)})
+        
         return html
 
     def _expand_links(self, matches):
@@ -2091,6 +2138,7 @@ within an HTML document.
 
         if(image.has_key("width")):
             style += "width:%s;" % image["width"]
+
         if(image.has_key("height")):
             style += "height:%s;" % image["height"]
         if(image.has_key("caption")):
@@ -2373,6 +2421,9 @@ $href_end
             elif(tag in ("hl", "hilite", "highlight")):
                 prefix += "<span style='background-color:yellow;'>"
                 postfix += "</span>"
+            elif(tag in ("done", "complete")):
+                prefix += "<span style='color:green;'>"
+                postfix += "</span>"
             elif(tag in ("star", "starred")):
                 prefix += "<div class='star'>&nbsp;</div>"
                 postfix += ""
@@ -2575,9 +2626,9 @@ $href_end
         elif(name == "note"):
             self.m_contents.append(self.format_note(tag, "Note", "note.png"))
         elif(name == "tbd"):
-            self.m_contents.append(self.format_tbd(tag))
+            self.m_contents.append(self.format_note(tag, "TBD", "tbd.png"))
         elif(name == "question"):
-            self.m_contents.append(self.format_question(tag))
+            self.m_contents.append(self.format_note(tag, "Question", "question.png"))
         elif(name == "warning"):
             self.m_contents.append(self.format_note(tag, "Warning", "warning.png"))
         elif(name == "table"):
@@ -2609,8 +2660,10 @@ $href_end
         elif(name == "questions"):
             self.m_contents.append(self.format_questions(tag))
         elif(name == "functionsummary"):
+            #print "Processing function summary"
             self.m_contents.append(self.format_function_summary(tag))
         elif(name == "typesummary"):
+            #print "Processing typesummary"
             self.m_contents.append(self.format_types_summary(tag))
         elif(name == "embed"):
             self.m_contents.append(self.format_embedded_object(tag))
@@ -2707,7 +2760,7 @@ $href_end
         vars["theme"] = self.m_engine.get_theme();
         vars["date"] = self.m_engine.get_date()
         vars["css"] = self.get_css()
-        vars["pdf"] = self.include_pdf("../" + self.get_pdf_name(), "css/")
+        vars["pdf"] = self.include_link("../" + self.get_pdf_name(), "css/")
         vars["link_index"] = "../index.html"
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
@@ -2875,7 +2928,7 @@ $cnts
              "date" : self.m_engine.get_date(),
              "version" : version,
              "css" : self.get_css("content/"),
-             "pdf" : self.include_pdf(self.get_pdf_name(), "content/css"),
+             "pdf" : self.include_link(self.get_pdf_name(), "content/css"),
              "javascript" : javascript,
              "links" : txt_links,
              "link_index" : "index.html",
@@ -3308,11 +3361,14 @@ div.tblkp  {margin:0px;padding:0px;}
 
         outputdir += "/css/"
 
-        shutil.copy(shorte_get_startup_path() + "/templates/shared/pdf.png", outputdir)
-        shutil.copy(shorte_get_startup_path() + "/templates/shared/question.png", outputdir)
-        shutil.copy(shorte_get_startup_path() + "/templates/shared/note.png", outputdir)
-        shutil.copy(shorte_get_startup_path() + "/templates/shared/warning.png", outputdir)
-        shutil.copy(shorte_get_startup_path() + "/templates/shared/tbd.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/pdf.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/txt.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/question.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/note.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/20x20/lock.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/20x20/icon_error.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/warning.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/tbd.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/star.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/star_small.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/pri_01.png", outputdir)

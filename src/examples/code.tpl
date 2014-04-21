@@ -54,8 +54,8 @@ A Test of Columns
 Blah blah blah
 
 @testcase: category="one"
-:name: Blah
-:desc:
+-- name: Blah
+-- desc:
 This test is used to verify the operation of the device in
 RXAUI mode with both the ingress and egress paths in retimer mode. Only
 the MAC interface is enabled in this test. This test may be run with either
@@ -71,15 +71,15 @@ If an external loopback is present this test performs these steps:
 If no external loopback is present the test performs the same steps except
 traffic is looped across the line interface using the line serial loopback
 
-:status: Passed
-:duration: 10.5s
+-- status: Passed
+-- duration: 10.5s
 
-@h2: if="TEST"
+@h2: if="1"
 Other tests
 
 @testcase: category="two" cascade="false"
-:name: Blah2
-:desc:
+-- name: Blah2
+-- desc:
 This test is used to verify the operation of the device in
 RXAUI mode with both the ingress and egress paths in retimer mode. Only
 the MAC interface is enabled in this test. This test may be run with either
@@ -95,11 +95,11 @@ If an external loopback is present this test performs these steps:
 If no external loopback is present the test performs the same steps except
 traffic is looped across the line interface using the line serial loopback
 
-:status: Failed
+-- status: Failed
 
 @testcase: category="two"
-:name: Blah3
-:desc:
+-- name: Blah3
+-- desc:
 This test is used to verify the operation of the device in
 RXAUI mode with both the ingress and egress paths in retimer mode. Only
 the MAC interface is enabled in this test. This test may be run with either
@@ -115,11 +115,11 @@ If an external loopback is present this test performs these steps:
 If no external loopback is present the test performs the same steps except
 traffic is looped across the line interface using the line serial loopback
 
-:status: Passed
+-- status: Passed
 
 @testcase: category="two"
-:name: Blah4
-:desc:
+-- name: Blah4
+-- desc:
 This test is used to verify the operation of the device in
 RXAUI mode with both the ingress and egress paths in retimer mode. Only
 the MAC interface is enabled in this test. This test may be run with either
@@ -135,7 +135,7 @@ If an external loopback is present this test performs these steps:
 If no external loopback is present the test performs the same steps except
 traffic is looped across the line interface using the line serial loopback
 
-:status: Passed
+-- status: Passed
 
 
 @h1 Code Samples
@@ -145,8 +145,10 @@ This is a test LEEDS_VLT_SUPPLY_1V_TX with @{u,some} @{color:00ff00,more stuff} 
 
     an indented block @{br}
     some more @{br} stuff here
-{{    This
-   is @{u,some} text}}
+
+{{
+This is @{u,some} text
+}}
 
 another block of text and some stuff
 
@@ -165,6 +167,9 @@ and some more stuff
 @typesummary
 
 @h2 Perl Example
+@perl:
+    print "Hello world!\n";
+    print "Hello world2!\n";
 
 @p Blah blah [[code.html->C Example]] with a link to the EPC
 
@@ -193,9 +198,6 @@ data and     a     few *spaces*
 - three     ||     | XXX  | tmp
 - Reserved  ||     | XXX  | tmp
 
-@perl:
-    print "Hello world!\n";
-    print "Hello world2!\n";
 
 @inkscape: src="examples/temp.svg"
 
@@ -319,14 +321,16 @@ puts "Hello world!"
 
 
 
-@struct: title="blah2" caption="blah blah" diagram="show:yes,align:128,bitorder:decrement"
+@struct: name="blah2" description="blah blah" diagram="show:yes,align:128,bitorder:decrement"
+-- fields:
 - Field | Name          | Description
 - 8x8   | serial_number | The serial number of the device
                           with some more description
 - 8x12  | part_number   | The part number of the device
 - 4     | some_number   | Some random 4 byte number
 
-@struct: title="blah3" caption="blah blah"
+@struct: name="blah3" description="blah blah"
+-- fields:
 - Field | Name          | Description
 - 8x8   | serial_number | The serial number of the device
                           with some more description
@@ -448,7 +452,8 @@ Q: This is another question with some more information
 A: This is the answer to that question
 
 @h4 e_my_test
-@enum: name="e_my_test" caption="This is a test enum"
+@enum: name="e_my_test" description="This is a test enum"
+-- values:
 - Name | Value | Description
 - LEEDS_VLT_SUPPLY_1V_TX | 0x0 |  1V supply TX 
 - LEEDS_VLT_SUPPLY_1V_RX | 0x1 |  1V supply RX 
@@ -461,7 +466,8 @@ A: This is the answer to that question
 - LEEDS_VLT_SUPPLY_TP_N | 0x8 |  Test point N 
 
 @h4 e_my_test2
-@enum: name="e_my_test2" caption="This is a test enum"
+@enum: name="e_my_test2" description="This is a test enum"
+-- values:
 - Name | Value | Description
 - LEEDS_VLT_SUPPLY_1V_TX | 0x0 |  1V supply TX 
 - LEEDS_VLT_SUPPLY_1V_RX | 0x1 |  1V supply RX 

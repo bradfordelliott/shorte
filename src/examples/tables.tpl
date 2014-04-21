@@ -70,7 +70,7 @@ This is a test of the table captions
                 and some more blah blah blah
 
 @h2 A Table with no Title
-@table
+@table: widths="10,20,20,50" width="100%"
 - One | Two | Three | Four
 - Blah | Blah | blah blah | blah blah
 -& Blah 2 | Blah 2 | Blah 3 | Blah 4

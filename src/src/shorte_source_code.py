@@ -513,3 +513,84 @@ class source_code_t:
         return tags_output
 
 
+class type_t:
+    def __init__(self):
+        self.name = ""
+        self.description = ""
+        self.deprecated = False
+        self.deprecated_msg = ""
+        self.private = False
+        self.comment = None
+        self.source = None
+        self.example = None
+        self.type = ""
+
+class enum_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.values = {}
+        self.max_cols = 0
+        self.type = "enum"
+
+    def __str__(self):
+        attrs = "Enum"
+        attrs += "  name:       %s\n" % self.name
+        attrs += "  desc:       %s\n" % self.description
+        attrs += "  deprecated: %s (%s)\n" % (self.deprecated, self.deprecated_msg)
+        attrs += "  private:    %s\n" % self.private
+        attrs += "  values:\n"  
+
+        for val in self.values:
+            attrs += "    "
+            for col in val['cols']:
+                attrs += col["text"]
+                break
+            attrs += "\n"
+
+        return attrs
+
+class struct_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.fields = {}
+        self.record = None
+        self.image = None
+        self.type = "struct"
+
+    def __str__(self):
+        attrs = "Struct"
+        attrs += "  name:     %s\n" % self.name
+        attrs += "  desc:     %s\n" % self.description
+        attrs += "  deprecated: %s (%s)\n" % (self.deprecated, self.deprecated_msg)
+        attrs += "  private:    %s\n" % self.private
+        attrs += "  fields:\n"  
+
+        for val in self.fields:
+            attrs += "    "
+            for col in val['cols']:
+                attrs += col["text"]
+                break
+            attrs += "\n"
+
+        return attrs
+
+class prototype_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.type = "prototype"
+
+    def __str__(self):
+        attrs =  "Prototype"
+        attrs += "  name:      %s\n" % self.name
+        attrs += "  desc:      %s\n" % self.description
+
+        return attrs
+
+
+class define_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.value = ""
+        self.type = "define"
+
+

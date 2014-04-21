@@ -2,9 +2,11 @@
 import sys
 import re
 sys.path.append('.')
+sys.path.append('../..')
 import libs.cairo_access
 from libs.cairo_access import *
 import math
+
 
 import src.graphing.linegraph as linegraph
 import src.graphing.bargraph as bargraph

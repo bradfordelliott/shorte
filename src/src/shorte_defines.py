@@ -59,19 +59,25 @@ class tag_t:
         self.heading = None
 
 g_tools = tools_t()
-
+g_startup_path = None
 def shorte_get_startup_path():
+    global g_startup_path
+    if(g_startup_path != None):
+        return g_startup_path
+
     argv0 = sys.argv[0]
     argv0 = argv0.replace("\\", "/")
     
     startup_path = os.path.dirname(argv0)
     if(startup_path == ""):
         startup_path = os.getcwd()
+
+    #print "STARTUP PATH: %s" % startup_path
     
     # Replace any Cygwin path references
-    startup_path = startup_path.replace("/cygdrive/c/", "C:/")
+    g_startup_path = startup_path.replace("/cygdrive/c/", "C:/")
 
-    return startup_path
+    return g_startup_path
 
 class topic_t:
     def __init__(self, vars):
@@ -554,11 +560,33 @@ def zipper(dir, zip_file):
     zip.close()
     return zip_file
 
+def shorte_image_resize(input_path, output_path, height, width):
+    import Image
+    im = Image.open(input_path)
+
+    output = im.resize((width,height), Image.ANTIALIAS)
+
+    output.save(output_path) 
+
+
+def INFO(message):
+    if(sys.platform == "win32"):
+        import console_utils as con
+        default_colors = con.get_text_attr()
+        con.set_text_attr(con.FOREGROUND_MAGENTA)
+        sys.stdout.write("INFO: ")
+        con.set_text_attr(default_colors)
+        sys.stdout.flush()
+        sys.stdout.write("%s\n" % message)
+        sys.stdout.flush()
+    else:
+        print "\033[90mINFO:\033[0m %s" % message
+
 def WARNING(message):
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
-        con.set_text_attr(con.FOREGROUND_RED)
+        con.set_text_attr(con.FOREGROUND_YELLOW)
         sys.stdout.write("WARNING: ")
         con.set_text_attr(default_colors)
         sys.stdout.flush()

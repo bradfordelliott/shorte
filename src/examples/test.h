@@ -1,6 +1,6 @@
 
 /**
- * @h1 Section 1!!!!
+ * @h1 Test.h: Section 1!!!!
  * This is a test block with some random data here. For
  * some reason this breaks the parsing of func1
  *
@@ -11,7 +11,7 @@
  * @text
  * Blah blah blah
  *
- * @h2 Function Summary
+ * @h2 Test.h: Function Summary
  * @functionsummary
  * @text
  */
@@ -30,12 +30,35 @@ public:
  *
  * @example
  *    tail.one = 0;
+ * 
+ * @private
  */
 typedef struct cs_mx_handle_table_entry_tag
 {
     /** This is a field */
     int one;
 } head, tail;
+
+/**
+ * This is a description of my private enum
+ *
+ * @private
+ * @deprecated This enum shouldn't be used anymore
+ */
+typedef enum
+{
+    /** This is a test */
+    e_private_test = 0
+}test_dot_h_my_private_enum;
+
+/**
+ * This is a description of my public enum
+ */
+typedef enum
+{
+    /** This is a test */
+    e_public_test = 0
+}public_enum;
 
 struct cs_mx_handle_table_entry_tag * head, * tail;
 
@@ -142,6 +165,11 @@ int private_func1(int blah, char* dummy);
 /**
  * This is the structure that gets passed to an application registered
  * interrupt handler.
+ *
+ * @example
+ *    cs_t100_irq_handler_data_t handler;
+ *    handler.dev_id     = NULL;
+ *    handler.irq_handle = NULL;
  */
 typedef struct {
     /** Hello ! */

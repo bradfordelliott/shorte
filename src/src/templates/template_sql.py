@@ -537,18 +537,15 @@ within an HTML document.
         obj = tag.contents
 
         struct = {}
-        struct["name"] = obj["title"]
-        struct["desc"] = ''
+        struct["name"] = obj.name
+        struct["desc"] = self.format_textblock(obj.description)
         struct["help"] = self.sqlize(help)
-        
-        if(obj.has_key("caption")):
-            struct["desc"] = self.format_textblock(obj["caption"])
         
         sql = template.substitute(struct)
 
         # Add the structure fields
-        if(obj.has_key('fields')):
-            for field in obj['fields']:
+        if(obj.fields):
+            for field in obj.fields:
 
                 if(field["attrs"][1].has_key("textblock")):
                     name = field["attrs"][1]["textblock"][0]['text'].strip()
@@ -580,18 +577,16 @@ within an HTML document.
         obj = tag.contents
 
         enum = {}
-        enum["name"] = obj["title"]
+        enum["name"] = obj.name
         enum["desc"] = ''
         enum["help"] = self.sqlize(help)
-        
-        if(obj.has_key("caption")):
-            enum["desc"] = self.format_textblock(obj["caption"])
+        enum["desc"] = self.format_textblock(obj.description)
         
         sql = template.substitute(enum)
         
         # Add the enum values
         i = 0
-        for row in obj["rows"]:
+        for row in obj.values:
             if i == 0:
                 i += 1
                 continue

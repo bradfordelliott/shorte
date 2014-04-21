@@ -713,8 +713,8 @@ class template_twiki_t(template_t):
     def append_source_code(self, tag):
 
         rc = ''
-        rc += self.format_source_code(tag["name"], tag["contents"])
-        result = tag["result"]
+        rc += self.format_source_code(tag.name, tag.contents)
+        result = tag.result
 
         if(result != None):
 
@@ -741,26 +741,26 @@ class template_twiki_t(template_t):
     
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 
         if(name == "#"):
             return
         if(name in "p"):
-            self.m_contents += self.format_text(tag["contents"]) + "\n"
+            self.m_contents += self.format_text(tag.contents) + "\n"
         elif(name == "pre"):
-            self.m_contents += "<sticky><pre style='margin-left:30px;'>" + self.format_text(tag["contents"]) + "</pre></sticky>\n"
+            self.m_contents += "<sticky><pre style='margin-left:30px;'>" + self.format_text(tag.contents) + "</pre></sticky>\n"
         elif(name == "note"):
-            self.m_contents += self.format_note(self.format_text(tag["contents"]))
+            self.m_contents += self.format_note(self.format_text(tag.contents))
         elif(name == "table"):
-            self.m_contents += self.format_table(tag["source"], tag["contents"])
+            self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag["source"], tag["contents"])
+            self.m_contents += self.format_struct(tag.source, tag.contents)
         elif(name == "ul"):
-            self.m_contents += self.format_list(tag["contents"], False)
+            self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_contents += self.format_list(tag["contents"], True)
+            self.m_contents += self.format_list(tag.contents, True)
         #elif(name == "checklist"):
         #    self.m_contents += self.format_checklist(tag)
         #elif(name == "image"):
@@ -861,10 +861,10 @@ td.divider{border: 1px solid black;padding: 0px;background-color: #E0E0E0;}
 
             for tag in tags:
 
-                if(self.m_engine.tag_is_header(tag["name"])):
-                    self.append_header(tag["name"], tag["contents"], output_file)
+                if(self.m_engine.tag_is_header(tag.name)):
+                    self.append_header(tag.name, tag.contents, output_file)
 
-                elif(self.m_engine.tag_is_source_code(tag["name"])):
+                elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
 
                 else:

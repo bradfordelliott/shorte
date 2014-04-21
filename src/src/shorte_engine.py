@@ -307,7 +307,7 @@ class engine_t:
     #+-----------------------------------------------------------------------------
     def parse_page(self, source_file):
 
-        print "Page: %s" % source_file
+        #print "Page: %s" % source_file
         self.m_parser.parse(source_file)
 
         #for link in self.m_parser.m_wiki_links:
@@ -900,7 +900,8 @@ def exists(s):
     def generate_packages(self, package_list, theme_list, options, zip_output=None):
 
         inline = False
-        include_pdf = False
+        include_link = False
+        include_link_type = 'pdf'
 
         #print "package_list: %s" % package_list
         #print "theme_list:   %s" % theme_list
@@ -916,13 +917,21 @@ def exists(s):
             if(package == "html"):
                 packages.append(PACKAGE_TYPE_HTML)
                 if('pdf' in package_list):
-                    include_pdf = True
+                    include_link = True
+                    include_link_type = 'pdf'
+                elif('txt' in package_list):
+                    include_link = True
+                    include_link_type = 'txt'
         
             elif(package == "html_inline"):
                 inline = True
                 packages.append("html_inline")
                 if('pdf' in package_list):
-                    include_pdf = True
+                    include_link = True
+                    include_link_type = 'pdf'
+                elif('txt' in package_list):
+                    include_link = True
+                    include_link_type = 'txt'
         
             else:
                 packages.append(package)
@@ -982,7 +991,9 @@ def exists(s):
                 template = template_html_t(self, indexer)
                 template.m_inline = inline
                 template.set_template_dir(pkg)
-                template.m_include_pdf = include_pdf
+                
+                template.m_include_link = include_link
+                template.m_include_link_type = include_link_type
             
             # Set the output template and generate the
             # contents in the output directory

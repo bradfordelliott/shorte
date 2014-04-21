@@ -73,6 +73,24 @@ class parser_t:
 
         do_nothing=1
     
+    def get_attribute_as_bool(self, attributes, key):
+    
+        if(attributes.has_key(key)):
+            val = attributes[key]
+    
+            if(val in ("True", "true", "1")):
+                return True
+            elif(val in ("False", "false", "0")):
+                return False
+            else:
+                FATAL("Can't parse attribute")
+    
+        return False
+    
+    def get_attribute_as_string(self, attributes, key):
+        if(attributes.has_key(key)):
+            return attributes[key]
+        return ""
     
     def strip_indent(self, input, indent):
         

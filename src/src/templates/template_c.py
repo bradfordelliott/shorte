@@ -500,7 +500,7 @@ $fields
     
     def append(self, tag):
         
-        name = tag["name"]
+        name = tag.name
 
         #print("Appending tag %s" % name)
 
@@ -517,7 +517,7 @@ $fields
         elif(name == "enum"):
             self.m_header["structs"] += self.format_enum(tag)
         else:
-            print "WARNING: Skipping %s for now" % name
+            WARNING("Tag %s not supported" % name)
 
 
     def get_contents(self, what):

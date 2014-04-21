@@ -128,26 +128,16 @@ class template_shorte_t(template_t):
 
         self.m_num_enums += 1
 
-        table = tag.contents
+        enum = tag.contents
         
-        if(table.has_key("title")):
-            title = table["title"]
-        else:
-            title = ""
-
+        title = enum.name
         title = re.sub("[ \n]+", " ", title).strip()
 
-        if(table.has_key("caption")):
-            #print "ENUM CAPTION: %s" % table["caption"]
-            caption = self.format_textblock(table["caption"])
-        else:
-            caption = ""
-
-        #caption = re.sub("[ \n]+", " ", caption).strip()
+        description = self.format_textblock(enum.description)
 
         values = ''
 
-        for row in table["rows"]:
+        for row in enum.values:
 
             name = row["cols"][0]["text"]
             val  = row["cols"][1]["text"]
@@ -166,8 +156,8 @@ class template_shorte_t(template_t):
 
         template = string.Template("""
 $heading
-@enum: name="$name" caption='''
-$caption
+@enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" description='''
+$description
 '''
 - Enum Name | Enum Value | Enum Description
 $values
@@ -182,39 +172,47 @@ $values
         vars = {}
         vars["name"] = title
         vars["heading"] = heading
-        vars["caption"] = caption
+        vars["description"] = description
         vars["values"] = values
+        vars["private"] = enum.private
+        vars["deprecated"] = enum.deprecated
+        vars["deprecated_msg"] = enum.deprecated_msg
 
         return template.substitute(vars)
 
     def format_define(self, tag):
 
         template = string.Template("""
+# Start of define
 $heading
-@define: name="$name" value="$value" description='''
-$caption
+@define: name="$name" value="$value" private="$private" deprecated="$deprecated" description='''
+$description
 '''
-        """)
+#End of define
+""")
 
         vars = {}
 
+        define = tag.contents
+
         add_heading = shorte_get_config("shorte", "header_add_to_define")
         if(tag.heading == None and ("None" != add_heading)):
-            heading = '@%s %s' % (add_heading, tag.contents["name"])
+            heading = '@%s %s' % (add_heading, define.name)
         else:
             heading = ''
 
         heading = ''
 
-        vars["name"] = tag.contents["name"]
+        vars["name"] = define.name
         vars["heading"] = heading
-        val = tag.contents["desc"]
-        val = re.sub("\|", "\\\\\\|", val)
-        vars["caption"] = trim_leading_indent(val)
+        val = self.format_textblock(define.description)
+        vars["description"] = trim_leading_indent(val)
             
-        val = tag.contents["value"]
+        val = define.value
         val = re.sub("\|", "\\\\\\|", val)
         vars["value"] = escape_string(val)
+        vars["private"] = define.private
+        vars["deprecated"] = define.deprecated
 
         return template.substitute(vars)
 
@@ -224,30 +222,24 @@ $caption
         
         self.m_num_structs += 1
 
-        table = tag.contents
+        struct = tag.contents
 
-        if(table.has_key("title")):
-            title = table["title"]
-        else:
-            title = ""
-
+        title = struct.name
         title = re.sub("[ \n]+", " ", title).strip()
 
-        if(table.has_key("caption")):
-            caption = self.format_textblock(table["caption"])
-        else:
-            caption = ""
+        caption = self.format_textblock(struct.description)
 
         values = ''
 
+
+        # DEBUG BRAD: Need to figure out how to deal with this
+        fields = "rows"
+        attributes = "cols"
+
         fields = "fields"
         attributes = "attrs"
-        if(table.has_key("rows")):
-            fields = "rows"
-            attributes = "cols"
 
-
-        for row in table[fields]:
+        for row in struct.fields:
 
             bits = row[attributes][0]["text"]
             name = row[attributes][1]["text"]
@@ -259,11 +251,13 @@ $caption
 
         template = string.Template("""
 $heading
-@struct: name="$name" title="$title" caption='''
-$caption
+@struct: name="$name" private="$private" deprecated="$deprecated" description='''
+$description
 '''
+-- fields:
 - Type | Name | Description
 $values
+$example
 """)
 
         vars = {}
@@ -279,14 +273,29 @@ $values
 
         #print "HEADING: %s" % heading
 
+        vars["example"] = self.format_object_example(struct)
+
         vars["name"] = title
         vars["parent"] = parent
-        vars["title"] = title
         vars["heading"] = heading
-        vars["caption"] = caption
+        vars["description"] = caption
         vars["values"] = values
+        vars["deprecated"] = "False"
+        vars["private"] = "False"
 
         return template.substitute(vars)
+
+    def format_object_example(self, obj):
+        example = ''
+
+        if(obj.example != None):
+            example = '''
+-- example:
+%s
+''' % self.format_source_code(obj.example["unparsed"])
+
+        return example
+
 
     def format_prototype(self, tag):
 
@@ -351,10 +360,10 @@ $heading
 
 
         if(prototype.has_key("example")):
-            function["example"] = '''
--- example:
-%s
-''' % self.format_source_code(prototype["example"]["unparsed"])
+            from src.shorte_source_code import *
+            func = prototype_t()
+            func.example = prototype["example"]
+            function["example"] = self.format_object_example(func)
         
         if(prototype.has_key("pseudocode")):
             function["pseudocode"] = '''
@@ -370,7 +379,7 @@ $heading
         else:
             function["seealso"] = ''
         
-        if(prototype.has_key("deprecated") and prototype["deprecated"] != None):
+        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
             function["deprecated"] = '''
 -- deprecated:
 %s
@@ -408,16 +417,21 @@ $heading
         #print "  data: [",  tag.contents , "]"
         #print "  output: %s" % output
 
-        return output + "\n"
+        return output
 
     def format_tag(self, tag):
+        #print "NAME: %s" % tag.name
         if(tag.name in "text"):
             if(0 == len(tag.source.strip())):
                 return ''
 
         output = "@%s" % tag.name
         if(tag.modifiers):
-            output += ": %s" % tag.modifiers
+            modifiers = []
+            for mod in tag.modifiers:
+                modifiers.append("%s='''%s'''" % (mod, tag.modifiers[mod]))
+
+            output += ": %s" % ' '.join(modifiers)
         else:
             pass
 

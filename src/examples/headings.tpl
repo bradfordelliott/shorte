@@ -52,6 +52,9 @@ and even a table
 
 @h1 A final section
 
+@h2 Heading 2
+@h3 Heading 3
+
 @h4 A fourth heading
 Some more stuff here
 
@@ -61,3 +64,4 @@ Some more stuff here
 Heading Other
 
 This is some text here
+

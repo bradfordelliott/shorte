@@ -735,6 +735,23 @@ class shorte_parser_t(parser_t):
         else:
             mark_reserved = False
 
+        if(modifiers.has_key("widths")):
+            vals = modifiers["widths"].split(",")
+            total = 0
+            widths = []
+            for i in range(0, len(vals)):
+                total += int(vals[i])
+                widths.append(int(vals[i]))
+
+            if(total != 100):
+                FATAL("Table widths do not add up to 100% at %s:%d" % (self.m_current_file, self.m_current_line))
+
+            table["widths"] = widths
+
+        if(modifiers.has_key("width")):
+            table["width"] = modifiers["width"]
+
+
         rows = []
         buffer = ""
 
@@ -960,21 +977,80 @@ a C/C++ like define that looks like:
                        with the define.
 '''
 
-        define = {}
-        define["name"] = attributes["name"]
+        define = define_t()
+        define.name = attributes["name"]
         if(attributes.has_key("description")):
             description = attributes["description"]
-            define["desc"] = unescape_string(attributes["description"])
+            define.description = unescape_string(attributes["description"])
         else:
-            define["desc"] = unescape_string(attributes["caption"])
+            define.description = unescape_string(attributes["caption"])
             description = attributes["caption"]
-        define["value"] = unescape_string(attributes["value"])
-        define["source"] = source
+        define.value = unescape_string(attributes["value"])
+        define.source = source
 
-        define["description"] = self.parse_textblock(trim_leading_indent(description))
+        define.description = self.parse_textblock(trim_leading_indent(description))
 
         return define
 
+    def parse_object_example(self, source, obj):
+        code = self.m_engine.m_source_code_analyzer
+        language = "code"
+        example = code.parse_source_code(language, source)
+        obj.example = {}
+        obj.example["language"] = language
+        obj.example["parsed"] = example 
+        obj.example["unparsed"] = source
+
+    def parse_enum(self, source, modifiers):
+        table = self.parse_table(source, modifiers)
+
+        enum = enum_t()
+        enum.name = table["name"]
+            
+        enum.description = table["description"]
+        enum.values = table["rows"]
+        enum.max_cols = table["max_cols"]
+        enum.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        enum.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        enum.private = self.get_attribute_as_bool(modifiers, "private")
+
+        # Remove the first row which just describes the enum
+        # values.
+        enum.values.pop(0)
+
+        i = 0
+        num_rows = len(table["rows"])
+
+        #table["rows"][0]["is_header"] = True
+
+        # Create Wiki links for each of the enums
+        for i in range(1, num_rows):
+
+            e = table["rows"][i]["cols"][0]["text"]
+            #print "ENUM: [%s]" % e
+            
+            word = wikiword_t()
+            word.wikiword = e
+            word.label = e
+            word.is_bookmark = True
+
+            if(modifiers.has_key("wikiword")):
+                word.wikiword = modifiers["wikiword"]
+
+            word.link = os.path.basename(self.m_current_file)
+            self.m_wiki_links[word.wikiword] = word
+
+        
+        # If the table has no title then default it
+        if(not table.has_key("title")):
+            if(table.has_key("name")):
+                table["title"] = table["name"]
+            else:
+                table["title"] = "Enums"
+
+        table["name"] = table["title"]
+
+        return enum
 
     def parse_struct(self, source, modifiers):
         '''This method is called to parse an @struct tag containing a structure
@@ -987,8 +1063,10 @@ a C/C++ like define that looks like:
            @return A dictionary defining the structure
         '''
 
+        struct2 = struct_t()
         struct = {}
         struct["fields"] = []
+        struct2.fields = []
 
         fields_are_bytes = False
         fields_are_bits = False
@@ -1001,312 +1079,349 @@ a C/C++ like define that looks like:
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
                 struct[modifier] = self.parse_textblock(modifiers[modifier])
+                struct2.description = self.parse_textblock(modifiers[modifier])
             else:
                 struct[modifier] = modifiers[modifier]
+
 
         rows = []
         buffer = ""
 
-        # Split the structure into individual rows. This is
-        # done by looking for the \n- sequence which separates
-        # each line
-        for i in range(0, len(source)):
-            if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
-                #print "BUFFER = [%s]" % buffer
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("example:")):
+                example = section[8:len(section)]
+                self.parse_object_example(example, struct2)
+
+            elif(section.startswith("fields:")):
+                    
+                source = section[7:len(section)].strip()
+
+                # Split the structure into individual rows. This is
+                # done by looking for the \n- sequence which separates
+                # each line
+                for i in range(0, len(source)):
+                    if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
+                        #print "BUFFER = [%s]" % buffer
+
+                        if(buffer != ''):
+                            rows.append(buffer)
+                            buffer = ''
+                    else:
+                        buffer += source[i]
 
                 if(buffer != ''):
+                    #print "BUFFER = [%s]" % buffer
                     rows.append(buffer)
-                    buffer = ''
-            else:
-                buffer += source[i]
 
-        if(buffer != ''):
-            #print "BUFFER = [%s]" % buffer
-            rows.append(buffer)
+                is_header = True
+                is_subheader = False
+                is_caption = False
 
-        is_header = True
-        is_subheader = False
-        is_caption = False
+                max_cols = 0
+                row_num = 0
+                pos_last = 0
 
-        max_cols = 0
-        row_num = 0
-        pos_last = 0
-
-        fields = []
-        
-        for row in rows:
-            
-            field = {}
-            field["attrs"] = []
-            field["is_reserved"] = False
-            field["is_header"] = False
-            field["is_title"] = False
-            field["is_subheader"] = False
-            field["is_caption"] = False
-            field["is_spacer"] = False
-            field["is_array"] = False
-
-            # Mark the first row as a header
-            if(row_num == 0):
-                field["is_header"] = True
-
-            row_num = row_num + 1
-            
-            cols = []
-            if(row == ""):
-                continue
-
-            
-            is_spaces = re.compile("^[ \t]*$", re.DOTALL)
-            if(is_spaces.match(row)):
-                field["is_spacer"] = True
-            
-            row = row + "\n"
-            
-            STATE_NORMAL     = 0
-            STATE_ESCAPE     = 4
-            
-            states = []
-            state = STATE_NORMAL
-            states.append(state)
-            
-            col = ""
-            colspan = 1
-            colnum = 1
-            
-            pos = 0
-            start = 0
-
-            
-            # Check to see the leading characters in each
-            # row. If they are &, *, or ^ then they have
-            # special significance.
-            if(row[0] == '&'):
-                field["is_subheader"] = True
-                start = 1
-            elif(row[0] == '*'):
-                field["is_header"] = True
-                start = 1
-            elif(row[0] == '^'):
-                field["is_caption"] = True
-                start = 1
-
-            i = start
-            end = len(row)
-            
-            while i < end:
+                fields = []
                 
-                if(i < pos):
-                    i += 1
-                    continue
-                
-                if(state == STATE_NORMAL):
-                    if(row[i] == '\\'):
-                        states.append(state)
-                        state = STATE_ESCAPE
+                for row in rows:
+                    
+                    field = {}
+                    field["attrs"] = []
+                    field["is_reserved"] = False
+                    field["is_header"] = False
+                    field["is_title"] = False
+                    field["is_subheader"] = False
+                    field["is_caption"] = False
+                    field["is_spacer"] = False
+                    field["is_array"] = False
 
-                    elif(row[i] == '@' and row[i+1] == '{'):
-			states.append(state)
-			state = STATE_INLINE_STYLING
-			col += row[i]
-			col += row[i+1]
-			i += 1
+                    # Mark the first row as a header
+                    if(row_num == 0):
+                        field["is_header"] = True
 
-                    elif(row[i] == '|'):
+                    row_num = row_num + 1
+                    
+                    cols = []
+                    if(row == ""):
+                        continue
+
+                    
+                    is_spaces = re.compile("^[ \t]*$", re.DOTALL)
+                    if(is_spaces.match(row)):
+                        field["is_spacer"] = True
+                    
+                    row = row + "\n"
+                    
+                    STATE_NORMAL     = 0
+                    STATE_ESCAPE     = 4
+                    
+                    states = []
+                    state = STATE_NORMAL
+                    states.append(state)
+                    
+                    col = ""
+                    colspan = 1
+                    colnum = 1
+                    
+                    pos = 0
+                    start = 0
+
+                    
+                    # Check to see the leading characters in each
+                    # row. If they are &, *, or ^ then they have
+                    # special significance.
+                    if(row[0] == '&'):
+                        field["is_subheader"] = True
+                        start = 1
+                    elif(row[0] == '*'):
+                        field["is_header"] = True
+                        start = 1
+                    elif(row[0] == '^'):
+                        field["is_caption"] = True
+                        start = 1
+
+                    i = start
+                    end = len(row)
+                    
+                    while i < end:
                         
-                        colnum += 1
-                        if(colnum > max_cols):
-                            max_cols = colnum
+                        if(i < pos):
+                            i += 1
+                            continue
                         
-                        #print "ATTR: [%s]" % col
+                        if(state == STATE_NORMAL):
+                            if(row[i] == '\\'):
+                                states.append(state)
+                                state = STATE_ESCAPE
 
-                        attr = col.strip()
+                            elif(row[i] == '@' and row[i+1] == '{'):
+		        	states.append(state)
+		        	state = STATE_INLINE_STYLING
+		        	col += row[i]
+		        	col += row[i+1]
+		        	i += 1
+
+                            elif(row[i] == '|'):
+                                
+                                colnum += 1
+                                if(colnum > max_cols):
+                                    max_cols = colnum
+                                
+                                #print "ATTR: [%s]" % col
+
+                                attr = col.strip()
+                                tmp = {}
+                                tmp["textblock"] = self.parse_textblock(col)
+
+                                # Strip any formatting characters
+                                attr = self.strip_formatting(attr)
+                                text = attr.strip()
+
+                                if(mark_reserved and self.is_reserved_text(text)):
+                                    field["is_reserved"] = True
+
+                                #field["attrs"].append(attr)
+                                
+                                tmp["text"] = attr
+                                field["attrs"].append(tmp)
+
+                                col = ""
+
+                            else:
+                                col += row[i]
+
+	                elif(state == STATE_INLINE_STYLING):
+	                    col += row[i]
+		            if(row[i] == '}'):
+                            	state = states.pop()
+
+                        elif(state == STATE_ESCAPE):
+                            col += row[i]
+                            state = states.pop()
+
+                        i += 1
+
+
+                    if(col != ""):
+                        
                         tmp = {}
                         tmp["textblock"] = self.parse_textblock(col)
+                                
+                        attr = col.strip()
 
-                        # Strip any formatting characters
-                        attr = self.strip_formatting(attr)
-                        text = attr.strip()
-
-                        if(mark_reserved and self.is_reserved_text(text)):
+                        if(attr == "Reserved" or attr == 'reserved' or attr == 'Rsvd' or attr == 'rsvd'):
                             field["is_reserved"] = True
 
-                        #field["attrs"].append(attr)
-                        
                         tmp["text"] = attr
+
                         field["attrs"].append(tmp)
 
-                        col = ""
+                    #print field
 
-                    else:
-                        col += row[i]
+                    fields.append(field)
 
-	        elif(state == STATE_INLINE_STYLING):
-	            col += row[i]
-		    if(row[i] == '}'):
-                    	state = states.pop()
+                for field in fields:
+                    if(not fields_are_bytes):
+                        bits = field["attrs"][0]["text"]
 
-                elif(state == STATE_ESCAPE):
-                    col += row[i]
-                    state = states.pop()
+                        if(bits.find("b") != -1):
+                            fields_are_bits = True
 
-                i += 1
+                type = ""
+                for field in fields:
 
+                    if(field["is_header"]):
+                        continue
 
-            if(col != ""):
-                
-                tmp = {}
-                tmp["textblock"] = self.parse_textblock(col)
-                        
-                attr = col.strip()
+                    if(field["is_spacer"]):
+                        width = 0
+                        start = 0
+                        end = 0
 
-                if(attr == "Reserved" or attr == 'reserved' or attr == 'Rsvd' or attr == 'rsvd'):
-                    field["is_reserved"] = True
+                    elif(fields_are_bytes):
 
-                tmp["text"] = attr
+                        bytes = field["attrs"][0]["text"]
 
-                field["attrs"].append(tmp)
+                        if((bytes[0] >= '0') and (bytes[0] <= '9')):
+                            parts = bytes.split("x") 
 
-            #print field
+                            #print parts
 
-            fields.append(field)
+                            if(len(parts) == 2):
+                                type = int(parts[0].strip())
+                                num  = int(parts[1].strip())
 
-        for field in fields:
-            if(not fields_are_bytes):
-                bits = field["attrs"][0]["text"]
+                                field["is_array"]        = True
+                                field["array_elem_size"] = type
 
-                if(bits.find("b") != -1):
-                    fields_are_bits = True
+                                #print("type = %d" % type)
+                                #print("num = %d" % num)
 
-        type = ""
-        for field in fields:
+                                width = (type * num)
 
-            if(field["is_header"]):
-                continue
+                            else:
+                                width = int(parts[0].strip()) * 8
 
-            if(field["is_spacer"]):
-                width = 0
-                start = 0
-                end = 0
-
-            elif(fields_are_bytes):
-
-                bytes = field["attrs"][0]["text"]
-
-                if((bytes[0] >= '0') and (bytes[0] <= '9')):
-                    parts = bytes.split("x") 
-
-                    #print parts
-
-                    if(len(parts) == 2):
-                        type = int(parts[0].strip())
-                        num  = int(parts[1].strip())
-
-                        field["is_array"]        = True
-                        field["array_elem_size"] = type
-
-                        #print("type = %d" % type)
-                        #print("num = %d" % num)
-
-                        width = (type * num)
-
-                    else:
-                        width = int(parts[0].strip()) * 8
-
-                    start += width
-                    end += start
-                else:
-                    width = 0
-                    type = bytes
-
-            elif(fields_are_bits):
-
-                bits = field["attrs"][0]["text"]
-
-                if((bits[0] >= '0') and (bits[0] <= '9')):
-                    #print "BITS: %s" % bits
-                    width = int(bits.strip()[0:len(bits)-1])
-                    start += width
-                    end += start
-                    type = "unknown"
-                else:
-                    width = 0
-                    type = bits
-
-            else:
-                bits = field["attrs"][0]["text"]
-
-                # If it's not the header then see if we should insert
-                # a reserved field befor this one to accomodate any gaps
-                # in the data structure
-                if((bits[0] >= '0') and (bits[0] <= '9')):
-
-                    #print "BITS: %s" % bits
-                    parts = bits.split("-")
-
-                    if(len(parts) == 2):
-                        start = int(parts[0].strip())
-                        end   = int(parts[1].strip())
-
-                        width = int(end - start + 1)
-                    else:
-                        width = 1
-                        start = int(bits.strip())
-                        end = start
-
-                    #print "START: %d:%d (%d)" % (start, end, pos_last)
-
-                    # If there was a gap between this field and
-                    # the last then automatically add a reserved
-                    # field.
-                    if(start != pos_last):
-
-                        new_start = pos_last
-                        new_end = start - 1
-                        new_width = new_end - new_start + 1
-
-                        new_field = {}
-                        new_field["width"] = new_width
-                        new_field["start"] = new_start
-                        new_field["end"] = new_end
-                        new_field["attrs"] = []
-
-                        if(new_width > 1):
-                            new_field["attrs"].append("%d - %d" % (new_start, new_end))
+                            start += width
+                            end += start
                         else:
-                            new_field["attrs"].append("%d" % (new_start))
-                                
-                        new_field["attrs"].append("Reserved")
-                        new_field["attrs"].append("Automatically generated")
-                        new_field["is_reserved"] = True
-                        new_field["is_header"] = False
-                        new_field["is_title"] = False
-                        new_field["is_subheader"] =  field["is_subheader"]
-                        new_field["is_caption"] = False
-                        new_field["is_spacer"] = False
-                        new_field["is_array"] = False
-                        new_field["type"] = ""
-                        struct["fields"].append(new_field)
+                            width = 0
+                            type = bytes
 
-                    pos_last = end+1
-                else:
-                    width = 0
-                    start = 0
-                    end = 0
+                    elif(fields_are_bits):
 
-            field["width"] = width
-            field["start"] = start
-            field["end"] = end
-            field["type"] = type
+                        bits = field["attrs"][0]["text"]
 
-            struct["fields"].append(field)
+                        if((bits[0] >= '0') and (bits[0] <= '9')):
+                            #print "BITS: %s" % bits
+                            width = int(bits.strip()[0:len(bits)-1])
+                            start += width
+                            end += start
+                            type = "unknown"
+                        else:
+                            width = 0
+                            type = bits
+
+                    else:
+                        bits = field["attrs"][0]["text"]
+
+                        # If it's not the header then see if we should insert
+                        # a reserved field befor this one to accomodate any gaps
+                        # in the data structure
+                        if((bits[0] >= '0') and (bits[0] <= '9')):
+
+                            #print "BITS: %s" % bits
+                            parts = bits.split("-")
+
+                            if(len(parts) == 2):
+                                start = int(parts[0].strip())
+                                end   = int(parts[1].strip())
+
+                                width = int(end - start + 1)
+                            else:
+                                width = 1
+                                start = int(bits.strip())
+                                end = start
+
+                            #print "START: %d:%d (%d)" % (start, end, pos_last)
+
+                            # If there was a gap between this field and
+                            # the last then automatically add a reserved
+                            # field.
+                            if(start != pos_last):
+
+                                new_start = pos_last
+                                new_end = start - 1
+                                new_width = new_end - new_start + 1
+
+                                new_field = {}
+                                new_field["width"] = new_width
+                                new_field["start"] = new_start
+                                new_field["end"] = new_end
+                                new_field["attrs"] = []
+
+                                if(new_width > 1):
+                                    new_field["attrs"].append("%d - %d" % (new_start, new_end))
+                                else:
+                                    new_field["attrs"].append("%d" % (new_start))
+                                        
+                                new_field["attrs"].append("Reserved")
+                                new_field["attrs"].append("Automatically generated")
+                                new_field["is_reserved"] = True
+                                new_field["is_header"] = False
+                                new_field["is_title"] = False
+                                new_field["is_subheader"] =  field["is_subheader"]
+                                new_field["is_caption"] = False
+                                new_field["is_spacer"] = False
+                                new_field["is_array"] = False
+                                new_field["type"] = ""
+                                struct["fields"].append(new_field)
+                                struct2.fields.append(new_field)
+
+                            pos_last = end+1
+                        else:
+                            width = 0
+                            start = 0
+                            end = 0
+
+                    field["width"] = width
+                    field["start"] = start
+                    field["end"] = end
+                    field["type"] = type
+
+                    struct["fields"].append(field)
+                    struct2.fields.append(field)
 
         #print "MAX_COLS = %d" % max_cols
 
         struct["max_cols"] = max_cols
+        struct2.max_cols = max_cols
+
         index = len(self.m_engine.m_images)
         image_name = "record_%d.png" % index
-        struct["title"] = modifiers["title"]
+        struct["title"] = modifiers["name"]
+        struct["name"] = modifiers["name"]
+        struct2.name = modifiers["name"]
+        struct["private"] = False
+        struct["deprecated"] = False
+
+        if(modifiers.has_key("private")):
+            if(modifiers["private"] in ("True", "true", "1")):
+                struct["private"] = True
+        if(modifiers.has_key("deprecated")):
+            if(modifiers["deprecated"] in ("True", "true", "1")):
+                struct["deprecated"] = True
+        
+        struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        struct2.private = self.get_attribute_as_bool(modifiers, "private")
             
         # Generate a record describing the structure
         desc = ''
@@ -1363,8 +1478,9 @@ a C/C++ like define that looks like:
             struct["image"]["reference"] = self.m_current_file
 
         struct["record"] = record
+        struct2.record = record
 
-        return struct
+        return (struct,struct2)
     
     def parse_checklist(self, source, modifiers):
 
@@ -1413,7 +1529,7 @@ a C/C++ like define that looks like:
 
     def parse_testcase(self, source, modifiers):
         
-        splitter = re.compile("^:[ \t]*", re.MULTILINE)
+        splitter = re.compile("^(:|--)[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
 
         vars = {}
@@ -1585,7 +1701,8 @@ a C/C++ like define that looks like:
                     vars["see_also"] = section[9:len(section)].strip()
                 
                 elif(section.startswith("deprecated:")):
-                    vars["deprecated"] = section[11:len(section)].strip()
+                    vars["deprecated"] = True
+                    vars["deprecated_msg"] = section[11:len(section)].strip()
 
 
         return vars
@@ -1952,7 +2069,8 @@ else:
 
         elif(name == "struct"):
             modifiers["treat_fields_as"] = "bytes"
-            tag.contents = self.parse_struct(data, modifiers)
+            (struct,struct2) = self.parse_struct(data, modifiers)
+            tag.contents = struct2
 
         elif(name == "define"):
             tag.contents = self.parse_define(data, modifiers)
@@ -2082,42 +2200,8 @@ else:
             tag.contents = self.parse_checklist(data, modifiers)
 
         elif(name == "enum"):
-            tag.contents = self.parse_table(data, modifiers)
+            tag.contents = self.parse_enum(data, modifiers)
             tag.name = "enum"
-            
-            table = tag.contents
-            
-            i = 0
-            num_rows = len(table["rows"])
-
-            table["rows"][0]["is_header"] = True
-
-            # Create Wiki links for each of the enums
-            for i in range(1, num_rows):
-
-                enum = table["rows"][i]["cols"][0]["text"]
-                #print "ENUM: [%s]" % enum
-                
-                word = wikiword_t()
-                word.wikiword = enum
-                word.label = enum
-                word.is_bookmark = True
-
-                if(modifiers.has_key("wikiword")):
-                    word.wikiword = modifiers["wikiword"]
-
-                word.link = os.path.basename(self.m_current_file)
-                self.m_wiki_links[word.wikiword] = word
-
-            
-            # If the table has no title then default it
-            if(not table.has_key("title")):
-                if(table.has_key("name")):
-                    table["title"] = table["name"]
-                else:
-                    table["title"] = "Enums"
-
-            table["name"] = table["title"]
 
         elif(name == "acronyms"):
             tag.contents = self.parse_table(data, modifiers)

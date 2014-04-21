@@ -12,7 +12,7 @@ a conditional block below:
 @pre
 <\?
     result = "Conditional text"
-    result += "more text"
+    result += " more text"
 ?>
 
 @text
@@ -20,6 +20,7 @@ However, this block does get expanded and it expands to the word:
 
 @{b,<?
 result = "Conditional text"
+result += " more text"
 ?>}
 
 

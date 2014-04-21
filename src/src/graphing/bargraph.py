@@ -1,8 +1,8 @@
 #!/usr/bin/python
 import sys
 import re
-import cairo_access
-from cairo_access import *
+import libs.cairo_access as cairo_access
+from libs.cairo_access import *
 import math
 
 from graph import graph_t

@@ -15,7 +15,7 @@
  * - Three | Four
  */
 
-#define my_test2 0 /* TODO ccw consider making this dynamic */
+#define test_dot_c_my_test2 0 /* TODO ccw consider making this dynamic */
 
 /**
  * A definition to parse with a description
@@ -35,12 +35,12 @@
  *
  * and more paragraphs
  */
-#define TEST 0
+#define TEST_DOT_C_TEST 0
 
 /** Another define
  * with a multi-line description
  * and a "quote" built-in */
-#define BLAH_BLAH_BLAH "This is my define here"
+#define TEST_DOT_C_BLAH_BLAH_BLAH "This is my define here"
 
 
 /** 
@@ -88,7 +88,7 @@ typedef enum
 
     /** Some value for b */
     yyy = 2,
-}blah;
+}e_test_dot_c_blah;
 
 
 /** This is a description of mystruct
@@ -104,7 +104,7 @@ typedef struct
 
     /** This is a description of field 'b' */
     char* b;
-}mystruct_t;
+}test_dot_c_mystruct_t;
 
 /** THis is a test
  *
@@ -115,7 +115,7 @@ typedef struct
     /** Test */
     int y;
 
-}mystruct2_t;
+}test_dot_c_mystruct2_t;
 
 /**
  * The supported PRBS polynomials 
@@ -174,7 +174,7 @@ typedef enum
     /** 1 + x^5 + x^58  */
     CS4224_PRBS_Tx_2exp58 = 0x6,
 
-}e_cs4224_prbs_polynomial;
+}e_test_dot_c_cs4224_prbs_polynomial;
 
 
 /**
@@ -214,12 +214,12 @@ typedef enum
  *     my_test(blah,dummy);
  *
  * @see
- *     my_test21
+ *     test_dot_c_my_test21
  *
  * @deprecated This method has been deprecated. Please
  *             refer to my_test21 for future use.
  */
-int my_test(int blah, bool* dummy)
+int test_dot_c_my_test(int blah, bool* dummy)
 {
 
     return TRUE;
@@ -232,19 +232,19 @@ int my_test(int blah, bool* dummy)
  *
  * @heading Blah Blah
  */
-int my_test21(int blah)
+int test_dot_c_my_test21(int blah)
 {
     return FALSE;
 }
 
-int my_undocumented_function(int main)
+int test_dot_c_my_undocumented_function(int main)
 {
 }
 
 /**
  * @private
  */
-int my_private_function(void)
+int test_dot_c_my_private_function(void)
 {
 }
 

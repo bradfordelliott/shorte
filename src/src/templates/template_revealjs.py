@@ -130,9 +130,9 @@ class template_revealjs_t(template_html_t):
         elif(name == "note"):
             self.m_contents.append(self.format_note(tag, "Note", "note.png"))
         elif(name == "tbd"):
-            self.m_contents.append(self.format_tbd(tag))
+            self.m_contents.append(self.format_note(tag, "TBD", "tbd.png"))
         elif(name == "question"):
-            self.m_contents.append(self.format_question(tag))
+            self.m_contents.append(self.format_note(tag, "Question", "question.png"))
         elif(name == "warning"):
             self.m_contents.append(self.format_note(tag, "Warning", "warning.png"))
         elif(name == "table"):
