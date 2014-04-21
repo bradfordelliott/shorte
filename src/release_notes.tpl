@@ -6,7 +6,11 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.63 (Apr xx, 2014)
+@h3 Version 1.0.64 (Apr 21, 2014)
+- Build issues
+    - Cleaned up cross-platform build environment, primarily for windows
+
+@h3 Version 1.0.63 (Apr 21, 2014)
 - Templates
     - Cleaned up some of the images and added icons for text doc links
     - ODT/PDF
