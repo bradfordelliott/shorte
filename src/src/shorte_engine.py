@@ -23,6 +23,88 @@ from src.templates.template_sql import template_sql_t
 from src.templates.template_mediawiki import template_mediawiki_t
 from src.templates.template_revealjs import template_revealjs_t
 
+class document_info_t:
+    '''This class is used to manage the attributes associated
+       with a shorte document'''
+
+    def __init__(self):
+        '''Class constructor'''
+
+        self.m_docnumber = None
+        self.m_docversion = None
+        self.m_docsubitle = ""
+        self.m_doctitle = ""
+        self.m_docauthor = None
+        self.m_revision_history = None
+        self.m_footer_title = None
+        self.m_footer_subtitle = None
+
+    def version(self):
+        if(self.m_docversion == None):
+            return "N/A"
+
+        return self.m_docversion
+
+    def set_version(self, version):
+        if(self.m_docversion == None):
+            self.m_docversion = version
+
+    def author(self):
+        if(self.m_docauthor == None):
+            return "N/A"
+
+        return self.m_docauthor
+
+    def set_author(self, author):
+        if(self.m_docauthor == None):
+            self.m_docauthor = author
+
+    def copyright_date(self):
+        return "2014"
+
+    def customer(self):
+        return ""
+
+    def footer_title(self):
+        if(self.m_footer_title == None):
+            return "Cortina Systems, Inc. Confidential"
+        return self.m_footer_title
+
+    def set_footer_title(self, title):
+        if(self.m_footer_title == None):
+            #INFO("set_footer_title: %s" % title)
+            self.m_footer_title = title
+
+    def set_footer_subtitle(self, title):
+        if(self.m_footer_subtitle == None):
+            #DEBUG("set_footer_subtitle: %s" % title)
+            self.m_footer_subtitle = title
+
+    def footer_subtitle(self):
+        if(self.m_footer_subtitle == None):
+            return ""
+        return self.m_footer_subtitle
+    
+    def revision_history(self):
+        return self.m_revision_history
+
+    def set_revision_history(self, revision_history):
+        if(self.m_revision_history == None):
+            self.m_revision_history = revision_history
+
+    def number(self):
+        return self.m_docnumber
+
+    def set_number(self, number):
+        if(self.m_docnumber == None):
+            self.m_docnumber = number
+
+    def title(self):
+        return self.m_doctitle
+
+    def subtitle(self):
+        return self.m_docsubtitle
+
 #+------------------------------------------------------------------------------
 #|
 #| CLASS: engine_t
@@ -50,12 +132,8 @@ class engine_t:
         self.m_imagemaps = {}
         self.m_macros = {}
 
-        self.m_docsubtitle = ""
-        self.m_docversion = None
         self.m_package = ""
-        self.m_docnumber = None
-        self.m_docauthor = None
-        self.m_revision_history = None
+        self.m_doc_info = document_info_t()
 
         self.m_output_filename = None
 
@@ -100,9 +178,6 @@ class engine_t:
         if(self.m_parser != None):
             self.m_parser.reset()
 
-    def get_doc_revision_history(self):
-        return self.m_revision_history
-
     def set_theme(self, theme):
         self.m_theme = theme
 
@@ -124,7 +199,7 @@ class engine_t:
         return self.m_parser.get_subtitle()
 
     def set_version(self, version):
-        self.m_docversion = version
+        self.m_doc_info.set_version(version)
 
     def set_package(self, package):
         self.m_package = package
@@ -133,27 +208,11 @@ class engine_t:
         self.m_template = template
         self.m_template.m_title = self.m_parser.get_title()
 
-
-
-    def get_version(self):
-
-        if(self.m_docversion == None):
-            return "N/A"
-        return self.m_docversion
-
-    def get_author(self):
-        if(self.m_docauthor == None):
-            return "N/A"
-        return self.m_docauthor
+    def get_doc_info(self):
+        return self.m_doc_info
 
     def get_date(self):
         return self.m_date
-
-    def get_doc_number(self):
-        if(self.m_docnumber == None):
-            return ""
-
-        return self.m_docnumber
 
     def get_output_dir(self):
         return self.m_output_directory
@@ -687,7 +746,7 @@ class engine_t:
         # First evaluate any code snippets
         pages = self.m_parser.get_pages()
 
-        version = self.get_version()
+        version = self.get_doc_info().version()
 
         for page in pages:
 
@@ -783,7 +842,7 @@ else:
         # First evaluate any code snippets
         pages = self.m_parser.get_pages()
 
-        version = self.get_version()
+        version = self.get_doc_info().version()
 
         for page in pages:
 

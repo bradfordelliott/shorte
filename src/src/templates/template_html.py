@@ -2756,7 +2756,7 @@ $href_end
 
         vars["rightmenu"] = "" #right_menu
         vars["src"] = "<a href='%s'>%s</a>" % (os.path.basename(source_file), os.path.basename(source_file))
-        vars["version"] = self.m_engine.get_version();
+        vars["version"] = self.m_engine.get_doc_info().version();
         vars["theme"] = self.m_engine.get_theme();
         vars["date"] = self.m_engine.get_date()
         vars["css"] = self.get_css()
@@ -3443,7 +3443,7 @@ div.tblkp  {margin:0px;padding:0px;}
         vars = {}
         vars["rightmenu"] = ""
         vars["src"] = ""
-        vars["version"] = self.m_engine.get_version();
+        vars["version"] = self.m_engine.get_doc_info().version();
         vars["theme"] = self.m_engine.get_theme()
         vars["date"] = datetime.date.today()
         vars["css"] = self.get_css()
@@ -3463,7 +3463,7 @@ div.tblkp  {margin:0px;padding:0px;}
 
     def generate_revision_history_page(self, output):
         
-        history = self.m_engine.get_doc_revision_history()
+        history = self.m_engine.get_doc_info().revision_history()
 
         if(history != None):
             history["title"] = "Revision History"
@@ -3475,7 +3475,7 @@ div.tblkp  {margin:0px;padding:0px;}
         vars = {}
         vars["rightmenu"] = ""
         vars["src"] = ""
-        vars["version"] = self.m_engine.get_version();
+        vars["version"] = self.m_engine.get_doc_info().version();
         vars["theme"] = self.m_engine.get_theme()
         vars["date"] = datetime.date.today()
         vars["css"] = self.get_css()

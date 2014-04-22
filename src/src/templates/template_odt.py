@@ -565,12 +565,10 @@ class template_odt_t(template_t):
     
     
     <style:style style:name="shorte_acronym_col1" style:family="table-column">
-    <!--<style:table-column-properties style:rel-column-width="5000*"/>-->
-    <style:table-column-properties style:use-optimal-column-width="true"/>
+    <style:table-column-properties style:rel-column-width="2000*"/>
     </style:style>
     <style:style style:name="shorte_acronym_col2" style:family="table-column">
-    <!--<style:table-column-properties style:rel-column-width="5000*"/>-->
-    <style:table-column-properties style:use-optimal-column-width="true"/>
+    <style:table-column-properties style:rel-column-width="5000*"/>
     </style:style>
     
     <style:style style:name="shorte_func_summary_col1" style:family="table-column">
@@ -3083,7 +3081,8 @@ class template_odt_t(template_t):
 
         if(table != None):
             table["title"] = "Revision History"
-            table["column-styles"] = ["shorte_type_summary_col2", "shorte_type_summary_col2", "shorte_type_summary_col2"]
+            table["widths"] = [10,30,60]
+            #table["column-styles"] = ["shorte_type_summary_col2", "shorte_type_summary_col2", "shorte_type_summary_col2"]
             if(replace_paragraph):
                 output = self.__format_table("", tag)
             else:
@@ -3198,12 +3197,15 @@ class template_odt_t(template_t):
         xml = re.sub("DOCUMENT_SHORTTITLE", self.get_title_short(), xml)
         xml = re.sub("DOCUMENT_TITLE", self.get_title(), xml)
         xml = re.sub("DOCUMENT_SUBTITLE", self.m_engine.get_subtitle(), xml)
-        xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_version(), xml)
-        xml = re.sub("DOCUMENT_CUSTOMER", "N/A", xml)
+        xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_doc_info().version(), xml)
+        xml = re.sub("DOCUMENT_CUSTOMER", self.m_engine.get_doc_info().customer(), xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
-        xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_number(), xml)
+        xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_info().number(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_TITLE", self.m_engine.get_doc_info().footer_title(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_SUBTITLE", self.m_engine.get_doc_info().footer_subtitle(), xml)
+        xml = re.sub("DOCUMENT_COPYRIGHT_DATE", self.m_engine.get_doc_info().copyright_date(), xml)
 
-        xml = re.sub("<text:p text:style-name=\"[A-Za-z0-9_]+\">DOCUMENT_REVISION_HISTORY</text:p>", self.__format_revision_history(self.m_engine.get_doc_revision_history()), xml)
+        xml = re.sub("<text:p text:style-name=\"[A-Za-z0-9_]+\">DOCUMENT_REVISION_HISTORY</text:p>", self.__format_revision_history(self.m_engine.get_doc_info().revision_history()), xml)
         #xml = re.sub("DOCUMENT_REVISION_HISTORY", self.__format_revision_history(self.m_engine.get_doc_revision_history(), False), xml)
 
         pages = self._doc_pages_to_xml()
@@ -3331,10 +3333,13 @@ class template_odt_t(template_t):
         xml = re.sub("DOCUMENT_SHORTTITLE", self.get_title_short(), xml)
         xml = re.sub("DOCUMENT_TITLE", self.get_title(), xml)
         xml = re.sub("DOCUMENT_SUBTITLE", self.m_engine.get_subtitle(), xml, 0)
-        xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_version(), xml)
-        xml = re.sub("DOCUMENT_CUSTOMER", "N/A", xml)
+        xml = re.sub("DOCUMENT_VERSION", self.m_engine.get_doc_info().version(), xml)
+        xml = re.sub("DOCUMENT_CUSTOMER", self.m_engine.get_doc_info().customer(), xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
-        xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_number(), xml)
+        xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_info().number(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_TITLE", self.m_engine.get_doc_info().footer_title(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_SUBTITLE", self.m_engine.get_doc_info().footer_subtitle(), xml)
+        xml = re.sub("DOCUMENT_COPYRIGHT_DATE", self.m_engine.get_doc_info().copyright_date(), xml)
 
         xml = re.sub("<text:outline-style style:name=\"Outline\">.*?</text:outline-style>", doc_styles["outline"], xml)
         

@@ -233,14 +233,14 @@ test_sequences:
 	python shorte.py -f examples/sequences.tpl -p "html+pdf" --theme=cortina -o build-output/sequences_pdf
 
 test_templates:
-#	python shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
-#	python shorte.py -f examples/template_test.tpl -p "word" -o build-output/template_tests/word
-#	python shorte.py -f examples/template_test.tpl -p "odt" -o build-output/template_tests/odt
-#	python shorte.py -f examples/template_test.tpl -p "mergefile" -o build-output/template_tests/mergefile
-#	python shorte.py -f examples/template_test.tpl -p "html" -o build-output/template_tests/html
-#	python shorte.py -f examples/template_test.tpl -p "reveal.js" -o build-output/template_tests/revealjs
-#	python shorte.py -f examples/template_test.tpl -p "twiki" -o build-output/template_tests/twiki
-#	python shorte.py -f examples/template_test.tpl -p "mediawiki" -o build-output/template_tests/mediawiki
+	python shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
+	python shorte.py -f examples/template_test.tpl -p "word" -o build-output/template_tests/word
+	python shorte.py -f examples/template_test.tpl -p "odt" -o build-output/template_tests/odt
+	python shorte.py -f examples/template_test.tpl -p "mergefile" -o build-output/template_tests/mergefile
+	python shorte.py -f examples/template_test.tpl -p "html" -o build-output/template_tests/html
+	python shorte.py -f examples/template_test.tpl -p "reveal.js" -o build-output/template_tests/revealjs
+	python shorte.py -f examples/template_test.tpl -p "twiki" -o build-output/template_tests/twiki
+	python shorte.py -f examples/template_test.tpl -p "mediawiki" -o build-output/template_tests/mediawiki
 	python shorte.py -f examples/template_test.tpl -p "c" -o build-output/template_tests/c
 	python shorte.py -f examples/template_test.tpl -p "shorte" -o build-output/template_tests/shorte
 	python shorte.py -f examples/template_test.tpl -p "sql" -o build-output/template_tests/sql
@@ -341,6 +341,12 @@ release: release_notes
 	-rm -rf ../build-output/examples/*.svg
 	-rm -rf ../build-output/examples/test.tpl
 	-rm -rf ../build-output/examples/tmp.tpl
+	cd ../build-output && chmod -R o+x *
+	cd ../build-output && chmod -R o+r *
+	cd ../build-output && chmod -R g+x *
+	cd ../build-output && chmod -R g+r *
+	cd ../build-output && chmod 755 .
+	cd ../build-output && find . -type d -exec chmod "o+x" {} \;
 	cd ../build-output && ${archive}
 
 release_win32:

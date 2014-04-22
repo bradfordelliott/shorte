@@ -9,6 +9,9 @@ class custom_styles(styles):
         #self.table_indent = 0.65
         #self.list_bullet_indent  = 0.2
         #self.list_bullet_base    = 2.5
+
+        self.list_bullet_text_indent = 0.4
+
         self.standard_indent = 0
 
     def custom_styles(self):

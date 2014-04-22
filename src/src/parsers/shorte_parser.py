@@ -25,6 +25,7 @@ from shorte_parser_base import parser_t
 from src.templates.template_shorte import template_shorte_t
 
 import src.graphing.sequence_diagram as sequence_diagram
+import src.shorte_defines
 
 g_cairo_loaded = False
 try:
@@ -112,6 +113,9 @@ class shorte_parser_t(parser_t):
             "docfilename"     : True,
             "outdir"          : True,
             "sourcedir"       : True,
+
+            "doc.footer.title" : True,
+            "doc.footer.subtitle" : True,
 
             # Layout tags
             "columns"         : True,
@@ -252,25 +256,25 @@ class shorte_parser_t(parser_t):
         header["filename"] = None
         header["outdir"] = None
         header["sourcedir"] = None
+        header["footer.title"] = None
+        header["footer.subtitle"] = None
 
         for tag in tags:
-            if(tag.name == "doctitle"):
+            if(tag.name in ("title", "doctitle", "doc.title")):
                 header["title"] = tag.contents
-            elif(tag.name == "docfilename"):
+            elif(tag.name in ("docfilename", "doc.filename")):
                 header["filename"] = tag.contents
-            elif(tag.name == "title"):
-                header["title"] = tag.contents
-            elif(tag.name == "docsubtitle"):
+            elif(tag.name in ("docsubtitle", "doc.subtitle")):
                 header["subtitle"] = tag.contents
-            elif(tag.name == "docauthor"):
+            elif(tag.name in ("docauthor", "doc.author")):
                 header["author"] = tag.contents
             elif(tag.name == "csource"):
                 header["csource"] = tag.contents
-            elif(tag.name == "docversion"):
+            elif(tag.name in ("docversion", "doc.version")):
                 header["version"] = tag.contents
-            elif(tag.name == "docnumber"):
+            elif(tag.name in ("docnumber", "doc.number")):
                 header["number"] = tag.contents
-            elif(tag.name == "docrevisions"):
+            elif(tag.name in ("docrevisions", "doc.revisions")):
                 header["revision_history"] = self.parse_table(tag.contents, tag.modifiers)
             elif(tag.name == "sourcedir"):
                 header["sourcedir"] = tag.contents
@@ -279,6 +283,15 @@ class shorte_parser_t(parser_t):
             elif(tag.name == "outdir"):
                 header["outdir"] = tag.contents
                 self.m_engine.set_output_dir(header["outdir"])
+
+            elif(tag.name == "doc.footer.title"):
+                header["footer.title"] = tag.contents
+                self.m_engine.get_doc_info().set_footer_title(tag.contents)
+            elif(tag.name == "doc.footer.subtitle"):
+                header["footer.subtitle"] = tag.contents
+                self.m_engine.get_doc_info().set_footer_subtitle(tag.contents)
+            else:
+                WARNING("Unknown tag %s" % tag)
 
         return header
 
@@ -1738,11 +1751,11 @@ a C/C++ like define that looks like:
             image["name"] = basename
             image["ext"] = ext
         
-            print "Image:"
-            print "  src:  %s" % image["src"]
-            print "  name: %s" % image["name"]
-            print "  ext:  %s" % image["ext"]
-            #sys.exit(-1)
+            src.shorte_defines.DEBUG('''Image:
+    src:  %s
+    name: %s
+    ext:  %s
+''' % (image["src"], image["name"], image["ext"]))
         
         if(tags.has_key("height")):
             image["height"] = tags["height"]
@@ -2759,15 +2772,14 @@ def exists(s):
                 self.m_title = title
             if(self.m_subtitle == None):
                 self.m_subtitle = subtitle
-            if(self.m_engine.m_docversion == None):
-                self.m_engine.m_docversion = version
-            if(self.m_engine.m_docnumber == None):
-                self.m_engine.m_docnumber = number
-            if(self.m_engine.m_docauthor == None):
-                if(header.has_key("author")):
-                    self.m_engine.m_docauthor = header["author"]
-            if(self.m_engine.m_revision_history == None):
-                self.m_engine.m_revision_history = revision_history
+
+            self.m_engine.get_doc_info().set_version(version)
+            self.m_engine.get_doc_info().set_number(number)
+            if(header.has_key("author")):
+                self.m_engine.get_doc_info().set_author(header["author"])
+
+            self.m_engine.get_doc_info().set_revision_history(revision_history)
+
             if(self.m_engine.m_output_filename == None):
                 if(header.has_key("filename")):
                     self.m_engine.m_output_filename = header["filename"]

@@ -1274,7 +1274,7 @@ $box_end
 
         xml = re.sub("DOCUMENT_TITLE",    self.xmlize(self.m_engine.get_title()), xml)
         xml = re.sub("DOCUMENT_SUBTITLE", self.xmlize(self.m_engine.get_subtitle()), xml)
-        xml = re.sub("DOCUMENT_VERSION",  self.xmlize(self.m_engine.get_version()), xml)
+        xml = re.sub("DOCUMENT_VERSION",  self.xmlize(self.m_engine.get_doc_info().version()), xml)
 
         xml = re.sub("<wx:sub-section.*?[[INSERT_CONTENTS_HERE]].*?<\/wx:sub-section>", pages, xml)
         xml = re.sub("__NEWLINE__", '\\\\n', xml)

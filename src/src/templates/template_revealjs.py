@@ -265,8 +265,8 @@ class template_revealjs_t(template_html_t):
         html = tpl.substitute({"title" : title,
                         "subtitle" : subtitle,
                         "date" : self.m_engine.get_date(),
-                        "version" : self.m_engine.get_version(),
-                        "author" : self.m_engine.get_author(),
+                        "version" : self.m_engine.get_doc_info().version(),
+                        "author" : self.m_engine.get_doc_info().author(),
                         "contents" : self.get_contents()})
 
         output = open(output_file, "wt")

@@ -6,9 +6,20 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.65 (Apr 21, 2014)
+- Templates
+    - Re-worked the ODT templates to remove the differences between the
+      public and private Cortina templates. Added new document header
+      tags to support the footer attributes required by the RTP team. 
+- Other
+    - Added framework to change verbosity of output. Still needs more work.
+    - Added footer attributes to the document header section. Re-worked the
+      heading management to be slightly more maintainable
+
 @h3 Version 1.0.64 (Apr 21, 2014)
 - Build issues
     - Cleaned up cross-platform build environment, primarily for windows
+-
 
 @h3 Version 1.0.63 (Apr 21, 2014)
 - Templates

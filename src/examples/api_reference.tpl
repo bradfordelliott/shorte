@@ -1,5 +1,9 @@
 @doctitle API Reference
 @docsubtitle Example
+@docnumber 1234
+@docversion 0.1
+@doc.footer.title My Footer
+@doc.footer.subtitle My Subtitle
 
 @body
 
@@ -16,3 +20,8 @@ This might be an introduction to the code
 
 
 @include "examples/test.c"
+
+@acronyms
+- Acronym | Definition
+- EPT     | Egress Parser Table
+- EPC     | Egress Parser CAM

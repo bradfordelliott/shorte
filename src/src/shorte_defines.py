@@ -568,21 +568,47 @@ def shorte_image_resize(input_path, output_path, height, width):
 
     output.save(output_path) 
 
+g_verbose = False
+def shorte_set_verbosity(enable):
+    global g_verbose
+    g_verbose = enable
 
-def INFO(message):
+def DEBUG(message):
+    '''This method is used to manage debug statements in the log file'''
+    if(g_verbose):
+        print "DEBUG: %s" % message
+
+def STATUS(message):
+    '''This method is used to manage import status messages in the log file'''
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
         con.set_text_attr(con.FOREGROUND_MAGENTA)
-        sys.stdout.write("INFO: ")
+        sys.stdout.write("STATUS: ")
         con.set_text_attr(default_colors)
         sys.stdout.flush()
         sys.stdout.write("%s\n" % message)
         sys.stdout.flush()
     else:
-        print "\033[90mINFO:\033[0m %s" % message
+        print "\033[90mSTATUS:\033[0m %s" % message
+
+def INFO(message):
+    '''This method is used to manage informational messages in the log file that are more import than debug statements'''
+    if(g_verbose):
+        if(sys.platform == "win32"):
+            import console_utils as con
+            default_colors = con.get_text_attr()
+            con.set_text_attr(con.FOREGROUND_MAGENTA)
+            sys.stdout.write("INFO: ")
+            con.set_text_attr(default_colors)
+            sys.stdout.flush()
+            sys.stdout.write("%s\n" % message)
+            sys.stdout.flush()
+        else:
+            print "\033[90mINFO:\033[0m %s" % message
 
 def WARNING(message):
+    '''This method is used to manage warning mesages messages in the log file'''
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
@@ -596,6 +622,7 @@ def WARNING(message):
         print "\033[93mWARNING:\033[0m %s" % message
 
 def ERROR(message):
+    '''This method is used to manage error mesages messages in the log file'''
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
@@ -609,6 +636,7 @@ def ERROR(message):
         print "\033[91mERROR:\033[0m %s" % message
 
 def FATAL(message):
+    '''This method is used to manage fatal error mesages messages in the log file for which there is no recovery'''
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()

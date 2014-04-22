@@ -116,12 +116,19 @@ parser.add_option("--zip", "--zip",
 parser.add_option("--resize", "--resize_image",
                   action="store", dest="resize", default=None,
                   help="Resize an input image")
+parser.add_option("--verbose", "--verbose",
+                  action="store_true", dest="verbose", default=False,
+                  help="Verbosity of the output log")
 
 #parser.add_option("-I", "--include",
 #                  action="store",type="string",dest="include",
 #                  help="Include paths to search for include files")
 
 (options, args) = parser.parse_args()
+
+if(options.verbose):
+    shorte_set_verbosity(True)
+
 from src.shorte_server import shorte_server_start
 
 # Run shorte as an XML-RPC server process instead of a command
