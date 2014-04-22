@@ -207,11 +207,14 @@ typedef enum
  *     int blah = 0;
  *     bool dummy = TRUE;
  *
- *     // The @text doesn't work properly and comments
+ *     // The text doesn't work properly and comments
  *     // aren't showing up in the parsed text
- *     dummy = @blah;
+ *     dummy = blah;
  *
- *     my_test(blah,dummy);
+ *     if(1)
+ *     {
+ *         my_test(blah,dummy);
+ *     }
  *
  * @see
  *     test_dot_c_my_test21

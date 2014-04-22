@@ -708,8 +708,7 @@ class template_html_t(template_t):
                 #output += '<span class="cmt">%s</span>' % source
                 output += source
             elif(type == TAG_TYPE_WHITESPACE):
-                #output += '&nbsp;'
-                output += ' '
+                output += '&nbsp;'
             elif(type == TAG_TYPE_STRING):
                 #output += '<span class="str">%s</span>' % source
                 output += source
@@ -1174,6 +1173,7 @@ class template_html_t(template_t):
                 source = template_source.substitute({
                     "id":     snippet_id,
                     "source": self.format_source_code_no_lines(language, example)})
+
             else:
                 code_header = ""
                 source = ""

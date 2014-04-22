@@ -14,6 +14,30 @@
 @body
 
 @h1 A list of enums
+This is a test of enums. Verify that all these are properly hyperlinked:
+- LEEDS_VLT_SUPPLY_1V_TX
+- LEEDS_VLT_SUPPLY_1V_RX
+- LEEDS_VLT_SUPPLY_1V_CRE
+- LEEDS_VLT_SUPPLY_1V_DIG_RX
+- LEEDS_VLT_SUPPLY_1p8V_RX
+- LEEDS_VLT_SUPPLY_1p8V_TX
+- LEEDS_VLT_SUPPLY_2p5V
+- LEEDS_VLT_SUPPLY_TP_P
+- LEEDS_VLT_SUPPLY_TP_N
+
+Also they should be hyperlinked in tables:
+
+@table:
+- Value
+- LEEDS_VLT_SUPPLY_1V_TX
+- LEEDS_VLT_SUPPLY_1V_RX
+- LEEDS_VLT_SUPPLY_1V_CRE
+- LEEDS_VLT_SUPPLY_1V_DIG_RX
+- LEEDS_VLT_SUPPLY_1p8V_RX
+- LEEDS_VLT_SUPPLY_1p8V_TX
+- LEEDS_VLT_SUPPLY_2p5V
+- LEEDS_VLT_SUPPLY_TP_P
+- LEEDS_VLT_SUPPLY_TP_N
 
 @h4 e_my_test
 @enum: name="e_my_test" description='''

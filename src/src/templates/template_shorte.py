@@ -159,6 +159,7 @@ $heading
 @enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" description='''
 $description
 '''
+-- values:
 - Enum Name | Enum Value | Enum Description
 $values
 """)

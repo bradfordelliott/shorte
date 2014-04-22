@@ -1015,53 +1015,63 @@ a C/C++ like define that looks like:
         obj.example["unparsed"] = source
 
     def parse_enum(self, source, modifiers):
-        table = self.parse_table(source, modifiers)
-
+        
         enum = enum_t()
-        enum.name = table["name"]
-            
-        enum.description = table["description"]
-        enum.values = table["rows"]
-        enum.max_cols = table["max_cols"]
+        
+        enum.name = modifiers["name"]
+        enum.description = self.parse_textblock(modifiers["description"])
         enum.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         enum.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         enum.private = self.get_attribute_as_bool(modifiers, "private")
-
-        # Remove the first row which just describes the enum
-        # values.
-        enum.values.pop(0)
-
-        i = 0
-        num_rows = len(table["rows"])
-
-        #table["rows"][0]["is_header"] = True
-
-        # Create Wiki links for each of the enums
-        for i in range(1, num_rows):
-
-            e = table["rows"][i]["cols"][0]["text"]
-            #print "ENUM: [%s]" % e
-            
-            word = wikiword_t()
-            word.wikiword = e
-            word.label = e
-            word.is_bookmark = True
-
-            if(modifiers.has_key("wikiword")):
-                word.wikiword = modifiers["wikiword"]
-
-            word.link = os.path.basename(self.m_current_file)
-            self.m_wiki_links[word.wikiword] = word
-
         
-        # If the table has no title then default it
-        if(not table.has_key("title")):
-            if(table.has_key("name")):
-                table["title"] = table["name"]
-            else:
-                table["title"] = "Enums"
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
 
-        table["name"] = table["title"]
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            elif(section.startswith("values:")):
+                source = section[7:len(section)].strip()
+
+                table = self.parse_table(source, modifiers)
+                enum.values = table["rows"]
+                enum.max_cols = table["max_cols"]
+
+                #print "BEFORE"
+                #print enum.values
+
+                # Remove the first row which just describes the enum
+                # values.
+                enum.values.pop(0)
+
+                #print "AFTER"
+                #print enum.values
+
+                #sys.exit(-1)
+
+                i = 0
+                num_rows = len(enum.values)
+
+                #table["rows"][0]["is_header"] = True
+
+                # Create Wiki links for each of the enums
+                for i in range(0, num_rows):
+
+                    e = table["rows"][i]["cols"][0]["text"]
+                    #print "ENUM: [%s]" % e
+                    
+                    word = wikiword_t()
+                    word.wikiword = e
+                    word.label = e
+                    word.is_bookmark = True
+
+                    if(modifiers.has_key("wikiword")):
+                        word.wikiword = modifiers["wikiword"]
+
+                    word.link = os.path.basename(self.m_current_file)
+                    self.m_wiki_links[word.wikiword] = word
 
         return enum
 

@@ -6,6 +6,14 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.66 (Apr 22, 2014)
+- Enums
+    - Fixed issue parsing enumerations caused by some enhancements
+      to the parser.
+- HTML
+    - Fixed the HTML template to correctly handle spaces in the
+      javascript popup window. They are converted to &nbsp;
+
 @h3 Version 1.0.65 (Apr 21, 2014)
 - Templates
     - Re-worked the ODT templates to remove the differences between the

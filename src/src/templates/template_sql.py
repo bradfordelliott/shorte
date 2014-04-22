@@ -587,10 +587,6 @@ within an HTML document.
         # Add the enum values
         i = 0
         for row in obj.values:
-            if i == 0:
-                i += 1
-                continue
-            
             cols = row["cols"]
 
             enum = cols[0]["text"]

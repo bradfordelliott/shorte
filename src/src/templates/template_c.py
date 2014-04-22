@@ -316,13 +316,13 @@ ${prototype}
    
     def format_enum(self, tag):
 
-        table = tag["contents"]
-        modifiers = tag["modifiers"]
+        enum = tag.contents
+        modifiers = tag.modifiers
         fields = ''
 
         i = 0
         
-        for row in table["rows"]:
+        for row in enum.values:
 
             if i == 0:
                 i += 1
@@ -378,9 +378,9 @@ $fields
         vars["desc"] = ""
 
         if(self.m_comment_style == COMMENT_STYLE_SHORTE):
-            vars["desc"] = '// ' + self.format_comment(modifiers["caption"], "// ")
+            vars["desc"] = '// ' + self.format_comment(modifiers["description"], "// ")
         else:
-            vars["desc"] = ' * ' + self.format_comment(modifiers["caption"], " * ")
+            vars["desc"] = ' * ' + self.format_comment(modifiers["description"], " * ")
 
         return templates[self.m_comment_style].substitute(vars)
 
