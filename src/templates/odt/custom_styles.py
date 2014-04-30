@@ -6,14 +6,14 @@ class styles():
         self.table_indent = 0
         self.list_bullet_indent  = 0.75
 
-        self.list_bullet_base    = 0.5
+        self.list_bullet_base  = 0
 
         # This is the indent for the text after a bullet point
         #self.list_bullet_text_indent = 1.2
 
         # If you don't care to use checkboxes or images
         # in lists then this can be changed to 0.4 - 0.5   
-        self.list_bullet_text_indent = 1.0
+        self.list_bullet_text_indent = 0.7
 
         # This is the common indent for the entire document
         self.standard_indent = 0
@@ -134,12 +134,12 @@ class styles():
         #   defines the indent level of the bullet styles for
         #   an ordered or unordered list. It does not control the
         #   indent between the bullet and the text of each list entry
-        for level in [1,2,3,4,5,6,7]:
-            list_styles += '''
-    <style:style style:name="para_list_level%d" style:family="paragraph" style:parent-style-name="Standard" style:list-style-name="List_20_%d">
-      <style:paragraph-properties fo:margin-left="%fcm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
+        list_styles += '''
+    <style:style style:name="shorte_unordered_list_item" style:family="paragraph" style:parent-style-name="shorte_standard" style:list-style-name="shorte_unordered_list">
     </style:style>
-    ''' % (level, level, self.standard_indent + (self.list_bullet_indent * (level-1)))
+    <style:style style:name="shorte_ordered_list_item" style:family="paragraph" style:parent-style-name="shorte_standard" style:list-style-name="shorte_ordered_list">
+    </style:style>
+    '''
         
         unordered_list_style = '''
         <text:list-style style:name="shorte_unordered_list">
@@ -150,31 +150,26 @@ class styles():
         '''
         for level in [1,2,3,4,5,6,7]:
             bullet = '&#176;'
-            #bullet = '+'
             if(level & 1):
                 bullet = '&#8226;'
-            #indent = self.standard_indent + self.list_bullet_base + ((level) * self.list_bullet_indent) #0.38 + (level * 0.51)
-            indent = 0.38 + (level * 0.51)
 
             # DEBUG BRAD: This controls the indent after the bullet
-            indent = self.standard_indent + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
+            indent = self.standard_indent + self.list_bullet_base + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
 
-            #<style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="%fcm" fo:text-indent="0cm" fo:margin-left="0cm"/>
+            text_indent = -0.635
             unordered_list_style += '''
             <text:list-level-style-bullet text:level="%d" text:style-name="Bullet_20_Symbols" text:bullet-char="%s">
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="%fcm" fo:text-indent="0cm" fo:margin-left="%fcm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="%fcm" fo:text-indent="%fcm" fo:margin-left="%fcm"/>
                 </style:list-level-properties>
             </text:list-level-style-bullet>
-            ''' % (level, bullet, indent, indent)
+            ''' % (level, bullet, indent, text_indent, indent)
 
             display_levels = ''
             if(level > 1):
                 display_levels = 'text:display-levels="%d"' % (1)
 
-            #indent = 1.04 + (level * 0.51)
             indent = self.standard_indent + self.list_bullet_base + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
-            #indent = self.standard_indent + self.list_bullet_base + ((level) * self.list_bullet_indent)
 
             if(level in [1,4,7]):
                 num_format = '1'
@@ -183,19 +178,14 @@ class styles():
             else:
                 num_format = 'i'
                 
-            '''<style:list-level-properties text:space-before="0.635cm" 
-text:min-label-width="0.635cm"
-text:list-level-position-and-space-mode="label-alignment"/>
- <style:list-level-label-alignment text:label-followed-by="space"/>
- </style:list-level-properties>'''
-
+            text_indent = -0.935
             ordered_list_style += '''
             <text:list-level-style-number text:level="%d" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix=".  " style:num-format="%s" %s>
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
-                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="%fcm" fo:text-indent="0cm" fo:margin-left="%fcm"/>
+                    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="%fcm" fo:text-indent="%fcm" fo:margin-left="%fcm"/>
                 </style:list-level-properties>
             </text:list-level-style-number>
-            ''' % (level, num_format, display_levels, indent, indent)
+            ''' % (level, num_format, display_levels, indent, text_indent, indent)
 
 
         unordered_list_style += '''
@@ -205,7 +195,63 @@ text:list-level-position-and-space-mode="label-alignment"/>
         </text:list-style>
 '''
 
-        list_styles += unordered_list_style
-        list_styles += ordered_list_style
+        #styles = '''
+        #    <text:list-style style:name="shorte_unordered_list">
+        #      <text:list-level-style-bullet text:level="1" text:style-name="Bullet_20_Symbols" text:bullet-char="&#176;">
+        #        <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #          <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.27cm" fo:text-indent="-0.635cm" fo:margin-left="1.27cm"/>
+        #        </style:list-level-properties>
+        #      </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="2" text:style-name="Bullet_20_Symbols" text:bullet-char="&#8226;">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="1.905cm" fo:text-indent="-0.635cm" fo:margin-left="1.905cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="3" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="2.54cm" fo:text-indent="-0.635cm" fo:margin-left="2.54cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="4" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.175cm" fo:text-indent="-0.635cm" fo:margin-left="3.175cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="5" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="3.81cm" fo:text-indent="-0.635cm" fo:margin-left="3.81cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="6" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="4.445cm" fo:text-indent="-0.635cm" fo:margin-left="4.445cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="7" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.08cm" fo:text-indent="-0.635cm" fo:margin-left="5.08cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="8" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="5.715cm" fo:text-indent="-0.635cm" fo:margin-left="5.715cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="9" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.35cm" fo:text-indent="-0.635cm" fo:margin-left="6.35cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    <text:list-level-style-bullet text:level="10" text:style-name="Bullet_20_Symbols" text:bullet-char="-">
+        #    <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
+        #    <style:list-level-label-alignment text:label-followed-by="listtab" text:list-tab-stop-position="6.985cm" fo:text-indent="-0.635cm" fo:margin-left="6.985cm"/>
+        #    </style:list-level-properties>
+        #    </text:list-level-style-bullet>
+        #    </text:list-style>
+        #    '''
 
-        return list_styles
+        # DEBUG BRAD: This works
+        #return styles + ordered_list_style + list_styles
+
+        return unordered_list_style + ordered_list_style + list_styles
+

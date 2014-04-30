@@ -2228,7 +2228,7 @@ class template_odt_t(template_t):
             source += '''<text:list-item>
                <text:p text:style-name="%s">%s</text:p>
                <text:list text:style-name="%s">''' % (
-                   self.m_styles["para"][list_style][level], prefix + self.format_text(elem.get_text()), style)
+                   list_style, prefix + self.format_text(elem.get_text()), style)
             
             num_children = len(elem.children)
             for i in range(0, num_children):
@@ -2257,7 +2257,7 @@ class template_odt_t(template_t):
     <text:list-item>
         <text:p text:style-name="%s">%s</text:p>
     </text:list-item>
-''' % (self.m_styles["para"][list_style][level], prefix + self.format_text(elem.get_text()))
+''' % (list_style, prefix + self.format_text(elem.get_text()))
 
         return source
     
@@ -2271,8 +2271,10 @@ class template_odt_t(template_t):
 
         if(not ordered):
             style = self.m_styles["list"]["unordered"]
+            list_style = "shorte_unordered_list_item"
         else:
             style = self.m_styles["list"]["ordered"]
+            list_style = "shorte_ordered_list_item"
 
         source = "<text:list text:style-name=\"%s\">" % style
         
@@ -3476,6 +3478,9 @@ class template_odt_t(template_t):
         else:
             path_startup = shorte_get_startup_path()
             path_oowriter = shorte_get_config("shorte", "path.oowriter.linux")
+        
+        if(os.environ.has_key("PATH_OOWRITER")):
+            path_oowriter = os.environ["PATH_OOWRITER"]
 
         #print "PACKAGE: %s" % package
         
@@ -3537,7 +3542,7 @@ class template_odt_t(template_t):
                     params_oowriter,
                     path_converter,
                     path_input)
-            print "Command: %s" % cmd
+            #print "Command: %s" % cmd
             #if(sys.platform == "cygwin"):
             #    os.system(cmd)
             #else:

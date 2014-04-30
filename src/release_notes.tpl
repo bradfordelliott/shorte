@@ -6,6 +6,11 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.67 (xxx)
+- ODT
+    - Added support for PATH_OOWRITER environment variable
+    - Fixed list indentation
+
 @h3 Version 1.0.66 (Apr 22, 2014)
 - Enums
     - Fixed issue parsing enumerations caused by some enhancements
