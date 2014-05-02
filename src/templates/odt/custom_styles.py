@@ -6,8 +6,6 @@ class styles():
         self.table_indent = 0
         self.list_bullet_indent  = 0.75
 
-        self.list_bullet_base  = 0
-
         # This is the indent for the text after a bullet point
         #self.list_bullet_text_indent = 1.2
 
@@ -153,8 +151,10 @@ class styles():
             if(level & 1):
                 bullet = '&#8226;'
 
+            #self.list_bullet_text_indent = 0.5
+
             # DEBUG BRAD: This controls the indent after the bullet
-            indent = self.standard_indent + self.list_bullet_base + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
+            indent = self.standard_indent + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
 
             text_indent = -0.635
             unordered_list_style += '''
@@ -169,7 +169,9 @@ class styles():
             if(level > 1):
                 display_levels = 'text:display-levels="%d"' % (1)
 
-            indent = self.standard_indent + self.list_bullet_base + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
+            text_indent = -0.735
+
+            indent = self.standard_indent + self.list_bullet_text_indent + (self.list_bullet_indent * (level-1))
 
             if(level in [1,4,7]):
                 num_format = '1'
@@ -178,7 +180,6 @@ class styles():
             else:
                 num_format = 'i'
                 
-            text_indent = -0.935
             ordered_list_style += '''
             <text:list-level-style-number text:level="%d" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix=".  " style:num-format="%s" %s>
                 <style:list-level-properties text:list-level-position-and-space-mode="label-alignment">
