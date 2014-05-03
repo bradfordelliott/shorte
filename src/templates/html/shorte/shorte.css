@@ -1,19 +1,17 @@
 @media screen
 {
-  body { margin: 0px;padding: 0px; background: #666;font-size:100%;}
+  body {font-family:Arial,Helvetica,sans-serif; margin: 0px;padding: 0px; background: white;font-size:100%;}
 
   div.container
   {
       postion: relative;
-      width: 90%;
+      width: 100%;
       margin-left: auto;
       margin-right: auto;
       text-align: left;
       margin: 0 auto;
-      margin-top: 20px;
       background: #fff;
-      border-right: 2px solid white;
-      border-left: 0px solid white;
+      border: 0px;
       height: 100%;
       z-index: 100;
       min-height: 500px;
@@ -28,7 +26,7 @@
   div.header
   {
      width:      100%;
-     border:     1px solid #fff;
+     border:     0px solid #fff;
      padding:    0px;
      background: white url(images/head_1024.png) no-repeat;
      color:      white;
@@ -53,7 +51,7 @@
      height:         40px;
      font-size:      0.9em;
      padding:        0px;
-     background:     url(images/menu.gif);
+     background:     url(images/menu.png);
      line-height:    normal;
   }
   
@@ -92,7 +90,7 @@
   #menu_div a
   {
      font-size: 1.0em;
-     color:           #005CDB;
+     color:           #e6592e;
      float:           left;
      margin:          0;
      text-decoration: none;
@@ -101,7 +99,7 @@
   #menu_div a div
   {
      display: block;
-     color:      #005CDB;
+     color:      #e6592e;
      margin: 0px;
      padding-top: 4px;
      padding-right: 20px;
@@ -129,10 +127,6 @@
 @media screen,print {
   
   $common
-  a {color: blue;font-weight: bold;font-size:0.9em;} 
-  a:hover {color: #666;font-weight: bold;text-decoration: underline;} 
-  a img {border: none;} 
-  a.name {color: black;} 
 }
 
 @media screen {

@@ -13,13 +13,16 @@ $javascript
 
 <div class="container">
     <div class="header">
-        <div style="height: 80px;"><span style='float:left;position:relative;left:300px;top:34px;font-size:1.6em;color:#666;'>$title - $subtitle</span>$pdf</div>
+        <div style="height: 120px;">
+            <span style='float:left;position:relative;left:240px;top:34px;font-size:1.4em;color:#ccc;'>$title</span>
+            <span style='float:left;position:absolute;left:270px;top:64px;font-size:1.2em;color:#ccc;'>$subtitle</span>
+            $pdf</div>
         <div id="menu_div">
             <ul>
                 <li><a href="$link_index" target="_top"><div>Contents</div></a></li>
                 <li><a href="$link_index_framed" target="_top"><div>Frames</div></a></li>
                 $links
-                <li style="float:right;"><a href="$link_revisions"><div style='color:#888;'>Version: $version</div></a></li>
+                <li style="float:right;"><a href="$link_revisions"><div style='color:#e6592e;'>Version: $version</div></a></li>
             </ul>
         </div>
     </div> <!-- end of header div -->
@@ -29,6 +32,7 @@ $javascript
         </div>
     <div style="clear:both;"></div>
     </div>
+    <!--
     <div class="footer">
         <div style="height: 40px;margin-top:10px;">
             <span style="margin-left:10px;width:200px;"><a href="$link_legal">Legal Information</a></span>
@@ -36,6 +40,7 @@ $javascript
             <span style="width:200px;float:right;">Last updated: $date</span>
         </div>
     </div>
+    -->
 </div>
 </body>
 </html>
