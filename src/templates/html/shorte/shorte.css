@@ -28,7 +28,7 @@
      width:      100%;
      border:     0px solid #fff;
      padding:    0px;
-     background: white url(images/head_1024.png) no-repeat;
+     background: #14100f url(images/head_1024.png) no-repeat;
      color:      white;
   }
   
@@ -90,7 +90,7 @@
   #menu_div a
   {
      font-size: 1.0em;
-     color:           #e6592e;
+     color:           #2b3717;
      float:           left;
      margin:          0;
      text-decoration: none;
@@ -99,7 +99,7 @@
   #menu_div a div
   {
      display: block;
-     color:      #e6592e;
+     color:      #2b3717;
      margin: 0px;
      padding-top: 4px;
      padding-right: 20px;
