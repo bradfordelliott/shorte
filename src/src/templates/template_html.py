@@ -2435,6 +2435,30 @@ $href_end
                 table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['|','!'])
                 return self.format_table(replace, table)
 
+            # Embed an inline note. This is useful when documenting
+            # source code.
+            elif(tag in ("note", "warning", "tbd", "question")):
+                # We've already converted breaks so we need to unconvert them
+                # to format the note properly.
+                replace = replace.replace("<br/>", "\n")
+                textblock = self.m_engine.m_parser.parse_textblock(replace)
+
+                if(tag == "note"):
+                    label = "Note"
+                    img = "note.png"
+                elif(tag == "warning"):
+                    label = "Warning"
+                    img = "warning.png"
+                elif(tag == "tbd"):
+                    label = "TBD"
+                    img = "tbd.png"
+                elif(tag == "question"):
+                    label = "Question"
+                    img = "question.png"
+
+                return self.format_note(textblock, label, img)
+
+
         return prefix + replace + postfix
 
 
