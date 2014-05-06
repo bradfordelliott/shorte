@@ -764,6 +764,8 @@ class template_text_t(template_t):
             self.m_contents += self.format_text(tag.contents) + "\n"
         elif(name == "note"):
             self.m_contents += self.format_note(tag, "NOTE:")
+        elif(name == "warning"):
+            self.m_contents += self.format_note(tag, "WARNING")
         elif(name == "tbd"):
             self.m_contents += self.format_note(tag, "TBD:")
         elif(name == "table"):
@@ -787,7 +789,7 @@ class template_text_t(template_t):
         #    self.m_contents += self.format_prototype(tag)
         elif(name in ("functionsummary", "typesummary")):
             WARNING("Unsupported tag %s" % name)
-        elif(name in ("define", "enum", "struct", "prototype")):
+        elif(name in ("define", "enum", "struct", "prototype", "image")):
             WARNING("Unsupported tag %s" % name)
         else:
             print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)

@@ -757,7 +757,7 @@ class shorte_parser_t(parser_t):
                 widths.append(int(vals[i]))
 
             if(total != 100):
-                FATAL("Table widths do not add up to 100% at %s:%d" % (self.m_current_file, self.m_current_line))
+                FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, self.m_current_line))
 
             table["widths"] = widths
 

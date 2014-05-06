@@ -267,7 +267,9 @@ class template_revealjs_t(template_html_t):
                         "date" : self.m_engine.get_date(),
                         "version" : self.m_engine.get_doc_info().version(),
                         "author" : self.m_engine.get_doc_info().author(),
-                        "contents" : self.get_contents()})
+                        "contents" : self.get_contents(),
+                        "pdf" : self.include_link(self.get_pdf_name(), "css/")
+                        })
 
         output = open(output_file, "wt")
         output.write(html)

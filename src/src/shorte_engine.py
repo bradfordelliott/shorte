@@ -973,8 +973,8 @@ def exists(s):
         # needs some modifications in order to include
         # a PDF link in the HTML documentation.
         for package in package_list:
-            if(package == "html"):
-                packages.append(PACKAGE_TYPE_HTML)
+            if(package in ("html", "reveal.js")):
+                packages.append(package)
                 if('pdf' in package_list):
                     include_link = True
                     include_link_type = 'pdf'
@@ -1046,6 +1046,8 @@ def exists(s):
                 template = template_mergefile_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_REVEALJS):
                 template = template_revealjs_t(self, indexer)
+                template.m_include_link = include_link
+                template.m_include_link_type = include_link_type
             else:
                 template = template_html_t(self, indexer)
                 template.m_inline = inline
