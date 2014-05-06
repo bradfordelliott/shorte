@@ -774,6 +774,7 @@ class template_html_t(template_t):
     def format_list_child(self, elem, start_tag, end_tag):
         
         source = ''
+        style = ''
 
         if(elem.children != None):
             prefix = ''
@@ -789,7 +790,8 @@ class template_html_t(template_t):
 
             if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
-                    prefix += '<input type="checkbox" checked onclick="return false;"></input>'
+                    prefix += '<input type="checkbox" checked onclick="return false;" disabled></input>'
+                    style = 'style="color:#999;"'
                 else:
                     prefix += '<input type="checkbox" onclick="return false;"></input>'
             
@@ -813,11 +815,12 @@ class template_html_t(template_t):
 
             if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
-                    prefix += "<input type='checkbox' checked onclick='return false;'></input>"
+                    prefix += "<input type='checkbox' checked onclick='return false;' disabled></input>"
+                    style = 'style="color:#999;"'
                 else:
                     prefix += "<input type='checkbox' onclick='return false;'></input>"
 
-            source += "<li>%s " % prefix + self.format_text(elem.get_text()) + "</li>"
+            source += "<li %s>%s " % (style,prefix + self.format_text(elem.get_text()) + "</li>")
 
         return source
     
