@@ -411,10 +411,14 @@ class engine_t:
             input = input.replace("/cygdrive/c/", "C:/")
 
         if(not os.path.exists(PATH_INKSCAPE)):
-            FATAL("%s not found, cannot convert" % PATH_INKSCAPE)
+            import shutil
+            ERROR("%s not found, cannot convert" % PATH_INKSCAPE)
+            path = shorte_get_startup_path() + "/templates/shared/inkscape_not_found.png"
+            shutil.copyfile(path, output)
+            return output
 
         cmd = '''%s -e "%s" "%s"''' % (PATH_INKSCAPE, output, input)
-        print cmd
+        #print cmd
         
         # Need a shorte delay after running inkscape because of
         # a race condition on windows

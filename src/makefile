@@ -34,6 +34,7 @@ help:
 	@${echo} "   test_comments        = test for single and multi-line comment handling"
 	@${echo} "   test_sequences       = test for sequence diagrams"
 	@${echo} "   test_templates       = test all the templates"
+	@${echo} "   test_inkscape        = test inskcape"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -183,9 +184,10 @@ test_enums:
 	python shorte.py -f examples/enums.tpl -t "${THEME}" -p "html+pdf" -o build-output/enums
 
 test_bullets:
-	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
+	python shorte.py -f examples/bullets2.tpl -t "odt=cortina" -p "odt" -o build-output/bullets --zip=bullets.zip
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets2 --zip=bullets.zip
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
-#	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
 	python -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "cortina_web" -x cpp -p "html_inline" -o build-output/t100
@@ -245,6 +247,11 @@ test_templates:
 	python shorte.py -f examples/template_test.tpl -p "shorte" -o build-output/template_tests/shorte
 	python shorte.py -f examples/template_test.tpl -p "sql" -o build-output/template_tests/sql
 
+test_shorte:
+	python shorte.py -f examples/headings.tpl -p "html" -t shorte -o build-output/shorte_template
+
+test_inkscape:
+	python shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code

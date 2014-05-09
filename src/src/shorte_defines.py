@@ -576,10 +576,16 @@ def shorte_set_verbosity(enable):
 def DEBUG(message):
     '''This method is used to manage debug statements in the log file'''
     if(g_verbose):
+        import inspect
+        frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
+        message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
         print "DEBUG: %s" % message
 
 def STATUS(message):
     '''This method is used to manage import status messages in the log file'''
+    import inspect
+    frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
+    message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
@@ -595,6 +601,9 @@ def STATUS(message):
 def INFO(message):
     '''This method is used to manage informational messages in the log file that are more import than debug statements'''
     if(g_verbose):
+        import inspect
+        frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
+        message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
         if(sys.platform == "win32"):
             import console_utils as con
             default_colors = con.get_text_attr()
@@ -609,6 +618,9 @@ def INFO(message):
 
 def WARNING(message):
     '''This method is used to manage warning mesages messages in the log file'''
+    import inspect
+    frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
+    message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
@@ -623,6 +635,9 @@ def WARNING(message):
 
 def ERROR(message):
     '''This method is used to manage error mesages messages in the log file'''
+    import inspect
+    frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
+    message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
@@ -637,6 +652,10 @@ def ERROR(message):
 
 def FATAL(message):
     '''This method is used to manage fatal error mesages messages in the log file for which there is no recovery'''
+    import inspect
+    frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
+    message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
+
     if(sys.platform == "win32"):
         import console_utils as con
         default_colors = con.get_text_attr()
