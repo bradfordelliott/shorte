@@ -981,18 +981,29 @@ class template_odt_t(template_t):
             height = int(height)
             
         im = Image.open(image["src"])
-        width = im.size[0]
-        height = im.size[1]
+
+        scale_width  = 1.0
+        scale_height = 1.0
+        if(width > 0):
+            scale_width = (width / (im.size[0] * (1.0)))
+            if(height == 0):
+                scale_height = scale_width
+
+        if(height > 0):
+            scale_height = (width / (im.size[1] * (1.0)))
+            if(width == 0):
+                scale_width = scale_height
+
+        width = scale_width * im.size[0]
+        height = scale_height * im.size[1]
 
         #print "width: %d" % width
         #print "height: %d" % height
+        #print "scale_width: %f" % scale_width
+        #print "scale_height: %f" % scale_height
 
-        max_width = 460.0
-        max_height = 640.0
-
-        #if(width < max_width):
-        #width = width / 2
-        #height = height / 2
+        max_width = 700 #460.0
+        max_height = 700 #640.0
 
         if(height > max_height):
             new_height = max_height
@@ -1006,11 +1017,17 @@ class template_odt_t(template_t):
             new_height = (max_width/width) * height
             height = new_height
             width = new_width
+        
+        im = Image.open(image["src"])
 
-        #print "width2: %d" % width
-        #print "height2: %d" % height
+        # DEBUG BRAD: Resize the image to fit
+        im = im.resize((int(width),int(height)), Image.BICUBIC)
+        scratchdir = shorte_get_config("shorte", "scratchdir")
+        img = scratchdir + os.path.sep + image["name"] + image["ext"]
+        image["src"] = img
+        im.save(img)
 
-        dpi = 72.0
+        dpi = 96.0
         width = "%fin" % (width/dpi)
         height = "%fin" % (height/dpi)
 
@@ -1026,6 +1043,7 @@ class template_odt_t(template_t):
         if(image.has_key("inline")):
             tag_start = "</text:p>"
             tag_end   = "<text:p text:style-name=\"Standard\">"
+        
 
         caption = ""
         if(image.has_key("caption")):
@@ -1058,6 +1076,7 @@ class template_odt_t(template_t):
 
         self.m_image_id += 1
 
+        #print data
         return data
 
     def format_inline_image(self, matches):
@@ -2057,7 +2076,7 @@ class template_odt_t(template_t):
 </text:p>
         ''' % (self.m_frame_id+10, self.m_image_id+10, image, label, source)
 
-        print "IMAGE: %s" % image
+        #print "IMAGE: %s" % image
         
         xml = '''
 <text:p text:style-name="shorte_standard">
@@ -2097,9 +2116,9 @@ class template_odt_t(template_t):
         #print self.styles[label]
         #print "----"
         #print ""
-        print "NOTE OUTPUT A"
-        print xml
-        print "----"
+        #print "NOTE OUTPUT A"
+        #print xml
+        #print "----"
 
         xml2 = tmp.substitute({
             "%s_TITLE" % type.upper() : label,
@@ -2107,9 +2126,9 @@ class template_odt_t(template_t):
             "GRAPHIC"    : "Graphic%d" % (self.m_image_id+10),
             "%s_CONTENT" % type.upper() : source})
 
-        print "NOTE OUTPUT B"
-        print xml2
-        print "----"
+        #print "NOTE OUTPUT B"
+        #print xml2
+        #print "----"
 
         self.m_frame_id += 1
         self.m_image_id += 1
@@ -3589,8 +3608,7 @@ class template_odt_t(template_t):
             # If the output file doesn't exist then generate a failure since the macro failed
             path_output = path_input.replace("odt", "pdf")
             if(not os.path.exists(path_output)):
-                print "\nERROR: Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n" % path_output
-                sys.exit(-1)
+                FATAL("Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n" % path_output)
             
             return path_output
     
