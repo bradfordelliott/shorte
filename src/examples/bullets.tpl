@@ -21,8 +21,9 @@ the position of @{star,starred} text remains consistent.
             -C4
                     -C3
                         -C4
-    - D with some text
-      wrapped across a line
+    - D with some text and a really long string that I hope
+      will be wrapped across a line but I'n not sure what
+      will happen
     - E
         - F
 
@@ -40,8 +41,9 @@ Blah blah blah
                 -C2
                     -C3
                         -C4
-    - D with some text
-      wrapped across a line
+    - D with some text and a really long string that I hope
+      will be wrapped across a line but I'n not sure what
+      will happen
     - E
         - F
 - one

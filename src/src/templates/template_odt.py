@@ -1140,6 +1140,35 @@ class template_odt_t(template_t):
                 xml += "<text:p text:style-name=\"shorte_standard\">"
                 return xml
 
+            # Embed an inline note. This is useful when documenting
+            # source code.
+            elif(tag in ("note", "warning", "tbd", "question")):
+                # DEBUG BRAD:
+                #   We've already converted breaks so we need to unconvert them
+                #   to format the note properly. This needs to be done better.
+                replace = replace.replace("&apos;", "'")
+                replace = replace.replace("<text:line-break/>", "\n")
+                xml = "</text:p>"
+                textblock = self.m_engine.m_parser.parse_textblock(replace)
+                
+                if(tag == "note"):
+                    label = "Note"
+                    img = "warning.png"
+                elif(tag == "warning"):
+                    label = "Warning"
+                    img = "warning.png"
+                elif(tag == "tbd"):
+                    label = "TBD"
+                    img = "tbd.png"
+                elif(tag == "question"):
+                    label = "Question"
+                    img = "question.png"
+                xml += self.format_note(textblock, type=tag, label=label, image=img)
+
+                xml += "<text:p text:style-name=\"shorte_standard\">"
+                return xml
+
+
         return prefix + replace + postfix
 
     def xmlize(self, data):
@@ -2041,49 +2070,12 @@ class template_odt_t(template_t):
 
         xml = '''
 <text:p text:style-name="shorte_standard">
-<draw:frame draw:style-name="shorte_note_frame" draw:name="Frame%d" text:anchor-type="as_character" style:rel-width="80%%" draw:z-index="13">
-          <draw:text-box fo:min-height="0.2in" fo:min-width="0.7902in">
-            <text:p text:style-name="shorte_note_title">
-              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.5cm" svg:y="-0.5cm" svg:width="1.15cm" svg:height="1.15cm" draw:z-index="14">
-                <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
-              </draw:frame>
-              <text:s text:c="4"/>
-            <text:span text:style-name="shorte_note_title">%s</text:span>
-            </text:p>
-%s
-          </draw:text-box>
-        </draw:frame>
-
-</text:p>
-        ''' % (self.m_frame_id+10, self.m_image_id+10, image, label, source)
-
-        print "IMAGE: %s" % image
-        
-        xml = '''
-<text:p text:style-name="shorte_standard">
-<draw:frame draw:style-name="shorte_note_frame" draw:name="Frame%d" text:anchor-type="as_character" style:rel-width="80%%" draw:z-index="13">
-          <draw:text-box fo:min-height="0.2in" fo:min-width="0.7902in">
-            <text:p text:style-name="shorte_note_title">
-              <draw:frame draw:style-name="shorte_frame_note" draw:name="graphics%d" text:anchor-type="paragraph" svg:x="-0.5cm" svg:y="-0.5cm" svg:width="1.15cm" svg:height="1.15cm" draw:z-index="14">
-                <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
-              </draw:frame>
-              <text:s text:c="4"/>
-            <text:span text:style-name="shorte_note_title">%s</text:span>
-            </text:p>
-%s
-          </draw:text-box>
-        </draw:frame>
-</text:p>
-        '''  % (self.m_frame_id+10, self.m_image_id+10, image, label, source)
-
-        xml = '''
-<text:p text:style-name="shorte_standard">
     <draw:frame draw:style-name="fr1" draw:name="Frame%d"
                 text:anchor-type="as-char" svg:width="14.051cm" style:rel-width="85%%" draw:z-index="8">
         <draw:text-box fo:min-height="1.499cm"><draw:frame draw:style-name="fr5" draw:name="Graphic%d" text:anchor-type="frame"
             svg:x="-0.307cm" svg:y="-0.231cm" svg:width="1.03cm" svg:height="1.03cm" draw:z-index="9">
             <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed"
-                xlink:actuate="onLoad"/></draw:frame><text:p text:style-name="shorte_5f_note_5f_title">
+                xlink:actuate="onLoad"/></draw:frame><text:p text:style-name="shorte_note_title">
                 <text:span text:style-name="T3"><text:s text:c="6"/></text:span><text:span text:style-name="T5">%s:</text:span></text:p>
                 %s
         </draw:text-box>
@@ -2097,19 +2089,19 @@ class template_odt_t(template_t):
         #print self.styles[label]
         #print "----"
         #print ""
-        print "NOTE OUTPUT A"
-        print xml
-        print "----"
+        #print "NOTE OUTPUT A"
+        #print xml
+        #print "----"
 
-        xml2 = tmp.substitute({
-            "%s_TITLE" % type.upper() : label,
-            "FRAME"      : "Frame%d" % (self.m_frame_id+10),
-            "GRAPHIC"    : "Graphic%d" % (self.m_image_id+10),
-            "%s_CONTENT" % type.upper() : source})
+        #xml2 = tmp.substitute({
+        #    "%s_TITLE" % type.upper() : label,
+        #    "FRAME"      : "Frame%d" % (self.m_frame_id+10),
+        #    "GRAPHIC"    : "Graphic%d" % (self.m_image_id+10),
+        #    "%s_CONTENT" % type.upper() : source})
 
-        print "NOTE OUTPUT B"
-        print xml2
-        print "----"
+        #print "NOTE OUTPUT B"
+        #print xml2
+        #print "----"
 
         self.m_frame_id += 1
         self.m_image_id += 1

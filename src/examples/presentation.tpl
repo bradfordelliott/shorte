@@ -31,9 +31,11 @@ Some random text here
 A new paragraph
 
 @table
-- One | Two
-- Three | Four
-- Five | Six
+- One   | Two
+- Three | Four is a column with some really long
+          text that wraps around to a newline. I wonder
+          how shorte will handle this???
+- Five  | Six
 
 @text
 This is another paragraph in this slide
@@ -67,4 +69,23 @@ and even a table
 This is a test
 
 @h1 Slide 4
-@image: src="examples/test.png"
+@image: src="examples/record_0.png"
+
+@h1 Slide 5
+This is an ordered list
+@ol
+- One
+- Two
+    - Three
+        - Four
+            - Five
+-
+
+@text
+This is an unordered list
+- One
+- Two
+    - Three
+        - Four
+    - Five
+- Six
