@@ -166,6 +166,14 @@ test_code:
     # DEBUG BRAD: This target is currently failing. Not sure how easy it will be to fix.
 	python shorte.py -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code_error -p "html+pdf"
 
+# This is an intermediate way of preprocessing files until I can add proper
+# support to shorte.
+test_preprocessor:
+	cat examples/cs_t100_api.h | sed 's/#\(define\|include\)/@@\1/g' | gcc -E -C - | src/parsers/gcc_expand.py > cs_t100_api_preprocessed.h
+	cat examples/test.c | sed 's/#\(define\|include\)/@@\1/g' | gcc -E -C - | src/parsers/gcc_expand.py > examples/test_preprocessed.c
+	python shorte.py -f examples/cs_t100_api_preprocessed.h -t "${THEME}" -x cpp -o build-output/c_code_t100_preprocessed -p "html+pdf"
+	python shorte.py -f examples/test_preprocessed.c -t "${THEME}" -x cpp -o build-output/c_code_preprocessed -p "html+pdf"
+
 test_defines:
 	python shorte.py -f examples/defines.h -t "${THEME}" -x cpp -o build-output/defines -p "html+pdf"
 
@@ -184,8 +192,9 @@ test_enums:
 
 test_bullets:
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
+	python shorte.py -f examples/bullets.tpl -t "html=shorte;pdf=shorte" -p "html+pdf" -o build-output/bullets_shorte
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
-#	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
 	python -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "cortina_web" -x cpp -p "html_inline" -o build-output/t100
@@ -224,9 +233,10 @@ test_extract_private:
 	python shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
 
 test_revealjs:
-	python shorte.py -f examples/presentation.tpl -p "reveal.js" --theme=shorte -o build-output/presentation
-	python shorte.py -f examples/headings.tpl -p "reveal.js" --theme=shorte -o build-output/presentation2
-	python shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation3
+	python shorte.py -f examples/presentation.tpl -p "reveal.js+pdf" --theme="reveal.js=shorte;pdf=shorte" -o build-output/presentation
+	python shorte.py -f examples/presentation.tpl -p "reveal.js+txt" --theme="reveal.js=shorte" -o build-output/presentation2
+	python shorte.py -f examples/headings.tpl -p "reveal.js" --theme=shorte -o build-output/presentation3
+	python shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation4
 
 test_sequences:
 	python shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
