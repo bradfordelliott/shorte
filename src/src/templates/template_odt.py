@@ -25,7 +25,7 @@ sys.path.append("libs")
 try:
     import Image
 except:
-    print "WARNING: Failed to load Image library"
+    WARNING("Failed to load Image library")
 
 from src.shorte_defines import *
 from template import *

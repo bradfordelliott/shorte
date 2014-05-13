@@ -26,6 +26,7 @@ help:
 	@${echo} "   test_bullets         = test the @ul and @ol list tags"
 	@${echo} "   test_wkiwords        = test the use of wikiwords"
 	@${echo} "   test_images          = test the use of images"
+	@${echo} "   test_images_encode   = test the encoding of images as base64"
 	@${echo} "   test_mergefile       = test the generation of mergefiles used for diffing"
 	@${echo} "   test_sql             = test the generation of SQL databases to store source code annotations"
 	@${echo} "   test_defines         = test the formatting of defines"
@@ -126,12 +127,13 @@ tests:
 	make test_wikiwords
 	make test_conditionals
 	make test_images
+	make test_images_encode
 	make test_mergefile
 	make test_sql
 	make test_server
 	make test_extract_private
 	make test_revealjs
-	make test_mx
+#	make test_mx
 	make test_templates
 
 THEME:=shorte
@@ -200,6 +202,8 @@ test_conditionals:
 
 test_images:
 	python shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
+
+test_images_encode:
 	python shorte.py -f examples/test.png -i "encode_images" 
 
 # This example is used to test the generation of mergefiles. A mergefile is a target that
