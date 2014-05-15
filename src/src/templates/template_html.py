@@ -2129,7 +2129,7 @@ ${example}
 
         # Check to see if the image requires scaling
         if(image.has_key("height") or image.has_key("width")):
-            image = self.m_engine.scale_image(image)
+            (image,height,width) = self.m_engine.scale_image(image)
         
         name = image["name"] + image["ext"]
 

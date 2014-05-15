@@ -960,73 +960,35 @@ class template_odt_t(template_t):
 
         #print "image: [%s]" % image["src"]
 
+        if(image.has_key("height") or image.has_key("width")):
+            (image,height,width) = self.m_engine.scale_image(image)
+        else:
+            im = Image.open(image["src"])
+            width = im.size[0]
+            height = im.size[1]
+
         data = encode_image(image["src"])
 
         style = ""
 
-        # DEBUG BRAD: Should use the PIL module to figure out the
-        #             dimentions of the image and insert them into
-        #             the document. Otherwise the images get inserted
-        #             as small images
-        width = 0
-        height = 0
-        if(image.has_key("width")):
-            width = image["width"]
-            width = re.sub("px", "", width)
-            width = int(width)
-
-        if(image.has_key("height")):
-            height = image["height"] 
-            height = re.sub("px", "", height)
-            height = int(height)
-            
-        im = Image.open(image["src"])
-
-        scale_width  = 1.0
-        scale_height = 1.0
-        if(width > 0):
-            scale_width = (width / (im.size[0] * (1.0)))
-            if(height == 0):
-                scale_height = scale_width
-
-        if(height > 0):
-            scale_height = (width / (im.size[1] * (1.0)))
-            if(width == 0):
-                scale_width = scale_height
-
-        width = scale_width * im.size[0]
-        height = scale_height * im.size[1]
-
         #print "width: %d" % width
         #print "height: %d" % height
-        #print "scale_width: %f" % scale_width
-        #print "scale_height: %f" % scale_height
-
         max_width = 700 #460.0
         max_height = 700 #640.0
 
         if(height > max_height):
             new_height = max_height
-            new_width = (max_height/height) * width
+            new_width = (max_height/(1.0*height)) * width
             
             height = new_height
             width = new_width
         
         if(width > max_width):
             new_width = max_width
-            new_height = (max_width/width) * height
+            new_height = (max_width/(1.0*width)) * height
             height = new_height
             width = new_width
         
-        im = Image.open(image["src"])
-
-        # DEBUG BRAD: Resize the image to fit
-        im = im.resize((int(width),int(height)), Image.BICUBIC)
-        scratchdir = shorte_get_config("shorte", "scratchdir")
-        img = scratchdir + os.path.sep + image["name"] + image["ext"]
-        image["src"] = img
-        im.save(img)
-
         dpi = 96.0
         width = "%fin" % (width/dpi)
         height = "%fin" % (height/dpi)

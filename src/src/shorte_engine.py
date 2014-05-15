@@ -461,21 +461,41 @@ class engine_t:
         return image
     
     def scale_image(self, image):
+        '''This method is used to scale an image if a height or width attribute
+           is specified.
+
+           @param image [I] - The image object to scale.
+
+           @return The modified image object with the updated source.
+        '''
         width = 0
         height = 0
 
+        width_scale_percentage = False
+        height_scale_percentage = False
+
         if(image.has_key("width")):
             width = image["width"]
-            width = re.sub("px", "", width)
+            if("%" in width):
+                width_scale_percentage = True
+                width = re.sub("%", "", width)
+            elif("px" in width):
+                width = re.sub("px", "", width)
             width = int(width)
 
         if(image.has_key("height")):
             height = image["height"]
-            height = re.sub("px", "", height)
+            if("%" in height):
+                height_scale_percentage = True
+                height = re.sub("%", "", height)
+            elif("px" in height):
+                height = re.sub("px", "", height)
             height = int(height)
 
-        if(image.has_key("caption")):
-            caption = image["caption"]
+        if(width_scale_percentage or height_scale_percentage):
+            ERROR("Can't scale images by percentage yet")
+            im = Image.open(image["src"])
+            return (image,im.size[1],im.size[0])
 
         im = Image.open(image["src"])
         scale_width  = 1.0
@@ -493,7 +513,6 @@ class engine_t:
         width = scale_width * im.size[0]
         height = scale_height * im.size[1]
 
-        im = Image.open(image["src"])
         # DEBUG BRAD: Resize the image to fit
         im = im.resize((int(width),int(height)), Image.BICUBIC)
         scratchdir = shorte_get_config("shorte", "scratchdir")
@@ -513,7 +532,7 @@ class engine_t:
 
         self.m_images.append(img)
 
-        return image
+        return (image,height,width)
 
     def inline_image(self, image):
 
