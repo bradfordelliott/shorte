@@ -2247,6 +2247,16 @@ $href_end
         image["inline"] = True
 
         return self.format_image(image)
+
+    def format_gallery(self, tag):
+
+        gallery = tag.contents
+        html = '<div>'
+        for image in gallery.images():
+            html += "<img style='float:left;width:100px;' src='%s'></img>" % image.name
+        html += "</div>"
+
+        return html
     
     def format_embedded_object(self, tag):
 
@@ -2667,6 +2677,8 @@ $href_end
             self.m_contents.append(self.format_checklist(tag))
         elif(name == "image"):
             self.m_contents.append(self.format_image(tag.contents))
+        elif(name == "gallery"):
+            self.m_contents.append(self.format_gallery(tag))
         elif(name == "imagemap"):
             self.m_contents.append(self.format_imagemap(tag))
         elif(name == "prototype"):

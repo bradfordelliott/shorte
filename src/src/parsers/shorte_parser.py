@@ -36,6 +36,72 @@ except:
         
 from libs.records import *
 
+#class cell_t():
+#    def __init__(self):
+#        self.span = 1
+#        self.text = ""
+#        self.textblock = ""
+        
+class table_t():
+    def __init__(self):
+        self.rows = []
+        self.modifiers = {}
+        self.max_cols = 1
+        self.widths = []
+        self.width = 0
+        pass
+
+    def add_row(self, row):
+        self.rows.append(row)
+
+class image_t():
+    def __init__(self):
+        self.caption = ""
+        self.source = ""
+        self.height = 0
+        self.width = 0
+        self.name = ""
+        self.extension = ""
+
+    def parse_path(self, path):
+        self.source = path
+        dirname = os.path.dirname(path) + os.path.sep
+        name = path.replace(dirname, "")
+        parts = os.path.splitext(name)
+        self.name = name
+        self.dirname = dirname
+        self.basename = parts[0]
+        self.extension = parts[1]
+
+    def to_dict(self):
+        image = {}
+        image["name"] = self.name
+        image["ext"] = self.extension
+        image["src"] = self.soure
+        image["height"] = self.height
+        image["width"] = self.width
+        image["caption"] = self.caption
+        image["center"] = False
+        image["href"] = None
+        image["align"] = ""
+        image["imagemap"] = None
+        image["reference"] = None
+
+        return image
+
+class gallery_t():
+    def __init__(self):
+        self.m_images = []
+        pass
+
+    def add_image(self, image):
+        self.m_images.append(image)
+
+    def images(self):
+        return self.m_images
+
+
+
 
 class shorte_parser_t(parser_t):
     def __init__(self, engine):
@@ -67,6 +133,7 @@ class shorte_parser_t(parser_t):
             "register"        : True,
             "ol"              : True,
             "image"           : True,
+            "gallery"         : True,
             "inkscape"        : True,
             "shell"           : True,
             "prototype"       : True,
@@ -733,14 +800,17 @@ class shorte_parser_t(parser_t):
     def parse_table(self, source, modifiers, col_separators=['|']):
 
         table = {}
+        table2 = table_t()
 
         table["rows"] = []
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
                 table[modifier] = self.parse_textblock(modifiers[modifier])
+                table2.modifiers[modifier] = table[modifier]
             else:
                 table[modifier] = modifiers[modifier]
+                table2.modifiers[modifier] = modifiers[modifier]
 
         
         if(modifiers.has_key("mark_reserved")):
@@ -760,9 +830,11 @@ class shorte_parser_t(parser_t):
                 FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, self.m_current_line))
 
             table["widths"] = widths
+            table2.widths = widths
 
         if(modifiers.has_key("width")):
             table["width"] = modifiers["width"]
+            table2.width = modifiers["width"]
 
 
         rows = []
@@ -936,6 +1008,7 @@ class shorte_parser_t(parser_t):
                 table_row["cols"].append(tmp)
 
             table["rows"].append(table_row)
+            table2.rows.append(table_row)
 
 
         # Now step through the table and figure out how many
@@ -952,6 +1025,7 @@ class shorte_parser_t(parser_t):
                 max_cols = colspan
         
         table["max_cols"] = max_cols
+        table2.max_cols = max_cols
 
         # Now right expand any columns that are shorter
         # than the maximum number of columns
@@ -969,7 +1043,7 @@ class shorte_parser_t(parser_t):
 
                 col["span"] = max_cols - len(row["cols"]) + 1
 
-        return table
+        return (table, table2)
 
 
     def strip_formatting(self, input):
@@ -1795,6 +1869,36 @@ a C/C++ like define that looks like:
 
         return imagemap
 
+    def parse_gallery(self, source, modifiers):
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+
+        gallery = gallery_t()
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("images:")):
+                text = section[8:len(section)]
+                (table,table2) = self.parse_table(text, modifiers)
+
+                for row in table2.rows:
+                    if(row["is_header"] == False):
+                        #for col in row["cols"]:
+                        image = image_t()
+                        image.height = 0
+                        image.width = 0
+                        image.caption = row["cols"][2]["text"]
+
+                        image.parse_path(row["cols"][0]["text"])
+
+                        gallery.add_image(image)
+
+        return gallery
+
     def parse_embed(self, tags):
         
         obj = {}
@@ -2111,6 +2215,9 @@ else:
 
         elif(name == "image"):
             tag.contents = self.parse_image(modifiers)
+
+        elif(name == "gallery"):
+            tag.contents = self.parse_gallery(data, modifiers)
 
         elif(name == "imagemap"):
             tag.contents = self.parse_imagemap(data, modifiers)
