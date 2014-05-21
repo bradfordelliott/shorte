@@ -2253,7 +2253,8 @@ $href_end
         gallery = tag.contents
         html = '<div>'
         for image in gallery.images():
-            html += "<img style='float:left;width:100px;' src='%s'></img>" % image.name
+            html += "<a href='%s'><img style='float:left;width:100px;height:100px;margin:5px;border:10px solid #ccc;border-radius:10px;' src='%s'></img></a>" % (
+                image.name, image.thumbnail())
         html += "</div>"
 
         return html

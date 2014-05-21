@@ -29,3 +29,9 @@
 - examples/test.png     | 70x70 | This is my caption
 - examples/record_0.png | 70x70 | This is my caption
 - examples/test.png     | 70x70 | This is my caption
+- examples/record_0.png | 70x70 | This is my caption
+- examples/test.png     | 70x70 | This is my caption
+- examples/record_0.png | 70x70 | This is my caption
+- examples/test.png     | 70x70 | This is my caption
+- examples/record_0.png | 70x70 | This is my caption
+- examples/test.png     | 70x70 | This is my caption

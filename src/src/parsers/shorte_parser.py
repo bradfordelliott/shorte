@@ -20,6 +20,10 @@ import os
 from src.shorte_source_code import *
 import platform
 import time
+try:
+    import Image
+except:
+    WARNING("Failed to load Image library")
 from shorte_parser_base import parser_t
     
 from src.templates.template_shorte import template_shorte_t
@@ -54,6 +58,7 @@ class table_t():
     def add_row(self, row):
         self.rows.append(row)
 
+
 class image_t():
     def __init__(self):
         self.caption = ""
@@ -73,6 +78,15 @@ class image_t():
         self.basename = parts[0]
         self.extension = parts[1]
 
+    def dimensions(self):
+
+        if(self.height == 0 or self.width == 0):
+            im = Image.open(image.source)
+            self.width = im.size[0]
+            self.height = im.size[1]
+        
+        return (self.width, self.height)
+
     def to_dict(self):
         image = {}
         image["name"] = self.name
@@ -88,6 +102,71 @@ class image_t():
         image["reference"] = None
 
         return image
+    
+    def scale(self, new_height, new_width):
+        width = 0
+        height = 0
+
+        width_scale_percentage = False
+        height_scale_percentage = False
+
+        width = new_width
+        
+        if(not isinstance(new_width, (int,long))):
+            if("%" in new_width):
+                width_scale_percentage = True
+                width = re.sub("%", "", new_width)
+            elif("px" in new_width):
+                width = re.sub("px", "", new_width)
+            width = int(width)
+
+        height = new_height
+        if(not isinstance(new_height, (int,long))):
+            if("%" in new_height):
+                height_scale_percentage = True
+                height = re.sub("%", "", height)
+            elif("px" in new_height):
+                height = re.sub("px", "", height)
+            height = int(height)
+
+        if(width_scale_percentage or height_scale_percentage):
+            ERROR("Can't scale images by percentage yet")
+            return self.name
+
+        im = Image.open(self.source)
+        scale_width  = 1.0
+        scale_height = 1.0
+        if(width > 0):
+            scale_width = (width / (im.size[0] * (1.0)))
+            if(height == 0):
+                scale_height = scale_width
+
+        if(height > 0):
+            scale_height = (width / (im.size[1] * (1.0)))
+            if(width == 0):
+                scale_width = scale_height
+
+        width = scale_width * im.size[0]
+        height = scale_height * im.size[1]
+
+
+        # DEBUG BRAD: Resize the image to fit
+        im = im.resize((int(width),int(height)), Image.BICUBIC)
+        scratchdir = shorte_get_config("shorte", "scratchdir")
+        name = self.basename + "_%dx%d" % (width,height)
+        img = scratchdir + os.path.sep + name + self.extension
+        print img
+        im.save(img)
+
+        return img
+
+    def create_thumbnail(self):
+        #print "Creating thumbnail"
+        return self.scale(new_height=100, new_width=100)
+
+    def thumbnail(self):
+        #print "Creating thumbnail"
+        return self.basename + "_100x100" + self.extension
 
 class gallery_t():
     def __init__(self):
@@ -1894,6 +1973,9 @@ a C/C++ like define that looks like:
                         image.caption = row["cols"][2]["text"]
 
                         image.parse_path(row["cols"][0]["text"])
+
+                        self.m_engine.m_images.append(image.source)
+                        self.m_engine.m_images.append(image.create_thumbnail())
 
                         gallery.add_image(image)
 
