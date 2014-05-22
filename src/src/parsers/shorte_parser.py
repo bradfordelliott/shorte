@@ -107,7 +107,7 @@ class image_t():
         width = 0
         height = 0
 
-        width_scale_percentage = False
+        width_scale_percentage  = False
         height_scale_percentage = False
 
         width = new_width
@@ -149,13 +149,11 @@ class image_t():
         width = scale_width * im.size[0]
         height = scale_height * im.size[1]
 
-
         # DEBUG BRAD: Resize the image to fit
         im = im.resize((int(width),int(height)), Image.BICUBIC)
         scratchdir = shorte_get_config("shorte", "scratchdir")
         name = self.basename + "_%dx%d" % (width,height)
         img = scratchdir + os.path.sep + name + self.extension
-        print img
         im.save(img)
 
         return img
@@ -1974,7 +1972,11 @@ a C/C++ like define that looks like:
 
                         image.parse_path(row["cols"][0]["text"])
 
+                        # Add the image to the list of managed photos
                         self.m_engine.m_images.append(image.source)
+
+                        # Create a thumbnail for the image and add it to
+                        # the list of managed photos
                         self.m_engine.m_images.append(image.create_thumbnail())
 
                         gallery.add_image(image)

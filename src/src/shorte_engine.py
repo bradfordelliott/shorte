@@ -492,21 +492,26 @@ class engine_t:
                 height = re.sub("px", "", height)
             height = int(height)
 
-        if(width_scale_percentage or height_scale_percentage):
-            ERROR("Can't scale images by percentage yet")
-            im = Image.open(image["src"])
-            return (image,im.size[1],im.size[0])
-
         im = Image.open(image["src"])
+
         scale_width  = 1.0
         scale_height = 1.0
+
         if(width > 0):
-            scale_width = (width / (im.size[0] * (1.0)))
+            if(width_scale_percentage):
+                scale_width = width/100.0
+            else:
+                scale_width = (width / (im.size[0] * (1.0)))
+
             if(height == 0):
                 scale_height = scale_width
 
         if(height > 0):
-            scale_height = (width / (im.size[1] * (1.0)))
+            if(height_scale_percentage):
+                scale_height = height/100.0
+            else:
+                scale_height = (width / (im.size[1] * (1.0)))
+
             if(width == 0):
                 scale_width = scale_height
 
