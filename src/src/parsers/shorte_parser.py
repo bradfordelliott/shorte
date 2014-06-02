@@ -46,17 +46,6 @@ from libs.records import *
 #        self.text = ""
 #        self.textblock = ""
         
-class table_t():
-    def __init__(self):
-        self.rows = []
-        self.modifiers = {}
-        self.max_cols = 1
-        self.widths = []
-        self.width = 0
-        pass
-
-    def add_row(self, row):
-        self.rows.append(row)
 
 
 class image_t():
@@ -682,7 +671,7 @@ class shorte_parser_t(parser_t):
         '''This method is called to parse the @sequence tag
            and generate a sequence diagram from it'''
 
-        table = self.parse_table(source, modifiers)
+        table = self.parse_table(source, modifiers).dict
 
         xml = '''<xml>
    <diagram>
@@ -788,8 +777,8 @@ class shorte_parser_t(parser_t):
 
         table = self.parse_table(source, modifiers)
 
-        title = table['title']
-        desc = table['caption']
+        title = table.title
+        desc = table.caption
         width = 800
         height = 600
         svg_file = "test.svg"
@@ -797,7 +786,7 @@ class shorte_parser_t(parser_t):
 
         events = []
         index = 0
-        for row in table["rows"]:
+        for row in table.rows:
 
             if(index == 0):
                 index += 1
@@ -835,13 +824,8 @@ class shorte_parser_t(parser_t):
 
             events.append(event)
 
-
-
-        if(table.has_key("title")):
-            name = table["title"]
-        if(table.has_key("name")):
-            name = table["name"]
-        
+        name = table.title
+        print "Name: [%s]" % name
 
         path = pathize(name)
         parts = os.path.splitext(path)
@@ -866,7 +850,7 @@ class shorte_parser_t(parser_t):
         image["ext"]  = ".png"
         image["imagemap"] = image_map
         image["imagemap_name"] = basename
-        image["html"] = self.parse_table(event_html, modifiers) 
+        image["html"] = self.parse_table(event_html, modifiers)
         image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(image["src"])
@@ -887,6 +871,10 @@ class shorte_parser_t(parser_t):
                 table2.modifiers[modifier] = table[modifier]
             else:
                 table[modifier] = modifiers[modifier]
+
+                if(modifier in ("name", "title")):
+                    table2.title = table[modifier]
+
                 table2.modifiers[modifier] = modifiers[modifier]
 
         
@@ -1120,7 +1108,8 @@ class shorte_parser_t(parser_t):
 
                 col["span"] = max_cols - len(row["cols"]) + 1
 
-        return (table, table2)
+        table2.dict = table
+        return table2
 
 
     def strip_formatting(self, input):
@@ -1187,8 +1176,8 @@ a C/C++ like define that looks like:
                 source = section[7:len(section)].strip()
 
                 table = self.parse_table(source, modifiers)
-                enum.values = table["rows"]
-                enum.max_cols = table["max_cols"]
+                enum.values = table.rows
+                enum.max_cols = table.max_cols
 
                 #print "BEFORE"
                 #print enum.values
@@ -1210,7 +1199,7 @@ a C/C++ like define that looks like:
                 # Create Wiki links for each of the enums
                 for i in range(0, num_rows):
 
-                    e = table["rows"][i]["cols"][0]["text"]
+                    e = table.rows[i]["cols"][0]["text"]
                     #print "ENUM: [%s]" % e
                     
                     word = wikiword_t()
@@ -1941,7 +1930,7 @@ a C/C++ like define that looks like:
 
     def parse_imagemap(self, source, modifiers):
 
-        imagemap = self.parse_table(source, modifiers)
+        imagemap = self.parse_table(source, modifiers).dict
         self.m_engine.m_imagemaps[imagemap["id"]] = imagemap
 
         return imagemap
@@ -1960,9 +1949,9 @@ a C/C++ like define that looks like:
 
             if(section.startswith("images:")):
                 text = section[8:len(section)]
-                (table,table2) = self.parse_table(text, modifiers)
+                table = self.parse_table(text, modifiers)
 
-                for row in table2.rows:
+                for row in table.rows:
                     if(row["is_header"] == False):
                         #for col in row["cols"]:
                         image = image_t()
@@ -2423,12 +2412,12 @@ else:
             table = tag.contents
 
             i = 0
-            num_rows = len(table["rows"])
+            num_rows = len(table.rows)
 
             # Create Wiki links for each of the acronyms
             for i in range(1, num_rows):
 
-                acronym = table["rows"][i]["cols"][0]["text"]
+                acronym = table.rows[i]["cols"][0]["text"]
 
                 word = wikiword_t()
                 word.wikiword = acronym
@@ -2442,8 +2431,8 @@ else:
                 self.m_wiki_links[word.wikiword] = word
             
             # If the table has no title then default it
-            if(not table.has_key("title")):
-                table["title"] = "Acronyms"
+            if(table.title == None):
+                table.title = "Acronyms"
 
         elif(name == "sequence"):
             tag.contents = self.parse_sequence(data, modifiers)

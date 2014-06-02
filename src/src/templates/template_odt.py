@@ -1273,7 +1273,7 @@ class template_odt_t(template_t):
         '''This is an internal method used to format the
            table title'''
 
-        if('title' in table):
+        if(table.has_title()):
             odt = '''
 <table:table-row>
     <table:table-cell table:style-name="%s" office:value-type="string" table:number-columns-spanned="%d">
@@ -1281,9 +1281,9 @@ class template_odt_t(template_t):
     </table:table-cell>
 </table:table-row>
 ''' % (style["title"]["cell"],
-       table["max_cols"],
+       table.get_max_cols(),
        style["title"]["text"],
-       table["title"])
+       table.get_title())
         else:
             odt = ''
 
@@ -1293,35 +1293,35 @@ class template_odt_t(template_t):
         '''This is an internal method used to format the column
            styles section of the table'''
 
-        if(table.has_key("table_style_name") and table["table_style_name"] == "shorte_table_rounded"):
+        if(table.table_style_name and table.table_style_name == "shorte_table_rounded"):
             col_styles = '''
 <table:table-column table:style-name="shorte_table_rounded.column_edge" table:number-columns-repeated="1"/>
 '''
         else:
             col_styles = ''
 
-        if(table.has_key("column-styles")):
+        if(table.has_column_styles()):
             col_styles = ''
             i = 0
 
-            for col in range(0, table["max_cols"]):
+            for col in range(0, table.get_max_cols()):
                 col_styles += ''' 
 <table:table-column table:style-name="%s"/>
-''' % table["column-styles"][i]
+''' % table.get_column_styles()[i]
                 i += 1
         else:
             col_styles += '''
 <table:table-column table:style-name="%s" table:number-columns-repeated="%d"/>
-''' % (self.m_styles["table"]["column"], table["max_cols"])
+''' % (self.m_styles["table"]["column"], table.get_max_cols())
         
-        if(table.has_key("table_style_name") and table["table_style_name"] == "shorte_table_rounded"):
+        if(table.table_style_name and table.table_style_name == "shorte_table_rounded"):
             col_styles += '''
 <table:table-column table:style-name="shorte_table_rounded.column_edge" table:number-columns-repeated="1"/>
 '''
         
-        if(table.has_key("table_style_name") and table["table_style_name"] == "shorte_table_rounded"):
-            if(table.has_key("title")):
-                table_title = self.format_bold(table["title"])
+        if(table.table_style_name and table.table_style_name == "shorte_table_rounded"):
+            if(table.has_title()):
+                table_title = self.format_bold(table.get_title)
             else:
                 table_title = ''
 
@@ -1451,7 +1451,7 @@ class template_odt_t(template_t):
         '''This method is called to format the contents of a table and
            generate the XML output necessary for inserting into the ODT
            document'''
-        
+
         xml = ''
         title = ''
             
@@ -1461,14 +1461,14 @@ class template_odt_t(template_t):
         # get the style information associated with the style name
         style = self.__table_get_style(table_style_name)
 
-        table["table_style_name"] = table_style_name
+        table.table_style_name = table_style_name
         
-            #xml += self.format_caption("Caption: %s" % table["caption"])
+        #xml += self.format_caption("Caption: %s" % table["caption"])
 
         title = self.__table_format_title(table, style)
 
-        if(table.has_key("widths")):
-            xml += self.add_column_styles(table["widths"], title)
+        if(table.has_widths()):
+            xml += self.add_column_styles(table.get_widths(), title)
         else:
             xml += self.__table_format_column_styles(table, style, title)
         #xml += self.__table_format_column_styles(table, style, title)
@@ -1477,10 +1477,10 @@ class template_odt_t(template_t):
 
         row_index = 0
         col_index = 0
-        max_cols = table["max_cols"]
-        max_rows = len(table["rows"])
+        max_cols = table.get_max_cols()
+        max_rows = table.get_num_rows()
 
-        for row in table["rows"]:
+        for row in table.get_rows():
 
             # Skip any embedded captions for now in ODT documents
             if(row["is_caption"]):
@@ -1569,9 +1569,9 @@ class template_odt_t(template_t):
         xml += "</table:table>"
         
         # If the table has a caption then output the caption
-        if "caption" in table:
+        if(table.has_caption()):
             xml += self.format_bold("Caption:")
-            xml += self.format_textblock(table["caption"], style="shorte_standard_indented")
+            xml += self.format_textblock(table.get_caption(), style="shorte_standard_indented")
 
 
         #xml += "<text:p></text:p>"
@@ -1630,7 +1630,11 @@ class template_odt_t(template_t):
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        title = self.__table_format_title({"title" : struct.name, "max_cols" : struct.max_cols}, style)
+        table = table_t()
+        table.title = struct.name
+        table.max_cols = struct.max_cols
+
+        title = self.__table_format_title(table, style)
         xml += '''
 <table:table table:name="shorte_table_%d" table:style-name="%s">
 <table:table-column table:style-name="%s"/>
@@ -1735,7 +1739,11 @@ class template_odt_t(template_t):
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        title = self.__table_format_title({"title" : enum.name, "max_cols" : max_cols}, style)
+        table = table_t()
+        table.title = enum.name
+        table.max_cols = enum.max_cols
+
+        title = self.__table_format_title(table, style)
         
         xml = ''
         title = ''
@@ -1874,7 +1882,7 @@ class template_odt_t(template_t):
 
         i = 0
 
-        for row in table["rows"]:
+        for row in table.rows:
             
             xml += '''
     <table:table-row>
@@ -1915,8 +1923,8 @@ class template_odt_t(template_t):
 
         xml += "</table:table>"
         
-        if("caption" in table):
-            xml += self.format_caption("Caption: %s" % table["caption"])
+        if(table.has_caption()):
+            xml += self.format_caption("Caption: %s" % table.get_caption())
         
         return xml
 
@@ -2365,10 +2373,10 @@ class template_odt_t(template_t):
                           "shorte_type_summary_col2",
                           "shorte_type_summary_col2"]
         
-        table = {}
-        table["max_cols"] = max_cols
-        table["column-styles"] = col_styles
-        table["rows"] = []
+        table = table_t()
+        table.max_cols = max_cols
+        table.column_styles = col_styles
+        table.rows = []
 
         hierarchy = ''
     
@@ -2386,7 +2394,7 @@ class template_odt_t(template_t):
                     cols = []
                     cols.append({"span":max_cols, 'text': hierarchy, "style": style, "text-style": text_style})
                     row["cols"] = cols
-                    table["rows"].append(row)
+                    table.rows.append(row)
             else:
                 if(tag.hierarchy != hierarchy):
                     hierarchy = tag.hierarchy
@@ -2395,7 +2403,7 @@ class template_odt_t(template_t):
                     cols = []
                     cols.append({"span":max_cols, 'text': hierarchy, "style": style, "text-style": text_style})
                     row["cols"] = cols
-                    table["rows"].append(row)
+                    table.rows.append(row)
 
             row = self._table_row()
 
@@ -2411,7 +2419,7 @@ class template_odt_t(template_t):
                 cols.append({"span":1, 'text':returns,   "style": style, "text-style": text_style})
                 cols.append({"span":1, 'text':prototype, "style": style, "text-style": text_style})
                 row["cols"] = cols
-                table["rows"].append(row)
+                table.rows.append(row)
 
                 row = self._table_row()
                 cols = []
@@ -2441,7 +2449,7 @@ class template_odt_t(template_t):
                 cols.append({"span":1, 'text':tag.name, "style": style, "text-style": text_style})
                 cols.append({"span":1, 'text':text, "style" : style, "text-style": text_style})
                 row["cols"] = cols
-                table["rows"].append(row)
+                table.rows.append(row)
 
                 row = self._table_row()
                 cols = []
@@ -2476,7 +2484,7 @@ class template_odt_t(template_t):
 
             row["cols"] = cols
 
-            table["rows"].append(row)
+            table.rows.append(row)
 
         return self.__format_table("", table, True)
 
@@ -2509,10 +2517,10 @@ class template_odt_t(template_t):
     def format_testcase(self, tag):
 
         testcase = tag.contents
-        table = {}
-        table["max_cols"] = 2
-        table["column-styles"] = ["shorte_func_summary_col1", "shorte_func_summary_col2"]
-        table["rows"] = []
+        table = table_t()
+        table.max_cols = 2
+        table.column_styles = ["shorte_func_summary_col1", "shorte_func_summary_col2"]
+        table.rows = []
 
         hierarchy = ''
     
@@ -2532,7 +2540,7 @@ class template_odt_t(template_t):
         text_style = self.m_styles["table"]["cell"]["prototype_section_text"]
         cols.append({"span":2, 'text':"Test Case: " + vars["name"], "style": style, "text-style": text_style})
         row["cols"] = cols
-        table["rows"].append(row)
+        table.rows.append(row)
         
         row = self._table_row()
         cols = []
@@ -2544,7 +2552,7 @@ class template_odt_t(template_t):
         text_style = self.m_styles["para"]["normal"]
         cols.append({"span":1, 'text': vars["status"], "style": style, "text-style": text_style})
         row["cols"] = cols
-        table["rows"].append(row)
+        table.rows.append(row)
 
         row = self._table_row()
         cols = []
@@ -2555,7 +2563,7 @@ class template_odt_t(template_t):
         text_style = self.m_styles["para"]["normal"]
         cols.append({"span":1, 'text': vars["desc"], "style": style, "text-style": text_style})
         row["cols"] = cols
-        table["rows"].append(row)
+        table.rows.append(row)
             
         return self.__format_table("", table, False)
 
@@ -3021,7 +3029,7 @@ class template_odt_t(template_t):
         elif(name == "sequence"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_sequence(tag)
         # These tags are not supported in OTD documents
-        elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns")):
+        elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns", "gallery")):
             #print "WARNING: %s tag not supported in ODT documents" % name
             pass
         else:
@@ -3093,8 +3101,8 @@ class template_odt_t(template_t):
         table = tag
 
         if(table != None):
-            table["title"] = "Revision History"
-            table["widths"] = [10,30,60]
+            table.title = "Revision History"
+            table.widths = [10,30,60]
             #table["column-styles"] = ["shorte_type_summary_col2", "shorte_type_summary_col2", "shorte_type_summary_col2"]
             if(replace_paragraph):
                 output = self.__format_table("", tag)
