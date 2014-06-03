@@ -1388,24 +1388,26 @@ class template_html_t(template_t):
         
         #html = "<div class='tb'><table class='tb'>\n"
 
-        if(table.has_key("width")):
+        if(table.dict.has_key("width")):
             width = 'width="100%"'
         else:
             width = ''
 
         html = "<table class='bordered' %s>" % width
+        
+        max_cols = table.get_max_cols()
 
-        if("title" in table):
-            html += "<tr><th colspan='%d'>%s</th></tr>\n" % (table["max_cols"], table["title"])
+        title = table.get_title()
+        if(title != None):
+            html += "<tr><th colspan='%d'>%s</th></tr>\n" % (max_cols, title)
 
         i = 0
 
-        max_cols = table["max_cols"]
         widths = []
-        if(table.has_key("widths")):
-            widths = table["widths"]
+        if(table.dict.has_key("widths")):
+            widths = table.dict["widths"]
 
-        for row in table["rows"]:
+        for row in table.rows:
             
             is_subheader = row["is_subheader"]
             is_header    = row["is_header"]
@@ -1416,7 +1418,7 @@ class template_html_t(template_t):
                 is_title = row["is_title"]
 
             if(is_title):
-                html += "<tr><th colspan='%d'>%s</th></tr>\n" % (table["max_cols"], row["cols"][0]["text"])
+                html += "<tr><th colspan='%d'>%s</th></tr>\n" % (max_cols, row["cols"][0]["text"])
                 i+= 1
                 continue
             elif(is_header):
@@ -1427,7 +1429,7 @@ class template_html_t(template_t):
                 html += "<tr>\n"
 
             if(row["is_caption"]):
-                html += "<td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (table["max_cols"], self.format_text(row["cols"][0]["text"]))
+                html += "<td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (max_cols, self.format_text(row["cols"][0]["text"]))
             elif(row["is_spacer"]):
                 html += "<td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
             else: 
@@ -1472,8 +1474,9 @@ class template_html_t(template_t):
             i+=1
 
 
-        if("caption" in table):
-            html += "<tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:left;'><b>Caption:</b> %s</td></tr>\n" % (table["max_cols"], self.format_textblock(table["caption"], False))
+        caption = table.get_caption()
+        if(caption != None):
+            html += "<tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:left;'><b>Caption:</b> %s</td></tr>\n" % (max_cols, self.format_textblock(caption, False))
         
         html += "</table>"
 
@@ -1640,13 +1643,12 @@ within an HTML document.
 
         html = "<table class='bordered'>\n"
 
-        if("title" in table):
-
-            html += "<tr><th colspan='%d'>%s</th></tr>\n" % (table["max_cols"], table["title"])
+        if(table.get_title() != None):
+            html += "<tr><th colspan='%d'>%s</th></tr>\n" % (table.get_max_cols(), table.get_title())
 
         i = 0
 
-        for row in table["rows"]:
+        for row in table.get_rows():
             
             is_subheader = row["is_subheader"]
             is_header    = row["is_header"]
@@ -1696,8 +1698,8 @@ within an HTML document.
 
             i+=1
 
-        if("caption" in table):
-            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
+        if(table.get_caption() != None):
+            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table.get_max_cols(), table.get_caption())
 
         html += "</table><br/>"
         
@@ -2129,8 +2131,8 @@ ${example}
 
         # Check to see if the image requires scaling
         if(image.has_key("height") or image.has_key("width")):
-            image = self.m_engine.scale_image(image)
-        
+            (image,height,width) = self.m_engine.scale_image(image)
+
         name = image["name"] + image["ext"]
 
         # If inlining is turned on then we need to embed the image
@@ -2260,6 +2262,17 @@ $href_end
         image["inline"] = True
 
         return self.format_image(image)
+
+    def format_gallery(self, tag):
+
+        gallery = tag.contents
+        html = '<div>'
+        for image in gallery.images():
+            html += "<a href='%s'><img style='float:left;width:100px;height:100px;margin:5px;border:10px solid #ccc;border-radius:10px;' src='%s'></img></a>" % (
+                image.name, image.thumbnail())
+        html += "</div>"
+
+        return html
     
     def format_embedded_object(self, tag):
 
@@ -2680,6 +2693,8 @@ $href_end
             self.m_contents.append(self.format_checklist(tag))
         elif(name == "image"):
             self.m_contents.append(self.format_image(tag.contents))
+        elif(name == "gallery"):
+            self.m_contents.append(self.format_gallery(tag))
         elif(name == "imagemap"):
             self.m_contents.append(self.format_imagemap(tag))
         elif(name == "prototype"):
@@ -3501,7 +3516,7 @@ div.tblkp  {margin:0px;padding:0px;}
         history = self.m_engine.get_doc_info().revision_history()
 
         if(history != None):
-            history["title"] = "Revision History"
+            history.title = "Revision History"
             history = self.format_table("", history)
         else:
             history = ""

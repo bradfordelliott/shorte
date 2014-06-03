@@ -216,8 +216,65 @@ class indexer_t:
         return self.m_image_index
 
 
+class table_t():
+    def __init__(self):
+        self.rows = []
+        self.modifiers = {}
+        self.max_cols = 1
+        self.widths = []
+        self.width = 0
+        self.title = None
+        self.caption = None
+
+        # Attributes primarily for ODT
+        self.table_style_name = None
+        self.column_styles = None
+        pass
+
+    def get_title(self):
+        return self.title
+    def has_title(self):
+        if(self.title != None):
+            return True
+        return False
+
+    def get_widths(self):
+        return self.widths
+    def has_widths(self):
+        if(len(self.widths) > 0):
+            return True
+        return False
+
+    def get_max_cols(self):
+        return self.max_cols
+
+    def get_caption(self):
+        return self.caption
+    def has_caption(self):
+        if(self.caption != None):
+            return True
+        return False
+
+    def add_row(self, row):
+        self.rows.append(row)
+
+    def get_rows(self):
+        return self.rows
+    def get_num_rows(self):
+        return len(self.rows)
+
+    def has_column_styles(self):
+        if(self.column_styles != None):
+            return True
+        return False
+
+    def get_column_styles(self):
+        return self.column_styles
+
+
 g_images  = []
 index = []
+
 
 
 import base64

@@ -20,6 +20,10 @@ import os
 from src.shorte_source_code import *
 import platform
 import time
+try:
+    import Image
+except:
+    WARNING("Failed to load Image library")
 from shorte_parser_base import parser_t
     
 from src.templates.template_shorte import template_shorte_t
@@ -35,6 +39,134 @@ except:
     print "WARNING: Failed to load cairo_access library"
         
 from libs.records import *
+
+#class cell_t():
+#    def __init__(self):
+#        self.span = 1
+#        self.text = ""
+#        self.textblock = ""
+        
+
+
+class image_t():
+    def __init__(self):
+        self.caption = ""
+        self.source = ""
+        self.height = 0
+        self.width = 0
+        self.name = ""
+        self.extension = ""
+
+    def parse_path(self, path):
+        self.source = path
+        dirname = os.path.dirname(path) + os.path.sep
+        name = path.replace(dirname, "")
+        parts = os.path.splitext(name)
+        self.name = name
+        self.dirname = dirname
+        self.basename = parts[0]
+        self.extension = parts[1]
+
+    def dimensions(self):
+
+        if(self.height == 0 or self.width == 0):
+            im = Image.open(image.source)
+            self.width = im.size[0]
+            self.height = im.size[1]
+        
+        return (self.width, self.height)
+
+    def to_dict(self):
+        image = {}
+        image["name"] = self.name
+        image["ext"] = self.extension
+        image["src"] = self.soure
+        image["height"] = self.height
+        image["width"] = self.width
+        image["caption"] = self.caption
+        image["center"] = False
+        image["href"] = None
+        image["align"] = ""
+        image["imagemap"] = None
+        image["reference"] = None
+
+        return image
+    
+    def scale(self, new_height, new_width):
+        width = 0
+        height = 0
+
+        width_scale_percentage  = False
+        height_scale_percentage = False
+
+        width = new_width
+        
+        if(not isinstance(new_width, (int,long))):
+            if("%" in new_width):
+                width_scale_percentage = True
+                width = re.sub("%", "", new_width)
+            elif("px" in new_width):
+                width = re.sub("px", "", new_width)
+            width = int(width)
+
+        height = new_height
+        if(not isinstance(new_height, (int,long))):
+            if("%" in new_height):
+                height_scale_percentage = True
+                height = re.sub("%", "", height)
+            elif("px" in new_height):
+                height = re.sub("px", "", height)
+            height = int(height)
+
+        if(width_scale_percentage or height_scale_percentage):
+            ERROR("Can't scale images by percentage yet")
+            return self.name
+
+        im = Image.open(self.source)
+        scale_width  = 1.0
+        scale_height = 1.0
+        if(width > 0):
+            scale_width = (width / (im.size[0] * (1.0)))
+            if(height == 0):
+                scale_height = scale_width
+
+        if(height > 0):
+            scale_height = (width / (im.size[1] * (1.0)))
+            if(width == 0):
+                scale_width = scale_height
+
+        width = scale_width * im.size[0]
+        height = scale_height * im.size[1]
+
+        # DEBUG BRAD: Resize the image to fit
+        im = im.resize((int(width),int(height)), Image.BICUBIC)
+        scratchdir = shorte_get_config("shorte", "scratchdir")
+        name = self.basename + "_%dx%d" % (width,height)
+        img = scratchdir + os.path.sep + name + self.extension
+        im.save(img)
+
+        return img
+
+    def create_thumbnail(self):
+        #print "Creating thumbnail"
+        return self.scale(new_height=100, new_width=100)
+
+    def thumbnail(self):
+        #print "Creating thumbnail"
+        return self.basename + "_100x100" + self.extension
+
+class gallery_t():
+    def __init__(self):
+        self.m_images = []
+        pass
+
+    def add_image(self, image):
+        self.m_images.append(image)
+
+    def images(self):
+        return self.m_images
+
+
 
 
 class shorte_parser_t(parser_t):
@@ -67,6 +199,7 @@ class shorte_parser_t(parser_t):
             "register"        : True,
             "ol"              : True,
             "image"           : True,
+            "gallery"         : True,
             "inkscape"        : True,
             "shell"           : True,
             "prototype"       : True,
@@ -538,7 +671,7 @@ class shorte_parser_t(parser_t):
         '''This method is called to parse the @sequence tag
            and generate a sequence diagram from it'''
 
-        table = self.parse_table(source, modifiers)
+        table = self.parse_table(source, modifiers).dict
 
         xml = '''<xml>
    <diagram>
@@ -644,8 +777,8 @@ class shorte_parser_t(parser_t):
 
         table = self.parse_table(source, modifiers)
 
-        title = table['title']
-        desc = table['caption']
+        title = table.title
+        desc = table.caption
         width = 800
         height = 600
         svg_file = "test.svg"
@@ -653,7 +786,7 @@ class shorte_parser_t(parser_t):
 
         events = []
         index = 0
-        for row in table["rows"]:
+        for row in table.rows:
 
             if(index == 0):
                 index += 1
@@ -691,13 +824,8 @@ class shorte_parser_t(parser_t):
 
             events.append(event)
 
-
-
-        if(table.has_key("title")):
-            name = table["title"]
-        if(table.has_key("name")):
-            name = table["name"]
-        
+        name = table.title
+        print "Name: [%s]" % name
 
         path = pathize(name)
         parts = os.path.splitext(path)
@@ -722,7 +850,7 @@ class shorte_parser_t(parser_t):
         image["ext"]  = ".png"
         image["imagemap"] = image_map
         image["imagemap_name"] = basename
-        image["html"] = self.parse_table(event_html, modifiers) 
+        image["html"] = self.parse_table(event_html, modifiers)
         image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(image["src"])
@@ -733,14 +861,21 @@ class shorte_parser_t(parser_t):
     def parse_table(self, source, modifiers, col_separators=['|']):
 
         table = {}
+        table2 = table_t()
 
         table["rows"] = []
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
                 table[modifier] = self.parse_textblock(modifiers[modifier])
+                table2.modifiers[modifier] = table[modifier]
             else:
                 table[modifier] = modifiers[modifier]
+
+                if(modifier in ("name", "title")):
+                    table2.title = table[modifier]
+
+                table2.modifiers[modifier] = modifiers[modifier]
 
         
         if(modifiers.has_key("mark_reserved")):
@@ -760,9 +895,11 @@ class shorte_parser_t(parser_t):
                 FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, self.m_current_line))
 
             table["widths"] = widths
+            table2.widths = widths
 
         if(modifiers.has_key("width")):
             table["width"] = modifiers["width"]
+            table2.width = modifiers["width"]
 
 
         rows = []
@@ -936,6 +1073,7 @@ class shorte_parser_t(parser_t):
                 table_row["cols"].append(tmp)
 
             table["rows"].append(table_row)
+            table2.rows.append(table_row)
 
 
         # Now step through the table and figure out how many
@@ -952,6 +1090,7 @@ class shorte_parser_t(parser_t):
                 max_cols = colspan
         
         table["max_cols"] = max_cols
+        table2.max_cols = max_cols
 
         # Now right expand any columns that are shorter
         # than the maximum number of columns
@@ -969,7 +1108,8 @@ class shorte_parser_t(parser_t):
 
                 col["span"] = max_cols - len(row["cols"]) + 1
 
-        return table
+        table2.dict = table
+        return table2
 
 
     def strip_formatting(self, input):
@@ -1036,8 +1176,8 @@ a C/C++ like define that looks like:
                 source = section[7:len(section)].strip()
 
                 table = self.parse_table(source, modifiers)
-                enum.values = table["rows"]
-                enum.max_cols = table["max_cols"]
+                enum.values = table.rows
+                enum.max_cols = table.max_cols
 
                 #print "BEFORE"
                 #print enum.values
@@ -1059,7 +1199,7 @@ a C/C++ like define that looks like:
                 # Create Wiki links for each of the enums
                 for i in range(0, num_rows):
 
-                    e = table["rows"][i]["cols"][0]["text"]
+                    e = table.rows[i]["cols"][0]["text"]
                     #print "ENUM: [%s]" % e
                     
                     word = wikiword_t()
@@ -1790,10 +1930,47 @@ a C/C++ like define that looks like:
 
     def parse_imagemap(self, source, modifiers):
 
-        imagemap = self.parse_table(source, modifiers)
+        imagemap = self.parse_table(source, modifiers).dict
         self.m_engine.m_imagemaps[imagemap["id"]] = imagemap
 
         return imagemap
+
+    def parse_gallery(self, source, modifiers):
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+
+        gallery = gallery_t()
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("images:")):
+                text = section[8:len(section)]
+                table = self.parse_table(text, modifiers)
+
+                for row in table.rows:
+                    if(row["is_header"] == False):
+                        #for col in row["cols"]:
+                        image = image_t()
+                        image.height = 0
+                        image.width = 0
+                        image.caption = row["cols"][2]["text"]
+
+                        image.parse_path(row["cols"][0]["text"])
+
+                        # Add the image to the list of managed photos
+                        self.m_engine.m_images.append(image.source)
+
+                        # Create a thumbnail for the image and add it to
+                        # the list of managed photos
+                        self.m_engine.m_images.append(image.create_thumbnail())
+
+                        gallery.add_image(image)
+
+        return gallery
 
     def parse_embed(self, tags):
         
@@ -2112,6 +2289,9 @@ else:
         elif(name == "image"):
             tag.contents = self.parse_image(modifiers)
 
+        elif(name == "gallery"):
+            tag.contents = self.parse_gallery(data, modifiers)
+
         elif(name == "imagemap"):
             tag.contents = self.parse_imagemap(data, modifiers)
 
@@ -2232,12 +2412,12 @@ else:
             table = tag.contents
 
             i = 0
-            num_rows = len(table["rows"])
+            num_rows = len(table.rows)
 
             # Create Wiki links for each of the acronyms
             for i in range(1, num_rows):
 
-                acronym = table["rows"][i]["cols"][0]["text"]
+                acronym = table.rows[i]["cols"][0]["text"]
 
                 word = wikiword_t()
                 word.wikiword = acronym
@@ -2251,8 +2431,8 @@ else:
                 self.m_wiki_links[word.wikiword] = word
             
             # If the table has no title then default it
-            if(not table.has_key("title")):
-                table["title"] = "Acronyms"
+            if(table.title == None):
+                table.title = "Acronyms"
 
         elif(name == "sequence"):
             tag.contents = self.parse_sequence(data, modifiers)
