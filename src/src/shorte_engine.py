@@ -3,6 +3,11 @@ import datetime
 import string
 from string import Template;
 
+try:
+    import Image
+except:
+    WARNING("Failed to load Image library")
+
 from src.shorte_defines import *
 from src.shorte_source_code import *
 from src.parsers.shorte_parser import *
@@ -411,10 +416,14 @@ class engine_t:
             input = input.replace("/cygdrive/c/", "C:/")
 
         if(not os.path.exists(PATH_INKSCAPE)):
-            FATAL("%s not found, cannot convert" % PATH_INKSCAPE)
+            import shutil
+            ERROR("%s not found, cannot convert" % PATH_INKSCAPE)
+            path = shorte_get_startup_path() + "/templates/shared/inkscape_not_found.png"
+            shutil.copyfile(path, output)
+            return output
 
         cmd = '''%s -e "%s" "%s"''' % (PATH_INKSCAPE, output, input)
-        print cmd
+        #print cmd
         
         # Need a shorte delay after running inkscape because of
         # a race condition on windows
@@ -448,6 +457,61 @@ class engine_t:
                     self.m_images.remove(i)
 
         self.m_images.append(output)
+
+        return image
+    
+    def scale_image(self, image):
+        width = 0
+        height = 0
+
+        if(image.has_key("width")):
+            width = image["width"]
+            width = re.sub("px", "", width)
+            width = int(width)
+
+        if(image.has_key("height")):
+            height = image["height"]
+            height = re.sub("px", "", height)
+            height = int(height)
+
+        if(image.has_key("caption")):
+            caption = image["caption"]
+
+        im = Image.open(image["src"])
+        scale_width  = 1.0
+        scale_height = 1.0
+        if(width > 0):
+            scale_width = (width / (im.size[0] * (1.0)))
+            if(height == 0):
+                scale_height = scale_width
+
+        if(height > 0):
+            scale_height = (width / (im.size[1] * (1.0)))
+            if(width == 0):
+                scale_width = scale_height
+
+        width = scale_width * im.size[0]
+        height = scale_height * im.size[1]
+
+        im = Image.open(image["src"])
+        # DEBUG BRAD: Resize the image to fit
+        im = im.resize((int(width),int(height)), Image.BICUBIC)
+        scratchdir = shorte_get_config("shorte", "scratchdir")
+        name = image["name"] + "_%dx%d" % (width,height)
+        img = scratchdir + os.path.sep + name + image["ext"]
+        image["name"] = name
+        image["src"] = img
+        print img
+        im.save(img)
+            
+        # If we've found the source image than remove it from
+        # the list of images
+        for i in self.m_images:
+            if(i == image["src"]):
+                print "Removing %s from the list" % i
+                self.m_images.remove(i)
+
+        self.m_images.append(img)
 
         return image
 

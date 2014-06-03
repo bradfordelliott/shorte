@@ -26,6 +26,7 @@ help:
 	@${echo} "   test_bullets         = test the @ul and @ol list tags"
 	@${echo} "   test_wkiwords        = test the use of wikiwords"
 	@${echo} "   test_images          = test the use of images"
+	@${echo} "   test_images_encode   = test the encoding of images as base64"
 	@${echo} "   test_mergefile       = test the generation of mergefiles used for diffing"
 	@${echo} "   test_sql             = test the generation of SQL databases to store source code annotations"
 	@${echo} "   test_defines         = test the formatting of defines"
@@ -34,6 +35,7 @@ help:
 	@${echo} "   test_comments        = test for single and multi-line comment handling"
 	@${echo} "   test_sequences       = test for sequence diagrams"
 	@${echo} "   test_templates       = test all the templates"
+	@${echo} "   test_inkscape        = test inskcape"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -125,12 +127,13 @@ tests:
 	make test_wikiwords
 	make test_conditionals
 	make test_images
+	make test_images_encode
 	make test_mergefile
 	make test_sql
 	make test_server
 	make test_extract_private
 	make test_revealjs
-	make test_mx
+#	make test_mx
 	make test_templates
 
 THEME:=shorte
@@ -179,6 +182,7 @@ test_defines:
 
 
 test_code_quick:
+	python shorte.py -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
 	python shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
@@ -193,6 +197,7 @@ test_enums:
 test_bullets:
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
 	python shorte.py -f examples/bullets.tpl -t "html=shorte;pdf=shorte" -p "html+pdf" -o build-output/bullets_shorte
+	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets2 --zip=bullets.zip
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
@@ -207,6 +212,8 @@ test_conditionals:
 
 test_images:
 	python shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
+
+test_images_encode:
 	python shorte.py -f examples/test.png -i "encode_images" 
 
 # This example is used to test the generation of mergefiles. A mergefile is a target that
@@ -255,6 +262,11 @@ test_templates:
 	python shorte.py -f examples/template_test.tpl -p "shorte" -o build-output/template_tests/shorte
 	python shorte.py -f examples/template_test.tpl -p "sql" -o build-output/template_tests/sql
 
+test_shorte:
+	python shorte.py -f examples/headings.tpl -p "html" -t shorte -o build-output/shorte_template
+
+test_inkscape:
+	python shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code

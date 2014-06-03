@@ -4,5 +4,14 @@
 @body
 @h1 Images
 
-@image: src="examples/test.png"
+@h2 200px
+@image: src="examples/test.png" width="200px"
+
+@h2 300px
+@image: src="examples/test.png" width="300px"
+
+@h2 700px
+@image: src="examples/record_0.png" width="700px"
+
+@h2 No Sizing
 @image: src="examples/record_0.png"

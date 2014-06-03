@@ -2126,6 +2126,10 @@ ${example}
         if(image.has_key("converter")):
             image = self.m_engine.convert_image(image)
             print "CONVERTED = [%s]" % image["name"]
+
+        # Check to see if the image requires scaling
+        if(image.has_key("height") or image.has_key("width")):
+            image = self.m_engine.scale_image(image)
         
         name = image["name"] + image["ext"]
 
@@ -2139,18 +2143,9 @@ ${example}
         href_start = ""
         href_end   = ""
 
-        if(image.has_key("width")):
-            style += "width:%s;" % image["width"]
-
-        if(image.has_key("height")):
-            style += "height:%s;" % image["height"]
-        if(image.has_key("caption")):
-            caption = image["caption"]
-
         if(image.has_key("href")):
             href_start = "<a style='text-decoration:none;' href='%s'>" % image["href"]
             href_end = "</a>"
-
 
         if(image.has_key("align") and (image["align"] == "center" or image["align"] == "right")):
             if(image["align"] == "center"):
@@ -3626,7 +3621,7 @@ div.tblkp  {margin:0px;padding:0px;}
                     continue
 
                 parts = os.path.split(image)
-                #print "IMAGE: [%s]" % image
+                print "IMAGE: [%s]" % image
                 shutil.copy(image, self.get_content_dir() + "/" + parts[1])
                 pictures_copied[image] = True
 
