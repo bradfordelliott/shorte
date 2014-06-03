@@ -422,7 +422,7 @@ class engine_t:
             shutil.copyfile(path, output)
             return output
 
-        cmd = '''%s -e "%s" "%s"''' % (PATH_INKSCAPE, output, input)
+        cmd = '''%s -z -e "%s" "%s"''' % (PATH_INKSCAPE, output, input)
         #print cmd
         
         # Need a shorte delay after running inkscape because of
@@ -433,6 +433,15 @@ class engine_t:
         return output
 
     def convert_image(self, image):
+        '''This method is called to convert an input image
+           from one format to another. Currently it really only
+           supports conversion via inkscape.
+
+           @param image [I] - The image to convert
+
+           @return The image structure updated to point
+                   to the converted image
+        '''
 
         name = image["name"]
         converter = image["converter"]
@@ -455,6 +464,11 @@ class engine_t:
                 if(i == input):
                     print "Removing %s from the list" % i
                     self.m_images.remove(i)
+
+            # Once the image has been converted remove
+            # the converter flag so we don't attempt to
+            # convert it multiple times.
+            del image["converter"]
 
         self.m_images.append(output)
 

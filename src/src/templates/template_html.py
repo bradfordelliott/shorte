@@ -2224,17 +2224,30 @@ $href_end
 
             cols = row["cols"]
 
-            shape = cols[0]["text"]
-            coords = cols[1]["text"]
-            label = cols[2]["text"]
-            desc  = cols[3]["text"]
+            shape  = cols[0]["text"]
+            coords = cols[1]["text"].strip()
+            label  = cols[2]["text"]
+            desc   = cols[3]["text"]
 
-            html += '''<area shape="%s" coords="%s" href="#"
+            if("x" in coords):
+                matches = re.match("x=([0-9]+)\s*,\s*y=([0-9]+)\s*,\s*w=([0-9]+),\s*h=\s*([0-9]+)", coords)
+
+                if(matches == None):
+                    FATAL("Could not parse the coordinates for this image map: coords=%s" % coords)
+
+                x = int(matches.groups()[0])
+                y = int(matches.groups()[1])
+                w = int(matches.groups()[2])
+                h = int(matches.groups()[3])
+
+                coords = "%d,%d,%d,%d" % (x,y,x+w,y+h)
+
+            html += '''<area shape="%s" coords="%s" href="#%s"
    onMouseover="ddrivetip('<b>%s</b><br/>%s')"
    onMouseOut="hideddrivetip()"
    
    >
-''' % (shape, coords, javascriptize(label), javascriptize(desc))
+''' % (shape, coords, label, javascriptize(label), javascriptize(desc))
 
         html += "</map>"
         
