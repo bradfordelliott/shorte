@@ -1253,6 +1253,8 @@ a C/C++ like define that looks like:
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
 
+        struct2.headings = {}
+
         for section in sections:
 
             if(section == ""):
@@ -1365,11 +1367,11 @@ a C/C++ like define that looks like:
                                 state = STATE_ESCAPE
 
                             elif(row[i] == '@' and row[i+1] == '{'):
-		        	states.append(state)
-		        	state = STATE_INLINE_STYLING
-		        	col += row[i]
-		        	col += row[i+1]
-		        	i += 1
+                                states.append(state)
+                                state = STATE_INLINE_STYLING
+                                col += row[i]
+                                col += row[i+1]
+                                i += 1
 
                             elif(row[i] == '|'):
                                 
@@ -1402,6 +1404,7 @@ a C/C++ like define that looks like:
 
 	                elif(state == STATE_INLINE_STYLING):
 	                    col += row[i]
+
 		            if(row[i] == '}'):
                             	state = states.pop()
 
@@ -1441,6 +1444,11 @@ a C/C++ like define that looks like:
                 for field in fields:
 
                     if(field["is_header"]):
+                        i = 0
+                        for attr in field["attrs"]:
+                            struct2.headings[i] = attr["text"]
+                            i += 1
+
                         continue
 
                     if(field["is_spacer"]):
@@ -1639,6 +1647,8 @@ a C/C++ like define that looks like:
             struct["image"]["path"] = image_name
             struct["image"]["map"] = image_map
             struct["image"]["reference"] = self.m_current_file
+
+            struct2.image = struct["image"]
 
         struct["record"] = record
         struct2.record = record
@@ -2276,11 +2286,15 @@ else:
             tag.contents = self.parse_define(data, modifiers)
         
         elif(name == "vector"):
-            tag.contents = self.parse_struct(data, modifiers)
+            modifiers["treat_fields_as"] = "bits"
+            (struct,struct2) = self.parse_struct(data, modifiers)
+            tag.contents = struct2
             tag.name = "struct"
     
         elif(name == "register"):
-            tag.contents = self.parse_struct(data, modifiers)
+            modifiers["treat_fields_as"] = "bits"
+            (struct,struct2) = self.parse_struct(data, modifiers)
+            tag.contents = struct2
             tag.name = "struct"
 
         elif(name in ("ol", "ul")):

@@ -135,6 +135,7 @@ tests:
 	make test_revealjs
 #	make test_mx
 	make test_templates
+	make test_registers
 
 THEME:=shorte
 
@@ -144,7 +145,8 @@ test_mx:
 test_hello:
 #	python shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
-	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
+#	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
+	python shorte.py -f examples/hello.tpl -p "html" -t "shorte" -o build-output/hello_hsio
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
@@ -267,6 +269,9 @@ test_shorte:
 
 test_inkscape:
 	python shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape
+
+test_registers:
+	python shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code

@@ -31,5 +31,18 @@ This is some more data
 - Two
 - Three
 
+# For some reason this doesn't format correctly. The function body doesn't get indented
+# properly
+@python
+def one():
+    '''This is a test string'''
+
+    print """This is another string"""
+
+    print "Hello!!!"
+
+
 @include "examples/headings.tpl"
 @include "examples/images.tpl"
+
+@h1 Test

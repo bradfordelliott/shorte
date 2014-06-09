@@ -26,6 +26,9 @@ Test
 
 This is a dummy header
 
+@h3 [WikiTitle,Wiki Title]
+This is a better way of doing wikiwords but shorte doesn't support it yet.
+
 
 @h1 This is some more data
 

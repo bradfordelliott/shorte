@@ -1986,8 +1986,21 @@ within an HTML document.
             html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.max_cols, "Diagram")
             html += struct.image["map"]
             html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none'></img></th></td>" % (struct.max_cols, name, struct.name)
-        
-        html += '''
+
+        # If the structure has associated headings
+        # then use them instead of the standard ones
+        if(struct.has_headings()):
+            html += '''
+<tr class='header'>
+'''
+            headings = struct.get_headings()
+            for heading in headings:
+                html += "<td>%s</td>" % headings[heading]
+
+            html += "</tr>"
+
+        else:
+            html += '''
 <tr class='header'>
   <td>Type</td>
   <td>Name</td>
@@ -2271,6 +2284,7 @@ $href_end
             html += "<a href='%s'><img style='float:left;width:100px;height:100px;margin:5px;border:10px solid #ccc;border-radius:10px;' src='%s'></img></a>" % (
                 image.name, image.thumbnail())
         html += "</div>"
+        html += "<div style='clear:both;'></div>"
 
         return html
     

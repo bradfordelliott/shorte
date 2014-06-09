@@ -8,8 +8,22 @@ This document describes the release history of the Shorte language.
 
 @h3 Version 1.0.67 (xxx)
 - ODT
-    - Added support for PATH_OOWRITER environment variable
-    - Fixed list indentation
+    - Added support for PATH_OOWRITER environment variable. Shorte
+      will look for swriter in this varible. If it isn't defined it
+      will fall back to the path in the shorte.cfg file.
+    - Fixed list indentation issues and wrapping of long list items
+    - Switched the note back to use stying defined in template_odt.py
+      instead of the OpenDocument template as it is easier to
+      handle.
+- Inline Styles
+    - Added support for inline styling of @note, @warning, @tbd
+- HTML
+    - Updated the styling of checkboxes to grey them out when
+      they are checked.
+- Text
+    - Some cleanup on the text template (-p txt)
+- Packages
+    - Added 'reveal.js+pdf' and 'reveal.js+txt' output bundles.
 
 @h3 Version 1.0.66 (Apr 22, 2014)
 - Enums

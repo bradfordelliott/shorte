@@ -3,7 +3,16 @@
  * @brief
  * This is some random data about this file here
  *
+ * - One
+ *     - Two
+ *     - Three
+ * -
+ *
+ * @{note, It should support an inline note}
+ *
  */
+#define FALSE 0
+#define TRUE !FALSE
 
 /**
  * @h1 Test.c
@@ -15,7 +24,26 @@
  * - Three | Four
  */
 
+#if defined(BRAD)
+
+#ifdef BLAH
+
 #define test_dot_c_my_test2 0 /* TODO ccw consider making this dynamic */
+
+#endif /* BLAH */
+
+/**
+ * This structure contains some statistics
+ */
+typedef struct {
+    /**< Number of times aligner has entered LOF state during the last statistics interval. */
+    cs_uint64 bei7erc1_stat;
+    
+    /**< Path Monitoring BEI error count for SECTION BEI */
+    cs_uint64 bei7erc1_stat2;
+
+} cs_term_stats_t, *cs_term_stats_p;
+
 
 /**
  * A definition to parse with a description
@@ -36,6 +64,8 @@
  * and more paragraphs
  */
 #define TEST_DOT_C_TEST 0
+
+#endif /* BRAD */
 
 /** Another define
  * with a multi-line description
@@ -65,6 +95,9 @@
  * -  This is a test
  * }
  *
+ * @{tbd,
+ * This still needs to be done}
+ *
  * @heading My Heading
  */
 typedef enum
@@ -91,7 +124,12 @@ typedef enum
 }e_test_dot_c_blah;
 
 
-/** This is a description of mystruct
+/**
+ * This is a description of mystruct
+ * 
+ * @{warning,
+ * This is a warning inside the structure
+ * description}
  *
  * @example
  *   mystruct_t tmp;
@@ -136,6 +174,16 @@ typedef struct
  *   - a list item
  *
  * Some @{i, italic text} and some @{b, bold text}.
+ *
+ * @{note,
+ *     This should be a note
+ *     with a list inside of it but it probably doesn't
+ *     work.
+ *     
+ *     - one
+ *     - two
+ *     - three
+ * }
  */
 typedef enum
 {
@@ -159,7 +207,15 @@ typedef enum
      */
     CS4224_PRBS_Tx_2exp23 = 0x1,
     
-    /** 1 + x^14 + x^15  */
+    /**
+     * 1 + x^14 + x^15
+     *
+     * @{note, Should not really use this. This should be a list but it doesn't appear to work.
+     *
+     *  - one
+     *  - two
+     *  }
+     */
     CS4224_PRBS_Tx_2exp15 = 0x2,
 
     /** 1 + x^6 + x^7  */
@@ -188,6 +244,9 @@ typedef enum
  * - Four ! Five ! Six
  * }
  *
+ * @{question,
+ * What should I do here?}
+ *
  * @param blah  [I] -
  *     Some data associated with blah
  *     with some more data
@@ -205,7 +264,7 @@ typedef enum
  *
  * @example
  *     int blah = 0;
- *     bool dummy = TRUE;
+ *     int dummy = TRUE;
  *
  *     // The text doesn't work properly and comments
  *     // aren't showing up in the parsed text
@@ -222,7 +281,7 @@ typedef enum
  * @deprecated This method has been deprecated. Please
  *             refer to my_test21 for future use.
  */
-int test_dot_c_my_test(int blah, bool* dummy)
+int test_dot_c_my_test(int blah, int* dummy)
 {
 
     return TRUE;

@@ -100,13 +100,13 @@ class template_mediawiki_t(template_html.template_html_t):
         #if("title" in table):
         #    html += "Title: %s\n" % (table["title"])
 
-        num_cols = table["max_cols"]
+        num_cols = table.get_max_cols()
         col_widths = []
 
         for i in range(0, num_cols):
             col_widths.append(0)
 
-        for row in table["rows"]:
+        for row in table.get_rows():
 
             j = 0;
             for col in row["cols"]:
@@ -117,7 +117,7 @@ class template_mediawiki_t(template_html.template_html_t):
 
         html += "{|\n"
 
-        for row in table["rows"]:
+        for row in table.get_rows():
 
             is_header = row["is_header"]
             is_subheader = row["is_subheader"]

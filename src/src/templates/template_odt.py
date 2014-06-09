@@ -418,7 +418,7 @@ class template_odt_t(template_t):
     </style:style>
 
     <style:style style:name="shorte_table_prototype" style:family="table">
-      <style:table-properties fo:margin="0in" fo:background-color="#F6F6F6" style:shadow="none" style:writing-mode="lr-tb">
+      <style:table-properties fo:margin="0in" fo:background-color="#FAFAFA" style:shadow="none" style:writing-mode="lr-tb">
         <style:background-image/>
       </style:table-properties>
     </style:style>

@@ -453,7 +453,7 @@ class template_word_t(template_t):
   </w:tblGrid>
 '''
 
-        for row in table["rows"]:
+        for row in table.get_rows():
 
             xml += "    <w:tr>\n";
             

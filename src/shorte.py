@@ -91,7 +91,7 @@ parser.add_option("-a", "--about",
 parser.add_option("-m", "--macros",
                   action="store",type="string",dest="macros",
                   help="Macro substitution")
-parser.add_option("-d", "--define",
+parser.add_option("-D", "--define",
                   action="store",type="string",dest="define",
                   help="Macro substitution")
 parser.add_option("-r", "--search_and_replace",

@@ -296,13 +296,18 @@ class source_code_t:
     def parse_source_code(self, type, source):
         
         tags = []
-        #print "source = %s" % source
+        #print "BEFORE\n======\n%s" % source
 
         source_lang = type
 
         source = trim_blank_lines(source)
+
+        #print "AFTER 1\n======\n%s" % source
+
         source = source.rstrip()
         source = trim_leading_indent(source)
+        
+        #print "AFTER 2\n======\n%s" % source
 
         # Now parse the source code into
         # a list of tags
@@ -319,6 +324,7 @@ class source_code_t:
         while i < end:
 
             state = states[-1]
+            #print "STATE: %d" % state
 
             # If we hit an escape sequence then skip it
             # and move to the next character.
@@ -326,7 +332,7 @@ class source_code_t:
                 i+=1
                 continue
 
-            if(not (state in (STATE_MCOMMENT, STATE_COMMENT, STATE_INLINE_STYLING)) and (source[i] in (' ', '(', ')', ','))):
+            if(not (state in (STATE_MCOMMENT, STATE_COMMENT, STATE_INLINE_STYLING, STATE_STRING)) and (source[i] in (' ', '(', ')', ','))):
                 type = tag["type"]
                 tags.append(tag)
 
@@ -344,7 +350,6 @@ class source_code_t:
                 continue
 
             if(source[i] == '\n'):
-                    
                 type = tag["type"]
 
                 #tag["data"] += source[i]
@@ -365,7 +370,6 @@ class source_code_t:
 
     
             if(state == STATE_NORMAL):
-
                 # Treat # as a single line comment
                 if(source[i] == '#'):
                     states.append(STATE_COMMENT)
@@ -412,14 +416,31 @@ class source_code_t:
                     tag["data"] = '<'
                     tag["type"] = TAG_TYPE_XMLCOMMENT
 
-                # Treat " as the start of a string
-                elif(source[i] == '"'):
+                # Treat " or ''' as the start of a string
+                elif(source[i] == '"'): # or source[i] == "'"):
                     states.append(STATE_STRING)
                     tags.append(tag)
 
                     tag = {}
                     tag["data"] = '"'
                     tag["type"] = TAG_TYPE_STRING
+
+                # Check for python style strings
+                elif(source[i:i+3] == "'''" or source[i:i+3] == '"""'):
+                    states.append(STATE_STRING)
+                    i += 2
+                    tags.append(tag)
+
+                    tag = {}
+                    tag["data"] = "'''"
+                    tag["type"] = TAG_TYPE_STRING
+
+                #elif(source_lang == "python" and (source[i:i+3] == "'''")):
+                #    states.append(STATE_STRING)
+                #    tags.append(tag)
+                #    tag = {}
+                #    tag["data"] = "'"
+                #    tag["type"] == TAG_TYPE_STRING
 
                 # Treat @{ as inline styling
                 elif(source[i] == '@' and source[i+1] == '{'):
@@ -485,8 +506,20 @@ class source_code_t:
                     tag["data"] += source[i]
 
             elif(state == STATE_STRING):
-                
-                if(source[i] == '"'):
+
+                if((tag["data"].startswith("'''") and source[i:i+3] == "'''") or
+                   (tag["data"].startswith('"""') and source[i:i+3] == '"""')):
+
+                    tag["data"] += source[i:i+3]
+                    tags.append(tag)
+                    i += 2 
+                    
+                    tag = {}
+                    tag["data"] = ''
+                    tag["type"] = TAG_TYPE_CODE
+                    states.pop()
+
+                elif(source[i] == '"'):
                     tag["data"] += source[i]
                     tags.append(tag)
                     
@@ -494,6 +527,16 @@ class source_code_t:
                     tag["data"] = ''
                     tag["type"] = TAG_TYPE_CODE
                     states.pop()
+
+                #elif(source_lang == "python" and (started_with ==  "'") and (source[i:i+3] == "'''")):
+                #    tags["data"] += source[i:i+3]
+                #    i += 2
+                #    tags.append(tag)
+
+                #    tag = {}
+                #    tag["data"] = ''
+                #    tag["type"] = TAG_TYPE_CODE
+                #    states.pop()
 
                 else:
                     tag["data"] += source[i]
@@ -556,6 +599,11 @@ class struct_t(type_t):
         self.record = None
         self.image = None
         self.type = "struct"
+        self.private = False
+
+        # This contains a list of any headings to associate
+        # with the structure.
+        self.headings = {}
 
     def __str__(self):
         attrs = "Struct"
@@ -573,6 +621,17 @@ class struct_t(type_t):
             attrs += "\n"
 
         return attrs
+
+    def has_headings(self):
+        if(len(self.headings) > 0):
+            return True
+        return False
+
+    def get_headings(self):
+
+        return self.headings
+
+
 
 class prototype_t(type_t):
     def __init__(self):

@@ -43,7 +43,7 @@ class template_text_t(template_t):
         output = ''
         line = 1
 
-        output += '001: '
+        output += ' 001: '
         
         i = 0
         for tag in tags:
@@ -66,7 +66,7 @@ class template_text_t(template_t):
 
                 # If there are any more tags then output the next line
                 if(i < (len(tags)-1)):
-                    output += "%03d: " % (line)
+                    output += " %03d: " % (line)
 
             i += 1
 
@@ -87,7 +87,7 @@ class template_text_t(template_t):
     #|    The note data formatted as HTML.
     #|
     #+-----------------------------------------------------------------------------
-    def format_note(self, tag, label="NOTE:"):
+    def format_note(self, tag, label="NOTE"):
 
         content = self.format_textblock(tag)
         lines = content.split('\n')
@@ -97,11 +97,14 @@ class template_text_t(template_t):
 
         output = '\n'.join(output_lines)
 
-        return '''
+        label_underline = '-'
+        for i in range(0, len(label)):
+            label_underline += '-'
+
+        return '''%s:
 %s
------
 %s
-''' % (label,output)
+''' % (label,label_underline,output)
             
     def format_checklist(self, tag):
         
@@ -129,9 +132,9 @@ class template_text_t(template_t):
         return source
 
     def parse_inline_styling(self, matches):
-
-
         data = matches.groups()[0].strip()
+        #print "DATA: [%s]" % data
+        #print "data: %s" % data
         parts = data.split(",")
         if(len(parts) == 1):
             tag = parts[0]
@@ -139,8 +142,74 @@ class template_text_t(template_t):
         elif(len(parts) > 1):
             tag = parts[0]
             replace = ''.join(parts[1:])
+
+        replace = trim_leading_blank_lines(replace)
+        #print "TAG: %s, REPLACE: %s" % (tag,replace)
         
-        return replace
+        if(-1 != tag.find("+")):
+            tags = tag.split("+")
+        else:
+            tags = [tag]
+
+        prefix = ''
+        postfix = ''
+
+        for tag in tags:
+            # Check if it's an inline styling block such as color
+            #   @{color:00ff00,my text here}
+            if(-1 != tag.find(":")):
+                parts = tag.split(":")
+                tag = parts[0].strip()
+                parts.pop(0)
+                qualifier = ":".join(parts)
+
+            if(tag in ("b", "bold", "pre", "u", "i", "color", "span", "cross", "strike", "hl", "hilite", "highlight", "done", "complete", "star", "starred")):
+                pass
+            elif(tag == "br"):
+                postfix += "\n"
+            elif(tag in "table"):
+                table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['|','!'])
+                output = self.format_table(replace, table)
+                output = output.replace("\n", "<br/>")
+                output = output.replace(" ", "&nbsp;")
+                return output
+
+            # Embed an inline note. This is useful when documenting
+            # source code.
+            elif(tag in ("note", "warning", "tbd", "question")):
+                # We've already converted breaks so we need to unconvert them
+                # to format the note properly.
+                replace = replace.replace("<br/>", "\n")
+                replace = replace.replace(" ", "&nbsp;")
+                textblock = self.m_engine.m_parser.parse_textblock(replace)
+
+                if(tag == "note"):
+                    label = "Note"
+                    img = "note.png"
+                elif(tag == "warning"):
+                    label = "Warning"
+                    img = "warning.png"
+                elif(tag == "tbd"):
+                    label = "TBD"
+                    img = "tbd.png"
+                elif(tag == "question"):
+                    label = "Question"
+                    img = "question.png"
+
+                return self.format_note(textblock, label, img)
+
+        return prefix + replace + postfix
+
+        #data = matches.groups()[0].strip()
+        #parts = data.split(",")
+        #if(len(parts) == 1):
+        #    tag = parts[0]
+        #    replace = tag
+        #elif(len(parts) > 1):
+        #    tag = parts[0]
+        #    replace = ''.join(parts[1:])
+        #
+        #return replace
     
     def format_list_child(self, elem, indent, ordered=False, start=0):
         source = ''
@@ -195,7 +264,7 @@ class template_text_t(template_t):
     
     def format_list(self, list, ordered=False):
 
-        source = ""
+        source = "\n"
 
         start = 1
         for elem in list:
@@ -208,7 +277,7 @@ class template_text_t(template_t):
     def format_textblock(self, tag):
 
         paragraphs = tag.contents
-        output = ''
+        output = '\n'
 
         for p in paragraphs:
             text = p["text"]
@@ -222,9 +291,17 @@ class template_text_t(template_t):
             elif(is_list):
                 output += self.format_list(text)
             else:
-                output += self.format_text(text) + "\n"
+                output += self.format_text(text)
 
-        return output
+        output += "\n"
+
+        while(output.startswith("\n")):
+            output = output[1:]
+
+        while(output.endswith("\n")):
+            output = output[0:-1]
+
+        return "\n" + output + "\n"
 
     def format_questions(self, tag):
 
@@ -387,11 +464,11 @@ class template_text_t(template_t):
 
         html = '\n'
         
-        if("title" in table):
+        if(table.has_title()):
 
-            html += "Title: %s\n" % (table["title"])
+            html += "Title: %s\n" % (table.get_title())
 
-        num_cols = table["max_cols"]
+        num_cols = table.get_max_cols()
         col_widths = []
 
         # First walk through the text and figure out the
@@ -399,17 +476,25 @@ class template_text_t(template_t):
         for i in range(0, num_cols):
             col_widths.append(0)
 
-        for row in table["rows"]:
+        max_width = 0
+        for row in table.get_rows():
 
             j = 0;
             for col in row["cols"]:
                 
                 if(len(col["text"]) > col_widths[j]):
                     col_widths[j] = len(col["text"])
+                    max_width += col_widths[j]
                 j += 1
 
+        # Add a table header
+        html += "+"
+        for i in range(0, max_width+1):
+            html += "-"
+        html += "+\n"
 
-        for row in table["rows"]:
+
+        for row in table.get_rows():
 
             is_header = row["is_header"]
             is_subheader = row["is_subheader"]
@@ -455,10 +540,13 @@ class template_text_t(template_t):
 
         #if("caption" in table):
         #    html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
-
-
-        html += '\n'
         
+        # Add a table footer
+        html += "+"
+        for i in range(0, max_width+1):
+            html += "-"
+        html += "+\n"
+
         return html
 
     
@@ -591,72 +679,76 @@ class template_text_t(template_t):
         return ""
 
     import base64
+     
+    def convert_image(self, image):
+        from PIL import Image
+        import random
+        from bisect import bisect
+         
+        # greyscale.. the following strings represent
+        # 7 tonal ranges, from lighter to darker.
+        # for a given pixel tonal level, choose a character
+        # at random from that range.
+         
+        greyscale = [
+                    " ",
+                    " ",
+                    ".,-",
+                    "_ivc=!/|\\~",
+                    "gjez2]/(YL)t[+T7Vf",
+                    "mdK4ZGbNDXY5P*Q",
+                    "W8KMA",
+                    "#%$"
+                    ]
+        #greyscale = [
+        #            " ",
+        #            " ",
+        #            ".",
+        #            "=",
+        #            "+",
+        #            "*",
+        #            "8",
+        #            "#"
+        #            ]
+         
+        # using the bisect class to put luminosity values
+        # in various ranges.
+        # these are the luminosity cut-off points for each
+        # of the 7 tonal levels. At the moment, these are 7 bands
+        # of even width, but they could be changed to boost
+        # contrast or change gamma, for example.
+         
+        zonebounds=[36,72,108,144,180,216,252]
+         
+        # open image and resize
+        # experiment with aspect ratios according to font
+         
+        im=Image.open(image)
+        im=im.resize((160, 75),Image.BILINEAR)
+        im=im.convert("L") # convert to mono
+         
+        # now, work our way over the pixels
+        # build up str
+         
+        str=""
+        for y in range(0,im.size[1]):
+            for x in range(0,im.size[0]):
+                lum=255-im.getpixel((x,y))
+                row=bisect(zonebounds,lum)
+                possibles=greyscale[row]
+                str=str+possibles[random.randint(0,len(possibles)-1)]
+            str=str+"\n"
+         
+        return str
 
 
-    def format_image(self, image):
+    def format_image(self, tag):
 
-        name = image["name"]
+        image = tag.contents
 
-        # If inlining is turned on then we need to embed the image
-        # into the generated output HTML file.
-        if(self.m_inline == True):
-            handle = open(name, "rb")
-            name = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-            handle.close()
-
-        style = ""
-        caption = ""
-        href_start = ""
-        href_end   = ""
-
-        if(image.has_key("width")):
-            style += "width:%s;" % image["width"]
-        if(image.has_key("height")):
-            style += "height:%s;" % image["height"]
-        if(image.has_key("caption")):
-            caption = image["caption"]
-
-        if(image.has_key("href")):
-            href_start = "<a style='text-decoration:none;' href='%s'>" % image["href"]
-            href_end = "</a>"
-
-
-        if(image.has_key("align") and (image["align"] == "center" or image["align"] == "right")):
-            if(image["align"] == "center"):
-            
-                return """
-%s
-<center>
-<table style='text-align:center;'>
-    <tr><td><img src='%s' style=\"%s\"/></td></tr>
-    <tr><td><b>%s</b></td></tr>
-</table>
-</center>
-%s
-""" % (href_start, name, style, caption, href_end)
-            elif(image["align"] == "right"):
-                return """
-%s
-<table style='text-align:center;float:right;'>
-    <tr><td><img src='%s' style=\"%s\"/></td></tr>
-    <tr><td><b>%s</b></td></tr>
-</table>
-%s
-""" % (href_start, name, style, caption, href_end)
-                
-
-        else:
-            return """
-%s
-<span style='display:inline;'>
-<table style='display:inline;text-align:center;'>
-    <tr><td><img src='%s' style=\"%s\"/></td></tr>
-    <tr><td><b>%s</b></td></tr>
-</table>
-</span>
-%s
-""" % (href_start, name, style, caption, href_end)
-
+        name = image["name"] + image["ext"]
+        
+        return "\nImage:\n  see " + name
     
     def format_inline_image(self, matches):
 
@@ -678,8 +770,10 @@ class template_text_t(template_t):
         data = expr.sub(self.parse_inline_styling, data)
 
         # Collapse multiple spaces
-        data = re.sub('\n', " ", data)
+        data = re.sub('\n+', "\n", data)
+        data = re.sub('<br/>', "\n", data)
         data = re.sub(" +", " ", data)
+        data = re.sub("&nbsp;", " ", data)
 
         # Replace any links
         data = re.sub(r'\[\[(->)?(.*?)\]\]', r'\2', data)
@@ -730,7 +824,7 @@ class template_text_t(template_t):
 
         for i in range(0, length - 1):
             header += header_char
-        header += "\n\n"
+        header += "\n"
 
         self.m_contents += tmp + header
     
@@ -763,11 +857,11 @@ class template_text_t(template_t):
         elif(name == "pre"):
             self.m_contents += self.format_text(tag.contents) + "\n"
         elif(name == "note"):
-            self.m_contents += self.format_note(tag, "NOTE:")
+            self.m_contents += self.format_note(tag, "NOTE")
         elif(name == "warning"):
             self.m_contents += self.format_note(tag, "WARNING")
         elif(name == "tbd"):
-            self.m_contents += self.format_note(tag, "TBD:")
+            self.m_contents += self.format_note(tag, "TBD")
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "text"):
@@ -780,6 +874,8 @@ class template_text_t(template_t):
             self.m_contents += self.format_list(tag.contents, True)
         elif(name == "questions"):
             self.m_contents += self.format_questions(tag)
+        elif(name == "image"):
+            self.m_contents += self.format_image(tag)
 
         #elif(name == "checklist"):
         #    self.m_contents += self.format_checklist(tag)
@@ -789,7 +885,7 @@ class template_text_t(template_t):
         #    self.m_contents += self.format_prototype(tag)
         elif(name in ("functionsummary", "typesummary")):
             WARNING("Unsupported tag %s" % name)
-        elif(name in ("define", "enum", "struct", "prototype", "image")):
+        elif(name in ("define", "enum", "struct", "prototype")):
             WARNING("Unsupported tag %s" % name)
         else:
             print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
