@@ -1363,7 +1363,16 @@ task ${struct_name}::display(string prefix)
             print "Can't construct images via cairo if cairo_access is not loaded"
             return ""
 
+
         c.set_antialias(CAIRO_ANTIALIAS_NONE);
+
+        if(sys.platform == "win32"):
+            font_size = 14.0
+            c.select_font_face("Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
+        else:
+            font_size = 14.0
+            c.select_font_face("Lucida Grande", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
+        c.set_font_size(font_size)
         
         image_map = "<map name=\"diagram_" + self.m_name + "\">"
         
@@ -1461,7 +1470,7 @@ task ${struct_name}::display(string prefix)
                         (x,y) = c.text_extents("%s" % name)
                     
                     center = self._xoffset(bit_position) + (self.m_width_of_bit * (max_bit_width - bit_position))/2 - x/2
-                    c.move_to(center, y_offset + height_row/2)
+                    c.move_to(center, y_offset + (height_row/2 + y/3))
                     c.show_text("%s" % name)
                     
                     width -= (bit_width - bit_position)
@@ -1501,7 +1510,7 @@ task ${struct_name}::display(string prefix)
                         (x,y) = c.text_extents("%s" % name)
                     
                     center = self._xoffset(bit_position) + (self.m_width_of_bit * (width))/2 - x/2
-                    c.move_to(center, y_offset + height_row/2)
+                    c.move_to(center, y_offset + (height_row/2 + y/3))
                     c.show_text("%s" % name)
                     
                     bit_position += width
@@ -1536,7 +1545,7 @@ task ${struct_name}::display(string prefix)
                         (x,y) = c.text_extents("%s" % name)
                     
                     center = self._xoffset(bit_position) + (self.m_width_of_bit * (width))/2 - x/2
-                    c.move_to(center, y_offset + height_row/2)
+                    c.move_to(center, y_offset + (height_row/2 + y/3))
                     c.show_text("%s" % name)
                     
                     width = 0
@@ -1566,7 +1575,10 @@ task ${struct_name}::display(string prefix)
                     top = 15
                 else:
                     c.set_source_rgb(0, 0, 0)
-                    c.move_to(x_offset + ((i-1) * self.m_width_of_bit) + 2, top)
+
+                    (tx,ty) = c.text_extents("%d" % (max_bit_width - i))
+
+                    c.move_to(x_offset + ((i) * self.m_width_of_bit) - (tx/2), top)
                     c.show_text("%d" % (max_bit_width - i))
                     
                     c.set_source_rgb(1.0, 0.7, 0.7)
@@ -1587,7 +1599,10 @@ task ${struct_name}::display(string prefix)
                     top = 15
                 else:
                     c.set_source_rgb(0, 0, 0)
-                    c.move_to(x_offset + (i * self.m_width_of_bit) + 2, top)
+
+                    (tx,ty) = c.text_extents("%d" % (i))
+
+                    c.move_to(x_offset + (i * self.m_width_of_bit) - tx/2, top)
                     c.show_text("%d" % i)
                     
                     c.set_source_rgb(1.0, 0.7, 0.7)
