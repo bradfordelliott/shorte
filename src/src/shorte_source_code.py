@@ -305,7 +305,7 @@ class source_code_t:
         #print "AFTER 1\n======\n%s" % source
 
         source = source.rstrip()
-        source = trim_leading_indent(source)
+        source = trim_leading_indent(source, allow_second_line_indent_check=False)
         
         #print "AFTER 2\n======\n%s" % source
 

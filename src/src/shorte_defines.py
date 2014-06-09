@@ -448,7 +448,16 @@ def trim_blank_lines(source):
     return output
 
 
-def trim_leading_indent(source):
+def trim_leading_indent(source, allow_second_line_indent_check=True):
+    '''This method is called to trim the leading indent from a string.
+    
+       @param source                         [I] - The string to strip
+       @param allow_second_line_indent_check [I] - If every line after the
+                                                   first is indented by the same amount
+                                                   then strip it. This doesn't make sense
+                                                   for source code elements but it probably does for
+                                                   normal text paragraphs.
+    '''
 
     source = trim_blank_lines(source)
 
@@ -506,7 +515,7 @@ def trim_leading_indent(source):
 
         j = 0
         for line in lines:
-            if(all_indented):
+            if(allow_second_line_indent_check and all_indented):
                 if(j == 0):
                     line = re.sub("^%s" % leading_indent, "", line)
                     lines_out.append(line)
@@ -527,6 +536,7 @@ def trim_leading_indent(source):
     #print "OUTPUT\n[%s]" % source.strip()
 
     return source
+
 
 def escape_string(source):
     source = source.replace('"', '\\"')

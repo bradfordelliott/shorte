@@ -36,6 +36,7 @@ help:
 	@${echo} "   test_sequences       = test for sequence diagrams"
 	@${echo} "   test_templates       = test all the templates"
 	@${echo} "   test_inkscape        = test inskcape"
+	@${echo} "   test_string_methods  = test string handling methods like trim_leading_indent"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -283,6 +284,9 @@ test_junk:
 	python shorte.py -f examples/functions.tpl -p "html+pdf" -o build-output/functions
 	python shorte.py -f examples/functions.tpl -p "html_inline+pdf" -o build-output/functions
 	python shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
+
+test_string_methods:
+	python tests/string_handling.py
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python
