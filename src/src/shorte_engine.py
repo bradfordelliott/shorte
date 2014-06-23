@@ -539,7 +539,7 @@ class engine_t:
         img = scratchdir + os.path.sep + name + image["ext"]
         image["name"] = name
         image["src"] = img
-        print img
+        #print img
         im.save(img)
             
         # If we've found the source image than remove it from

@@ -37,6 +37,8 @@ help:
 	@${echo} "   test_templates       = test all the templates"
 	@${echo} "   test_inkscape        = test inskcape"
 	@${echo} "   test_string_methods  = test string handling methods like trim_leading_indent"
+	@${echo} "   test_timeline        = test timeline plot handling"
+	@${echo} "   test_graphing        = test plot handling"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -148,6 +150,7 @@ test_hello:
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
 	python shorte.py -f examples/hello.tpl -p "html" -t "shorte" -o build-output/hello_hsio
+	python shorte.py -f examples/hello.tpl -p "html_inline" -t "shorte" -o build-output/hello_hsio_inline
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
@@ -218,6 +221,12 @@ test_images:
 
 test_images_encode:
 	python shorte.py -f examples/test.png -i "encode_images" 
+
+test_timeline:
+	python src/graphing/timeline.py
+
+test_graphing:
+	python src/graphing/graph_test.py
 
 # This example is used to test the generation of mergefiles. A mergefile is a target that
 # assembles a list of shorte files into a single document. This is useful for diffing things

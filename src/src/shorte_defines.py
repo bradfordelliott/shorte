@@ -72,12 +72,30 @@ def shorte_get_startup_path():
     if(startup_path == ""):
         startup_path = os.getcwd()
 
+    # If shorte.py doesn't exist then try the PATH_SHORTE
+    # environment variable
+    if(not os.path.exists(startup_path + "/shorte.py")):
+        WARNING("shorte.py not found at %s, trying PATH_SHORTE environment variable" % startup_path)
+
+        if(not os.environ.has_key("PATH_SHORTE")):
+            FATAL("Unable to determine shorte startup directory")
+
+        startup_path = os.environ["PATH_SHORTE"]
+
     #print "STARTUP PATH: %s" % startup_path
     
     # Replace any Cygwin path references
     g_startup_path = startup_path.replace("/cygdrive/c/", "C:/")
 
     return g_startup_path
+
+def shorte_get_scratch_path():
+    scratch_dir = shorte_get_config("shorte", "scratchdir")
+
+    if(not os.path.exists(scratch_dir)):
+        os.mkdir(scratch_dir)
+
+    return scratch_dir
 
 class topic_t:
     def __init__(self, vars):

@@ -271,7 +271,10 @@ class cairo_t():
             self.image.set_source_rgb(arrow_color[0], arrow_color[1], arrow_color[2]);
             self.image.fill_preserve();
             self.image.stroke();
-            
+
+    def to_radians(self, angle):
+        return angle/57.2957795
+
     def draw_line(self,
             x1,
             y1,
@@ -558,7 +561,7 @@ class graph_t():
     
         cindex = self.cindex
     
-        if(color != None):
+        if(color == None):
             color = colors[cindex]
             cindex+=1
             self.cindex = cindex
@@ -578,6 +581,10 @@ class graph_t():
             for key in self.datasets[dataset]["data"]:
                 if(key > maxX):
                     maxX = key
+
+        #print "maxX: %d" % maxX
+        maxX = (math.ceil(maxX /10.0)) * 10;
+        #print "maxX: %d" % maxX
         
         #if(1 == $self->{XAXIS}{"autoscale"})
         #{
@@ -606,7 +613,7 @@ class graph_t():
         elif(maxY < 10):
             pass
         else:
-            maxY = (ceil(maxY/ 10.0))*11
+            maxY = (math.ceil(maxY/ 10.0))*11
     
         if(maxY < self.yaxis["max"]):
             maxY = self.yaxis["max"]
@@ -614,7 +621,7 @@ class graph_t():
         return maxY
 
 
-    def set_xaxis(self, label, color, min, max, increment):
+    def set_xaxis(self, label, color, min=None, max=None, increment=1):
        
         self.xaxis["label"]     = label
         self.xaxis["min"]       = min
@@ -624,7 +631,7 @@ class graph_t():
         self.xaxis["autoscale"] = 1
 
 
-    def set_yaxis(self, label, color, min, max, increment):
+    def set_yaxis(self, label, color, min=None, max=None, increment=1):
         self.yaxis["label"]     = label
         self.yaxis["min"]       = min
         self.yaxis["max"]       = max
@@ -635,15 +642,14 @@ class graph_t():
         self.title = title
         self.subtitle = subtitle
 
-    def draw_legend(self):
+    def draw_legend(self, yoffset=50, xoffset=10):
        graph = self.graph
        
        top = self.top
-       left = self.left
        right = self.right
-       y = top + 50
+       y = top + yoffset
           
-       graph.draw_text(x = right + 10,
+       graph.draw_text(x = right + xoffset,
                        y = y,
                        font_color = "#000000",
                        text       = "Legend")
@@ -654,7 +660,7 @@ class graph_t():
            color = self.datasets[dataset]["color"]
        
            graph.draw_rect(
-               x = right + 15,
+               x = right + xoffset + 5,
                y = y,
                width = 20,
                height = 20,
@@ -662,7 +668,7 @@ class graph_t():
                line_color = color)
            
            graph.draw_text(
-               x = right + 40,
+               x = right + xoffset + 30,
                y = y+2,
                font_size = 8,
                font_color = color,
@@ -676,7 +682,7 @@ class graph_t():
         left = self.left
         right = self.right
         top = self.top
-        y = top - 36
+        y = top - 40
           
         graph.draw_text(x = left + ((right - left)/2),
                         y = y,
@@ -690,7 +696,7 @@ class graph_t():
         if(subtitle != None):
             graph.draw_text(
                 x = left + ((right - left)/2),
-                y = y + 20,
+                y = y + 24,
                 font_color = "#000000",
                 text       = subtitle,
                 text_anchor = "middle",

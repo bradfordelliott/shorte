@@ -3663,7 +3663,7 @@ div.tblkp  {margin:0px;padding:0px;}
                     continue
 
                 parts = os.path.split(image)
-                print "IMAGE: [%s]" % image
+                #print "IMAGE: [%s]" % image
                 shutil.copy(image, self.get_content_dir() + "/" + parts[1])
                 pictures_copied[image] = True
 

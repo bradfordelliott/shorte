@@ -1,6 +1,9 @@
 #!/usr/bin/python
 import sys
 import re
+if __name__ == "__main__":
+    sys.path.append("../..")
+sys.path.append(".")
 import libs.cairo_access as cairo_access
 from libs.cairo_access import *
 import math
@@ -8,16 +11,18 @@ import math
 from graph import graph_t
 
 
-class line_graph_t(graph_t):
+class timeline_graph_t(graph_t):
 
     def __init__(self, width, height):
 
         graph_t.__init__(self,width,height)
 
     def draw_yaxis(self):
+
+        return
         
         maxX = self.get_max_xcoordiate()
-        maxY = self.get_max_ycoordinate()
+        maxY = 10
 
         graph = self.graph
        
@@ -76,10 +81,7 @@ class line_graph_t(graph_t):
    
     def draw_xaxis(self):
         maxX = self.get_max_xcoordiate();
-        maxY = self.get_max_ycoordinate();
-
-        # DEBUG BRAD: This is a temporary hack
-        maxX = 10
+        maxY = 10
 
         if(maxX == 0):
             maxX = 1
@@ -96,8 +98,10 @@ class line_graph_t(graph_t):
         increment = maxX/10.0;
         
         if(1 == self.xaxis["autoscale"]):
-            increment = math.ceil(maxX/10)
+            increment = math.ceil(maxX/10.0)
         
+        #print "increment: %d" % increment
+        #print "maxX: %d" % maxX
         xAxisIncrements = int(maxX/increment)
         
         # Draw the X-Axis
@@ -137,15 +141,16 @@ class line_graph_t(graph_t):
     
     def draw_data(self):
         maxX = self.get_max_xcoordiate()
-        maxY = self.get_max_ycoordinate();
+        maxY = 10
         graph = self.graph
-        
+
         yincrement = (maxY/10)
         
-        if(1 == self.xaxis["autoscale"]):
-            xincrement = (maxX/10)
-        else:
-            xincrement = maxX/10;
+        #if(1 == self.xaxis["autoscale"]):
+        #    xincrement = (maxX/10)
+        #else:
+        xincrement = 1.0
+        #print "x_increment: %d" % xincrement
 
         if(xincrement == 0):
             xincrement = 1
@@ -156,53 +161,93 @@ class line_graph_t(graph_t):
         
         yAxisIncrements = maxY/yincrement;
         xAxisIncrements = maxX/xincrement;
+
+        #print "increments: %d" % xAxisIncrements
+
         height = self.height
         width = self.width
         top = self.top
         left = self.left
         right = self.right
         bottom = self.bottom
+
+
+        num_data_points = 0
+
+        for dataset in self.datasets:
+            for key in self.datasets[dataset]["data"]:
+                num_data_points += 1
+
+
+        pointer_offset_increment = (height/2.0)/(num_data_points-2)
+        #pointer_offset_increment = 30
+        pointer_offset = pointer_offset_increment
         
+        for dataset in self.datasets:
+            for key in self.datasets[dataset]["data"]:
+                pointer_offset += pointer_offset_increment
+            
+        graph.draw_line(left, bottom - (height/2), right, bottom - (height/2), line_color="#d0d0d0")
+
         for dataset in self.datasets:
             prevx = left;
             prevy = bottom;
             color = self.datasets[dataset]["color"]
+            #print "COLOR: %s" % color
             points = []
 
             #for key in (sort {$a <=> $b} keys(%{$self->{DATASETS}{$dataset}{"data"}}))
             for key in self.datasets[dataset]["data"]:
                 xvalue = key;
+                #print "xvalue = %d" % xvalue
                 yvalue = self.datasets[dataset]["data"][key]
                 
                 #print "x = %d, y = %d" % (xvalue, yvalue)
+                # DEBUG BRAD: Currently the value, need more
+                #             information than just the y value
+                evalue = yvalue
 
-                
-                x = (((xvalue/xincrement)/10.0) * width) + left;
-                y = bottom - (((yvalue/yincrement)/10.0) * height);
+                # For timeline the y-value is always 5. The
+                # data argument is the size/scale of the event.
+                yvalue = 5
+
+                x = (((xvalue/(1.0*xincrement))/(1.0 * maxX)) * width) + left;
+                y = bottom - (((yvalue/(1.0*yincrement))/(1.0*maxY)) * height);
+
+                #print "x = %d" % x
                 point = (x,y);
                 points.append(point)
         
-                #print "x = %d, y = %d" % (x, y)
-                #$graph->drawLine({"x1" => $prevx,
-                #                  "y1" => $prevy,
-                #                  "x2" => $x,
-                #                  "y2" => $y,
-                #                  "line-color" => $color,
-                #                  "line-weight" => 1});
-                
                 
                 # Now mark the points
                 #    We need to scale them so that they are not too large.
                 #    basically, if we are a width of 600 then we will use
                 #    diameter 5 and scale down based on this ratio
-                diameter = ((5 * width)/800);
+                diameter = ((evalue * width)/800);
+                diameter_outer = diameter + 10
+                
+                graph.draw_ellipse(x = x - (diameter_outer/2),
+                                   y = y - (diameter_outer/2),
+                                   width  = diameter_outer,
+                                   height = diameter_outer,
+                                   line_color = color,
+                                   background_color = color)
+
+                r = int(color[0:2],16)
+                g = int(color[2:4],16)
+                b = int(color[4:],16)
+                #print "color: r=%s, g=%s, b=%s" % (r,g,b)
+
+                new_color = "#%02x%02x%02x" % (r*0.6, g*0.6, b*0.6)
+
+                #print "new_color: %s" % new_color
                 
                 graph.draw_ellipse(x = x - (diameter/2),
                                    y = y - (diameter/2),
                                    width = diameter,
                                    height = diameter,
                                    line_color = color,
-                                   background_color = color)
+                                   background_color = new_color)
                 
                 if(self.draw_values()):
                     graph.draw_text(x = x,
@@ -212,10 +257,30 @@ class line_graph_t(graph_t):
                                   font_size  = 7)
                 prevx = x;
                 prevy = y;
+
+                # Draw the angled line pointing to the
+                # event at a 45 degree angle up and to the right.
+                x1 = x
+                y1 = y
+                len = pointer_offset
+                pointer_offset -= pointer_offset_increment
+                x2 = x1 + (len * math.sin(graph.to_radians(45)))
+                y2 = y1 - (len * math.cos(graph.to_radians(45)))
+                
+                graph.draw_line(x1,y1,x2,y2, line_color=color, line_pattern=2)
+
+                # Now complete the pointer to the end of the graph area
+                graph.draw_line(x2,y2,right + 60,y2, line_color=color, line_pattern=2)
+        
+                label = "%2.2f" % evalue
+                (text_width, text_height) = graph.image.text_extents(label)
+
+                # Draw some text at the end of the pointer
+                graph.draw_text(x=right + 65, y=y2 - (text_height/2), font_color=color, text=label, font_size=7)
                
-            graph.draw_curve(points      = points,
-                             line_color  = color,
-                             line_weight = 1)
+            #graph.draw_curve(points      = points,
+            #                 line_color  = color,
+            #                 line_weight = 1)
     
     def draw_graph(self, path):
         graph_t.draw_graph(self)
@@ -223,8 +288,21 @@ class line_graph_t(graph_t):
         self.draw_yaxis()
         self.draw_xaxis()
         self.draw_data()
-        self.draw_legend()
+        self.draw_legend(yoffset = -20, xoffset=100)
         self.draw_title()
 
-
         self.graph.image.write_to_png(path, self.width+280, self.height+110)
+
+
+if __name__ == "__main__":
+    timeline = timeline_graph_t(800, 400)
+    timeline.set_title("This is a test graph", "A test timeline with some data")
+    timeline.set_xaxis("Time",   "red")
+    timeline.set_yaxis("Y-Axis", "red")
+        
+    d = {0:5, 1:20, 6:35, 4:55, 12:100, 14:10, 15:100}
+    timeline.add_data_set(d, "one", color="c0c0c0")
+    
+    d2 = {1:6, 7:15}
+    timeline.add_data_set(d2, "two", color="f00000")
+    timeline.draw_graph("timeline.png")

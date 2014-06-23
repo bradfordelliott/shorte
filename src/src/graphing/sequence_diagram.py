@@ -553,9 +553,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     xml_header = xml_header.replace("680", "%d" % width)
     xml_header = xml_header.replace("300", "%d" % height)
             
-    #import tempfile
-    #(tmphandle,path) = tempfile.mkstemp(suffix=".png") #shorte_get_config("shorte", "scratchdir")
-    scratch_dir = shorte_get_config("shorte", "scratchdir")
+    scratch_dir = shorte_get_scratch_path()
     image_name = scratch_dir + "/" + base_file_name
 
     #hdiagram = open(image_name + ".svg", "wb")
@@ -571,7 +569,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     #cmd = 'java -Djava.awt.headless=true -jar %s -bg 1.255.255.255 -w %d -h %d -m image/png %s' % (BATIK, width, height, base_file_name + ".svg")
     #print "CMD: [%s]" % cmd
     #result = os.popen(cmd)
-        
+
     #cairo.image.write_to_png("test2.png", width, height)
     cairo.image.write_to_png(output_file, width, height)
     
