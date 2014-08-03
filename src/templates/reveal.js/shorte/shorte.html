@@ -1,16 +1,17 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!doctype html>
 <html lang="en">
 
     <head>
         <meta charset="utf-8">
         <!-- Force IE into standards mode -->
         <meta http-equiv="x-ua-compatible" content="IE=Edge"/>
-        
+
         <title>$title</title>
 
         <link rel="stylesheet" href="reveal.js/css/reveal.css">
         <link rel="stylesheet" href="shorte.css" id="theme">
-
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+        
         <style>
             html,
             body {
@@ -20,30 +21,26 @@
                 padding:0px;
             }
         </style>
-
-        <!--
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-        -->
-
     </head>
 
     <body>
-        <table style="height:100%;width:100%;">
-            <tr style="height:100px;width:100%;background-color:white;">
-                <td>
-                    <a href="index.html"><img src="css/images/logo.png" style="top:10px;left:10px;height:80px;border:0px;text-decoration:none;"></img></a>
+        <table style="height:100%;width:100%;border:0px;padding:0px;border-spacing:0px;border-collapse:collapse;background-color:white;">
+            <tr style="height:120px;width:100%;background:url('css/images/head_1024.png') no-repeat;background-size:100%;">
+                <td style='border-bottom:1px solid black;' valign="top">
+                    <span><a href="index.html"><img src="css/images/logo.png" style="top:30px;left:10px;height:80px;border:0px;text-decoration:none;"></img></a></span>
+                    <span style='margin-left:200px;font-weight:bold;font-size:3.0em;color:white;font-family:Arial;font-variant:small-caps;'>$title</span>
                     $pdf
                 </td>
             </tr>
-            <tr style="height:auto;">
+            <tr style="height:auto;background-color:;">
                 <td style="width:100%;height:auto;height:80%;">
-                    <div class="reveal" style="height:100% !important;height:100%;width:100%;margin:0px;padding:0px;">
+                    <div class="reveal" style="height:100%;width:100%;margin:0px;padding:0px;">
                         <div class="slides">
-                            <section data-background-transition="slide" style="background: rgba(255,255,255,0.5)">
-                                <h2 style="color:white;margin-top:300px;">$title</h2>
-                                <h3 style="color:white;">$subtitle</h3>
-                                <h3 style="color:white;">Version $version ($date)</h3>
-                                <h3 style="color:white;">Created by $author</h3>
+                            <section data-background-transition="slide">
+                                <h2 style="font-size:3.0em;font-weight:bold;font-variant:small-caps;">$title</h2>
+                                <h3 style="font-size:2.0em;">$subtitle</h3>
+                                <h3>Version $version ($date)</h3>
+                                <h3>Created by $author</h3>
                             </section>
                             $contents
                         </div>
@@ -51,9 +48,14 @@
                 </td>
             </tr>
 
-            <tr style="min-height:40px;height:40px;background-color:black;">
+            <tr style="min-height:40px;height:40px;background-color:#444;color:#ccc;">
                 <td>
-                    Footer Content
+                    <span style='margin-left:30px;'>
+                    &copy; Brad Elliott, 2014 All Rights Reserved
+                    </span>
+                    <span style='margin-left:200px;'>
+                    The documentation language
+                    </span>
                 </td>
             </tr> 
         </table>

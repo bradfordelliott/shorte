@@ -3,9 +3,7 @@
  *********************************************/
 body {
   background: #f0f1eb;
-  background-color: #f0f1eb;
-  background:url('css/pattern.png') repeat;
-}
+  background-color: #f0f1eb;}
 
 .reveal {
   font-family: "Arial", "Book Antiqua", Palatino, FreeSerif, serif;
@@ -22,12 +20,12 @@ body {
 /*********************************************
  * HEADERS
  *********************************************/
-.reveal h1{font-size: 1.9em;color: black;   padding: 0px;padding-bottom: 10px;margin: 0px;margin-top:-50px;margin-top:10px;margin-left: 5px;font-variant:small-caps;font-weight:bold;}
+.reveal h1{font-size: 1.9em;color:#999;   padding: 0px;padding-bottom: 5px;margin: 0px;margin-top:-50px;margin-top:10px;margin-left: 5px;font-variant:small-caps;font-weight:bold;}
 .reveal h2{font-size: 1.6em;color: #005CDB;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;}
-.reveal h3{font-size: 1.3em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
-.reveal h4{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #888;}
+.reveal h3{font-size: 1.3em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;}
+.reveal h4{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
 .reveal h5{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #A67F00;}
-.reveal h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #005CDB;text-decoration:underline;}
+.reveal h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;text-decoration:underline;}
 
 
 a {color: #FD4626;font-weight: bold;font-size:0.9em;}
@@ -219,7 +217,7 @@ a.name {color: black;}
 .reveal div.snippet span.ln {color: #C0C0C0;}
 
 /* Styling of text blocks */
-.reveal div.tblkps {margin-left:4px;margin-bottom:4px;font-size:1.0em;}
+.reveal div.tblkps {margin-left:4px;margin-bottom:20px;font-size:1.0em;}
 .reveal div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
 
 .reveal section.present{
@@ -227,8 +225,6 @@ a.name {color: black;}
     height:100%;
     overflow:auto;
     margin:0px;padding:0px;
-    background: rgba(255,255,255,0.85);
-    border:5px solid #999;
     padding-left:30px;
     padding-right:30px;
 }
