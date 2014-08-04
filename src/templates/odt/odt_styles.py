@@ -1,4 +1,5 @@
 import string
+import templates.themes
 
 class styles():
     def __init__(self):
@@ -15,7 +16,9 @@ class styles():
 
         # This is the common indent for the entire document
         self.standard_indent = 0
-    
+        
+        self.colors = templates.themes.theme().get_colors("shorte")
+
     def outline_styles(self):
         '''This method defines the outline style of the document. This
            is inserted into the style.xml file'''
@@ -31,8 +34,8 @@ class styles():
             #tab_stop = ""
     
             outline_styles += string.Template('''
-    			<text:outline-level-style text:level="${level}" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix=".0: " style:num-format="1" ${display_levels}>
-    			</text:outline-level-style>
+    <text:outline-level-style text:level="${level}" text:style-name="Numbering_20_Symbols" style:num-prefix=" " style:num-suffix=".0: " style:num-format="1" ${display_levels}>
+    </text:outline-level-style>
     ''').substitute({"level" : level, "display_levels" : display_levels, "tabstop" : tab_stop})
     
         outline_styles += '''
@@ -85,7 +88,7 @@ class styles():
       </style:table-cell-properties>
     </style:style>
     <style:style style:name="shorte_table.title" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#0057A6" fo:padding="0.0282in"
+      <style:table-cell-properties fo:background-color="${color_table_title}" fo:padding="0.0282in"
         fo:border="0.002in solid #000000">
         <style:background-image/>
       </style:table-cell-properties>
@@ -122,7 +125,8 @@ class styles():
       <style:text-properties fo:color="#000000"/>
     </style:style>
     
-    ''').substitute({"table_indent" : self.table_indent})
+    ''').substitute({"table_indent" : self.table_indent,
+                     "color_table_title" : self.colors["table"]["title"].bg})
 
 
     def get_list_styles(self):

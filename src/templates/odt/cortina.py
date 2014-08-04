@@ -1,6 +1,6 @@
 import string
 
-from templates.odt.custom_styles import *
+from templates.odt.odt_styles import *
 
 class custom_styles(styles):
     def __init__(self):
