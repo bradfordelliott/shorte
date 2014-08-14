@@ -2,13 +2,13 @@ import os
 import datetime
 import string
 from string import Template;
+from src.shorte_defines import *
 
 try:
     import Image
 except:
     WARNING("Failed to load Image library")
 
-from src.shorte_defines import *
 from src.shorte_source_code import *
 from src.parsers.shorte_parser import *
 from src.parsers.cpp_parser import *
