@@ -48,7 +48,7 @@ from libs.records import *
         
 
 
-class image_t():
+class image_t:
     def __init__(self):
         self.caption = ""
         self.source = ""
@@ -155,7 +155,7 @@ class image_t():
         #print "Creating thumbnail"
         return self.basename + "_100x100" + self.extension
 
-class gallery_t():
+class gallery_t:
     def __init__(self):
         self.m_images = []
         pass

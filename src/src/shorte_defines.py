@@ -260,7 +260,7 @@ class indexer_t:
         return self.m_image_index
 
 
-class table_t():
+class table_t:
     def __init__(self):
         self.rows = []
         self.modifiers = {}

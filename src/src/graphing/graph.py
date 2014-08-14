@@ -5,7 +5,7 @@ import libs.cairo_access as cairo_access
 from libs.cairo_access import *
 import math
 
-class cairo_t():
+class cairo_t:
     def __init__(self, width, height):
         self.image = cairo(5000, 5000)
 
@@ -577,7 +577,7 @@ class cairo_t():
 
 
 
-class graph_t():
+class graph_t:
 
     def __init__(self, width, height):
         self.width_padding = 200
