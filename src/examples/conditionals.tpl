@@ -16,7 +16,7 @@ a conditional block below:
 ?>
 
 @text
-However, this block does get expanded and it expands to the word:
+However, this block does get expanded and it expands to the phrase @{b,Conditional text more text}:
 
 @{b,<?
 result = "Conditional text"
@@ -42,25 +42,27 @@ This heading will be included because it ends up evaluating to
 cascade caused by the @{b,if="DEBUG"} on the previous @{b,@h2} header.
 
 @h1: skip_if_pdf
-This section would only be included if the output template is PDF
+Not in PDF files
 
-@h3 This is a subsection that should be skipped
-With some data underneath it
+This section would only be included if the output template is not a PDF file. If it is a PDF then it should be excluded.
 
-@h1 This section should not be skipped in PDF docs
+@h3 This is a subsection that should be skipped in PDFs
+With some data underneath it.
+
+@h1 This section should not be skipped in PDF docs since the cascade chain is broken
 blah blah blah
 
 @h2: skip_if_pdf
-But this heading should!!!
+This heading should be skipped in PDFs!!!
 
-@h3 This heading is also skipped
+@h3 This heading is skipped in PDFs
 
-@h2 But this heading shouldn't
+@h2 But this heading is not skipped in PDFs
 cause it doesn't have the skip_if_pdf tag
 
 @h3: skip_if_pdf
-This one is skipped
+This one is skipped in PDFs
 
-@h3 But this one isn't
+@h3 But this one isn't skipped in PDFs
 
 
