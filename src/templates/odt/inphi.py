@@ -12,7 +12,7 @@ class custom_styles(styles):
         self.standard_indent = 0.5
         self.table_indent = 0.5
 
-        self.colors = templates.themes.theme().get_colors("cortina")
+        self.colors = templates.themes.theme().get_colors("inphi")
 
     def custom_styles(self):
 

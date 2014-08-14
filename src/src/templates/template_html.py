@@ -362,7 +362,7 @@ class template_html_t(template_t):
                 else:
                     img_src = "%s/%s" % (icon_location,icon)
 
-            pdf = '''<span style='float:right;'><a href="%s.%s"><img style='height:50px;padding-top:5px;' src="%s"/></a></span>''' % (pdf_path, doc_type, img_src)
+            pdf = '''<span class='pdf' style='float:right;'><a href="%s.%s"><img style='height:50px;padding-top:5px;' src="%s"/></a></span>''' % (pdf_path, doc_type, img_src)
 
         return pdf
 
@@ -1298,7 +1298,7 @@ class template_html_t(template_t):
             function["pseudocode"] = code
             function["pseudocode"] = template_pseudocode.substitute(function)
 
-        if(prototype.has_key("see_also")):
+        if(prototype.has_key("see_also") and (len(prototype["see_also"]) > 0)):
             params = {}
             params["see_also"] = self.format_text(prototype["see_also"])
             function["see_also"] = template_see_also.substitute(params)
@@ -1308,7 +1308,7 @@ class template_html_t(template_t):
             #print "prototype.deprecated = %s" % prototype["deprecated"]
             #print "         .msg        = %s" % prototype["deprecated_msg"]
             params = {}
-            params["deprecated"] = self.format_text(prototype["deprecated_msg"])
+            params["deprecated"] = self.format_textblock(prototype["deprecated_msg"])
             function["deprecated"] = template_deprecated.substitute(params)
             is_deprecated = True
 
@@ -1943,16 +1943,18 @@ within an HTML document.
         
     
     # Called for format a structure for HTML output 
-    def format_struct(self, source, struct):
+    def format_struct(self, tag):
         '''This method is called to format the contents of an @struct tag
            as an HTML entity.
 
            @param self [I] - The instance of the formatter class
-           @param source [I] - The original source of the structure
-           @param struct [I] - The object defining the structure.
+           @param tag  [I] - The tag containing the structure object
 
            @return The HTML output of the structure
         '''
+
+        source = tag.source
+        struct = tag.contents
         
         
         html = ""
@@ -1964,6 +1966,7 @@ within an HTML document.
         else:
             img = ''
         html += "<tr><th colspan='%d'>%sStructure Fields</th></tr>\n" % (struct.max_cols, img)
+
        
 
         # If the structure has an image associated with it then
@@ -2008,25 +2011,24 @@ within an HTML document.
   </tr>'''
 
         i = 0
-
-        for field in struct.fields:
+        
+        for field in struct.get_fields():
             
             is_header = False
 
-            is_reserved = field["is_reserved"]
+            is_reserved = field.is_reserved
 
             if(is_header):
                 html += "    <tr class='header'>\n";
             else:
                 html += "<tr>\n"
 
-            
-            if(field["is_caption"]):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (struct["max_cols"], self.format_text(field["attrs"][0]))
-            elif(field["is_spacer"]):
+            if(field.is_caption):
+                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (struct.max_cols, self.format_text(field.attrs[0]))
+            elif(field.is_spacer):
                 html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
             else:
-                for attr in field["attrs"]:
+                for attr in field.attrs:
 
                     #print attr
                     if(is_dict(attr)):
@@ -2276,6 +2278,11 @@ $href_end
 
         return self.format_image(image)
 
+    def format_inline_image_str(self, data):
+        image = self.m_engine.m_parser.parse_inline_image_str(data)
+        image["inline"] = True
+        return self.format_image(image)
+
     def format_gallery(self, tag):
 
         gallery = tag.contents
@@ -2439,7 +2446,7 @@ $href_end
             elif(tag == "pre"):
                 prefix += "<pre style='margin-left:10px;'>"
                 postfix += "</pre>"
-            elif(tag == "u"):
+            elif(tag in ("u", "ul", "underline")):
                 prefix += "<u>"
                 postfix += "</u>"
             elif(tag == "i"):
@@ -2465,6 +2472,10 @@ $href_end
             elif(tag in ("star", "starred")):
                 prefix += "<div class='star'>&nbsp;</div>"
                 postfix += ""
+            elif(tag in ("img", "image")):
+                prefix += "<div>"
+                replace = self.format_inline_image_str(replace)
+                postfix += "</div>"
             elif(tag in "table"):
                 #print "PARSING INLINE TABLE"
                 #print "===================="
@@ -2696,7 +2707,7 @@ $href_end
         elif(name == "table"):
             self.m_contents.append(self.format_table(tag.source, tag.contents))
         elif(name == "struct"):
-            self.m_contents.append(self.format_struct(tag.source, tag.contents))
+            self.m_contents.append(self.format_struct(tag))
         elif(name == "define"):
             self.m_contents.append(self.format_define(tag))
         elif(name == "ul"):
@@ -2882,29 +2893,15 @@ $href_end
             elif(indent == 5):
                 cnts += "<div class='toc5'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, name, name)
 
-        toc = string.Template('''
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html>
-<head>
-<style>
-* html {width: 500px;}
-body {width: 500px;}
-/* Table of Contents */
-div.toc1 {margin-top:8px;margin-bottom:4px;}
-div.toc1 a{margin-left:20px;font-size:1.1em;color:#666;}
-div.toc2 {margin-top:4px;margin-bottom:2px;}
-div.toc2 a{margin-left:40px;font-size:1.0em;color:#005CDB;}
-div.toc3 {margin-top:4px;margin-bottom:2px;}
-div.toc3 a{margin-left:50px;font-size:0.9em;color:#000;}
-div.toc4 a{margin-left:70px;font-size:0.9em;color:#777;}
-div.toc5 a{margin-left:90px;font-size:0.9em;color:#666;}
-</style>
-</head>
-<body style="background-color: white;white-space:nowrap;font-weight:bold;">
-$cnts
-</body>
-</html>
-''').substitute({"css": self.get_css("content/"), "cnts" : cnts})
+        module = shorte_get_startup_path() + "/templates/html/html_styles.py"
+        basename = os.path.basename(module)
+        module = os.path.splitext(basename)[0]
+        import_str = "from templates.html.%s import *" % module
+        exec(import_str)
+        html_styles = html_styles(self.m_engine.m_theme)
+        toc_styles = html_styles.get_toc_frame_styles()
+
+        toc = string.Template(toc_styles).substitute({"css": self.get_css("content/"), "cnts" : cnts})
 
         file = open(self.m_engine.m_output_directory + "/toc.html", "w")
         file.write(self._cleanup_html(toc))
@@ -3059,338 +3056,24 @@ $cnts
         else:
             image_star = "background: no-repeat url(star_small.png);"
         
+        #module = shorte_get_startup_path() + "/templates/html/%s.py" % (self.m_engine.m_theme)
+        module = shorte_get_startup_path() + "/templates/html/html_styles.py"
+        basename = os.path.basename(module)
+        module = os.path.splitext(basename)[0]
+        import_str = "from templates.html.%s import *" % module
+        exec(import_str)
+        html_styles = html_styles(self.m_engine.m_theme)
+        common = html_styles.get_common_styles()
+        self.toc_styles = html_styles.get_toc_frame_styles()
+        styles_print = html_styles.get_print_styles()
+        styles_screen = html_styles.get_screen_styles()
+
         output = css.substitute({
-            "common" : string.Template('''
-  a {color: #FD4626;font-weight: bold;font-size:0.9em;}
-  a:hover {color: #666;font-weight: bold;text-decoration: underline;}
-  a img {border: none;}
-  a.name {color: black;}
-  
-  h1{font-size: 1.3em;padding: 0px;padding-bottom: 3px;margin: 0px;margin-top:10px;margin-left: 5px;color:#666;}
-  h2{font-size: 1.2em;font-weight: bold;color: #005CDB;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;}
-  h3{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;}
-  h4{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #666;}
-  h5{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: #A67F00;}
-  h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: black;text-decoration:underline;}
-  
-  p {margin-left: 20px;margin-bottom:10px;font-size: 1.0em;}
-  p.caption {margin-left: 0px;text-align: center;margin-top: 5px;}
-
-  
-  div.tb
-  {
-      width:80%;
-      margin:0px;
-      padding:10px;
-      margin-left:20px;
-      border-radius: 15px;
-      -moz-border-radius: 15px;
-      border:4px solid #dfd3b3;
-      background:#f5f4e5;
-  }
-  
-  font.hilite
-  {
-      background-color:yellow;
-      font-weight: bold;
-  }
-  
-  
-  /* Table of Contents */
-  div.toc1 {margin-top:8px;margin-bottom:4px;}
-  div.toc1 a{margin-left:20px;font-size:1.1em;color:#666;}
-  div.toc2 {margin-top:4px;margin-bottom:2px;}
-  div.toc2 a{margin-left:40px;font-size:1.0em;color:#005CDB;}
-  div.toc3 {margin-top:4px;margin-bottom:2px;}
-  div.toc3 a{margin-left:50px;font-size:0.9em;color:#000;}
-  div.toc4 a{margin-left:70px;font-size:0.9em;color:#777;}
-  div.toc5 a{margin-left:90px;font-size:0.9em;color:#666;}
-  table {
-      *border-collapse: collapse; /* IE7 and lower */
-      border-spacing: 0;
-  }
-  
-  .bordered {
-      margin:10px;
-      margin-left:20px;
-      background-color:white;
-      border: solid #ccc 4px;
-      -moz-border-radius: 6px;
-      -webkit-border-radius: 6px;
-      border-radius: 6px;
-  }
-  
-  .bordered td, .bordered th {
-      border-left: 1px solid #ccc;
-      border-top: 1px solid #ccc;
-      padding: 4px;
-      text-align: left;    
-  }
-  
-  .bordered th {
-      background-color:#396592;
-      color: white;
-      border-top: none;
-  }
-  
-  .bordered tr.alternaterow {
-      background-color:#f0f0f0;
-  }
-  .bordered tr.caption {
-      background-color:#8C9CB8;
-      color:white;
-  }
-  
-  .bordered tr.header td {
-      font-weight:bold;
-      background-color:#ddd;
-      border-top:0px solid #ccc;
-      border-bottom:2px solid #ccc;
-  }
-  .bordered tr td.header {
-      font-weight:bold;
-      background-color:#ddd;
-      border-top:0px solid #ccc;
-      border-bottom:2px solid #ccc;
-  }
-  .bordered tr td.subheader {
-      background-color:#E1E8EF;
-      border-top:1px solid #ccc;
-      border-bottom:0px solid #ccc;
-  }
-  .bordered tr td.reserved {
-      background-color:#f0f0f0;
-      border-top:1px solid #ccc;
-      border-bottom:0px solid #ccc;
-      color:#a0a0a0;
-  }
-  
-  .bordered td:first-child, .bordered th:first-child {
-      border-left: none;
-  }
-  
-  .bordered th:first-child {
-      -moz-border-radius: 3px 0 0 0;
-      -webkit-border-radius: 3px 0 0 0;
-      border-radius: 3px 0 0 0;
-  }
-  
-  .bordered th:last-child {
-      -moz-border-radius: 0 3px 0 0;
-      -webkit-border-radius: 0 3px 0 0;
-      border-radius: 0 3px 0 0;
-  }
-  
-  .bordered th:only-child{
-      -moz-border-radius: 3px 3px 0 0;
-      -webkit-border-radius: 3px 3px 0 0;
-      border-radius: 3px 3px 0 0;
-  }
-  
-  .bordered tr:last-child td:first-child {
-      -moz-border-radius: 0 0 0 3px;
-      -webkit-border-radius: 0 0 0 3px;
-      border-radius: 0 0 0 3px;
-  }
-  
-  .bordered tr:last-child td:last-child {
-      -moz-border-radius: 0 0 3px 0;
-      -webkit-border-radius: 0 0 3px 0;
-      border-radius: 0 0 3px 0;
-  }
-  
-  .image_inline
-  {
-      display:inline;
-  }
-  .image_inline table
-  {
-      display:inline;
-      text-align:center;
-  }
-  .image_inline img
-  {
-      border:0px;
-      margin-left:20px;
-  }
-  /* Question and answer blocks */
-  div.question
-  {
-      background-color:#ddd;
-      padding:10px;
-  }
-  div.answer
-  {
-      padding:10px;
-  }
-  
-  div.code
-  {
-      border-radius: 8px;
-      -moz-border-radius: 8px;
-      padding-top:6px;
-      padding-bottom:6px;
-      padding-left:3px;
-      padding-right:3px;
-  
-      font-family: courier new;
-      font-size: 0.9em;
-      margin-bottom: 0px;
-      margin-top: 4px;
-      margin-left:25px;
-      margin-right:10px;
-      margin-bottom:10px;
-      background-color:#f0f0f0;
-      border:3px solid #ccc;
-  }
-  div.code2
-  {
-      font-family: courier new;
-      font-size: 0.9em;
-      margin-bottom: 10px;
-      margin-top: 0px;
-      margin-left:10px;
-      margin-right:15px;
-      background-color:#f0f0f0;
-      border:1px solid #ccc;
-  }
-  div.code3
-  {
-      font-family: courier new;
-      font-size: 0.9em;
-  }
-  
-  div.code a
-  {
-      font-weight:normal;
-  }
-  div.prototype a
-  {
-      font-weight:normal;
-  }
-  
-  div.source
-  {
-      visibility:hidden;
-      display:block;
-      height:0;
-      width:0;
-  }
-  
-  
-  div.code_result
-  {
-     margin-left: 25px;
-     color: #396592;
-  }
-
-
-  div.star
-  {
-      display:inline-block;
-      position:relative;
-      top:-10px;
-      padding:0px;
-      margin-right:-9px;
-      margin-left:-9px;
-      width:18px;
-      height:18px;
-      $star
-  }
-
-  ${priority}
-
-  ''').substitute({
-        "star" : image_star,
-        "priority" : ''.join(image_priority)}),
-
-            "print_only" : '''
-body
-{
-    width:100%;margin:0;float:none;
-    font-family:times;
-
-}
-div.container
-{
-    width:100%;margin:0;float:none;
-
-}
-div.header
-{
-    display:none;
-}
-div.menu_div
-{
-    display:none;
-}
-
-div.footer
-{
-    display:block;
-}
-
-div.footer a
-{
-    display:none;
-}
-
-div.code_header
-{
-    display:none;
-}
-
-object
-{
-    display:none;
-}
-
-/* Styling of code segments */
-div.snippet span.operator {color: purple;}
-div.snippet span.kw {font-weight:bold;color: blue;} /* keyword */
-div.snippet span.str {color: #9933CC;}
-div.snippet span.mstring {color: #9933CC;}
-div.snippet span.cmt {font-style:italic;color: green;}
-div.snippet span.ln {color: #C0C0C0;}
-
-/* Styling of text blocks */
-div.tblkps {margin:0px;padding:0px;margin-left:20px;}
-div.tblkp  {margin:0px;padding:0px;}
-''',
-
-            "screen_only" : '''
-  div.code_header
-  {
-      font-family: courier new;
-      font-size: 0.9em;
-      margin-bottom:0px;
-      margin-top:10px;
-      margin-left: 30px;
-      background-color: white;
-      border: 0px;
-      width:100%;
-      color:#ccc;
-  }
-  
-  div.code_header a
-  {
-      text-decoration:none;
-      color:#ccc;
-  }
-
-  /* Styling of code segments */
-  div.snippet span.operator {color: purple;}
-  div.snippet span.keyword {color: blue;}
-  div.snippet span.kw {color: blue;}
-  div.snippet span.str {color: #9933CC;}
-  div.snippet span.mstring {color: #9933CC;}
-  div.snippet span.cmt {color: green;}
-  div.snippet span.ln {color: #C0C0C0;}
-
-  /* Styling of text blocks */
-  div.tblkps {margin-left:4px;margin-bottom:4px;font-size:1.0em;}
-  div.tblkp  {margin-left:4px;padding:0px;margin-bottom:4px;font-size:1.0em;}
-'''
+            "common" : string.Template(common).substitute({
+            "star" : image_star,
+            "priority" : ''.join(image_priority)}),
+            "print_only" : styles_print,
+            "screen_only" : styles_screen
             })
 
         return output

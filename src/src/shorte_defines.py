@@ -78,7 +78,9 @@ def shorte_get_startup_path():
         WARNING("shorte.py not found at %s, trying PATH_SHORTE environment variable" % startup_path)
 
         if(not os.environ.has_key("PATH_SHORTE")):
-            FATAL("Unable to determine shorte startup directory")
+            FATAL("Unable to determine shorte startup directory. I would recommend you "
+                  "define the PATH_SHORTE environment variable to the location of "
+                  "shorte.py")
 
         startup_path = os.environ["PATH_SHORTE"]
 
@@ -91,11 +93,35 @@ def shorte_get_startup_path():
 
 def shorte_get_scratch_path():
     scratch_dir = shorte_get_config("shorte", "scratchdir")
+    scratch_dir = os.path.abspath(scratch_dir)
 
     if(not os.path.exists(scratch_dir)):
         os.mkdir(scratch_dir)
 
     return scratch_dir
+
+
+def shorte_get_tool_path(tool):
+        
+    tool_uc = tool.upper()
+    path_tool = None
+
+    if(os.environ.has_key("PATH_%s" % tool_uc)):
+        path_tool = os.environ["PATH_%s" % tool_uc]
+    else:
+        if(sys.platform == "cygwin" or sys.platform == "win32"):
+            osname = "win32"
+        elif(sys.platform == "darwin"):
+            osname ="osx"
+        else:
+            osname ="linux"
+        path_tool = shorte_get_config("shorte", "path.%s.%s" % (tool.lower(), osname))
+
+    if(not path_tool):
+        FATAL("%s not found at %s. Try setting PATH_%s" % (tool, path_tool, tool_uc))
+
+    return path_tool
+
 
 class topic_t:
     def __init__(self, vars):
@@ -247,6 +273,9 @@ class table_t():
         # Attributes primarily for ODT
         self.table_style_name = None
         self.column_styles = None
+
+        self.style = None
+
         pass
 
     def get_title(self):
@@ -262,6 +291,13 @@ class table_t():
         if(len(self.widths) > 0):
             return True
         return False
+
+    def has_style(self):
+        if(self.style != None):
+            return True
+        return False
+    def get_style(self):
+        return self.style
 
     def get_max_cols(self):
         return self.max_cols

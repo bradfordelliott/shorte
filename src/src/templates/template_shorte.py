@@ -384,7 +384,7 @@ $heading
             function["deprecated"] = '''
 -- deprecated:
 %s
-''' % (prototype["deprecated_msg"])
+''' % (self.format_textblock(prototype["deprecated_msg"]))
         else:
             function["deprecated"] = ''
         

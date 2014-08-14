@@ -39,6 +39,99 @@ $cnts
                  "heading_4_fg" : self.colors["heading.4"].fg,
                  "heading_5_fg" : self.colors["heading.5"].fg,
                  "heading_6_fg" : self.colors["heading.6"].fg})
+
+    def get_print_styles(self):
+        return '''
+body
+{
+    width:100%;margin:0;float:none;
+    font-family:times;
+
+}
+div.container
+{
+    width:100%;margin:0;float:none;
+
+}
+div.header
+{
+    display:none;
+}
+div.menu_div
+{
+    display:none;
+}
+
+div.footer
+{
+    display:block;
+}
+
+div.footer a
+{
+    display:none;
+}
+
+div.code_header
+{
+    display:none;
+}
+
+object
+{
+    display:none;
+}
+
+/* Styling of code segments */
+div.snippet span.operator {color: purple;}
+div.snippet span.kw {font-weight:bold;color: blue;} /* keyword */
+div.snippet span.str {color: #9933CC;}
+div.snippet span.mstring {color: #9933CC;}
+div.snippet span.cmt {font-style:italic;color: green;}
+div.snippet span.ln {color: #C0C0C0;}
+
+/* Styling of text blocks */
+div.tblkps {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;margin-left:20px;}
+div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
+'''
+
+    def get_screen_styles(self):
+        return '''
+  div.code_header
+  {
+      font-family: courier new;
+      font-size: 0.9em;
+      margin-bottom:0px;
+      margin-top:10px;
+      margin-left: 30px;
+      background-color: white;
+      border: 0px;
+      width:100%;
+      color:#ccc;
+  }
+  
+  div.code_header a
+  {
+      text-decoration:none;
+      color:#ccc;
+  }
+
+  /* Styling of code segments */
+  div.snippet span.operator {color: purple;}
+  div.snippet span.keyword {color: blue;}
+  div.snippet span.kw {color: blue;}
+  div.snippet span.str {color: #9933CC;}
+  div.snippet span.mstring {color: #9933CC;}
+  div.snippet span.cmt {color: green;}
+  div.snippet span.ln {color: #C0C0C0;}
+
+  /* Styling of text blocks */
+  div.tblkps {margin-left:4px;margin-top:10px;margin-bottom:10px;font-size:1.0em;}
+  div.tblkp  {margin-left:4px;padding:0px;margin-top:10px;margin-bottom:10px;font-size:1.0em;}
+
+  table div.tblkps {margin-left:4px;margin-top:5px;margin-bottom:5px;font-size:1.0em;}
+  table div.tblkp  {margin-left:4px;padding:0px;margin-top:5px;margin-bottom:5px;font-size:1.0em;}
+    '''
   
     def get_common_styles(self):
         return string.Template('''

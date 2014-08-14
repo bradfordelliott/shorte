@@ -473,6 +473,7 @@ within an HTML document.
         help = html.format_prototype(tag)
         
         prototype = tag.contents
+        #print prototype
 
         function = {}
         function["name"] = prototype["name"]
@@ -532,7 +533,7 @@ within an HTML document.
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
         html.m_wikiword_path_prefix = False
-        help = html.format_struct(tag.source, tag.contents)
+        help = html.format_struct(tag)
         
         obj = tag.contents
 

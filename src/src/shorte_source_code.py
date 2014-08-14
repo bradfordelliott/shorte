@@ -257,7 +257,8 @@ class source_code_t:
             "sql" : '''
  CREATE TABLE INTEGER AUTO_INCREMENT
  TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
-'''
+''',
+            "gnuplot" : ''''''
         }
        
         self.m_keywords = {}
@@ -592,10 +593,62 @@ class enum_t(type_t):
 
         return attrs
 
+class field_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.attrs = []
+        self.is_reserved = False
+        self.is_header = False
+        self.is_title = False
+        self.is_subheader = False
+        self.is_caption = False
+        self.is_spacer = False
+        self.is_array = False
+        self.array_elem_size = 1
+        self.width = 0
+        self.start = 0
+        self.end = 0
+        self.type = None
+        self.name = None
+        self.desc = None
+
+    def from_hash(self, field):
+        self.attrs = field["attrs"]
+        self.is_reserved = field["is_reserved"]
+        self.is_header = field["is_header"]
+        self.is_title = field["is_title"]
+        self.is_subheader = field["is_subheader"]
+        self.is_caption = field["is_caption"]
+        self.is_spacer = field["is_spacer"]
+        if(field.has_key("is_array")):
+            self.is_array = field["is_array"]
+        if(field.has_key("array_elem_size")):
+            self.array_elem_size = field["array_elem_size"]
+        
+        self.name = self.attrs[1]["text"]
+        self.desc = self.attrs[2]["textblock"]
+
+        if(field.has_key("width")):
+            self.width = field["width"]
+            self.start = field["start"]
+            self.end   = field["end"]
+            self.type  = field["type"]
+        else:
+            WARNING("Field %s has no type" % self.name)
+        
+
+    def __str__(self):
+        attrs =  "Field\n"
+        attrs += "  name: %s\n" % self.name
+        attrs += "  desc: %s\n" % self.desc
+
+        return attrs
+
+
 class struct_t(type_t):
     def __init__(self):
         type_t.__init__(self)
-        self.fields = {}
+        self.fields = []
         self.record = None
         self.image = None
         self.type = "struct"
@@ -613,12 +666,10 @@ class struct_t(type_t):
         attrs += "  private:    %s\n" % self.private
         attrs += "  fields:\n"  
 
-        for val in self.fields:
-            attrs += "    "
-            for col in val['cols']:
-                attrs += col["text"]
-                break
-            attrs += "\n"
+        fields = self.get_fields()
+
+        for val in fields:
+            attrs += "    " + val.name + "\n"
 
         return attrs
 
@@ -630,6 +681,17 @@ class struct_t(type_t):
     def get_headings(self):
 
         return self.headings
+
+    def get_fields(self):
+        
+        fields = []
+        for f in self.fields:
+            f2 = field_t()
+            f2.from_hash(f)
+            fields.append(f2)
+
+        return fields
+
 
 
 

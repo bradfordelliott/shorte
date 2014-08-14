@@ -274,9 +274,13 @@ class template_text_t(template_t):
         return source
     
     
-    def format_textblock(self, tag):
+    def format_textblock(self, tag, prefix='', prefix_first_line=True, pad_textblock=False):
 
-        paragraphs = tag.contents
+        if(isinstance(tag, tag_t)):
+            paragraphs = tag.contents
+        else:
+            paragraphs = tag
+        
         output = '\n'
 
         for p in paragraphs:
@@ -293,15 +297,27 @@ class template_text_t(template_t):
             else:
                 output += self.format_text(text)
 
-        output += "\n"
-
         while(output.startswith("\n")):
             output = output[1:]
 
         while(output.endswith("\n")):
             output = output[0:-1]
 
-        return "\n" + output + "\n"
+        lines = output.split('\n')
+        output = ''
+        for i in range(0, len(lines)):
+            if(i == 0):
+                if(prefix_first_line):
+                    output += prefix + lines[i] + '\n'
+                else:
+                    output += lines[i] + '\n'
+            else:
+                output += prefix + lines[i] + '\n'
+
+        if(pad_textblock):
+            return "\n" + output + "\n"
+
+        return output
 
     def format_questions(self, tag):
 
@@ -550,61 +566,33 @@ class template_text_t(template_t):
         return html
 
     
-    def format_struct(self, source, struct):
+    def format_struct(self, tag):
+
+        struct = tag.contents
         
-        html = "<table class='tb'>\n"
-        
-        if("title" in struct):
-            html += "<tr><th colspan='%d' style='background-color:#444;font-weight:bold;color:white;border:1px solid black;'>%s</th></tr>\n" % (struct["max_cols"], struct["title"])
-       
-        # If the structure has an image associated with it then
-        # display it as part of the HTML describing the structure.
-        if(struct.has_key("image")):
-
-            name = struct["image"]["path"]
-            
-            # If inlining is turned on then we need to embed the image
-            # into the generated output HTML file.
-            if(self.m_inline == True):
-                handle = open(name, "rb")
-                name = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-                handle.close()
-
-            
-            html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct["max_cols"], "Diagram")
-            html += struct["image"]["map"]
-            html += "<tr><th colspan='%d' style='border: 1px solid black;padding:10px;'><img src='%s' usemap='#diagram_%s'></img></th></tr>" % (struct["max_cols"], name, struct["image"]["path"])
-
         i = 0
-
-        for field in struct["fields"]:
+        fields = ''
+        for field in struct.get_fields():
             
-            if(i == 0):
-                is_header = True
-            else:
-                is_header = False
-
-            is_reserved = field["is_reserved"]
-
-            if(is_header):
-                html += "    <tr class='header'>\n";
-            else:
-                html += "<tr>\n"
+            fields += "| %2d | %20s | %s" % (field.width, field.name, self.format_textblock(field.desc, prefix="|    |                      | ", prefix_first_line=False))
             
-            for attr in field["attrs"]:
-
-                attr = self.format_text(attr)
-
-                if(is_header):
-                    html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
-                elif(is_reserved):
-                    html += "      <td colspan='%d' style='background-color:#eee; color:#999;'>%s</td>\n" % (1, attr)
-                else:
-                    html += "      <td colspan='%d'>%s</td>\n" % (1, attr)
-            
-            html += "</tr>\n"
-
             i+=1
+        
+        output = string.Template('''
++-----------------------------------------------------------------------------
+| Structure: $name
+|
+${desc}|
++-----------------------------------------------------------------------------
+| Fields:
++-----------------------------------------------------------------------------
+${fields}+-----------------------------------------------------------------------------
+''').substitute({"name" : struct.name,
+                 "desc" : self.format_textblock(struct.description, "|  "),
+                 "fields" : fields})
+
+        return output
+
         
         if("caption" in struct):
             html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
@@ -866,8 +854,8 @@ class template_text_t(template_t):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
-        #elif(name == "struct"):
-        #    self.m_contents += self.format_struct(tag.source, tag.contents)
+        elif(name == "struct"):
+            self.m_contents += self.format_struct(tag)
         elif(name == "ul"):
             self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):

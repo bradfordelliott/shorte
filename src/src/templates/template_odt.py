@@ -417,75 +417,6 @@ class template_odt_t(template_t):
       <style:text-properties fo:color="#C0C0C0"/>
     </style:style>
 
-    <style:style style:name="shorte_table_prototype" style:family="table">
-      <style:table-properties fo:margin="0in" fo:background-color="#FAFAFA" style:shadow="none" style:writing-mode="lr-tb">
-        <style:background-image/>
-      </style:table-properties>
-    </style:style>
-
-    <style:style style:name="shorte_tablePrototype.A" style:family="table-column">
-      <style:table-column-properties style:column-width="0.503cm"/>
-    </style:style>
-
-    <style:style style:name="shorte_tablePrototype.B" style:family="table-column">
-      <style:table-column-properties style:column-width="2.699cm"/>
-    </style:style>
-
-    <style:style style:name="shorte_tablePrototype.C" style:family="table-column">
-      <style:table-column-properties style:column-width="0.682cm"/>
-    </style:style>
-    <style:style style:name="shorte_tablePrototype.D" style:family="table-column">
-      <style:table-column-properties style:column-width="12.309cm"/>
-    </style:style>
-    <style:style style:name="shorte_tablePrototype.1" style:family="table-row">
-      <style:table-row-properties style:min-row-height="0.503cm"/>
-    </style:style>
-    <style:style style:name="shorte_table_prototype_name" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#b3b3b3" fo:padding="0.097cm" fo:border-left="none" fo:border-right="none" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table_prototype_data" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="transparent" fo:padding="0.097cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.002cm solid #000000">
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table_prototype_definition" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#e6e6e6" fo:padding="0.097cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="0.002cm solid #000000">
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_tablePrototype.7" style:family="table-row">
-      <style:table-row-properties style:min-row-height="0.531cm"/>
-    </style:style>
-
-
-    <style:style style:name="para_prototype_name" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" style:shadow="none"/>
-      <style:text-properties fo:color="#ffffff" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-    <style:style style:name="para_prototype_text" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-left="0.3cm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false"/>
-      <style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
-    </style:style>
-    <style:style style:name="para_prototype_section" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" style:shadow="none"/>
-      <style:text-properties fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-
-    <style:style style:name="para_prototype_code" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" style:shadow="none"/>
-      <style:text-properties fo:color="#000000" fo:font-weight="bold" style:font-name="Courier New" fo:font-size="9pt"/>
-    </style:style>
-
-    <style:style style:name="para_prototype_param_name" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" style:shadow="none"/>
-      <style:text-properties fo:color="#0000ff" fo:font-weight="bold" style:font-name="Courier New" fo:font-size="9pt"/>
-    </style:style>
-    <style:style style:name="para_prototype_param" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0cm" style:shadow="none"/>
-      <style:text-properties fo:color="#000000" font-name="Courier New" fo:font-size="9pt"/>
-    </style:style>
     
     <style:style style:name="shorte_para_white_bold" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
@@ -514,33 +445,6 @@ class template_odt_t(template_t):
         <style:paragraph-properties fo:margin-left="0.554cm" fo:margin-right="0cm" fo:text-indent="0cm" style:auto-text-indent="false" fo:background-color="#e0e0e0" fo:padding="0.002cm" fo:border-left="none" fo:border-right="none" fo:border-top="none" fo:border-bottom="none" style:shadow="none">
             <style:background-image/>
         </style:paragraph-properties>
-    </style:style>
-
-
-    <style:style style:name="shorte_code3" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
-        <style:paragraph-properties fo:margin-left="0.255cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-indent="0cm" style:auto-text-indent="false" style:page-number="auto" fo:background-color="#f2f2f2" fo:keep-with-next="auto">
-            <style:background-image/>
-        </style:paragraph-properties>
-        <style:text-properties style:font-name="Courier New" fo:font-size="8pt" style:font-size-asian="8pt" style:font-size-complex="8pt"/>
-    </style:style>
-
-    <style:style style:name="code" style:family="text">
-        <style:text-properties style:font-name="Courier New" fo:font-size="8pt" style:font-size-asian="8pt" style:font-size-complex="8pt"/>
-    </style:style>
-    <style:style style:name="code_line_numbers" style:display-name="code_line_numbers" style:family="text">
-        <style:text-properties fo:color="#c0c0c0" style:font-name="Courier New" fo:font-size="8pt" style:font-size-asian="10pt" style:font-size-complex="8pt"/>
-    </style:style>
-    <style:style style:name="code_string" style:display-name="code_string" style:family="text">
-        <style:text-properties fo:color="#ff00ff" style:font-name="Courier New" fo:font-size="8pt" style:font-size-asian="10pt" style:font-size-complex="8pt"/>
-    </style:style>
-    <style:style style:name="code_comment" style:display-name="code_comment" style:family="text">
-        <style:text-properties fo:color="#54c571" style:font-name="Courier New" fo:font-size="8pt" style:font-size-asian="10pt" style:font-size-complex="8pt"/>
-    </style:style>
-    <style:style style:name="code_keyword" style:display-name="code_keyword" style:family="text">
-        <style:text-properties fo:color="#0000ff" style:font-name="Courier New" fo:font-size="8pt" style:font-size-asian="10pt" style:font-size-complex="8pt"/>
-    </style:style>
-    <style:style style:name="hyperlink" style:display-name="hyperlink" style:family="text">
-        <style:text-properties fo:color="#ff0000"/>
     </style:style>
 
     <style:style style:name="shorte_enum_col1" style:family="table-column">
@@ -756,6 +660,36 @@ class template_odt_t(template_t):
     </style:graphic-properties>
 </style:style>
 
+<!-- This style is used to generate notes, TBD's and warnings -->
+<style:style style:name="fr_note" style:family="graphic" style:parent-style-name="Frame">
+    <style:graphic-properties fo:margin-left="0.5cm" fo:margin-right="0cm" fo:margin-top="0cm"
+        fo:margin-bottom="0cm" style:vertical-pos="top" style:vertical-rel="baseline" style:horizontal-pos="center"
+        style:horizontal-rel="paragraph-content" fo:background-color="#ffffcc" style:background-transparency="0%"
+        draw:fill="solid" fo:padding-left="0.101cm" fo:padding-right="0.101cm" fo:padding-top="0cm"
+        fo:padding-bottom="0.101cm" fo:border="0.06pt solid #b2b2b2" style:shadow="none"
+        draw:shadow-opacity="100%"><style:background-image/>
+    </style:graphic-properties>
+</style:style>
+
+<style:style style:name="fr_note_img" style:family="graphic" style:parent-style-name="Graphics">
+    <style:graphic-properties style:wrap="run-through" style:number-wrapped-paragraphs="no-limit" style:vertical-pos="from-top"
+        style:vertical-rel="frame" style:horizontal-pos="from-left" style:horizontal-rel="frame"
+        fo:background-color="transparent" style:background-transparency="100%" draw:fill="solid"
+        style:shadow="none" draw:shadow-opacity="100%" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)"
+        draw:luminance="0%" draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%"
+        draw:gamma="100%" draw:color-inversion="false" draw:image-opacity="100%"
+        draw:color-mode="standard"><style:background-image/>
+    </style:graphic-properties>
+</style:style>
+
+<style:style style:name="fr_inline_table" style:family="graphic" style:parent-style-name="Graphics">
+    <style:graphic-properties style:vertical-pos="from-top" style:vertical-rel="paragraph"
+    style:horizontal-pos="from-left"
+    style:horizontal-rel="paragraph" style:mirror="none" fo:clip="rect(0cm, 0cm, 0cm, 0cm)" draw:luminance="0%"
+    draw:contrast="0%" draw:red="0%" draw:green="0%" draw:blue="0%" draw:gamma="100%" draw:color-inversion="false"
+    draw:image-opacity="100%" draw:color-mode="standard"/>
+</style:style>
+
     
     ''' + self.m_styles_extra
         
@@ -784,11 +718,11 @@ class template_odt_t(template_t):
         
         return output
 
-    def insert_inline_image(self, x, y, height, width, name):
+    def insert_inline_image(self, x, y, height, width, src):
         self.m_image_id += 1
         return '''<draw:frame draw:style-name="fr_inline" draw:name="graphics%d" text:anchor-type="char" svg:x="%fcm" svg:y="%fcm" svg:width="%fcm" svg:height="%fcm" draw:z-index="22">
                    <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
-               </draw:frame>''' % (self.m_image_id+10, x, y, width, height, name)
+               </draw:frame>''' % (self.m_image_id+10, x, y, width, height, src)
 
 
     def get_index_name(self):
@@ -1047,6 +981,12 @@ class template_odt_t(template_t):
         image["inline"] = True
 
         return self.format_image(image)
+
+    def format_inline_image_str(self, data):
+        image = self.m_engine.m_parser.parse_inline_image_str(data)
+        image["inline"] = True
+        return self.format_image(image)
+        
     
     def parse_inline_styling(self, matches):
         data = matches.groups()[0].strip()
@@ -1076,10 +1016,10 @@ class template_odt_t(template_t):
                 tag = parts[0].strip()
                 qualifier = parts[1].strip()
 
-            if(tag == "b"):
+            if(tag in ("b","bold")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["bold"]
                 postfix += "</text:span>"
-            elif(tag == "u"):
+            elif(tag in ("u", "ul", "underline")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["underline"]
                 postfix += "</text:span>"
             elif(tag == "i"):
@@ -1111,14 +1051,28 @@ class template_odt_t(template_t):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["strikethru"]
                 postfix += "</text:span>"
             elif(tag in ("star", "starred")):
-                prefix += self.insert_inline_image(x=-0.2, y=0.7, height=0.515, width=0.515, name="star_small.png")
+                prefix += self.insert_inline_image(x=-0.2, y=0.7, height=0.515, width=0.515, src="star_small.png")
+                
+            elif(tag in ("img", "image")):
+                xml = self.format_inline_image_str(replace)
+                return xml
                 
             elif(tag == "table"):
                 table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['!', '|'])
-                xml = "</text:p>"
+                #xml = "</text:p>"
+                
+                xml = ''
+                xml = '''<draw:frame draw:style-name="fr_inline_table" draw:name="Frame%d" text:anchor-type="character" svg:x="0cm" svg:y="0cm" svg:width="12.088cm" draw:z-index="27">''' % (self.m_frame_id + 10)
+                self.m_frame_id += 1
+                xml += '''<draw:text-box>'''
+        
                 #print "REPLACE[%s]" % replace
                 xml += self.__format_table(replace, table)
-                xml += "<text:p text:style-name=\"shorte_standard\">"
+
+                xml += '''</draw:text-box>'''
+                xml += '''</draw:frame>'''
+
+                #xml += "<text:p text:style-name=\"shorte_standard\">"
                 return xml
 
             # Embed an inline note. This is useful when documenting
@@ -1134,7 +1088,7 @@ class template_odt_t(template_t):
                 
                 if(tag == "note"):
                     label = "Note"
-                    img = "warning.png"
+                    img = "note.png"
                 elif(tag == "warning"):
                     label = "Warning"
                     img = "warning.png"
@@ -1166,6 +1120,57 @@ class template_odt_t(template_t):
 
         return data
 
+    def xmlize(self, data):
+        
+        data = re.sub("‘", "&apos;", data)
+        data = re.sub("’", "&apos;", data)
+        data = re.sub("®", "&#174;", data)
+
+        output = ''
+        STATE_NORMAL = 0
+        STATE_INLINE_STYLING = 1
+        state = STATE_NORMAL
+
+        for i in range(0, len(data)):
+            if(state == STATE_NORMAL):
+                if(data[i] == '@' and data[i+1] == '{'):
+                    output += data[i]
+                    state = STATE_INLINE_STYLING
+                    continue
+
+                if(data[i] == '&'):
+                    output += '&amp;'
+                elif(data[i] == "'"):
+                    output += '&apos;'
+                elif(data[i] == '<'):
+                    output += '&lt;'
+                elif(data[i] == '>'):
+                    output += '&gt;'
+                elif(data[i] == '"'):
+                    output += '&quot;'
+                else:
+                    output += data[i]
+
+            else:
+                if(data[i] == '}'):
+                    state = STATE_NORMAL
+                output += data[i]
+
+        return output
+                
+        ## Convert an < and > characters
+        #data = re.sub("&", "&amp;", data)
+        #data = re.sub("'", "&apos;", data)
+        ## Replace some characters that OpenOffice doesn't like in XML
+        #data = re.sub("‘", "&apos;", data)
+        #data = re.sub("’", "&apos;", data)
+        #data = re.sub("<", "&lt;", data)
+        #data = re.sub(">", "&gt;", data)
+        #data = re.sub('"', "&quot;", data)
+
+        #data = re.sub("®", "&#174;", data)
+       
+        #return data
 
     def format_text(self, data, allow_wikify=True, exclude_wikiwords=[], expand_equals_block=False):
 
@@ -1173,18 +1178,7 @@ class template_odt_t(template_t):
         data = data.strip()
         data = re.sub("->", "#", data)
 
-            
-        # Convert an < and > characters
-        data = re.sub("&", "&amp;", data)
-        data = re.sub("'", "&apos;", data)
-        # Replace some characters that OpenOffice doesn't like in XML
-        data = re.sub("‘", "&apos;", data)
-        data = re.sub("’", "&apos;", data)
-        data = re.sub("<", "&lt;", data)
-        data = re.sub(">", "&gt;", data)
-        data = re.sub('"', "&quot;", data)
-
-        data = re.sub("®", "&#174;", data)
+        data = self.xmlize(data)
 
         if(expand_equals_block):
             data = re.sub("\n\s*\n", "<text:line-break/><text:line-break/>", data)
@@ -1274,26 +1268,49 @@ class template_odt_t(template_t):
     def __table_get_style(self, name):
 
         table = {}
-        table["title"] = {
-                "cell" : "shorte_table.title",
-                "text" : "shorte_table_title" # "shorte_table.title_text"
-                }
-        table["header"] = {
-                "cell" : "shorte_table.header",
-                "text" : "shorte_table_heading" # "shorte_table.header_text"
-                }
-        table["subheader"] = {
-                "cell" : "shorte_table.subheader",
-                "text" : "shorte_table_subheading" # "shorte_table.normal_text"
-                }
-        table["reserved"] = {
-                "cell" : "shorte_table.reserved",
-                "text" : "shorte_table_reserved" # "shorte_table.reserved_text"
-                }
-        table["default"] = {
-                "cell" : "shorte_table.normal_cell",
-                "text" : "shorte_table_standard" # "shorte_table.normal_text"
-                }
+
+        if(name == "default"):
+            table["title"] = {
+                    "cell" : "shorte_table.title",
+                    "text" : "shorte_table_title" # "shorte_table.title_text"
+                    }
+            table["header"] = {
+                    "cell" : "shorte_table.header",
+                    "text" : "shorte_table_heading" # "shorte_table.header_text"
+                    }
+            table["subheader"] = {
+                    "cell" : "shorte_table.subheader",
+                    "text" : "shorte_table_subheading" # "shorte_table.normal_text"
+                    }
+            table["reserved"] = {
+                    "cell" : "shorte_table.reserved",
+                    "text" : "shorte_table_reserved" # "shorte_table.reserved_text"
+                    }
+            table["default"] = {
+                    "cell" : "shorte_table.normal_cell",
+                    "text" : "shorte_table_standard" # "shorte_table.normal_text"
+                    }
+        else:
+            table["title"] = {
+                    "cell" : "shorte_table.title",
+                    "text" : "shorte_table_title_%s" % name
+                    }
+            table["header"] = {
+                    "cell" : "shorte_table.header",
+                    "text" : "shorte_table_heading_%s" % name
+                    }
+            table["subheader"] = {
+                    "cell" : "shorte_table.subheader",
+                    "text" : "shorte_table_subheading_%s" % name
+                    }
+            table["reserved"] = {
+                    "cell" : "shorte_table.reserved",
+                    "text" : "shorte_table_reserved_%s" % name
+                    }
+            table["default"] = {
+                    "cell" : "shorte_table.normal_cell",
+                    "text" : "shorte_table_standard_%s" % name
+                    }
 
         return table
 
@@ -1483,12 +1500,16 @@ class template_odt_t(template_t):
 
         xml = ''
         title = ''
-            
+        self.m_table_id += 1
+
         # DEBUG BRAD: Uncomment this to test out the new rounded table support
         #table_style_name = "shorte_table_rounded"
         
         # get the style information associated with the style name
-        style = self.__table_get_style(table_style_name)
+        if(table.has_style()):
+            style = self.__table_get_style(table.get_style())
+        else:
+            style = self.__table_get_style(table_style_name)
 
         table.table_style_name = table_style_name
         
@@ -1502,7 +1523,6 @@ class template_odt_t(template_t):
             xml += self.__table_format_column_styles(table, style, title)
         #xml += self.__table_format_column_styles(table, style, title)
 
-        self.m_table_id += 1
 
         row_index = 0
         col_index = 0
@@ -1608,19 +1628,59 @@ class template_odt_t(template_t):
         return xml
     
     def format_define(self, tag):
-        
+
         define = tag.contents
+
+        table = table_t()
+        table.max_cols = 2
+        table.title = "Define: %s" % define.name
+        table.rows = []
+        table.widths = [40,60]
+        
         name   = self.format_text(define.name)
         value  = self.format_text(define.value)
         desc   = self.format_textblock(define.description)
+                
+        style = "shorte_table.normal_cell"
 
-        xml = '''
-<text:p text:style-name="%s">%s = %s</text:p>
-%s
-''' % (self.m_styles["para"]["bold"],
-       name, value,
-       desc
-       )
+        cols = []
+        cols.append({"span":2, 'text': "Description:", "style": "shorte_table.header", "text-style": self.m_styles["para"]["bold"]})
+        row = self._table_row()
+        row["cols"] = cols
+        table.rows.append(row)
+        
+        cols = []
+        cols.append({"span":2, 'textblock': define.description, "style": style, "text-style": "shorte_indent_0"})
+        row = self._table_row()
+        row["cols"] = cols
+        table.rows.append(row)
+        
+        cols = []
+        cols.append({"span":2, 'text': "Value:", "style": "shorte_table.header", "text-style": self.m_styles["para"]["bold"]})
+        row = self._table_row()
+        row["cols"] = cols
+        table.rows.append(row)
+        
+        cols = []
+        cols.append({"span":2, 'text': define.value, "style": style, "text-style": "shorte_indent_0"})
+        row = self._table_row()
+        row["cols"] = cols
+        table.rows.append(row)
+
+        return self.__format_table("", table, True)
+
+        
+
+        xml = string.Template('''
+<text:p text:style-name="${style}">Description:</text:p>
+${desc}
+<text:p text:style-name="${style}">Value:</text:p>
+<text:p text:style-name="${style}">$name = $value</text:p>
+''').substitute({
+    "style" : self.m_styles["para"]["bold"],
+    "name"  : name,
+    "value" : value,
+    "desc"  : desc})
 
         return xml
     
@@ -1769,28 +1829,19 @@ class template_odt_t(template_t):
         style = self.__table_get_style(style_name)
 
         table = table_t()
-        table.title = enum.name
+        table.title = "Enum: " + enum.name
         table.max_cols = enum.max_cols
 
         title = self.__table_format_title(table, style)
         
         xml = ''
-        title = ''
 
         xml += self.format_textblock(enum.description)
 
         if(show_enum_vals):
-            xml += '''
-<table:table table:name="shorte_table_%d" table:style-name="%s">
-<table:table-column table:style-name="%s"/>
-<table:table-column table:style-name="%s"/>
-<table:table-column table:style-name="%s"/>
-%s
-''' % (self.m_table_id, self.m_styles["table"]["style"],
-       "shorte_enum_col1",
-       "shorte_enum_col2",
-       "shorte_enum_col3",
-       title)
+            table.widths = [30,10,50]
+
+            xml += self.add_column_styles(table.get_widths(), title)
             xml += '''<table:table-row>'''
             xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Enum")
             xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Value")
@@ -1798,16 +1849,9 @@ class template_odt_t(template_t):
             xml += "</table:table-row>\n"
 
         else:
-            xml += '''
-<table:table table:name="shorte_table_%d" table:style-name="%s">
-<table:table-column table:style-name="%s"/>
-<table:table-column table:style-name="%s"/>
-%s
-''' % (self.m_table_id, self.m_styles["table"]["style"],
-       "shorte_enum_col1",
-       "shorte_enum_col3",
-       title)
-        
+            table.widths = [30,70]
+            xml += self.add_column_styles(table.get_widths(), title)
+
             xml += '''<table:table-row>'''
             xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Enum")
             xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
@@ -1976,7 +2020,7 @@ class template_odt_t(template_t):
             paragraphs = tag
 
         xml = ''
-        
+
         for p in paragraphs:
             indent  = p["indent"]
             text    = p["text"]
@@ -2055,39 +2099,28 @@ class template_odt_t(template_t):
 
     def format_note(self, tag, type="note", label="Note", image="note.png"):
 
+        #print "format_note, image=%s, label=%s\n" % (image, label)
+
         source = self.format_textblock(tag, style="shorte_standard")
 
         xml = '''
 <text:p text:style-name="shorte_standard">
-    <draw:frame draw:style-name="fr1" draw:name="Frame%d"
+    <draw:frame draw:style-name="fr_note" draw:name="Frame%d"
                 text:anchor-type="as-char" svg:width="14.051cm" style:rel-width="85%%" draw:z-index="8">
-        <draw:text-box fo:min-height="1.499cm"><draw:frame draw:style-name="fr5" draw:name="Graphic%d" text:anchor-type="frame"
-            svg:x="-0.307cm" svg:y="-0.231cm" svg:width="1.03cm" svg:height="1.03cm" draw:z-index="9">
+        <draw:text-box fo:min-height="1.499cm"><draw:frame draw:style-name="fr_note_img" draw:name="Graphic%d" text:anchor-type="paragraph"
+            svg:x="-0.507cm" svg:y="-0.231cm" svg:width="1.03cm" svg:height="1.03cm" draw:z-index="9">
             <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed"
                 xlink:actuate="onLoad"/></draw:frame><text:p text:style-name="shorte_note_title">
-                <text:span text:style-name="T3"><text:s text:c="6"/></text:span><text:span text:style-name="T5">%s:</text:span></text:p>
+                <text:span><text:s text:c="6"/></text:span><text:span>%s:</text:span></text:p>
                 %s
         </draw:text-box>
     </draw:frame>
 </text:p>
 ''' % (self.m_frame_id + 10, self.m_image_id+10, image, label, source)
 
-        tmp = string.Template(self.styles[type])
-
-        #xml2 = tmp.substitute({
-        #    "%s_TITLE" % type.upper() : label,
-        #    "FRAME"      : "Frame%d" % (self.m_frame_id+10),
-        #    "GRAPHIC"    : "Graphic%d" % (self.m_image_id+10),
-        #    "%s_CONTENT" % type.upper() : source})
-
-        #print "NOTE OUTPUT B"
-        #print xml2
-        #print "----"
-
         self.m_frame_id += 1
         self.m_image_id += 1
 
-        #return xml2
         return xml
     
     def format_question(self, source):
@@ -2168,7 +2201,7 @@ class template_odt_t(template_t):
             output = '<text:p text:style-name="%s">' % self.m_styles["para"]["code"]
 
         if(show_line_numbers):
-            output += '<text:span text:style-name="%s">%04d </text:span>' % (self.m_styles["span"]["code_line_numbers"], line)
+            output += '<text:span text:style-name="%s">%03d </text:span>' % (self.m_styles["span"]["code_line_numbers"], line)
         
         lt = re.compile("<")
         gt = re.compile(">")
@@ -2201,7 +2234,7 @@ class template_odt_t(template_t):
                 output += '<text:line-break/>'
                 
                 if(show_line_numbers):
-                    output += '<text:span text:style-name="%s">%04d </text:span>' % (self.m_styles["span"]["code_line_numbers"], line)
+                    output += '<text:span text:style-name="%s">%03d </text:span>' % (self.m_styles["span"]["code_line_numbers"], line)
             
         if(show_frame):
             output += '</text:p>'
@@ -2598,6 +2631,7 @@ class template_odt_t(template_t):
         if(prototype.has_key("desc2")):
             tag = tag_t()
             tag.contents = prototype["desc2"]
+                    
             function["desc"] = self.format_textblock(tag)
 
         if(prototype.has_key("prototype")):
@@ -2613,20 +2647,30 @@ class template_odt_t(template_t):
             table["rows"] = []
 
             param_template = string.Template("""
-        <table:table-row table:style-name="$table_row_prototype">
-          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
-            <text:p text:style-name="$para_prototype_param"></text:p>
-          </table:table-cell>
-          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
-            <text:p text:style-name="$para_prototype_param_name">${name}</text:p>
-          </table:table-cell>
-          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">
-            <text:p text:style-name="$para_prototype_param">[${io}]</text:p>
-          </table:table-cell>
-          <table:table-cell table:style-name="$table_cell_prototype" office:value-type="string">${desc}</table:table-cell>
-        </table:table-row>
-                        """)
-
+<!-- The first row is the parameter name -->
+<table:table-row table:style-name="$table_row_prototype">
+  <table:table-cell table:style-name="shorte_table_prototype_parameter_header" office:value-type="string">
+    <text:p text:style-name="$para_prototype_param"></text:p>
+  </table:table-cell>
+  <table:table-cell table:style-name="shorte_table_prototype_parameter_header" office:value-type="string" table:number-columns-spanned="3">
+    <text:p text:style-name="$para_prototype_param_name">${name}</text:p>
+  </table:table-cell>
+</table:table-row>
+<!-- The second row contains the parameter attributes -->
+<table:table-row table:style-name="$table_row_prototype">
+  <table:table-cell table:style-name="shorte_table_prototype_parameter_data" office:value-type="string">
+    <text:p text:style-name="$para_prototype_param"></text:p>
+  </table:table-cell>
+  <table:table-cell table:style-name="shorte_table_prototype_parameter_data" office:value-type="string">
+    <text:p text:style-name="$para_prototype_param"></text:p>
+  </table:table-cell>
+  <table:table-cell table:style-name="shorte_table_prototype_parameter_io" office:value-type="string">
+    <text:p text:style-name="$para_prototype_param">[${io}]</text:p>
+  </table:table-cell>
+  <table:table-cell table:style-name="shorte_table_prototype_parameter_data" office:value-type="string">${desc}</table:table-cell>
+</table:table-row>
+""")
+            
             output = ''
             for param in params:
             
@@ -2667,6 +2711,7 @@ class template_odt_t(template_t):
                     tag = tag_t()
                     tag.contents = param["desc2"]
                     param["desc"] = self.format_textblock(tag, style=self.m_styles["para"]["prototype"]["param"])
+                    #param["desc"] = self.format_textblock(tag)
 
                 param["table_row_prototype"] = self.m_styles["table"]["row"]["prototype"]
                 param["table_cell_prototype"] = self.m_styles["table"]["cell"]["prototype"]
@@ -2718,7 +2763,8 @@ class template_odt_t(template_t):
 
             function["returns"] = xml
 
-        if(prototype.has_key("see_also") and prototype["see_also"] != None):
+        if(prototype.has_key("see_also") and len(prototype["see_also"]) > 0):
+            #print "SEE ALSO: [%s]" % prototype["see_also"]
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
@@ -2762,14 +2808,14 @@ class template_odt_t(template_t):
         </table:table-row>
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style2}" table:number-columns-spanned="4" office:value-type="string">
-            <text:p text:style-name="${param_style}">${deprecated}</text:p>
+            ${deprecated}
           </table:table-cell>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "deprecated" : self.format_text(prototype["deprecated_msg"]),
+    "deprecated" : self.format_textblock(prototype["deprecated_msg"]),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2919,7 +2965,8 @@ class template_odt_t(template_t):
         self.m_table_id += 1
 
         if(is_deprecated):
-            function["name"] += " (DEPRECATED)"
+            function["name"] += " (THIS METHOD IS DEPRECATED)"
+            function["style_table"] = "shorte_table_prototype_deprecated"
 
         xml = template.substitute(function)
 
@@ -3298,7 +3345,7 @@ class template_odt_t(template_t):
         #sys.exit(-1)
 
 
-        images = ["note", "tbd", "question", "warning", "star_small", "checked", "unchecked", "pri_01", "pri_02", "pri_03", "pri_04", "pri_05"]
+        images = ["note", "tbd", "question", "warning", "star_small", "checked", "unchecked", "pri_01", "pri_02", "pri_03", "pri_04", "pri_05", "deprecated"]
         for path in images:
             # Add the note.png file
             png = shorte_get_startup_path() + "/templates/shared/%s.png" % path
