@@ -101,7 +101,7 @@ vim:
 	cp syntax/vim/syntax/tpl.vim /cygdrive/c/Program\ Files/Vim/vim73/syntax/.
 
 release_notes:
-	python shorte.py -f release_notes.tpl -p html_inline -t ${THEME} -v ${version} -o build-output/release_notes
+	python ./shorte.py -f release_notes.tpl -p html_inline -t ${THEME} -v ${version} -o build-output/release_notes
 
 install:
 	cd ../build-output && cp -r shorte-${version}.tar.gz /cygdrive/m/shorte/.
