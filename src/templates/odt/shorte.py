@@ -58,12 +58,16 @@ class custom_styles(styles):
                 "margin_bottom" : margin_bottom,
                 "margin_left"   : margin_left,
                 "font_size"     : font_size,
-                "color_heading" : self.colors["heading.1"].fg})
+                "color_heading" : self.colors["heading.%d" % heading].fg})
     
         list_styles = self.get_list_styles()
 
         # Table Styles
         table_styles = self.get_table_styles()
+
+        prototype_styles = self.get_prototype_styles()
+
+        source_code_styles = self.get_source_code_styles()
     
         custom_styles = string.Template('''
     <style:style style:name="shorte_standard" style:family="paragraph" style:parent-style-name="Standard">
@@ -73,15 +77,24 @@ class custom_styles(styles):
     
     ${heading_styles}
     
+    
     $table_styles
     
     <!-- List styles -->
     $list_styles
+
+    <!-- Prototype styles -->
+    $prototype_styles
+    
+    $source_code_styles
+
     ''').substitute(
             {
          "heading_styles" : heading_styles,
          "list_styles" : list_styles,
          "table_styles" : table_styles,
-         "standard_indent" : self.standard_indent})
+         "prototype_styles" : prototype_styles,
+         "standard_indent" : self.standard_indent,
+         "source_code_styles" : source_code_styles})
     
         return custom_styles

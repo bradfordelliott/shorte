@@ -6,7 +6,10 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.67 (xxx)
+@h3 Version 1.0.67 (Aug 14, 2014)
+This is a general cleanup release to push some cleanup work
+to Shorte.
+
 - ODT
     - Added support for PATH_OOWRITER environment variable. Shorte
       will look for swriter in this varible. If it isn't defined it
@@ -24,6 +27,14 @@ This document describes the release history of the Shorte language.
     - Some cleanup on the text template (-p txt)
 - Packages
     - Added 'reveal.js+pdf' and 'reveal.js+txt' output bundles.
+- Graphing
+    - Meshed out the @gnuplot tag to support integration with
+      gnuplot.
+    - Meshed out the @graph tag for native rendering of graphs.
+      Currently only line graphs and bar graphs are supported.
+- Templates
+    - Cleaned up the shorte template and made the styles
+      a bit easier to modify for different themes.
 
 @h3 Version 1.0.66 (Apr 22, 2014)
 - Enums

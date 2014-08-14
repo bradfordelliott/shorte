@@ -98,6 +98,8 @@ class document_info_t:
             self.m_revision_history = revision_history
 
     def number(self):
+        if(self.m_docnumber == None):
+            return ""
         return self.m_docnumber
 
     def set_number(self, number):
@@ -449,6 +451,9 @@ class engine_t:
 
         if(not os.path.exists(output)):
             FATAL("Image source file %s does not exist, cannot convert" % output)
+
+        if(converter == "gnuplot"):
+            FATAL("Converting inkscape image %s" % name)
 
         if(converter == "inkscape"):
             input = image["src"]
