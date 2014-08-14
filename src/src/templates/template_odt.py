@@ -20,6 +20,8 @@ import shutil
 import time
 from string import Template;
 
+from src.shorte_defines import *
+
 import sys
 sys.path.append("libs")
 try:
