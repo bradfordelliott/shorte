@@ -151,8 +151,8 @@ test_hello:
 #	python shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
-	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
-	python shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
+	python ./shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
+	python ./shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
