@@ -176,6 +176,8 @@ class shorte_parser_t(parser_t):
         
         self.m_engine = engine
 
+        self.m_uid = 0
+
         # The list of valid tags supported by the language
         self.m_valid_tags = {
             "h1"              : True,
@@ -201,6 +203,8 @@ class shorte_parser_t(parser_t):
             "image"           : True,
             "gallery"         : True,
             "inkscape"        : True,
+            "gnuplot"         : True,
+            "graph"           : True,
             "shell"           : True,
             "prototype"       : True,
             "imagemap"        : True,
@@ -495,7 +499,7 @@ class shorte_parser_t(parser_t):
 
             if(state == STATE_NORMAL):
 
-                if(not self.tag_is_source_code(tag_name)):
+                if(not self.tag_is_source_code(tag_name) and tag_name != "gnuplot"):
                     
                     # parse any comments
                     if(input[i] == '#'):
@@ -570,21 +574,29 @@ class shorte_parser_t(parser_t):
 
         return (i, ''.join(tag_data), ''.join(tag_modifier))
     
+    def parse_inline_image_str(self, data):
+        tags = self.parse_modifiers(data)
+        return self.parse_inline_image_data(tags)
 
     def parse_inline_image(self, matches):
 
         name = matches.groups()[0]
 
         tags = {}
+        tags["src"] = name
         
         if(len(matches.groups()) > 1):
             tags = self.parse_modifiers(matches.groups()[3])
             if(not tags.has_key("caption")):
                 tags["caption"] = matches.groups()[1]
 
-        image = {}
+        return self.parse_inline_image_data(name, tags)
+
+
+    def parse_inline_image_data(self, tags):
             
-        src = os.path.abspath(name)
+        image = {}
+        src = os.path.abspath(tags["src"])
         dirname = os.path.dirname(src) + os.path.sep
 
         name = src.replace(dirname, "")
@@ -825,7 +837,7 @@ class shorte_parser_t(parser_t):
             events.append(event)
 
         name = table.title
-        print "Name: [%s]" % name
+        #print "Name: [%s]" % name
 
         path = pathize(name)
         parts = os.path.splitext(path)
@@ -844,13 +856,15 @@ class shorte_parser_t(parser_t):
             target_height=600,
             base_file_name=basename)
 
+        table = self.parse_table(event_html, modifiers)
+        table.widths = [8,10,10,20,52]
         image = {}
         image["src"] = sequence_img
         image["name"] = basename
         image["ext"]  = ".png"
         image["imagemap"] = image_map
         image["imagemap_name"] = basename
-        image["html"] = self.parse_table(event_html, modifiers)
+        image["html"] = table
         image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(image["src"])
@@ -900,6 +914,9 @@ class shorte_parser_t(parser_t):
         if(modifiers.has_key("width")):
             table["width"] = modifiers["width"]
             table2.width = modifiers["width"]
+
+        if(modifiers.has_key("style")):
+            table2.style = modifiers["style"]
 
 
         rows = []
@@ -1214,6 +1231,178 @@ a C/C++ like define that looks like:
                     self.m_wiki_links[word.wikiword] = word
 
         return enum
+
+    def parse_gnuplot(self, source, modifiers):
+        '''This method is called to parse a gnuplot tag
+           @param self      [I] - The shorte parser instance
+           @param source    [I] - The source code for the tag
+           @param modifiers [I] - A list of modifiers associated with the tag.
+
+           @return A dictionary defining the GNU Plot object
+        '''
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+        
+            
+        scratchdir = shorte_get_scratch_path()
+        
+        image = {}
+        image["name"] = "gnuplot_%d" % self.m_uid
+        self.m_uid += 1
+        image["data"] = ""
+        image["cmd"]  = ""
+        
+        if(modifiers.has_key("data")):
+            # Open the plot data file
+            handle = open(modifiers["data"], "rt")
+            image["data"] = handle.read()
+            handle.close()
+        
+        if(modifiers.has_key("cmd")):
+            # Open the plot data file
+            handle = open(modifiers["cmd"], "rt")
+            image["cmd"] = handle.read()
+            handle.close()
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("data:")):
+                data = section[5:len(section)]
+                image["data"] = data
+
+            elif(section.startswith("cmd:")):
+                cmd = section[4:]
+                image["cmd"] = cmd
+                    
+        image["cmd"] = image["cmd"].replace("$OUTPUT_FILE", image["name"] + ".png")
+        image["cmd"] = image["cmd"].replace("$DATA_FILE", "plot.dat")
+
+        # Create the plot data file
+        handle = open(scratchdir + "/plot.dat", "wt")
+        handle.write(image["data"])
+        handle.close()
+
+        # Create the plot command file
+        handle = open(scratchdir + "/plot.gnu", "wt")
+        handle.write(image["cmd"])
+
+        path_gnuplot = shorte_get_tool_path("gnuplot")
+
+        cmd = 'cd "%s";%s %s' % (scratchdir, path_gnuplot, "plot.gnu")
+
+        # DEBUG BRAD: Check the return here to ensure
+        #             the image was actually generated
+        output = os.popen(cmd)
+
+        image["name"] = image["name"]
+        image["ext"] = ".png"
+        image["src"] = scratchdir + "/" + image["name"] + image["ext"]
+        self.m_engine.m_images.append(image["src"])
+        print image["src"]
+
+        return image
+    
+    
+    def parse_graph(self, source, modifiers):
+        '''This method is called to parse a graph tag
+           @param self      [I] - The shorte parser instance
+           @param source    [I] - The source code for the tag
+           @param modifiers [I] - A list of modifiers associated with the tag.
+
+           @return A dictionary defining the generated image object
+        '''
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+            
+        scratchdir = shorte_get_scratch_path()
+        
+        image = {}
+        image["name"] = "graph_%d" % self.m_uid
+        self.m_uid += 1
+        image["data"] = {}
+
+        graph_type = "line"
+        height = 600
+        width = 800
+        title = ""
+        subtitle = ""
+        
+        if(modifiers.has_key("data")):
+            # Open the plot data file
+            handle = open(modifiers["data"], "rt")
+            image["data"] = handle.read()
+            handle.close()
+        if(modifiers.has_key("type")):
+            graph_type = modifiers["type"]
+        if(modifiers.has_key("height")):
+            height = int(modifiers["height"])
+        if(modifiers.has_key("width")):
+            width = int(modifiers["width"])
+        if(modifiers.has_key("title")):
+            title = modifiers["title"]
+        if(modifiers.has_key("subtitle")):
+            subtitle = modifiers["subtitle"]
+        
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("data:")):
+                data = section[5:len(section)]
+
+                #print data
+
+                tmp_macros = {}
+                eval(compile(data, "example.py", "exec"), tmp_macros, tmp_macros)
+                image["data"] = tmp_macros["data"]
+                #image["data"] = data
+                #lines = data.split('\n')
+                #
+                #for line in lines:
+                #    parts = line.split(" ")
+                #    if(len(parts) == 2):
+                #        x = float(parts[0])
+                #        y = float(parts[1])
+                #        image["data"][x] = y
+
+        if(graph_type == "line"):
+            import src.graphing.linegraph as linegraph
+            graph = linegraph.line_graph_t(width,height)
+            graph.set_title(title, subtitle)
+            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+        elif(graph_type == "bar"):
+            import src.graphing.bargraph as bargraph
+            graph = bargraph.bar_graph_t(width,height)
+            graph.set_title(title, subtitle)
+            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+        elif(graph_type == "timeline"):
+            import src.graphing.timeline as timeline
+            graph = timeline.timeline_graph_t(width,height)
+            graph.set_title(title, subtitle)
+            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+            
+        #d = {0:1, 1:3, 4:5, 6:4, 7:4, 8:3, 10:8}
+        for dataset in image["data"]:
+            graph.add_data_set(image["data"][dataset], dataset)
+
+        image["name"] = image["name"]
+        image["ext"] = ".png"
+        image["src"] = scratchdir + "/" + image["name"] + image["ext"]
+        image["caption"] = "This is a random caption"
+        
+        graph.draw_graph(image["src"])
+        self.m_engine.m_images.append(image["src"])
+
+        return image
 
     def parse_struct(self, source, modifiers):
         '''This method is called to parse an @struct tag containing a structure
@@ -1875,7 +2064,8 @@ a C/C++ like define that looks like:
                 
                 elif(section.startswith("deprecated:")):
                     vars["deprecated"] = True
-                    vars["deprecated_msg"] = section[11:len(section)].strip()
+                    msg = self.parse_textblock(section[11:len(section)].strip())
+                    vars["deprecated_msg"] = msg
 
 
         return vars
@@ -2408,6 +2598,14 @@ else:
 
         elif(name == "inkscape"):
             tag.contents = self._parse_inkscape(data, modifiers)
+            tag.name = "image"
+
+        elif(name == "gnuplot"):
+            tag.contents = self.parse_gnuplot(data, modifiers)
+            tag.name = "image"
+
+        elif(name == "graph"):
+            tag.contents = self.parse_graph(data, modifiers)
             tag.name = "image"
 
         elif(name == "pre"):

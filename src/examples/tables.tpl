@@ -9,7 +9,7 @@ with some @{b+u+i+hl,underlined bold italics} blah blah
 - a list
 - a list
 
-a new paragraph
+a new @{color:ff0000,paragraph}
 
     some indented text
     some more indented text
@@ -51,7 +51,7 @@ This is a test of the table captions
   Some pre text here
   }}
   
-  some more text in a new paragraph
+  some more text in a @{pre,new paragraph}
 - Blah blah blah | BLah blah
                    with some @{u+b+i,underlined bold italics} blah blah
                    - a list
@@ -70,7 +70,7 @@ This is a test of the table captions
                 and some more blah blah blah
 
 @h2 A Table with no Title
-@table: widths="10,20,20,50" width="100%"
+@table: widths="10,20,20,50" style="micro" width="100%"
 - One | Two | Three | Four
 - Blah | Blah | blah blah | blah blah
 -& Blah 2 | Blah 2 | Blah 3 | Blah 4

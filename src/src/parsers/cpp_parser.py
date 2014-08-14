@@ -827,10 +827,13 @@ class cpp_parser_t(shorte_parser_t):
         expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
         matches = expr_deprecated.search(text)
         if(matches != None):
+            
+            msg = trim_leading_blank_lines(matches.groups()[0])
+            msg = self.parse_textblock(msg)
             comment["deprecated"] = True
-            comment["deprecated_msg"] = matches.groups()[0]
+            comment["deprecated_msg"] = msg #matches.groups()[0]
             comment2.deprecated = True
-            comment2.deprecated_msg = matches.groups()[0]
+            comment2.deprecated_msg = msg # matches.groups()[0]
 
         
         return (comment,comment2)

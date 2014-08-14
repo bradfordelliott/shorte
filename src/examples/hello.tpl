@@ -14,6 +14,7 @@ It supports lists
 - three
 
 and tables:
+
 @{table,
 -t My Table
 -h Column One ! Column Two
@@ -21,6 +22,22 @@ and tables:
 -  Three      ! Four
 -r Three      ! Four
 }
+
+inlined images:
+@{image, src="examples/record_0.png" width="100px" height="100px"}
+
+and a list with an inline table:
+- one
+    - @{bold,two} 
+    - @{strike,striked} 
+    - An inlined table
+      @{table,
+- My Table
+- One   ! Two
+- Three ! Four}
+    - Another list entry with an image:
+        @{image, src="examples/record_0.png"}
+- two
 
 This is some random stuff here with a link to [[->Example: Dynamic Reconfiguration, dynamically reconfigure something]]
 

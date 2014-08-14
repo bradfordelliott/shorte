@@ -11,18 +11,28 @@
  * @{note, It should support an inline note}
  *
  */
-#define FALSE 0
-#define TRUE !FALSE
 
 /**
  * @h1 Test.c
- * @h2 Function Summary: test.c
+ * @h2 A function summary example
  * @functionsummary
  * @text
  * @table: name="This is my table!"
  * - Blah  | Blah 
  * - Three | Four
  */
+
+/**
+ * This is an example of a define
+ */
+#define FALSE 0
+
+/**
+ * This is another define that is the opposite
+ * of FALSE
+ */
+#define TRUE !FALSE
+
 
 #if defined(BRAD)
 
@@ -247,6 +257,12 @@ typedef enum
  * @{question,
  * What should I do here?}
  *
+ * @{note,
+ * This is a random note here that contains a list
+ * - one
+ *     - two
+ * -}
+ *
  * @param blah  [I] -
  *     Some data associated with blah
  *     with some more data
@@ -256,6 +272,12 @@ typedef enum
  *     - Three ! Four
  *     }
  *
+ *     and a note
+ *
+ *     @{note,
+ *     - This is a note that is really a list
+ *     }
+ *
  *     This is more @{b,data}.
  *
  * @param dummy [O] - Some other dumb variable.
@@ -263,6 +285,8 @@ typedef enum
  * @return TRUE on success, FALSE on failure.
  *
  * @example
+ *     0         1         2         3         4         5         6         7
+ *     01234567890123456789012345678901234567890123456789012345678901234567890123456789
  *     int blah = 0;
  *     int dummy = TRUE;
  *
@@ -279,7 +303,10 @@ typedef enum
  *     test_dot_c_my_test21
  *
  * @deprecated This method has been deprecated. Please
- *             refer to my_test21 for future use.
+ *             refer to my_test21 for future use. Can deprecated
+ *             contain a note:
+ *             @{note,
+ *             This is a random note here}
  */
 int test_dot_c_my_test(int blah, int* dummy)
 {
@@ -292,7 +319,7 @@ int test_dot_c_my_test(int blah, int* dummy)
  * This is another test function
  *     @param blah [I] - This si a test
  *
- * @heading Blah Blah
+ * @return Always returns FALSE.
  */
 int test_dot_c_my_test21(int blah)
 {

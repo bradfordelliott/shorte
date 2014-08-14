@@ -228,46 +228,63 @@ class parser_t:
         item_indent = 0
         #print "PARSING LIST: [%s]" % source
 
+        STATE_NORMAL = 0
+        STATE_INLINE_FORMATTING = 1
+
+        state = STATE_NORMAL
+
         for i in range(0, len(source)):
 
-            if(source[i] in ('-')):
+            if(state == STATE_INLINE_FORMATTING):
+                if(source[i] == '}'):
+                    state = STATE_NORMAL
 
-                # Look backwards till the first newline
-                # to ensure this is a list item and not
-                # a dash between two words:
-                j = i-1
-                is_list_item = True
-                while(j > 0):
-                    if(source[j] == "\n"):
-                        break
-                    elif(source[j] != " "):
-                        is_list_item = False
-                    j -= 1
-
-                if(not is_list_item):
-                    item.append(source[i])
-                    continue
-
-                # Output the last item if it exists
-                if(len(item) != 0):
-                    litem = list_item_t()
-                    litem.set_text(''.join(item))
-                    litem.indent = item_indent
-                    items.append(litem)
-                item = []
-
-                # Figure out the indent level of this item
-                item_indent = 0
-                j = i
-                while(j >= 0):
-                    if(source[j] == '\n'):
-                        break
-                    j -= 1
-                    item_indent += 1
-                
-
-            else:
                 item.append(source[i])
+            
+            elif(state == STATE_NORMAL):
+                if(source[i] == '@' and source[i+1] == '{'):
+                    item.append(source[i])
+                    state = STATE_INLINE_FORMATTING
+                    continue
+                
+                elif(source[i] in ('-')):
+
+                    # Look backwards till the first newline
+                    # to ensure this is a list item and not
+                    # a dash between two words:
+                    j = i-1
+                    is_list_item = True
+                    while(j > 0):
+                        if(source[j] == "\n"):
+                            break
+                        elif(source[j] != " "):
+                            is_list_item = False
+                        j -= 1
+
+                    if(not is_list_item):
+                        item.append(source[i])
+                        continue
+
+                    # Output the last item if it exists
+                    if(len(item) != 0):
+                        litem = list_item_t()
+                        litem.set_text(''.join(item))
+                        litem.indent = item_indent
+                        items.append(litem)
+                    item = []
+
+                    # Figure out the indent level of this item
+                    item_indent = 0
+                    j = i
+                    while(j >= 0):
+                        if(source[j] == '\n'):
+                            break
+                        j -= 1
+                        item_indent += 1
+                    
+
+                else:
+                    item.append(source[i])
 
         if(len(item) != 0):
             litem = list_item_t()

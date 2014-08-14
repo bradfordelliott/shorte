@@ -25,20 +25,22 @@ help:
 	@${echo} "   test_enums           = test the @enum source code tag"
 	@${echo} "   test_bullets         = test the @ul and @ol list tags"
 	@${echo} "   test_wkiwords        = test the use of wikiwords"
-	@${echo} "   test_images          = test the use of images"
-	@${echo} "   test_images_encode   = test the encoding of images as base64"
 	@${echo} "   test_mergefile       = test the generation of mergefiles used for diffing"
 	@${echo} "   test_sql             = test the generation of SQL databases to store source code annotations"
 	@${echo} "   test_defines         = test the formatting of defines"
 	@${echo} "   test_extract_private = test for extracting private methods"
 	@${echo} "   test_revealjs        = test for reveal.js presentations"
 	@${echo} "   test_comments        = test for single and multi-line comment handling"
-	@${echo} "   test_sequences       = test for sequence diagrams"
 	@${echo} "   test_templates       = test all the templates"
-	@${echo} "   test_inkscape        = test inskcape"
+	@${echo} "   test_template_text   = test the text template"
 	@${echo} "   test_string_methods  = test string handling methods like trim_leading_indent"
-	@${echo} "   test_timeline        = test timeline plot handling"
-	@${echo} "   test_graphing        = test plot handling"
+	@${echo} "   image handling:"
+	@${echo} "     test_graphing        = test plot handling"
+	@${echo} "     test_gnuplot         = test GNU Plot integration"
+	@${echo} "     test_inkscape        = test inskcape"
+	@${echo} "     test_sequences       = test for sequence diagrams"
+	@${echo} "     test_images          = test the use of images"
+	@${echo} "     test_images_encode   = test the encoding of images as base64"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -143,14 +145,14 @@ tests:
 THEME:=shorte
 
 test_mx:
-	python shorte.py -f SRSA.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -w "examples/mx" -o build-output/mx
+	python shorte.py -f SRSA.tpl -p "html+pdf" -t "${THEME}" -w "examples/mx" -o build-output/mx
 
 test_hello:
 #	python shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
 #	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
-	python shorte.py -f examples/hello.tpl -p "html" -t "shorte" -o build-output/hello_hsio
-	python shorte.py -f examples/hello.tpl -p "html_inline" -t "shorte" -o build-output/hello_hsio_inline
+	python shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
+	python shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
 test_headings:
 	python shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
@@ -187,6 +189,9 @@ test_defines:
 	python shorte.py -f examples/defines.h -t "${THEME}" -x cpp -o build-output/defines -p "html+pdf"
 
 
+test_cpp_parser:
+	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/cpp_parser -p "html+pdf"
+
 test_code_quick:
 	python shorte.py -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
 	python shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
@@ -201,14 +206,14 @@ test_enums:
 	python shorte.py -f examples/enums.tpl -t "${THEME}" -p "html+pdf" -o build-output/enums
 
 test_bullets:
-	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
-	python shorte.py -f examples/bullets.tpl -t "html=shorte;pdf=shorte" -p "html+pdf" -o build-output/bullets_shorte
-	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html+pdf" -o build-output/bullets2 --zip=bullets.zip
+	python shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
+	python shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets_shorte
+	python shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets2 --zip=bullets.zip
 	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
-	python shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
+	python shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
-	python -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "cortina_web" -x cpp -p "html_inline" -o build-output/t100
+	python -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "${THEME}" -x cpp -p "html_inline" -o build-output/t100
 
 test_wikiwords:
 	python shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html+pdf" -o build-output/wikiwords
@@ -222,11 +227,10 @@ test_images:
 test_images_encode:
 	python shorte.py -f examples/test.png -i "encode_images" 
 
-test_timeline:
-	python src/graphing/timeline.py
-
 test_graphing:
-	python src/graphing/graph_test.py
+	python shorte.py -f examples/graphing.tpl -p "html" -o build-output/graphing
+
+#python src/graphing/graph_test.py
 
 # This example is used to test the generation of mergefiles. A mergefile is a target that
 # assembles a list of shorte files into a single document. This is useful for diffing things
@@ -259,7 +263,10 @@ test_revealjs:
 
 test_sequences:
 	python shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
-	python shorte.py -f examples/sequences.tpl -p "html+pdf" --theme=cortina -o build-output/sequences_pdf
+	python shorte.py -f examples/sequences.tpl -p "html+pdf" --theme="${THEME}" -o build-output/sequences_pdf
+
+test_template_text:
+	python shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
 
 test_templates:
 	python shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
@@ -279,6 +286,9 @@ test_shorte:
 
 test_inkscape:
 	python shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape
+
+test_gnuplot:
+	python shorte.py -f examples/gnuplot.tpl -p "html+pdf" -t shorte -o build-output/gnuplot
 
 test_registers:
 	python shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers

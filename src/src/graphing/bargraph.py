@@ -22,8 +22,8 @@ class bar_graph_t(graph_t):
         if(maxY == 0):
             maxY = 1
     
-        increment = maxY/10
-        y_axis_increments = maxY/increment
+        increment = maxY/10.0
+        y_axis_increments = int(maxY/increment)
         height = self.height
         width = self.width
         top = self.top
@@ -73,8 +73,7 @@ class bar_graph_t(graph_t):
                         text_orientation = "vertical")
 
     def draw_xaxis(self):
-        # DEBUG BRAD: This is a temporary hack
-        maxX = 10
+        maxX = self.get_max_xcoordiate();
 
         if(maxX == 0):
             maxX = 1
@@ -131,18 +130,18 @@ class bar_graph_t(graph_t):
                         text       = self.xaxis["label"])
 
     def draw_data(self):
-        maxX = 10 # self.get_max_xcoordiate();
+        maxX = self.get_max_xcoordiate();
         maxY = self.get_max_ycoordinate();
         graph = self.graph
         
-        yincrement = (maxY/10);
+        yincrement = (maxY/10.0);
         if(1 == self.xaxis["autoscale"]):
-            xincrement = (maxX/10);
+            xincrement = (maxX/10.0);
         else:
-            xincrement = maxX/10;
+            xincrement = maxX/10.0;
         
-        yAxisIncrements = maxY/yincrement;
-        xAxisIncrements = maxX/xincrement;
+        yAxisIncrements = (maxY/yincrement);
+        xAxisIncrements = (maxX/xincrement);
         height = self.height
         width = self.width
         top = self.top
@@ -150,17 +149,28 @@ class bar_graph_t(graph_t):
         right = self.right
         bottom = self.bottom
         numdatasets = len(self.datasets)
-        
-        offset = 0
+
+        #print "x_axis_increments: %d" % xAxisIncrements
+        #print "y_axis_increments: %d" % yAxisIncrements
+
+        numpoints = 0
         for dataset in self.datasets:
-            numpoints = len(self.datasets[dataset]["data"])
+            numpoints += len(self.datasets[dataset]["data"])
+        
+        #print "Num data sets: %d" % numdatasets
+        #print "Width: %d" % width
+        #print "xaxisincremnts: %d" % xAxisIncrements
+        barwidth = (right-left)/(30*numdatasets)
+        #print "barwidth: %d" % ((right-left) / (30 * numdatasets))
+        offset = 0
+
+        for dataset in self.datasets:
+            #numpoints = len(self.datasets[dataset]["data"])
             prevx = left;
             prevy = bottom;
             color = self.datasets[dataset]["color"]
-            barwidth= 0;
             barheight = 0;
             
-            barwidth  = (right - left - 50)/(((numdatasets + 1) * numpoints));
             #print "bar width   = $barwidth\n";
             #print "xincrements = $xAxisIncrements\n";
             #print "width = $width\n";
@@ -171,8 +181,10 @@ class bar_graph_t(graph_t):
                 xvalue = "%.0f" % key
                 yvalue = self.datasets[dataset]["data"][key]
 
-                x = (((int(xvalue)/int(xincrement))/10.0) * width) + left + offset;
-                y = bottom - (((int(yvalue)/int(yincrement))/10.0) * height);
+                #x = (((int(xvalue)/int(xincrement))/10.0) * width) + left + offset;
+                #y = bottom - (((int(yvalue)/int(yincrement))/10.0) * height);
+                x = (((float(xvalue)/(xincrement))/xAxisIncrements) * width) + left + offset;
+                y = bottom - ((((yvalue)/(yincrement))/yAxisIncrements) * height);
                 #print("x = $x, y = $y\n");
         
                 barheight =bottom - y;

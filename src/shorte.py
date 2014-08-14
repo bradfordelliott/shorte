@@ -62,7 +62,7 @@ parser.add_option("-v", "--version",
                   action="store", dest="version",
                   help="The version of the document")
 parser.add_option("-t", "--theme",
-                  action="store",type="string",dest="theme",default="cortina",
+                  action="store",type="string",dest="theme",default="shorte",
                   help="The output theme")
 parser.add_option("-n", "--name",
                   action="store",type="string",dest="name",
@@ -198,7 +198,11 @@ if(options.macros):
            
             macros[key] = val
 
+    #for macro in macros:
+    #    print "MACRO: %s = [%s]" % (macro, macros[macro])
+
     shorte.set_macros(macros)
+
 if(options.define):
     fields = options.define.split(";")
     defines = {}

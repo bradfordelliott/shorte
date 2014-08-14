@@ -24,8 +24,8 @@ class line_graph_t(graph_t):
         if(maxY == 0):
             maxY = 1
     
-        increment = maxY/10
-        y_axis_increments = maxY/increment
+        increment = maxY/10.0
+        y_axis_increments = int(maxY/increment)
         height = self.height
         width = self.width
         top = self.top
@@ -79,7 +79,7 @@ class line_graph_t(graph_t):
         maxY = self.get_max_ycoordinate();
 
         # DEBUG BRAD: This is a temporary hack
-        maxX = 10
+        #maxX = 10
 
         if(maxX == 0):
             maxX = 1
@@ -128,7 +128,8 @@ class line_graph_t(graph_t):
                             y = bottom + 15,
                             font_color = "#000000",
                             #background_color = "#FFFFFF",
-                            text = label)
+                            text = label,
+                            font_family="Helvetica")
          
         graph.draw_text(x = (left + (right - left)/2),
                         y = bottom + 35,
@@ -140,12 +141,12 @@ class line_graph_t(graph_t):
         maxY = self.get_max_ycoordinate();
         graph = self.graph
         
-        yincrement = (maxY/10)
+        yincrement = (maxY/10.0)
         
         if(1 == self.xaxis["autoscale"]):
-            xincrement = (maxX/10)
+            xincrement = (maxX/10.0)
         else:
-            xincrement = maxX/10;
+            xincrement = maxX/10.0;
 
         if(xincrement == 0):
             xincrement = 1
@@ -162,6 +163,9 @@ class line_graph_t(graph_t):
         left = self.left
         right = self.right
         bottom = self.bottom
+
+        #print "Y axis increments: %d" % yAxisIncrements
+        #print "X axis increments: %d" % xAxisIncrements
         
         for dataset in self.datasets:
             prevx = left;
@@ -170,12 +174,13 @@ class line_graph_t(graph_t):
             points = []
 
             #for key in (sort {$a <=> $b} keys(%{$self->{DATASETS}{$dataset}{"data"}}))
-            for key in self.datasets[dataset]["data"]:
+            keys = self.datasets[dataset]["data"].keys()
+            keys.sort()
+            for key in keys:
                 xvalue = key;
                 yvalue = self.datasets[dataset]["data"][key]
                 
                 #print "x = %d, y = %d" % (xvalue, yvalue)
-
                 
                 x = (((xvalue/xincrement)/10.0) * width) + left;
                 y = bottom - (((yvalue/yincrement)/10.0) * height);
@@ -215,7 +220,7 @@ class line_graph_t(graph_t):
                
             graph.draw_curve(points      = points,
                              line_color  = color,
-                             line_weight = 1)
+                             line_weight = 1.5)
     
     def draw_graph(self, path):
         graph_t.draw_graph(self)

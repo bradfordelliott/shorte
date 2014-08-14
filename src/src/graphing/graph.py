@@ -9,16 +9,31 @@ class cairo_t():
     def __init__(self, width, height):
         self.image = cairo(5000, 5000)
 
-    def draw_text(self, x, y, text, font_color="black", text_anchor="start", angle=0, font_size=10, text_orientation="horizontal", font_family="Verdana",
+    def draw_text(self,
+        x,
+        y,
+        text,
+        font_color="black",
+        text_anchor="start",
+        angle=0,
+        font_size=10,
+        text_orientation="horizontal",
+        font_family="Helvetica",
         line_color="black",
-        background_color="white"):
+        background_color="white",
+        font_weight="normal"):
         font_color = self.translate_color(font_color)
     
         width = 0
     
         font_size += 3
 
-        self.image.select_font_face(font_family, CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        if(font_weight == "normal"):
+            font_weight = CAIRO_FONT_WEIGHT_NORMAL
+        else:
+            font_weight = CAIRO_FONT_WEIGHT_BOLD
+
+        self.image.select_font_face(font_family, CAIRO_FONT_SLANT_NORMAL, font_weight)
     
         #$self->drawRect({"x" => $propsRef->{"x"},
         #                 "y" => $propsRef->{"y"},
@@ -187,7 +202,6 @@ class cairo_t():
                text_anchor = "middle",
                text_orientation = text_orientation)
     
-    
     def draw_curve(self, points, line_color="black", line_weight=1):
         im = self.image
         
@@ -238,10 +252,69 @@ class cairo_t():
             im.move_to(x, y)
             #print "cx1=$cx1,cy1=$cy1,cx2=$cx2,cy2=$cy2,x2=$x2,y2=$y2\n";
 
-
+            # This would draw straight lines between each point
+            #im.line_to(x2, y2)
+            # This draws a curve to each point
             im.curve_to(cx1, cy1, cx2, cy2, x2, y2)
 
         im.stroke()
+    
+    def draw_lines(self, points, line_color="black", line_weight=1):
+        im = self.image
+        
+        line_color = self.translate_color(line_color);
+        font_color = line_color
+        im.set_source_rgb(line_color[0], line_color[1], line_color[2]);
+        im.set_line_width(line_weight);
+
+        graph_data = points
+
+        prepared_data = [];
+
+        for i in range(0, len(graph_data)):
+            x = graph_data[i][0];
+            y = graph_data[i][1];
+
+            #print "x = $x, y = $y\n";
+
+            if((i != 0) and (i != (len(graph_data) - 1))):
+                (x_left, y_left) = (graph_data[i - 1][0], graph_data[i - 1][1]);
+                (x_right, y_right) = (graph_data[i + 1][0], graph_data[i + 1][1]);
+                step_x_left = (x - x_left) / 2;
+                step_x_right = (x_right - x) / 2;
+                (dx, dy) = (x_right - x_left, y_right - y_left);
+                h = 2*math.sqrt(dx*dx + dy*dy);
+
+                if(h == 0):
+                    (cx1, cy1, cx2, cy2) = (x, y, x, y)
+                else:
+                    (dx1, dy1) = ((dx * step_x_left) / h, (dy * step_x_left) / h);
+                    (dx2, dy2) = ((dx * step_x_right) / h, (dy * step_x_right) / h);
+                    (cx1, cx2) = (x - dx1, x + dx2);
+                    (cy1, cy2) = (y - dy1, y + dy2);
+            else:
+                (cx1, cy1, cx2, cy2) = (x, y, x, y)
+
+            #print "Adding point\n";
+            point = (x, y, cx1, cy1, cx2, cy2)
+            prepared_data.append(point)
+
+
+        for i in range(0, len(prepared_data)-1):
+            #print "i = $i\n";
+            (x, y)     = (prepared_data[i][0], prepared_data[i][1])
+            (cx1, cy1) = (prepared_data[i][4], prepared_data[i][5])
+            (cx2, cy2) = (prepared_data[i + 1][2], prepared_data[i + 1][3])
+            (x2, y2) = (prepared_data[i + 1][0], prepared_data[i + 1][1])
+            im.move_to(x, y)
+            #print "cx1=$cx1,cy1=$cy1,cx2=$cx2,cy2=$cy2,x2=$x2,y2=$y2\n";
+
+            # This would draw straight lines between each point
+            im.line_to(x2, y2)
+
+        im.stroke()
+
+        self.draw_arrow_head(x2,y2,-90,arrow_color="#0000ff")
         
     def draw_arrow_head(self,x,y,angle,arrow_type=2,arrow_size=2,arrow_color="#000000"):
 
@@ -400,7 +473,8 @@ class cairo_t():
 
         return id
 
-    def draw_rounded_rect(self, x, y, width, height, radius, background_color, line_color):
+    def draw_rounded_rect(
+        self, x, y, width, height, radius, background_color, line_color, line_width=0.9):
         
         im = self.image
         
@@ -417,7 +491,7 @@ class cairo_t():
         rect_height = height
 
         im.save()
-        im.set_line_width(0.9)
+        im.set_line_width(line_width)
 
         x1 = x0+rect_width
         y1 = y0+rect_height
@@ -506,8 +580,12 @@ class cairo_t():
 class graph_t():
 
     def __init__(self, width, height):
-        self.width  = width - 280
-        self.height = height - 110
+        self.width_padding = 200
+        self.height_padding  = 110
+
+        self.width  = width - self.width_padding
+        self.height = height - self.height_padding
+
         
         self.left = 100
         self.right = self.width + self.left
@@ -521,7 +599,9 @@ class graph_t():
         self.xaxis = {}
         self.yaxis = {}
 
-        self.graph = cairo_t(self.width + 280, self.height + 110)
+        self.graph = cairo_t(self.width + self.width_padding, self.height + self.height_padding)
+
+        self.draw_frame = False
         
 
     def add_data_set(self, dataset, name, color=None):
@@ -579,11 +659,15 @@ class graph_t():
         
         for dataset in self.datasets:
             for key in self.datasets[dataset]["data"]:
+                #print key
                 if(key > maxX):
                     maxX = key
 
         #print "maxX: %d" % maxX
         maxX = (math.ceil(maxX /10.0)) * 10;
+
+        if(maxX < self.xaxis["max"]):
+            maxX = self.xaxis["max"]
         #print "maxX: %d" % maxX
         
         #if(1 == $self->{XAXIS}{"autoscale"})
@@ -621,7 +705,7 @@ class graph_t():
         return maxY
 
 
-    def set_xaxis(self, label, color, min=None, max=None, increment=1):
+    def set_xaxis(self, label, color, min=None, max=None, increment=1, labels=None):
        
         self.xaxis["label"]     = label
         self.xaxis["min"]       = min
@@ -629,14 +713,16 @@ class graph_t():
         self.xaxis["increment"] = increment
         self.xaxis["color"]     = color
         self.xaxis["autoscale"] = 1
+        self.xaxis["labels"]    = labels
 
 
-    def set_yaxis(self, label, color, min=None, max=None, increment=1):
+    def set_yaxis(self, label, color, min=None, max=None, increment=1, labels=None):
         self.yaxis["label"]     = label
         self.yaxis["min"]       = min
         self.yaxis["max"]       = max
         self.yaxis["increment"] = increment
         self.yaxis["color"]     = color
+        self.yaxis["labels"]    = labels
 
     def set_title(self, title, subtitle):
         self.title = title
@@ -682,21 +768,22 @@ class graph_t():
         left = self.left
         right = self.right
         top = self.top
-        y = top - 40
+        y = top - 35
           
         graph.draw_text(x = left + ((right - left)/2),
                         y = y,
                         font_color = "#000000",
                         text       = self.title,
                         text_anchor = "middle",
-                        font_size   = 16)
+                        font_size   = 16,
+                        font_weight = "bold")
     
         subtitle = self.subtitle
 
         if(subtitle != None):
             graph.draw_text(
                 x = left + ((right - left)/2),
-                y = y + 24,
+                y = y + 20,
                 font_color = "#000000",
                 text       = subtitle,
                 text_anchor = "middle",
@@ -721,32 +808,35 @@ class graph_t():
 
        padding=10
        
-       graph.draw_rounded_rect(
-           x = padding,
-           y = padding,
-           width = width + 280 - (2*padding),
-           height = height + 110 - (2*padding),
-           radius = 10,
-           background_color = "#C0C0C0",
-           line_color = "#C0C0C0")
-       
-       padding+=1
-       graph.draw_rounded_rect(
-           x = padding,
-           y = padding,
-           width = width + 280 - (2*padding),
-           height = height + 110 - (2*padding),
-           radius = 10,
-           background_color = "#f0f0f0",
-           line_color = "#C0C0C0")
+       if(self.draw_frame):
+           graph.draw_rounded_rect(
+               x = padding,
+               y = padding,
+               width = width + self.width_padding - (2*padding),
+               height = height + self.height_padding - (2*padding),
+               radius = 0,
+               background_color = "#f0f0f0",
+               line_color = "#e0e0e0",
+               line_width=15.0)
+           
+           padding+=1
+           graph.draw_rounded_rect(
+               x = padding,
+               y = padding,
+               width = width + self.width_padding - (2*padding),
+               height = height + self.height_padding - (2*padding),
+               radius = 0,
+               background_color = "#f0f0f0",
+               line_color = "#C0C0C0")
        
        graph.draw_rounded_rect(
            x = left,
            y = top,
            width = width,
            height = height,
-           radius = 10,
+           radius = 0,
            background_color = "#FFFFFF",
-           line_color = "#000000")
+           line_color = "#D0D0D0",
+           line_width=5.0)
     
 
