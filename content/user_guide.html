@@ -2,8 +2,8 @@
 <html>
 <head>
     <title>The Shorte Language</title>
-    <link rel="stylesheet" type="text/css" media="all" href="css/cortina_public.css" title="Default" />
-
+    <link rel="stylesheet" type="text/css" media="all" href="css/shorte.css" title="Default" />
+    
     
     <style>
         #dhtmltooltip
@@ -19,12 +19,8 @@
          -moz-border-radius: 7px;
         }
     </style>
-    
- 
-    <!-- These are temporary links to jquery support modules -->
-    <script type="text/javascript" src="css/js/jquery-1.7.min.js"></script>
-    <script type="text/javascript" src="css/js/jquery.maphilight.js"></script>
-    
+
+
 </head>
 <body>
 
@@ -199,13 +195,16 @@ function display_code(snippet)
 
 <div class="container">
     <div class="header">
-        <div style="height: 80px;"><span style='float:left;position:relative;left:300px;top:34px;font-size:1.6em;color:#666;'>The Shorte Language - Reference Manual</span><span style='float:right;'><a href="../the_shorte_language.pdf"><img style='height:60px;' src="pdf.png"/></a></span></div>
+        <div style="height: 120px;">
+            <span style='float:left;position:relative;left:200px;top:70px;font-size:1.4em;color:#404040;'>The Shorte Language</span>
+            <span style='float:left;position:absolute;left:630px;top:70px;font-size:1.2em;color:#404040;'>Reference Manual</span>
+            </div>
         <div id="menu_div">
             <ul>
                 <li><a href="../index.html" target="_top"><div>Contents</div></a></li>
                 <li><a href="../index_framed.html" target="_top"><div>Frames</div></a></li>
                 
-                <li style="float:right;"><a href="revisions.html"><div style='color:#888;'>Version: 1.0.58</div></a></li>
+                <li style="float:right;"><a href="revisions.html"><div style='color:#e6592e;'>Version: 1.0.58</div></a></li>
             </ul>
         </div>
     </div> <!-- end of header div -->
@@ -216,7 +215,7 @@ function display_code(snippet)
 used to generate documentation in a format that is familar
 to writing source code. It supports:
 </div>
-<ul><li>include files for modularizing a document</li><li>conditional includes and conditional text</li><li>easy revision control and diffing of documentation</li><li>cross referencing of C source code</li></ul><h2>1.1. Why another Language?<a name='Why another Language?'></a></h2>
+<ul><li >include files for modularizing a document</li> <li >conditional includes and conditional text</li> <li >easy revision control and diffing of documentation</li> <li >cross referencing of C source code</li> </ul><h2>1.1. Why another Language?<a name='Why another Language?'></a></h2>
 <div class='tblkps' >I started this project about two years ago because I wasn't happy
 with other markups like reStructuredText. There are a lot of really
 good markup tools out there but I decided to try my hand and creating
@@ -254,7 +253,7 @@ hard to format quite like I wanted.
 </div>
 
 <div class='source' id="snippet_2">
-<div class='snippet'># Document heading here<br/>@doctitle My Title<br/>@docsubtitle My Subtitle<br/>...<br/><br/># The beginning of the body<br/>@body<br/>@h1 Some title here<br/>Some text here<br/>...</div>
+<div class='snippet'># Document heading here<br/>@doctitle&nbsp;My&nbsp;Title<br/>@docsubtitle&nbsp;My&nbsp;Subtitle<br/>...<br/><br/># The beginning of the body<br/>@body<br/>@h1&nbsp;Some&nbsp;title&nbsp;here<br/>Some&nbsp;text&nbsp;here<br/>...</div>
 </div>
 
 
@@ -277,18 +276,18 @@ at the beginning of a line.
 </div>
 
 <div class='source' id="snippet_4">
-<div class='snippet'># This is a single line comment<br/># and a second line to the same single line comment<br/>This is not a comment</div>
+<div class='snippet'># This is a single line comment<br/># and a second line to the same single line comment<br/>This&nbsp;is&nbsp;not&nbsp;a&nbsp;comment</div>
 </div>
 
 
 <div class='tblkps' >If you want to use the # character elsewhere in the document it should normally
 be escaped with a \ character. This is not necessary inside source code blocks
-such as <a href='user_guide.html#@c'>@c</a>, <a href='user_guide.html#@java'>@java</a>, <a href='user_guide.html#@python'>@python</a>, etc.
+such as @c, @java, @python, etc.
 </div>
 <h2>1.4. Conditional Text<a name='Conditional Text'></a></h2>
 <div class='tblkps' >The Shorte language supports two types of conditional text
 </div>
-<ul><li>PHY style inline blocks</li><li>conditionals using the if="xxx" attribute on tags</li></ul><h3>1.4.1. PHY Style Code Blocks<a name='PHY Style Code Blocks'></a></h3>
+<ul><li >PHY style inline blocks</li> <li >conditionals using the if="xxx" attribute on tags</li> </ul><h3>1.4.1. PHY Style Code Blocks<a name='PHY Style Code Blocks'></a></h3>
 <div class='tblkps' >These blocks of code are similar to the inline PHY syntax. You use
 the &lt;? ... ?&gt; syntax to inline a block of Python code. Any output
 must get assigned to a variable called <b>result</b> which gets return in
@@ -317,7 +316,7 @@ line parameter.
 </div>
 
 <div class='source' id="snippet_6">
-<div class='snippet'>&lt;?<br/>result = ''<br/>if(1):<br/>    result += 'This is some *bold text* here'<br/>if(0):<br/>    result += 'But this line is not included' <br/>?&gt;</div>
+<div class='snippet'>&lt;?<br/>result&nbsp;=&nbsp;''<br/>if(1):<br/>&nbsp;&nbsp;&nbsp;&nbsp;result&nbsp;+=&nbsp;'This&nbsp;is&nbsp;some&nbsp;*bold&nbsp;text*&nbsp;here'<br/>if(0):<br/>&nbsp;&nbsp;&nbsp;&nbsp;result&nbsp;+=&nbsp;'But&nbsp;this&nbsp;line&nbsp;is&nbsp;not&nbsp;included'&nbsp;<br/>?&gt;</div>
 </div>
 
 
@@ -349,28 +348,28 @@ For example:
 </div>
 
 <div class='source' id="snippet_8">
-<div class='snippet'># Include this table<br/>@table: if="1"<br/>- Col 1 | Col2<br/>- Data1 | Data 2<br/><br/># But not this table<br/>@table: if="0"<br/>- Col 3  | col 4<br/>- Data 3 | Data 4</div>
+<div class='snippet'># Include this table<br/>@table:&nbsp;if="1"<br/>-&nbsp;Col&nbsp;1&nbsp;|&nbsp;Col2<br/>-&nbsp;Data1&nbsp;|&nbsp;Data&nbsp;2<br/><br/># But not this table<br/>@table:&nbsp;if="0"<br/>-&nbsp;Col&nbsp;3&nbsp;&nbsp;|&nbsp;col&nbsp;4<br/>-&nbsp;Data&nbsp;3&nbsp;|&nbsp;Data&nbsp;4</div>
 </div>
 
 
 <div class='tblkps' >will expand to:</div>
-<table class='bordered'><tr class='header'>
-<td  class='header'><div class='tblkp' >Col 1</div>
+<table class='bordered' ><tr class='header'>
+<td   class='header'><div class='tblkp' >Col 1</div>
 </td>
-<td  class='header'><div class='tblkp' >Col2</div>
+<td   class='header'><div class='tblkp' >Col2</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Data1</div>
+<td  ><div class='tblkp' >Data1</div>
 </td>
-<td ><div class='tblkp' >Data 2</div>
+<td  ><div class='tblkp' >Data 2</div>
 </td>
 </tr>
 </table><div class='tblkps' >As will the inline code blocks you can specify variables to pass
 to the <b>if</b> text to evaluate using the <b>-m</b> command line paramter.
 </div>
 <h2>1.5. Include Files<a name='Include Files'></a></h2>
-<div class='tblkps' >Shorte supports include files. There are two tags, <a href='user_guide.html#@include'>@include</a> and <a href='user_guide.html#@include_child'>@include_child</a>
+<div class='tblkps' >Shorte supports include files. There are two tags, @include and @include_child
 which are used to include files.
 </div>
 <div class='tblkps' >They can be included anywhere in the body of the document.
@@ -395,11 +394,11 @@ which are used to include files.
 010  
 011  
 012  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@body</span><br/><span class='kw'>@include</span> <span class="str">"chapters/chapter_one.tpl"</span><br/><span class='kw'>@include</span> <span class="str">"chapters/chapter_two.tpl"</span><br/><br/><span class='kw'>@include</span>: if=<span class="str">"ALLOW_CHAPTER3</span> <span class="str">==</span> <span class="str">True"</span><br/>chapters/chapter_three.tpl<br/><br/><span class="cmt"># Here we'll use the <a href='user_guide.html#@include_child'>@include_child</a> tag since</span><br/><span class="cmt"># the <a href='user_guide.html#@include'>@include</a> tag normally breaks the flow of</span><br/><span class="cmt"># conditional statements. By using <a href='user_guide.html#@include_child'>@include_child</a></span><br/><span class="cmt"># this file will only be included if ALLOW_CHAPTER3 == True</span><br/><span class='kw'>@include_child</span> <span class="str">"chapters/child_of_chapter_three.tpl"</span></div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@body</span><br/><span class='kw'>@include</span> <span class="str">"chapters/chapter_one.tpl"</span><br/><span class='kw'>@include</span> <span class="str">"chapters/chapter_two.tpl"</span><br/><br/><span class='kw'>@include</span>: if=<span class="str">"ALLOW_CHAPTER3 == True"</span><br/>chapters/chapter_three.tpl<br/><br/><span class="cmt"># Here we'll use the @include_child tag since</span><br/><span class="cmt"># the @include tag normally breaks the flow of</span><br/><span class="cmt"># conditional statements. By using @include_child</span><br/><span class="cmt"># this file will only be included if ALLOW_CHAPTER3 == True</span><br/><span class='kw'>@include_child</span> <span class="str">"chapters/child_of_chapter_three.tpl"</span></div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_10">
-<div class='snippet'>@body<br/>@include "chapters/chapter_one.tpl"<br/>@include "chapters/chapter_two.tpl"<br/><br/>@include: if="ALLOW_CHAPTER3 == True"<br/>chapters/chapter_three.tpl<br/><br/># Here we'll use the @include_child tag since<br/># the @include tag normally breaks the flow of<br/># conditional statements. By using @include_child<br/># this file will only be included if ALLOW_CHAPTER3 == True<br/>@include_child "chapters/child_of_chapter_three.tpl"</div>
+<div class='snippet'>@body<br/>@include&nbsp;"chapters/chapter_one.tpl"<br/>@include&nbsp;"chapters/chapter_two.tpl"<br/><br/>@include:&nbsp;if="ALLOW_CHAPTER3 == True"<br/>chapters/chapter_three.tpl<br/><br/># Here we'll use the @include_child tag since<br/># the @include tag normally breaks the flow of<br/># conditional statements. By using @include_child<br/># this file will only be included if ALLOW_CHAPTER3 == True<br/>@include_child&nbsp;"chapters/child_of_chapter_three.tpl"</div>
 </div>
 
 
@@ -408,8 +407,8 @@ which are used to include files.
   <table>
     <tr valign="top">
         <td>
-            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="note.png"/>Note:</div>
-            <div style="margin-left:10px;"><div class='tblkps' >Shorte currently can't handle include paths. The include path has to
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:35px;margin-left:-10px;margin-top:-10px;' src="css/note.png"></img>Note:</div>
+            <div style="margin-left:10px;margin-top:5px;"><div class='tblkps' >Shorte currently can't handle include paths. The include path has to
 be a sub-directory where the top level file is included. Eventually
 support for include paths will be added.
 </div>
@@ -430,369 +429,369 @@ by the use of tags that have the syntax @tag.
 <div class='tblkps' >The following table describes the tags currently
 supported by Shorte:
 </div>
-<table class='bordered'><tr><th colspan='2'>Shorte Supported Tags</th></tr>
+<table class='bordered' ><tr><th colspan='2'>Shorte Supported Tags</th></tr>
 <tr class='header'>
-<td  class='header'><div class='tblkp' >Tag</div>
+<td   class='header'><div class='tblkp' >Tag</div>
 </td>
-<td  class='header'><div class='tblkp' >Description</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Document Metadata (only in document header)</div>
+<td   class='header'><div class='tblkp' >Description</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@doctitle'>@doctitle</a></div>
-</td>
-<td ><div class='tblkp' >The title associated with the document</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Document Metadata (only in document header)</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@docsubtitle'>@docsubtitle</a></div>
+<td  ><div class='tblkp' >@doctitle</div>
 </td>
-<td ><div class='tblkp' >The subtitle associated with the document</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@docversion'>@docversion</a></div>
-</td>
-<td ><div class='tblkp' >The version associatied with the document</div>
+<td  ><div class='tblkp' >The title associated with the document</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@docnumber'>@docnumber</a></div>
+<td  ><div class='tblkp' >@docsubtitle</div>
 </td>
-<td ><div class='tblkp' >The number associated with the document</div>
+<td  ><div class='tblkp' >The subtitle associated with the document</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@docrevisions'>@docrevisions</a></div>
+<td  ><div class='tblkp' >@docversion</div>
 </td>
-<td ><div class='tblkp' >The revision history associated with the document</div>
+<td  ><div class='tblkp' >The version associatied with the document</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@docnumber</div>
+</td>
+<td  ><div class='tblkp' >The number associated with the document</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@docrevisions</div>
+</td>
+<td  ><div class='tblkp' >The revision history associated with the document</div>
 </td>
 </tr>
 <tr class='header'>
-<td colspan='2' class='header'><div class='tblkp' >Document Body</div>
+<td colspan='2'  class='header'><div class='tblkp' >Document Body</div>
 </td>
 </tr>
 <tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Heading Tags</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Heading Tags</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@h1'>@h1</a></div>
+<td  ><div class='tblkp' >@h1</div>
 </td>
-<td ><div class='tblkp' >A top level header similar to H1 in HTML</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@h2'>@h2</a></div>
-</td>
-<td ><div class='tblkp' >A header similar to H2 in HTML</div>
+<td  ><div class='tblkp' >A top level header similar to H1 in HTML</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@h3'>@h3</a></div>
+<td  ><div class='tblkp' >@h2</div>
 </td>
-<td ><div class='tblkp' >A header similar to H3 in HTML</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@h4'>@h4</a></div>
-</td>
-<td ><div class='tblkp' >A header similar to H4 in HTML</div>
+<td  ><div class='tblkp' >A header similar to H2 in HTML</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@h5'>@h5</a></div>
+<td  ><div class='tblkp' >@h3</div>
 </td>
-<td ><div class='tblkp' >A header similar to H5 in HTML</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Text Entry Tags</div>
+<td  ><div class='tblkp' >A header similar to H3 in HTML</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@text'>@text</a></div>
+<td  ><div class='tblkp' >@h4</div>
 </td>
-<td ><div class='tblkp' >A document text block</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@p'>@p</a></div>
-</td>
-<td ><div class='tblkp' >A paragraph similar to the <b>P</b> tag from HTML</div>
+<td  ><div class='tblkp' >A header similar to H4 in HTML</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@pre'>@pre</a></div>
+<td  ><div class='tblkp' >@h5</div>
 </td>
-<td ><div class='tblkp' >A block of unformatted test similar to the <b>PRE</b> tag from HTML</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Includes</div>
+<td  ><div class='tblkp' >A header similar to H5 in HTML</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@include'>@include</a></div>
-</td>
-<td ><div class='tblkp' >This tag is used to include another file (breaks conditional cascade)</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Text Entry Tags</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@include_child'>@include_child</a></div>
+<td  ><div class='tblkp' >@text</div>
 </td>
-<td ><div class='tblkp' >This tag is used to include a child file (supports conditional cascade)</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Images and Image Maps</div>
+<td  ><div class='tblkp' >A document text block</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@image'>@image</a></div>
+<td  ><div class='tblkp' >@p</div>
 </td>
-<td ><div class='tblkp' >An inline image</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@imagemap'>@imagemap</a></div>
-</td>
-<td ><div class='tblkp' >Include an HTML image map</div>
+<td  ><div class='tblkp' >A paragraph similar to the <b>P</b> tag from HTML</div>
 </td>
 </tr>
 <tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Lists and Tables</div>
+<td  ><div class='tblkp' >@pre</div>
+</td>
+<td  ><div class='tblkp' >A block of unformatted test similar to the <b>PRE</b> tag from HTML</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@ul'>@ul</a></div>
-</td>
-<td ><div class='tblkp' >An un-ordered list</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Includes</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@ol'>@ol</a></div>
+<td  ><div class='tblkp' >@include</div>
 </td>
-<td ><div class='tblkp' >An ordered list</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@table'>@table</a></div>
-</td>
-<td ><div class='tblkp' >A table</div>
+<td  ><div class='tblkp' >This tag is used to include another file (breaks conditional cascade)</div>
 </td>
 </tr>
 <tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Notes, TBDs and Questions</div>
+<td  ><div class='tblkp' >@include_child</div>
+</td>
+<td  ><div class='tblkp' >This tag is used to include a child file (supports conditional cascade)</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@note'>@note</a></div>
-</td>
-<td ><div class='tblkp' >A note</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Images and Image Maps</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@question'>@question</a></div>
+<td  ><div class='tblkp' >@image</div>
 </td>
-<td ><div class='tblkp' >A question</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@tbd'>@tbd</a></div>
-</td>
-<td ><div class='tblkp' >A To Be Determined block</div>
+<td  ><div class='tblkp' >An inline image</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@questions'>@questions</a></div>
+<td  ><div class='tblkp' >@imagemap</div>
 </td>
-<td ><div class='tblkp' >A list of questions</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Structures and Functions</div>
+<td  ><div class='tblkp' >Include an HTML image map</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@define'>@define</a></div>
-</td>
-<td ><div class='tblkp' >A C style #define</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Lists and Tables</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@enum'>@enum</a></div>
+<td  ><div class='tblkp' >@ul</div>
 </td>
-<td ><div class='tblkp' >An enumeration</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@vector'>@vector</a></div>
-</td>
-<td ><div class='tblkp' >Similar to <a href='user_guide.html#@struct'>@struct</a> but generates a bitfield</div>
+<td  ><div class='tblkp' >An un-ordered list</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@struct'>@struct</a></div>
+<td  ><div class='tblkp' >@ol</div>
 </td>
-<td ><div class='tblkp' >A C style structure</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@prototype'>@prototype</a></div>
-</td>
-<td ><div class='tblkp' >C function prototypes</div>
+<td  ><div class='tblkp' >An ordered list</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@functionsummary'>@functionsummary</a></div>
+<td  ><div class='tblkp' >@table</div>
 </td>
-<td ><div class='tblkp' >A function summary</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@typesummary'>@typesummary</a></div>
-</td>
-<td ><div class='tblkp' >A type summary</div>
+<td  ><div class='tblkp' >A table</div>
 </td>
 </tr>
 <tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Source Code Tags</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Notes, TBDs and Questions</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@c'>@c</a></div>
+<td  ><div class='tblkp' >@note</div>
 </td>
-<td ><div class='tblkp' >A block of C code</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@d'>@d</a></div>
-</td>
-<td ><div class='tblkp' >A block of D code</div>
+<td  ><div class='tblkp' >A note</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@bash'>@bash</a></div>
+<td  ><div class='tblkp' >@question</div>
 </td>
-<td ><div class='tblkp' >A block of bash code</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@python'>@python</a></div>
-</td>
-<td ><div class='tblkp' >A block of python code</div>
+<td  ><div class='tblkp' >A question</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@sql'>@sql</a></div>
+<td  ><div class='tblkp' >@tbd</div>
 </td>
-<td ><div class='tblkp' >A block of SQL code</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@java'>@java</a></div>
-</td>
-<td ><div class='tblkp' >A block of Java code</div>
+<td  ><div class='tblkp' >A To Be Determined block</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@tcl'>@tcl</a></div>
+<td  ><div class='tblkp' >@questions</div>
 </td>
-<td ><div class='tblkp' >A block of TCL code</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@vera'>@vera</a></div>
-</td>
-<td ><div class='tblkp' >A block of Vera code</div>
+<td  ><div class='tblkp' >A list of questions</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@perl'>@perl</a></div>
-</td>
-<td ><div class='tblkp' >A block of Perl code</div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Structures and Functions</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@code'>@code</a></div>
+<td  ><div class='tblkp' >@define</div>
 </td>
-<td ><div class='tblkp' >A block of unknown source code</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@shorte'>@shorte</a></div>
-</td>
-<td ><div class='tblkp' >A block of shorte code</div>
+<td  ><div class='tblkp' >A C style #define</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@xml'>@xml</a></div>
+<td  ><div class='tblkp' >@enum</div>
 </td>
-<td ><div class='tblkp' >A block of XML code</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Other Tags</div>
+<td  ><div class='tblkp' >An enumeration</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@shell'>@shell</a></div>
+<td  ><div class='tblkp' >@vector</div>
 </td>
-<td ><div class='tblkp' >TBD</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@inkscape'>@inkscape</a></div>
-</td>
-<td ><div class='tblkp' >Include an SVG created in Inkscape</div>
+<td  ><div class='tblkp' >Similar to @struct but generates a bitfield</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@checklist'>@checklist</a></div>
+<td  ><div class='tblkp' >@struct</div>
 </td>
-<td ><div class='tblkp' >Generate a checklist</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@acronyms'>@acronyms</a></div>
-</td>
-<td ><div class='tblkp' >A list of acronyms</div>
+<td  ><div class='tblkp' >A C style structure</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@embed'>@embed</a></div>
+<td  ><div class='tblkp' >@prototype</div>
 </td>
-<td ><div class='tblkp' >An embedded object (HTML only)</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Sequence Diagrams</div>
+<td  ><div class='tblkp' >C function prototypes</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@sequence'>@sequence</a></div>
+<td  ><div class='tblkp' >@functionsummary</div>
 </td>
-<td ><div class='tblkp' >Generate a sequence diagram</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Test Case Definitions</div>
+<td  ><div class='tblkp' >A function summary</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@testcase'>@testcase</a></div>
+<td  ><div class='tblkp' >@typesummary</div>
 </td>
-<td ><div class='tblkp' >A test case description</div>
+<td  ><div class='tblkp' >A type summary</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@testcasesummary'>@testcasesummary</a></div>
+<td colspan='2'  class='subheader'><div class='tblkp' >Source Code Tags</div>
 </td>
-<td ><div class='tblkp' >A test case summary</div>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@c</div>
+</td>
+<td  ><div class='tblkp' >A block of C code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@d</div>
+</td>
+<td  ><div class='tblkp' >A block of D code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@bash</div>
+</td>
+<td  ><div class='tblkp' >A block of bash code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@python</div>
+</td>
+<td  ><div class='tblkp' >A block of python code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@sql</div>
+</td>
+<td  ><div class='tblkp' >A block of SQL code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@java</div>
+</td>
+<td  ><div class='tblkp' >A block of Java code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@tcl</div>
+</td>
+<td  ><div class='tblkp' >A block of TCL code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@vera</div>
+</td>
+<td  ><div class='tblkp' >A block of Vera code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@perl</div>
+</td>
+<td  ><div class='tblkp' >A block of Perl code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@code</div>
+</td>
+<td  ><div class='tblkp' >A block of unknown source code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@shorte</div>
+</td>
+<td  ><div class='tblkp' >A block of shorte code</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@xml</div>
+</td>
+<td  ><div class='tblkp' >A block of XML code</div>
+</td>
+</tr>
+<tr>
+<td colspan='2'  class='subheader'><div class='tblkp' >Other Tags</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@shell</div>
+</td>
+<td  ><div class='tblkp' >TBD</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@inkscape</div>
+</td>
+<td  ><div class='tblkp' >Include an SVG created in Inkscape</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@checklist</div>
+</td>
+<td  ><div class='tblkp' >Generate a checklist</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@acronyms</div>
+</td>
+<td  ><div class='tblkp' >A list of acronyms</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@embed</div>
+</td>
+<td  ><div class='tblkp' >An embedded object (HTML only)</div>
+</td>
+</tr>
+<tr>
+<td colspan='2'  class='subheader'><div class='tblkp' >Sequence Diagrams</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@sequence</div>
+</td>
+<td  ><div class='tblkp' >Generate a sequence diagram</div>
+</td>
+</tr>
+<tr>
+<td colspan='2'  class='subheader'><div class='tblkp' >Test Case Definitions</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@testcase</div>
+</td>
+<td  ><div class='tblkp' >A test case description</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@testcasesummary</div>
+</td>
+<td  ><div class='tblkp' >A test case summary</div>
 </td>
 </tr>
 </table><h1>2. Installation Instructions<a name='Installation Instructions'></a></h1>
@@ -818,65 +817,65 @@ from:
 <div class='tblkps' >To install from sources several prerequisites are required.
 They are shown in the following table:
 </div>
-<table class='bordered'><tr><th colspan='3'>Installation prerequisites</th></tr>
+<table class='bordered' ><tr><th colspan='3'>Installation prerequisites</th></tr>
 <tr class='header'>
-<td  class='header'><div class='tblkp' >Tool</div>
+<td   class='header'><div class='tblkp' >Tool</div>
 </td>
-<td  class='header'><div class='tblkp' >Tool <a href='user_guide.html#Version'>Version</a></div>
+<td   class='header'><div class='tblkp' >Tool Version</div>
 </td>
-<td  class='header'><div class='tblkp' >Description</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' >GCC</div>
-</td>
-<td ><div class='tblkp' >3.4 or later</div>
-</td>
-<td ><div class='tblkp' >A compiler used to compile the cairo plugin for Python</div>
+<td   class='header'><div class='tblkp' >Description</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Make</div>
+<td  ><div class='tblkp' >GCC</div>
 </td>
-<td ><div class='tblkp' >3.81 or later</div>
+<td  ><div class='tblkp' >3.4 or later</div>
 </td>
-<td ><div class='tblkp' >In order to run the makefile associated with the cairo plugin</div>
+<td  ><div class='tblkp' >A compiler used to compile the cairo plugin for Python</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Cairo</div>
+<td  ><div class='tblkp' >Make</div>
 </td>
-<td ><div class='tblkp' >1.11 or later</div>
+<td  ><div class='tblkp' >3.81 or later</div>
 </td>
-<td ><div class='tblkp' >Cairo is required for generating images such as structure definitions
+<td  ><div class='tblkp' >In order to run the makefile associated with the cairo plugin</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >Cairo</div>
+</td>
+<td  ><div class='tblkp' >1.11 or later</div>
+</td>
+<td  ><div class='tblkp' >Cairo is required for generating images such as structure definitions
 or sequence diagrams.
 </div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >SWIG</div>
+<td  ><div class='tblkp' >SWIG</div>
 </td>
-<td ><div class='tblkp' >2.0 or later</div>
+<td  ><div class='tblkp' >2.0 or later</div>
 </td>
-<td ><div class='tblkp' >SWIG is required in order to build the cairo plugin for Python.</div>
+<td  ><div class='tblkp' >SWIG is required in order to build the cairo plugin for Python.</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Python</div>
+<td  ><div class='tblkp' >Python</div>
 </td>
-<td ><div class='tblkp' >2.6 or 2.7</div>
+<td  ><div class='tblkp' >2.6 or 2.7</div>
 </td>
-<td ><div class='tblkp' >Shorte is built in Python. <a href='user_guide.html#Version'>Version</a> 2.6 or later is required but 3.x
+<td  ><div class='tblkp' >Shorte is built in Python. Version 2.6 or later is required but 3.x
 is currently not supported.
 </div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Py2exe</div>
+<td  ><div class='tblkp' >Py2exe</div>
 </td>
-<td ><div class='tblkp' ><a href='user_guide.html#Version'>Version</a> for Python</div>
+<td  ><div class='tblkp' >Version for Python</div>
 </td>
-<td ><div class='tblkp' >This tool is used to generate</div>
+<td  ><div class='tblkp' >This tool is used to generate</div>
 </td>
 </tr>
 </table><h2>2.3. Changing the Path to LibreOffice/OpenOffice<a name='Changing the Path to LibreOffice/OpenOffice'></a></h2>
@@ -899,7 +898,7 @@ the path to OpenOffice/LibreOffice. This may be done the following field in the 
 </div>
 
 <div class='source' id="snippet_12">
-<div class='snippet'># Paths to open office swriter<br/>path.oowriter.win32=C:/Program Files/LibreOffice 4/program/swriter.exe<br/>path.oowriter.linux=/home/belliott/libreoffice/opt/libreoffice4.1/program/swriter<br/>path.oowriter.osx=/Applications/LibreOffice.app/Contents/MacOS/soffice</div>
+<div class='snippet'># Paths to open office swriter<br/>path.oowriter.win32=C:/Program&nbsp;Files/LibreOffice&nbsp;4/program/swriter.exe<br/>path.oowriter.linux=/home/belliott/libreoffice/opt/libreoffice4.1/program/swriter<br/>path.oowriter.osx=/Applications/LibreOffice.app/Contents/MacOS/soffice</div>
 </div>
 
 
@@ -1021,7 +1020,7 @@ add Shorte to the path.
 </div>
 
 <div class='source' id="snippet_14">
-<div class='snippet'>$ shorte.py -h<br/>Usage: shorte.py [options]<br/><br/>Options:<br/>  -h, --help            show this help message and exit<br/>  -f FILES, --files=FILES<br/>                        The list of files to generate<br/>  -l FILE_LIST, --list=FILE_LIST<br/>                        The list of files to generate in an input file<br/>  -o OUTPUT_DIR, --output=OUTPUT_DIR<br/>                        The directory where output is generated<br/>  -v VERSION, --version=VERSION<br/>                        The version of the document<br/>  -t THEME, --theme=THEME<br/>                        The output theme<br/>  -n NAME, --name=NAME  The document name or title<br/>  -p PACKAGE, --package=PACKAGE<br/>                        The output package. Supported types are html, odt,<br/>                        word, and pdf<br/>  -b OUTPUT_FORMAT, --output_format=OUTPUT_FORMAT<br/>                        Set the output format in C generated code: bitfields,<br/>                        byte_array, or defines<br/>  -y, --diagnostic_code<br/>                        Generate diagnostic code in generate code<br/>  -c CONFIG, --config=CONFIG<br/>                        The config file to load<br/>  -s SETTINGS, --settings=SETTINGS<br/>                        A list of settings to use that overrides the standard<br/>                        config file<br/>  -x PARSER, --parser=PARSER<br/>                        The parser to use<br/>  -a, --about           About this program<br/>  -m MACROS, --macros=MACROS<br/>                        Macro substitution<br/>  -d DEFINE, --define=DEFINE<br/>                        Macro substitution<br/>  -r REPLACE, --search_and_replace=REPLACE<br/>                        An input search and replace module that is loaded to<br/>                        pre-process input files and replace any references</div>
+<div class='snippet'>$&nbsp;shorte.py&nbsp;-h<br/>Usage:&nbsp;shorte.py&nbsp;[options]<br/><br/>Options:<br/>&nbsp;&nbsp;-h,&nbsp;--help&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;show&nbsp;this&nbsp;help&nbsp;message&nbsp;and&nbsp;exit<br/>&nbsp;&nbsp;-f&nbsp;FILES,&nbsp;--files=FILES<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;list&nbsp;of&nbsp;files&nbsp;to&nbsp;generate<br/>&nbsp;&nbsp;-l&nbsp;FILE_LIST,&nbsp;--list=FILE_LIST<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;list&nbsp;of&nbsp;files&nbsp;to&nbsp;generate&nbsp;in&nbsp;an&nbsp;input&nbsp;file<br/>&nbsp;&nbsp;-o&nbsp;OUTPUT_DIR,&nbsp;--output=OUTPUT_DIR<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;directory&nbsp;where&nbsp;output&nbsp;is&nbsp;generated<br/>&nbsp;&nbsp;-v&nbsp;VERSION,&nbsp;--version=VERSION<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;version&nbsp;of&nbsp;the&nbsp;document<br/>&nbsp;&nbsp;-t&nbsp;THEME,&nbsp;--theme=THEME<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;output&nbsp;theme<br/>&nbsp;&nbsp;-n&nbsp;NAME,&nbsp;--name=NAME&nbsp;&nbsp;The&nbsp;document&nbsp;name&nbsp;or&nbsp;title<br/>&nbsp;&nbsp;-p&nbsp;PACKAGE,&nbsp;--package=PACKAGE<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;output&nbsp;package.&nbsp;Supported&nbsp;types&nbsp;are&nbsp;html,&nbsp;odt,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;word,&nbsp;and&nbsp;pdf<br/>&nbsp;&nbsp;-b&nbsp;OUTPUT_FORMAT,&nbsp;--output_format=OUTPUT_FORMAT<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set&nbsp;the&nbsp;output&nbsp;format&nbsp;in&nbsp;C&nbsp;generated&nbsp;code:&nbsp;bitfields,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;byte_array,&nbsp;or&nbsp;defines<br/>&nbsp;&nbsp;-y,&nbsp;--diagnostic_code<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generate&nbsp;diagnostic&nbsp;code&nbsp;in&nbsp;generate&nbsp;code<br/>&nbsp;&nbsp;-c&nbsp;CONFIG,&nbsp;--config=CONFIG<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;config&nbsp;file&nbsp;to&nbsp;load<br/>&nbsp;&nbsp;-s&nbsp;SETTINGS,&nbsp;--settings=SETTINGS<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;list&nbsp;of&nbsp;settings&nbsp;to&nbsp;use&nbsp;that&nbsp;overrides&nbsp;the&nbsp;standard<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;config&nbsp;file<br/>&nbsp;&nbsp;-x&nbsp;PARSER,&nbsp;--parser=PARSER<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The&nbsp;parser&nbsp;to&nbsp;use<br/>&nbsp;&nbsp;-a,&nbsp;--about&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;About&nbsp;this&nbsp;program<br/>&nbsp;&nbsp;-m&nbsp;MACROS,&nbsp;--macros=MACROS<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Macro&nbsp;substitution<br/>&nbsp;&nbsp;-d&nbsp;DEFINE,&nbsp;--define=DEFINE<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Macro&nbsp;substitution<br/>&nbsp;&nbsp;-r&nbsp;REPLACE,&nbsp;--search_and_replace=REPLACE<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;An&nbsp;input&nbsp;search&nbsp;and&nbsp;replace&nbsp;module&nbsp;that&nbsp;is&nbsp;loaded&nbsp;to<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pre-process&nbsp;input&nbsp;files&nbsp;and&nbsp;replace&nbsp;any&nbsp;references</div>
 </div>
 
 
@@ -1042,20 +1041,20 @@ Shorte modules describing each of the source files.
 </div>
 
 <div class='source' id="snippet_16">
-<div class='snippet'>shorte.py -l source_file_list.py -x cpp -p shorte -r bin/cs4224_snr.py -m 'SKU=CS4343;VERSION=1.1'; -o build-output/srcs</div>
+<div class='snippet'>shorte.py&nbsp;-l&nbsp;source_file_list.py&nbsp;-x&nbsp;cpp&nbsp;-p&nbsp;shorte&nbsp;-r&nbsp;bin/cs4224_snr.py&nbsp;-m&nbsp;'SKU=CS4343;VERSION=1.1';&nbsp;-o&nbsp;build-output/srcs</div>
 </div>
 
 
 <div class='tblkps' ></div>
-<ul><li>The <b>-r cs4224_snr.py</b> file allows a search and replace to be performed on the sources as they are
+<ul><li >The <b>-r cs4224_snr.py</b> file allows a search and replace to be performed on the sources as they are
   generated.
-</li><li>The <b>-m flag</b> passes a list of macros that can be used within the
+</li> <li >The <b>-m flag</b> passes a list of macros that can be used within the
   document for conditional inclusion or conditional text.
-</li><li>The <b>-o build-output/srcs</b> parameter says to generate the files in the
+</li> <li >The <b>-o build-output/srcs</b> parameter says to generate the files in the
   build-output/srcs directory.
-</li><li>The <b>-x cpp</b> option switches the parser to the CPP parser instead of
+</li> <li >The <b>-x cpp</b> option switches the parser to the CPP parser instead of
   the default Shorte parser.
-</li><li>The <b>-p shorte</b> parameter says to generate Shorte code from the C sources.</li></ul><div class='tblkps' >The source_file_list.py file will look something like:</div>
+</li> <li >The <b>-p shorte</b> parameter says to generate Shorte code from the C sources.</li> </ul><div class='tblkps' >The source_file_list.py file will look something like:</div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
@@ -1073,11 +1072,11 @@ Shorte modules describing each of the source files.
 007  
 008  
 009  
-</div><div style='width:95%;float:left;white-space:pre-wrap'>result = '''<br/>modules/high_level/cs4224.c<br/>modules/high_level/cs4224.h<br/><br/><span class="cmt"># Only include FC-AN and KR-AN in the duplex guide</span><br/><span class='kw'>if</span>(SKU == 'CS4343'):<br/>    result += '''<br/>modules/kran/cs4224_kran.c<br/>'''</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>result = <span class="str">'''</span><br/><span class="str">modules/high_level/cs4224.c</span><br/><span class="str">modules/high_level/cs4224.h</span><br/><span class="str"></span><br/><span class="str"># Only include FC-AN and KR-AN in the duplex guide</span><br/><span class="str">if(SKU == 'CS4343'):</span><br/><span class="str">    result += '''</span><br/><span class="str">modules/kran/cs4224_kran.c</span><br/><span class="str">'''</span></div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_18">
-<div class='snippet'>result = '''<br/>modules/high_level/cs4224.c<br/>modules/high_level/cs4224.h<br/><br/># Only include FC-AN and KR-AN in the duplex guide<br/>if(SKU == 'CS4343'):<br/>    result += '''<br/>modules/kran/cs4224_kran.c<br/>'''</div>
+<div class='snippet'>result&nbsp;=&nbsp;'''<br/>modules/high_level/cs4224.c<br/>modules/high_level/cs4224.h<br/><br/># Only include FC-AN and KR-AN in the duplex guide<br/>if(SKU == 'CS4343'):<br/>    result += '''<br/>modules/kran/cs4224_kran.c<br/>'''</div>
 </div>
 
 
@@ -1119,33 +1118,33 @@ in the document before the @body tag. An example document header looks like:
 </div>
 
 <div class='source' id="snippet_20">
-<div class='snippet'># The beginning of the document is assumed to be the document<br/># header. As a convention normally the top level file will<br/># contain metadata about the document.<br/><br/># The title of the document<br/>@doctitle The Shorte Language<br/><br/># The subtitle of the document<br/>@docsubtitle Reference Manual<br/><br/># A version number (can be overwritten from the command line)<br/>@docversion 1.0<br/><br/># A number to assign to the document<br/>@docnumber 34567<br/><br/>@docrevisions:<br/>- Revision | Date          | Description<br/>- 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual</div>
+<div class='snippet'># The beginning of the document is assumed to be the document<br/># header. As a convention normally the top level file will<br/># contain metadata about the document.<br/><br/># The title of the document<br/>@doctitle&nbsp;The&nbsp;Shorte&nbsp;Language<br/><br/># The subtitle of the document<br/>@docsubtitle&nbsp;Reference&nbsp;Manual<br/><br/># A version number (can be overwritten from the command line)<br/>@docversion&nbsp;1.0<br/><br/># A number to assign to the document<br/>@docnumber&nbsp;34567<br/><br/>@docrevisions:<br/>-&nbsp;Revision&nbsp;|&nbsp;Date&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Description<br/>-&nbsp;1.0.0&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;08&nbsp;July,&nbsp;2013&nbsp;|&nbsp;Initial&nbsp;draft&nbsp;of&nbsp;the&nbsp;Shorte&nbsp;Reference&nbsp;Manual</div>
 </div>
 
 
 <h3>4.1.1. @doctitle<a name='@doctitle'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@doctitle'>@doctitle</a> defines the title associated with the document. Only the first instance of this
+<div class='tblkps' >The @doctitle defines the title associated with the document. Only the first instance of this
 tag is used. If a second instance is encountered it will be ignored.
 </div>
 <h3>4.1.2. @docsubtitle<a name='@docsubtitle'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@docsubtitle'>@docsubtitle</a> defines a subtitle for the document. Only the first instance of this
+<div class='tblkps' >The @docsubtitle defines a subtitle for the document. Only the first instance of this
 tag is used. If a second instance is encountered it will be ignored.
 </div>
 <h3>4.1.3. @docversion<a name='@docversion'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@docversion'>@docversion</a> tag defines a version number for the document. This can be overridden
+<div class='tblkps' >The @docversion tag defines a version number for the document. This can be overridden
 at the command line.
 </div>
 <h3>4.1.4. @docnumber<a name='@docnumber'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@docnumber'>@docnumber</a> tag defines a number to associate with the document.</div>
+<div class='tblkps' >The @docnumber tag defines a number to associate with the document.</div>
 <h3>4.1.5. @docrevisions<a name='@docrevisions'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@docrevisions'>@docrevisions</a> tag defines a revision history for the document.</div>
+<div class='tblkps' >The @docrevisions tag defines a revision history for the document.</div>
 <h1>5. The Document Body<a name='The Document Body'></a></h1>
 <h2>5.1. Heading Tags<a name='Heading Tags'></a></h2>
 <div class='tblkps' >Headings use the @hN format where <b>N</b> currently
 ranges from 1-5.
 </div>
 <h3>5.1.1. @h1<a name='@h1'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@h1'>@h1</a> tag is the highest level header. It is similar in use
+<div class='tblkps' >The @h1 tag is the highest level header. It is similar in use
 to the H1 tag from HTML.
 </div>
 
@@ -1163,13 +1162,13 @@ to the H1 tag from HTML.
 </div>
 
 <div class='source' id="snippet_22">
-<div class='snippet'># An example header<br/>@h1 This is an example header<br/>This is some text for the example header</div>
+<div class='snippet'># An example header<br/>@h1&nbsp;This&nbsp;is&nbsp;an&nbsp;example&nbsp;header<br/>This&nbsp;is&nbsp;some&nbsp;text&nbsp;for&nbsp;the&nbsp;example&nbsp;header</div>
 </div>
 
 
 <h3>5.1.2. @h2<a name='@h2'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@h2'>@h2</a> tag is a hierarchial header directly beneath
-the <a href='user_guide.html#@h1'>@h1</a> tag. It is similar to the H2 tag from HTML.
+<div class='tblkps' >The @h2 tag is a hierarchial header directly beneath
+the @h1 tag. It is similar to the H2 tag from HTML.
 </div>
 
 
@@ -1188,13 +1187,13 @@ the <a href='user_guide.html#@h1'>@h1</a> tag. It is similar to the H2 tag from 
 </div>
 
 <div class='source' id="snippet_24">
-<div class='snippet'>@h1 This is an example header<br/><br/># An example second level header<br/>@h2 This is a sub header<br/>This is some text related to the sub @h1 tag.</div>
+<div class='snippet'>@h1&nbsp;This&nbsp;is&nbsp;an&nbsp;example&nbsp;header<br/><br/># An example second level header<br/>@h2&nbsp;This&nbsp;is&nbsp;a&nbsp;sub&nbsp;header<br/>This&nbsp;is&nbsp;some&nbsp;text&nbsp;related&nbsp;to&nbsp;the&nbsp;sub&nbsp;@h1&nbsp;tag.</div>
 </div>
 
 
 <h3>5.1.3. @h3<a name='@h3'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@h3'>@h3</a> tag is a hierarchial header directly beneath
-the <a href='user_guide.html#@h2'>@h2</a> tag. It is similar to the H3 tag from HTML.
+<div class='tblkps' >The @h3 tag is a hierarchial header directly beneath
+the @h2 tag. It is similar to the H3 tag from HTML.
 </div>
 
 
@@ -1214,13 +1213,13 @@ the <a href='user_guide.html#@h2'>@h2</a> tag. It is similar to the H3 tag from 
 </div>
 
 <div class='source' id="snippet_26">
-<div class='snippet'>@h1 This is an example header<br/><br/>@h2 This is a sub header<br/><br/>@h3 This is a third level header<br/>Some text related to this header</div>
+<div class='snippet'>@h1&nbsp;This&nbsp;is&nbsp;an&nbsp;example&nbsp;header<br/><br/>@h2&nbsp;This&nbsp;is&nbsp;a&nbsp;sub&nbsp;header<br/><br/>@h3&nbsp;This&nbsp;is&nbsp;a&nbsp;third&nbsp;level&nbsp;header<br/>Some&nbsp;text&nbsp;related&nbsp;to&nbsp;this&nbsp;header</div>
 </div>
 
 
 <h3>5.1.4. @h4<a name='@h4'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@h4'>@h4</a> tag is a hierarchial header directly beneath
-the <a href='user_guide.html#@h3'>@h3</a> tag. It is similar to the H4 tag from HTML.
+<div class='tblkps' >The @h4 tag is a hierarchial header directly beneath
+the @h3 tag. It is similar to the H4 tag from HTML.
 </div>
 
 
@@ -1242,13 +1241,13 @@ the <a href='user_guide.html#@h3'>@h3</a> tag. It is similar to the H4 tag from 
 </div>
 
 <div class='source' id="snippet_28">
-<div class='snippet'>@h1 This is an example header<br/><br/>@h2 This is a sub header<br/><br/>@h3 This is a third level header<br/><br/>@h4 This is a fourth level header<br/>Some example text here</div>
+<div class='snippet'>@h1&nbsp;This&nbsp;is&nbsp;an&nbsp;example&nbsp;header<br/><br/>@h2&nbsp;This&nbsp;is&nbsp;a&nbsp;sub&nbsp;header<br/><br/>@h3&nbsp;This&nbsp;is&nbsp;a&nbsp;third&nbsp;level&nbsp;header<br/><br/>@h4&nbsp;This&nbsp;is&nbsp;a&nbsp;fourth&nbsp;level&nbsp;header<br/>Some&nbsp;example&nbsp;text&nbsp;here</div>
 </div>
 
 
 <h3>5.1.5. @h5<a name='@h5'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@h5'>@h5</a> tag is a hierarchial header directly beneath
-the <a href='user_guide.html#@h4'>@h4</a> tag. It is similar to the H5 tag from HTML.
+<div class='tblkps' >The @h5 tag is a hierarchial header directly beneath
+the @h4 tag. It is similar to the H5 tag from HTML.
 </div>
 
 
@@ -1272,12 +1271,12 @@ the <a href='user_guide.html#@h4'>@h4</a> tag. It is similar to the H5 tag from 
 </div>
 
 <div class='source' id="snippet_30">
-<div class='snippet'>@h1 This is an example header<br/><br/>@h2 This is a sub header<br/><br/>@h3 This is a third level header<br/><br/>@h4 This is a fourth level header<br/><br/>@h5 This is a fifth level header<br/>Some example text here</div>
+<div class='snippet'>@h1&nbsp;This&nbsp;is&nbsp;an&nbsp;example&nbsp;header<br/><br/>@h2&nbsp;This&nbsp;is&nbsp;a&nbsp;sub&nbsp;header<br/><br/>@h3&nbsp;This&nbsp;is&nbsp;a&nbsp;third&nbsp;level&nbsp;header<br/><br/>@h4&nbsp;This&nbsp;is&nbsp;a&nbsp;fourth&nbsp;level&nbsp;header<br/><br/>@h5&nbsp;This&nbsp;is&nbsp;a&nbsp;fifth&nbsp;level&nbsp;header<br/>Some&nbsp;example&nbsp;text&nbsp;here</div>
 </div>
 
 
 <h3>5.1.6. @h<a name='@h'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@h'>@h</a> tag can be used to create a header that is
+<div class='tblkps' >The @h tag can be used to create a header that is
 un-numbered.
 </div>
 
@@ -1290,11 +1289,11 @@ un-numbered.
 <div class='code'>
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
 002  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@h'>@h</a> This is an un-numbered header<br/>Some random text after the header</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@h This is an un-numbered header<br/>Some random text after the header</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_32">
-<div class='snippet'>@h This is an un-numbered header<br/>Some random text after the header</div>
+<div class='snippet'>@h&nbsp;This&nbsp;is&nbsp;an&nbsp;un-numbered&nbsp;header<br/>Some&nbsp;random&nbsp;text&nbsp;after&nbsp;the&nbsp;header</div>
 </div>
 
 
@@ -1320,13 +1319,13 @@ the user to prevent a short heading from being automatically linked
 </div>
 
 <div class='source' id="snippet_34">
-<div class='snippet'>@h2: wikiword="MyHeading"<br/>Test<br/><br/>This is some text associated with MyHeading. MyHeading will be expanded<br/>to the word "Test" but Test won't get expanded.</div>
+<div class='snippet'>@h2:&nbsp;wikiword="MyHeading"<br/>Test<br/><br/>This&nbsp;is&nbsp;some&nbsp;text&nbsp;associated&nbsp;with&nbsp;MyHeading.&nbsp;MyHeading&nbsp;will&nbsp;be&nbsp;expanded<br/>to&nbsp;the&nbsp;word&nbsp;"Test"&nbsp;but&nbsp;Test&nbsp;won't&nbsp;get&nbsp;expanded.</div>
 </div>
 
 
 <h2>5.2. Text Entry Tags<a name='Text Entry Tags'></a></h2>
 <h3>5.2.1. @text<a name='@text'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@text'>@text</a> tag creates a text block that is automatically
+<div class='tblkps' >The @text tag creates a text block that is automatically
 parsed for things like bullets, indentation, or blocks
 of code.
 </div>
@@ -1355,20 +1354,20 @@ of code.
 </div>
 
 <div class='source' id="snippet_36">
-<div class='snippet'>blah blah blah<br/><br/>- An multi-level list<br/>  - A second level in the list<br/>    - A third level in the list<br/><br/>Another paragraph with @{hl, some inlined styling} and<br/><br/>- A second list<br/><br/>{{<br/>and a block of code<br/>}}</div>
+<div class='snippet'>blah&nbsp;blah&nbsp;blah<br/><br/>-&nbsp;An&nbsp;multi-level&nbsp;list<br/>&nbsp;&nbsp;-&nbsp;A&nbsp;second&nbsp;level&nbsp;in&nbsp;the&nbsp;list<br/>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;A&nbsp;third&nbsp;level&nbsp;in&nbsp;the&nbsp;list<br/><br/>Another&nbsp;paragraph&nbsp;with&nbsp;@{hl,&nbsp;some&nbsp;inlined&nbsp;styling}&nbsp;and<br/><br/>-&nbsp;A&nbsp;second&nbsp;list<br/><br/>{{<br/>and&nbsp;a&nbsp;block&nbsp;of&nbsp;code<br/>}}</div>
 </div>
 
 
 <div class='tblkps' >When rendered we get something that looks like this:</div>
 <div class='tblkps' >blah blah blah</div>
 <div class='tblkps' ></div>
-<ul><li>An multi-level list<ul><li>A second level in the list<ul><li>A third level in the list</li></ul></li></ul></li></ul><div class='tblkps' >Another paragraph with <span style='background-color:yellow;'> some inlined styling</span> and</div>
+<ul><li> An multi-level list<ul><li> A second level in the list<ul><li >A third level in the list</li> </ul></li></ul></li></ul><div class='tblkps' >Another paragraph with <span style='background-color:yellow;'> some inlined styling</span> and</div>
 <div class='tblkps' ></div>
-<ul><li>A second list</li></ul><div class='tblkps' ></div>
+<ul><li >A second list</li> </ul><div class='tblkps' ></div>
 <div class='code' style = 'margin-left:20px;background-color:#eee;'><div class='snippet' style='white-space:pre'>and a block of code</div></div>
 <h3>5.2.2. @p<a name='@p'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@p'>@p</a> tag is used to create a paragraph. It is similar to the <b>P</b> tag
-in HTML. It does not attempt to parse the text block like the <a href='user_guide.html#@text'>@text</a>
+<div class='tblkps' >The @p tag is used to create a paragraph. It is similar to the <b>P</b> tag
+in HTML. It does not attempt to parse the text block like the @text
 tag does in order to extract lists or indented code.
 </div>
 
@@ -1385,7 +1384,7 @@ tag does in order to extract lists or indented code.
 </div>
 
 <div class='source' id="snippet_38">
-<div class='snippet'>@p This is a paragraph in my document<br/>@p This is another paragraph in my document</div>
+<div class='snippet'>@p&nbsp;This&nbsp;is&nbsp;a&nbsp;paragraph&nbsp;in&nbsp;my&nbsp;document<br/>@p&nbsp;This&nbsp;is&nbsp;another&nbsp;paragraph&nbsp;in&nbsp;my&nbsp;document</div>
 </div>
 
 
@@ -1393,7 +1392,7 @@ tag does in order to extract lists or indented code.
 <p>This is a paragraph in my document</p>
 <p>This is another paragraph in my document</p>
 <h3>5.2.3. @pre<a name='@pre'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@pre'>@pre</a> tag creates a block of unformatted text:</div>
+<div class='tblkps' >The @pre tag creates a block of unformatted text:</div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
@@ -1410,7 +1409,7 @@ tag does in order to extract lists or indented code.
 </div>
 
 <div class='source' id="snippet_40">
-<div class='snippet'>@pre<br/>This is a test<br/>  this is a test<br/>    this is also a test</div>
+<div class='snippet'>@pre<br/>This&nbsp;is&nbsp;a&nbsp;test<br/>&nbsp;&nbsp;this&nbsp;is&nbsp;a&nbsp;test<br/>&nbsp;&nbsp;&nbsp;&nbsp;this&nbsp;is&nbsp;also&nbsp;a&nbsp;test</div>
 </div>
 
 
@@ -1421,29 +1420,29 @@ tag does in order to extract lists or indented code.
 </pre>
 <h2>5.3. Include Files<a name='Include Files'></a></h2>
 <div class='tblkps' >Shorte supports include files using either of the following tags:</div>
-<table class='bordered'><tr class='header'>
-<td  class='header'><div class='tblkp' >Include</div>
+<table class='bordered' ><tr class='header'>
+<td   class='header'><div class='tblkp' >Include</div>
 </td>
-<td  class='header'><div class='tblkp' >Description</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@include'>@include</a></div>
-</td>
-<td ><div class='tblkp' >A normal include - interrupts any conditional text flow</div>
+<td   class='header'><div class='tblkp' >Description</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' ><a href='user_guide.html#@include_child'>@include_child</a></div>
+<td  ><div class='tblkp' >@include</div>
 </td>
-<td ><div class='tblkp' >A child include - obeys conditional text flow cascading rules</div>
+<td  ><div class='tblkp' >A normal include - interrupts any conditional text flow</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >@include_child</div>
+</td>
+<td  ><div class='tblkp' >A child include - obeys conditional text flow cascading rules</div>
 </td>
 </tr>
 </table><h3>5.3.1. @include<a name='@include'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@include'>@include</a> tag is used to include another file. This is to allow breaking
-a document up into multiple modules. The <a href='user_guide.html#@include'>@include</a> will break any cascading of
+<div class='tblkps' >The @include tag is used to include another file. This is to allow breaking
+a document up into multiple modules. The @include will break any cascading of
 conditional statements in the document hierarchy. To cascade conditional
-text in the document hierarcy use the <a href='user_guide.html#@include_child'>@include_child</a> tag instead.
+text in the document hierarcy use the @include_child tag instead.
 </div>
 
 
@@ -1458,7 +1457,7 @@ text in the document hierarcy use the <a href='user_guide.html#@include_child'>@
 </div>
 
 <div class='source' id="snippet_42">
-<div class='snippet'>@include "chapters/my_chapter.tpl"</div>
+<div class='snippet'>@include&nbsp;"chapters/my_chapter.tpl"</div>
 </div>
 
 
@@ -1478,16 +1477,16 @@ or exclude the file.
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
 002  
 003  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@include</span>: if=<span class="str">"VARIABLE</span> <span class="str">==</span> <span class="str">'xyz'"</span><br/>chapters/my_chapter.tpl<br/>chapters/my_chapter2.tpl</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@include</span>: if=<span class="str">"VARIABLE == 'xyz'"</span><br/>chapters/my_chapter.tpl<br/>chapters/my_chapter2.tpl</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_44">
-<div class='snippet'>@include: if="VARIABLE == 'xyz'"<br/>chapters/my_chapter.tpl<br/>chapters/my_chapter2.tpl</div>
+<div class='snippet'>@include:&nbsp;if="VARIABLE == 'xyz'"<br/>chapters/my_chapter.tpl<br/>chapters/my_chapter2.tpl</div>
 </div>
 
 
 <h3>5.3.2. @include_child<a name='@include_child'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@include_child'>@include_child</a> tag is an alternative to the @child tag. It behaves
+<div class='tblkps' >The @include_child tag is an alternative to the @child tag. It behaves
 slightly differently in that it does not break the cascase of conditional
 text but continues the current cascade.
 </div>
@@ -1504,17 +1503,17 @@ text but continues the current cascade.
 003  
 004  
 005  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@h1</span> My Title<br/>This section will continue inside the my_chapter.tpl file.<br/><br/><span class='kw'>@include_child</span>: if=<span class="str">"VARIABLE</span> <span class="str">==</span> <span class="str">'xyz'"</span><br/>chapters/my_chapter.tpl</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@h1</span> My Title<br/>This section will continue inside the my_chapter.tpl file.<br/><br/><span class='kw'>@include_child</span>: if=<span class="str">"VARIABLE == 'xyz'"</span><br/>chapters/my_chapter.tpl</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_46">
-<div class='snippet'>@h1 My Title<br/>This section will continue inside the my_chapter.tpl file.<br/><br/>@include_child: if="VARIABLE == 'xyz'"<br/>chapters/my_chapter.tpl</div>
+<div class='snippet'>@h1&nbsp;My&nbsp;Title<br/>This&nbsp;section&nbsp;will&nbsp;continue&nbsp;inside&nbsp;the&nbsp;my_chapter.tpl&nbsp;file.<br/><br/>@include_child:&nbsp;if="VARIABLE == 'xyz'"<br/>chapters/my_chapter.tpl</div>
 </div>
 
 
 <h2>5.4. Images and Image Maps<a name='Images and Image Maps'></a></h2>
 <h3>5.4.1. @image<a name='@image'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@image'>@image</a> tag is used to include an image. Recommended image formats
+<div class='tblkps' >The @image tag is used to include an image. Recommended image formats
 currently included .jpg or .png.
 </div>
 <h3>5.4.2. @imagemap<a name='@imagemap'></a></h3>
@@ -1535,22 +1534,22 @@ HTML output template. Links are not currently supported.
 004  
 005  
 006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@imagemap'>@imagemap</a>: id=<span class="str">"one"</span><br/>- shape  | coords         | Label       | Description<br/>- circle | 50,50,50       | A Circle    | This is a description of my circle<br/>- rect   | 72,144,215,216 | A rectangle | This is a description of my rectangle.<br/><br/><a href='user_guide.html#@image'>@image</a>: map=<span class="str">"one"</span> src=<span class="str">"chapters/images/imagemap.png"</span></div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@imagemap: id=<span class="str">"one"</span><br/>- shape  | coords         | Label       | Description<br/>- circle | 50,50,50       | A Circle    | This is a description of my circle<br/>- rect   | 72,144,215,216 | A rectangle | This is a description of my rectangle.<br/><br/>@image: map=<span class="str">"one"</span> src=<span class="str">"chapters/images/imagemap.png"</span></div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_48">
-<div class='snippet'>@imagemap: id="one"<br/>- shape  | coords         | Label       | Description<br/>- circle | 50,50,50       | A Circle    | This is a description of my circle<br/>- rect   | 72,144,215,216 | A rectangle | This is a description of my rectangle.<br/><br/>@image: map="one" src="chapters/images/imagemap.png"</div>
+<div class='snippet'>@imagemap:&nbsp;id="one"<br/>-&nbsp;shape&nbsp;&nbsp;|&nbsp;coords&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Label&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Description<br/>-&nbsp;circle&nbsp;|&nbsp;50,50,50&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;A&nbsp;Circle&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;This&nbsp;is&nbsp;a&nbsp;description&nbsp;of&nbsp;my&nbsp;circle<br/>-&nbsp;rect&nbsp;&nbsp;&nbsp;|&nbsp;72,144,215,216&nbsp;|&nbsp;A&nbsp;rectangle&nbsp;|&nbsp;This&nbsp;is&nbsp;a&nbsp;description&nbsp;of&nbsp;my&nbsp;rectangle.<br/><br/>@image:&nbsp;map="one"&nbsp;src="chapters/images/imagemap.png"</div>
 </div>
 
 
 <div class='tblkps' >Will generate the following imagemap:</div>
 <map name="one">
-<area shape="circle" coords="50,50,50" href="#"
+<area shape="circle" coords="50,50,50" href="#A Circle"
    onMouseover="ddrivetip('<b>A Circle</b><br/> This is a description of my circle<br/><br/>')"
    onMouseOut="hideddrivetip()"
    
    >
-<area shape="rect" coords="72,144,215,216" href="#"
+<area shape="rect" coords="72,144,215,216" href="#A rectangle"
    onMouseover="ddrivetip('<b>A rectangle</b><br/> This is a description of my rectangle.<br/>')"
    onMouseOut="hideddrivetip()"
    
@@ -1566,7 +1565,7 @@ HTML output template. Links are not currently supported.
 
 <h2>5.5. Lists and Tables<a name='Lists and Tables'></a></h2>
 <h3>5.5.1. @ul<a name='@ul'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@ul'>@ul</a> tag is used to create an unordered list similar to the <b>ul</b> tag
+<div class='tblkps' >The @ul tag is used to create an unordered list similar to the <b>ul</b> tag
 in HTML. Lists can currently be indented 5 levels deep.
 </div>
 
@@ -1587,13 +1586,13 @@ in HTML. Lists can currently be indented 5 levels deep.
 </div>
 
 <div class='source' id="snippet_50">
-<div class='snippet'>@ul<br/>- Item 1<br/>  - Subitem a<br/>    - Sub-subitem y<br/>- Item 2<br/>  - Subitem b</div>
+<div class='snippet'>@ul<br/>-&nbsp;Item&nbsp;1<br/>&nbsp;&nbsp;-&nbsp;Subitem&nbsp;a<br/>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Sub-subitem&nbsp;y<br/>-&nbsp;Item&nbsp;2<br/>&nbsp;&nbsp;-&nbsp;Subitem&nbsp;b</div>
 </div>
 
 
 <div class='tblkps' >This generates the following output</div>
-<ul><li>Item 1<ul><li>Subitem a<ul><li>Sub-subitem y</li></ul></li></ul></li><li>Item 2<ul><li>Subitem b</li></ul></li></ul><h3>5.5.2. @ol<a name='@ol'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@ol'>@ol</a> tag is used to create an unordered list similar to the <b>ol</b> tag
+<ul><li> Item 1<ul><li> Subitem a<ul><li >Sub-subitem y</li> </ul></li></ul></li><li> Item 2<ul><li >Subitem b</li> </ul></li></ul><h3>5.5.2. @ol<a name='@ol'></a></h3>
+<div class='tblkps' >The @ol tag is used to create an unordered list similar to the <b>ol</b> tag
 in HTML. Lists can currently be indented 5 levels deep.
 </div>
 
@@ -1614,13 +1613,13 @@ in HTML. Lists can currently be indented 5 levels deep.
 </div>
 
 <div class='source' id="snippet_52">
-<div class='snippet'>@ol<br/>- Item 1<br/>  - Subitem a<br/>    - Sub-subitem y<br/>- Item 2<br/>  - Subitem b</div>
+<div class='snippet'>@ol<br/>-&nbsp;Item&nbsp;1<br/>&nbsp;&nbsp;-&nbsp;Subitem&nbsp;a<br/>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;Sub-subitem&nbsp;y<br/>-&nbsp;Item&nbsp;2<br/>&nbsp;&nbsp;-&nbsp;Subitem&nbsp;b</div>
 </div>
 
 
 <div class='tblkps' >This generates the following output</div>
-<ol><li>Item 1<ol><li>Subitem a<ol><li>Sub-subitem y</li></ol></li></ol></li><li>Item 2<ol><li>Subitem b</li></ol></li></ol><h3>5.5.3. @table<a name='@table'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@table'>@table</a> tag is used to create a table. The syntax is shown in the
+<ol><li> Item 1<ol><li> Subitem a<ol><li >Sub-subitem y</li> </ol></li></ol></li><li> Item 2<ol><li >Subitem b</li> </ol></li></ol><h3>5.5.3. @table<a name='@table'></a></h3>
+<div class='tblkps' >The @table tag is used to create a table. The syntax is shown in the
 example below.
 </div>
 
@@ -1641,37 +1640,37 @@ example below.
 </div>
 
 <div class='source' id="snippet_54">
-<div class='snippet'>@table<br/>- Header Col 1 | Header Col 2<br/>- Field 1      | Field 2<br/>- Field 3      | Field 4<br/>-&amp; Section<br/>- Field 5      | Field 6</div>
+<div class='snippet'>@table<br/>-&nbsp;Header&nbsp;Col&nbsp;1&nbsp;|&nbsp;Header&nbsp;Col&nbsp;2<br/>-&nbsp;Field&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Field&nbsp;2<br/>-&nbsp;Field&nbsp;3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Field&nbsp;4<br/>-&amp;&nbsp;Section<br/>-&nbsp;Field&nbsp;5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Field&nbsp;6</div>
 </div>
 
 
 <div class='tblkps' >This generates the following output:</div>
-<table class='bordered'><tr class='header'>
-<td  class='header'><div class='tblkp' >Header Col 1</div>
+<table class='bordered' ><tr class='header'>
+<td   class='header'><div class='tblkp' >Header Col 1</div>
 </td>
-<td  class='header'><div class='tblkp' >Header Col 2</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' >Field 1</div>
-</td>
-<td ><div class='tblkp' >Field 2</div>
+<td   class='header'><div class='tblkp' >Header Col 2</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Field 3</div>
+<td  ><div class='tblkp' >Field 1</div>
 </td>
-<td ><div class='tblkp' >Field 4</div>
-</td>
-</tr>
-<tr>
-<td colspan='2' class='subheader'><div class='tblkp' >Section Header</div>
+<td  ><div class='tblkp' >Field 2</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >Field 5</div>
+<td  ><div class='tblkp' >Field 3</div>
 </td>
-<td ><div class='tblkp' >Field 6</div>
+<td  ><div class='tblkp' >Field 4</div>
+</td>
+</tr>
+<tr>
+<td colspan='2'  class='subheader'><div class='tblkp' >Section Header</div>
+</td>
+</tr>
+<tr>
+<td  ><div class='tblkp' >Field 5</div>
+</td>
+<td  ><div class='tblkp' >Field 6</div>
 </td>
 </tr>
 </table><h4>5.5.3.1. Spanning Columns<a name='Spanning Columns'></a></h4>
@@ -1697,52 +1696,52 @@ after the column to span. Each additional | spans an extra column.
 </div>
 
 <div class='source' id="snippet_56">
-<div class='snippet'>@table<br/>- Column 1 | column 2 | Column 3 | Column 4 | Column 5<br/>- This column spans the whole table<br/>-&amp; So does this header<br/>- || Blah blah || Blah blah<br/>-&amp; This row has no spanning<br/>- one | two | three | four | five</div>
+<div class='snippet'>@table<br/>-&nbsp;Column&nbsp;1&nbsp;|&nbsp;column&nbsp;2&nbsp;|&nbsp;Column&nbsp;3&nbsp;|&nbsp;Column&nbsp;4&nbsp;|&nbsp;Column&nbsp;5<br/>-&nbsp;This&nbsp;column&nbsp;spans&nbsp;the&nbsp;whole&nbsp;table<br/>-&amp;&nbsp;So&nbsp;does&nbsp;this&nbsp;header<br/>-&nbsp;||&nbsp;Blah&nbsp;blah&nbsp;||&nbsp;Blah&nbsp;blah<br/>-&amp;&nbsp;This&nbsp;row&nbsp;has&nbsp;no&nbsp;spanning<br/>-&nbsp;one&nbsp;|&nbsp;two&nbsp;|&nbsp;three&nbsp;|&nbsp;four&nbsp;|&nbsp;five</div>
 </div>
 
 
 <div class='tblkps' >This creates a table that looks like this:</div>
-<table class='bordered'><tr class='header'>
-<td  class='header'><div class='tblkp' >Column 1</div>
+<table class='bordered' ><tr class='header'>
+<td   class='header'><div class='tblkp' >Column 1</div>
 </td>
-<td  class='header'><div class='tblkp' >column 2</div>
+<td   class='header'><div class='tblkp' >column 2</div>
 </td>
-<td  class='header'><div class='tblkp' >Column 3</div>
+<td   class='header'><div class='tblkp' >Column 3</div>
 </td>
-<td  class='header'><div class='tblkp' >Column 4</div>
+<td   class='header'><div class='tblkp' >Column 4</div>
 </td>
-<td  class='header'><div class='tblkp' >Column 5</div>
-</td>
-</tr>
-<tr>
-<td colspan='5'><div class='tblkp' >This column spans the whole table</div>
+<td   class='header'><div class='tblkp' >Column 5</div>
 </td>
 </tr>
 <tr>
-<td colspan='5' class='subheader'><div class='tblkp' >So does this header</div>
+<td colspan='5' ><div class='tblkp' >This column spans the whole table</div>
 </td>
 </tr>
 <tr>
-<td colspan='2'></td>
-<td colspan='2'><div class='tblkp' >Blah blah</div>
-</td>
-<td ><div class='tblkp' >Blah blah</div>
+<td colspan='5'  class='subheader'><div class='tblkp' >So does this header</div>
 </td>
 </tr>
 <tr>
-<td colspan='5' class='subheader'><div class='tblkp' >This row has no spanning</div>
+<td colspan='2' ></td>
+<td colspan='2' ><div class='tblkp' >Blah blah</div>
+</td>
+<td  ><div class='tblkp' >Blah blah</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >one</div>
+<td colspan='5'  class='subheader'><div class='tblkp' >This row has no spanning</div>
 </td>
-<td ><div class='tblkp' >two</div>
+</tr>
+<tr>
+<td  ><div class='tblkp' >one</div>
 </td>
-<td ><div class='tblkp' >three</div>
+<td  ><div class='tblkp' >two</div>
 </td>
-<td ><div class='tblkp' >four</div>
+<td  ><div class='tblkp' >three</div>
 </td>
-<td ><div class='tblkp' >five</div>
+<td  ><div class='tblkp' >four</div>
+</td>
+<td  ><div class='tblkp' >five</div>
 </td>
 </tr>
 </table><h4>5.5.3.2. Headings and Sub-headings<a name='Headings and Sub-headings'></a></h4>
@@ -1764,21 +1763,21 @@ mark any row as a header row by staring the line with -*
 </div>
 
 <div class='source' id="snippet_58">
-<div class='snippet'>- My Heading 1<br/>-* Also a heading<br/>-&amp; This is a sub-heading</div>
+<div class='snippet'>-&nbsp;My&nbsp;Heading&nbsp;1<br/>-*&nbsp;Also&nbsp;a&nbsp;heading<br/>-&amp;&nbsp;This&nbsp;is&nbsp;a&nbsp;sub-heading</div>
 </div>
 
 
 <div class='tblkps' >This creates a table that looks like:</div>
-<table class='bordered'><tr class='header'>
-<td  class='header'><div class='tblkp' >My Heading 1</div>
+<table class='bordered' ><tr class='header'>
+<td   class='header'><div class='tblkp' >My Heading 1</div>
 </td>
 </tr>
 <tr class='header'>
-<td  class='header'><div class='tblkp' >Also a heading</div>
+<td   class='header'><div class='tblkp' >Also a heading</div>
 </td>
 </tr>
 <tr>
-<td  class='subheader'><div class='tblkp' >This is a sub-heading</div>
+<td   class='subheader'><div class='tblkp' >This is a sub-heading</div>
 </td>
 </tr>
 </table><h4>5.5.3.3. Table Caption<a name='Table Caption'></a></h4>
@@ -1794,27 +1793,25 @@ mark any row as a header row by staring the line with -*
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
 002  
 003  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@table</span>: caption=<span class="str">"This</span> <span class="str">is</span> <span class="str">a</span> <span class="str">caption</span> <span class="str">for</span> <span class="str">my</span> <span class="str">table"</span><br/>- My table<br/>- My data | some more data</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@table</span>: caption=<span class="str">"This is a caption for my table"</span><br/>- My table<br/>- My data | some more data</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_60">
-<div class='snippet'>@table: caption="This is a caption for my table"<br/>- My table<br/>- My data | some more data</div>
+<div class='snippet'>@table:&nbsp;caption="This is a caption for my table"<br/>-&nbsp;My&nbsp;table<br/>-&nbsp;My&nbsp;data&nbsp;|&nbsp;some&nbsp;more&nbsp;data</div>
 </div>
 
 
 <div class='tblkps' >This creates the following table:</div>
-<table class='bordered'><tr class='header'>
-<td colspan='2' class='header'><div class='tblkp' >My table</div>
+<table class='bordered' ><tr class='header'>
+<td colspan='2'  class='header'><div class='tblkp' >My table</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >My data</div>
+<td  ><div class='tblkp' >My data</div>
 </td>
-<td ><div class='tblkp' >some more data</div>
+<td  ><div class='tblkp' >some more data</div>
 </td>
 </tr>
-<tr class='caption'><td colspan='2' class='caption' style='border:0px;text-align:left;'><b>Caption:</b> <div class='tblkp' >This is a caption for my table</div>
-</td></tr>
 </table><h4>5.5.3.4. Table Title<a name='Table Title'></a></h4>
 <div class='tblkps' >To add a title to the table you can use the <b>title</b> attribute:</div>
 
@@ -1828,29 +1825,29 @@ mark any row as a header row by staring the line with -*
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
 002  
 003  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@table</span>: title=<span class="str">"This</span> <span class="str">is</span> <span class="str">my</span> <span class="str">table"</span><br/>- My table<br/>- My data | some more data</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@table</span>: title=<span class="str">"This is my table"</span><br/>- My table<br/>- My data | some more data</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_62">
-<div class='snippet'>@table: title="This is my table"<br/>- My table<br/>- My data | some more data</div>
+<div class='snippet'>@table:&nbsp;title="This is my table"<br/>-&nbsp;My&nbsp;table<br/>-&nbsp;My&nbsp;data&nbsp;|&nbsp;some&nbsp;more&nbsp;data</div>
 </div>
 
 
 <div class='tblkps' >This creates the following table:</div>
-<table class='bordered'><tr><th colspan='2'>This is my table</th></tr>
+<table class='bordered' ><tr><th colspan='2'>This is my table</th></tr>
 <tr class='header'>
-<td colspan='2' class='header'><div class='tblkp' >My table</div>
+<td colspan='2'  class='header'><div class='tblkp' >My table</div>
 </td>
 </tr>
 <tr>
-<td ><div class='tblkp' >My data</div>
+<td  ><div class='tblkp' >My data</div>
 </td>
-<td ><div class='tblkp' >some more data</div>
+<td  ><div class='tblkp' >some more data</div>
 </td>
 </tr>
 </table><h2>5.6. Notes, TBD and Questions<a name='Notes, TBD and Questions'></a></h2>
 <h3>5.6.1. @note<a name='@note'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@note'>@note</a> tag is used to create notes within a section. Here is an
+<div class='tblkps' >The @note tag is used to create notes within a section. Here is an
 example:
 </div>
 
@@ -1872,7 +1869,7 @@ example:
 </div>
 
 <div class='source' id="snippet_64">
-<div class='snippet'>@note<br/>This is a note here that I want to display<br/><br/>- It has a list<br/>  - With some data<br/><br/>And another paragraph.</div>
+<div class='snippet'>@note<br/>This&nbsp;is&nbsp;a&nbsp;note&nbsp;here&nbsp;that&nbsp;I&nbsp;want&nbsp;to&nbsp;display<br/><br/>-&nbsp;It&nbsp;has&nbsp;a&nbsp;list<br/>&nbsp;&nbsp;-&nbsp;With&nbsp;some&nbsp;data<br/><br/>And&nbsp;another&nbsp;paragraph.</div>
 </div>
 
 
@@ -1882,19 +1879,19 @@ example:
   <table>
     <tr valign="top">
         <td>
-            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="note.png"/>Note:</div>
-            <div style="margin-left:10px;"><div class='tblkps' >This is a note here that I want to display</div>
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:35px;margin-left:-10px;margin-top:-10px;' src="css/note.png"></img>Note:</div>
+            <div style="margin-left:10px;margin-top:5px;"><div class='tblkps' >This is a note here that I want to display</div>
 <div class='tblkps' ></div>
-<ul><li>It has a list<ul><li>With some data</li></ul></li></ul><div class='tblkps' >And another paragraph.</div>
+<ul><li> It has a list<ul><li >With some data</li> </ul></li></ul><div class='tblkps' >And another paragraph.</div>
 </div>
         </td>
     </tr>
   </table>
 </div>
 <h3>5.6.2. @tbd<a name='@tbd'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@tbd'>@tbd</a> tag is used to highlight sections of a document
+<div class='tblkps' >The @tbd tag is used to highlight sections of a document
 that are still <b>To Be Determined</b>. They are similar in
-syntax to the <a href='user_guide.html#@note'>@note</a> tag
+syntax to the @note tag
 </div>
 
 
@@ -1919,11 +1916,11 @@ syntax to the <a href='user_guide.html#@note'>@note</a> tag
 013  
 014  
 015  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@tbd'>@tbd</a><br/>This is a block of code that is to be determined. It<br/>works just like a textblock and supports<br/><br/>- lists<br/>    - indented data<br/>    - another item<br/>- second item in list<br/><br/>Another paragraph<br/><br/>    some indented text here<br/>    that wraps to a new line<br/><br/>A final paragraph</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@tbd<br/>This is a block of code that is to be determined. It<br/>works just like a textblock and supports<br/><br/>- lists<br/>    - indented data<br/>    - another item<br/>- second item in list<br/><br/>Another paragraph<br/><br/>    some indented text here<br/>    that wraps to a new line<br/><br/>A final paragraph</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_66">
-<div class='snippet'>@tbd<br/>This is a block of code that is to be determined. It<br/>works just like a textblock and supports<br/><br/>- lists<br/>    - indented data<br/>    - another item<br/>- second item in list<br/><br/>Another paragraph<br/><br/>    some indented text here<br/>    that wraps to a new line<br/><br/>A final paragraph</div>
+<div class='snippet'>@tbd<br/>This&nbsp;is&nbsp;a&nbsp;block&nbsp;of&nbsp;code&nbsp;that&nbsp;is&nbsp;to&nbsp;be&nbsp;determined.&nbsp;It<br/>works&nbsp;just&nbsp;like&nbsp;a&nbsp;textblock&nbsp;and&nbsp;supports<br/><br/>-&nbsp;lists<br/>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;indented&nbsp;data<br/>&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;another&nbsp;item<br/>-&nbsp;second&nbsp;item&nbsp;in&nbsp;list<br/><br/>Another&nbsp;paragraph<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;some&nbsp;indented&nbsp;text&nbsp;here<br/>&nbsp;&nbsp;&nbsp;&nbsp;that&nbsp;wraps&nbsp;to&nbsp;a&nbsp;new&nbsp;line<br/><br/>A&nbsp;final&nbsp;paragraph</div>
 </div>
 
 
@@ -1932,24 +1929,24 @@ syntax to the <a href='user_guide.html#@note'>@note</a> tag
   <table>
     <tr valign="top">
         <td>
-            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:30px;' src="tbd.png"/>TBD:</div>
-            <div style="margin-left:10px;">&lt;div class='tblkps' &gt;This is a block of code that is to be determined. It
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:35px;margin-left:-10px;margin-top:-10px;' src="css/tbd.png"></img>TBD:</div>
+            <div style="margin-left:10px;margin-top:5px;"><div class='tblkps' >This is a block of code that is to be determined. It
 works just like a textblock and supports
-&lt;/div&gt;
-&lt;div class='tblkps' &gt;&lt;/div&gt;
-&lt;ul&gt;&lt;li&gt;lists&lt;ul&gt;&lt;li&gt;indented data&lt;/li&gt;&lt;li&gt;another item&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;li&gt;second item in list&lt;/li&gt;&lt;/ul&gt;&lt;div class='tblkps' &gt;Another paragraph&lt;/div&gt;
-&lt;div class='tblkps' &gt;&lt;/div&gt;
-&lt;div class='tblkps' style='margin-left:44px;'&gt;    some indented text here
+</div>
+<div class='tblkps' ></div>
+<ul><li> lists<ul><li >indented data</li> <li >another item</li> </ul></li><li >second item in list</li> </ul><div class='tblkps' >Another paragraph</div>
+<div class='tblkps' ></div>
+<div class='tblkps' style='margin-left:44px;'>    some indented text here
     that wraps to a new line
-&lt;/div&gt;
-&lt;div class='tblkps' &gt;A final paragraph&lt;/div&gt;
+</div>
+<div class='tblkps' >A final paragraph</div>
 </div>
         </td>
     </tr>
   </table>
 </div>
 <h3>5.6.3. @question<a name='@question'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@question'>@question</a> tag is used to mark a question to the reader
+<div class='tblkps' >The @question tag is used to mark a question to the reader
 or mark anything that might still need to be answered
 </div>
 
@@ -1965,31 +1962,32 @@ or mark anything that might still need to be answered
 003  
 004  
 005  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@question'>@question</a><br/>This is a question<br/><br/>with another paragraph. It should eventually be switched<br/>to the same syntax as the <span class='kw'>@note</span> and <a href='user_guide.html#@tbd'>@tbd</a> tag.</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@question<br/>This is a question<br/><br/>with another paragraph. It should eventually be switched<br/>to the same syntax as the <span class='kw'>@note</span> and @tbd tag.</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_68">
-<div class='snippet'>@question<br/>This is a question<br/><br/>with another paragraph. It should eventually be switched<br/>to the same syntax as the @note and @tbd tag.</div>
+<div class='snippet'>@question<br/>This&nbsp;is&nbsp;a&nbsp;question<br/><br/>with&nbsp;another&nbsp;paragraph.&nbsp;It&nbsp;should&nbsp;eventually&nbsp;be&nbsp;switched<br/>to&nbsp;the&nbsp;same&nbsp;syntax&nbsp;as&nbsp;the&nbsp;@note&nbsp;and&nbsp;@tbd&nbsp;tag.</div>
 </div>
 
 
 <div class='tblkps' >When rendered this looks like:</div>
 
-    <div style='margin-left: 30px; color: red; border-left: 1px solid #C0C0C0;width:100%;'>
-    <table>
-        <tr>
-            <td><img style="height:50px;" src="question.png"></td>
-            <td>
-                <div style='font-weight:bold;color:black;text-decoration:underline;'>Question:</div>
-                <div style="margin-left:10px;">This is a question&lt;br/&gt;&lt;br/&gt;with another paragraph. It should eventually be switched
-to the same syntax as the &lt;a href='user_guide.html#@note'&gt;@note&lt;/a&gt; and &lt;a href='user_guide.html#@tbd'&gt;@tbd&lt;/a&gt; tag.
+<div style='margin-left: 20px; margin-top:10px; margin-bottom:10px; margin-right:30px;border:1px solid #ccc;background:#f8f7cf;border-radius:6px;-moz-border-radius:6px;-webkit-border-radius:6px;'>
+  <table>
+    <tr valign="top">
+        <td>
+            <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:35px;margin-left:-10px;margin-top:-10px;' src="css/question.png"></img>Question:</div>
+            <div style="margin-left:10px;margin-top:5px;"><div class='tblkps' >This is a question</div>
+<div class='tblkps' >with another paragraph. It should eventually be switched
+to the same syntax as the @note and @tbd tag.
 </div>
-            </td>
-        </tr>
-    </table>
-    </div>
+</div>
+        </td>
+    </tr>
+  </table>
+</div>
 <h3>5.6.4. @questions<a name='@questions'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@questions'>@questions</a> tag is used to create a Q and A type section.
+<div class='tblkps' >The @questions tag is used to create a Q and A type section.
 For example,
 </div>
 
@@ -2010,11 +2008,11 @@ For example,
 008  
 009  
 010  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@questions'>@questions</a><br/>Q: This is a question with some more info<br/>A: This is the answer to the question with a lot<br/>   of detail that wraps across multiple lines and<br/>   hopefully it will make the HTML look interesting<br/>   but I'm not sure we'll just have to see what<br/>   happens when it's rendered<br/><br/>Q: This is another question with some more information<br/>A: This is the answer to that question</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@questions<br/>Q: This is a question with some more info<br/>A: This is the answer to the question with a lot<br/>   of detail that wraps across multiple lines and<br/>   hopefully it will make the HTML look interesting<br/>   but I'm not sure we'll just have to see what<br/>   happens when it's rendered<br/><br/>Q: This is another question with some more information<br/>A: This is the answer to that question</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_70">
-<div class='snippet'>@questions<br/>Q: This is a question with some more info<br/>A: This is the answer to the question with a lot<br/>   of detail that wraps across multiple lines and<br/>   hopefully it will make the HTML look interesting<br/>   but I'm not sure we'll just have to see what<br/>   happens when it's rendered<br/><br/>Q: This is another question with some more information<br/>A: This is the answer to that question</div>
+<div class='snippet'>@questions<br/>Q:&nbsp;This&nbsp;is&nbsp;a&nbsp;question&nbsp;with&nbsp;some&nbsp;more&nbsp;info<br/>A:&nbsp;This&nbsp;is&nbsp;the&nbsp;answer&nbsp;to&nbsp;the&nbsp;question&nbsp;with&nbsp;a&nbsp;lot<br/>&nbsp;&nbsp;&nbsp;of&nbsp;detail&nbsp;that&nbsp;wraps&nbsp;across&nbsp;multiple&nbsp;lines&nbsp;and<br/>&nbsp;&nbsp;&nbsp;hopefully&nbsp;it&nbsp;will&nbsp;make&nbsp;the&nbsp;HTML&nbsp;look&nbsp;interesting<br/>&nbsp;&nbsp;&nbsp;but&nbsp;I'm&nbsp;not&nbsp;sure&nbsp;we'll&nbsp;just&nbsp;have&nbsp;to&nbsp;see&nbsp;what<br/>&nbsp;&nbsp;&nbsp;happens&nbsp;when&nbsp;it's&nbsp;rendered<br/><br/>Q:&nbsp;This&nbsp;is&nbsp;another&nbsp;question&nbsp;with&nbsp;some&nbsp;more&nbsp;information<br/>A:&nbsp;This&nbsp;is&nbsp;the&nbsp;answer&nbsp;to&nbsp;that&nbsp;question</div>
 </div>
 
 
@@ -2035,7 +2033,7 @@ For example,
 
 <h2>5.7. Structures and Functions<a name='Structures and Functions'></a></h2>
 <h3>5.7.1. @struct<a name='@struct'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@struct'>@struct</a> tag defines a C style structure. It also supports generating
+<div class='tblkps' >The @struct tag defines a C style structure. It also supports generating
 a picture showing the layout of the structure. The <b>title</b> attribute
 should currently be a unique name since it is used to map any generated
 image to the structure itself as well as generate C code from the structure
@@ -2057,18 +2055,31 @@ definition.
 004  
 005  
 006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@struct</span>: title=<span class="str">"struct1"</span> caption=<span class="str">"blah</span> <span class="str">blah"</span> diagram=<span class="str">"show:yes</span>,<span class="str">align:128</span>,<span class="str">bitorder:decrement"</span><br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div><div style='clear:both;'></div></div>
+007  
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@struct</span>: name=<span class="str">"struct1"</span> caption=<span class="str">"blah blah"</span> diagram=<span class="str">"show:yes,align:128,bitorder:decrement"</span><br/>--fields:<br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_72">
-<div class='snippet'>@struct: title="struct1" caption="blah blah" diagram="show:yes,align:128,bitorder:decrement"<br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div>
+<div class='snippet'>@struct:&nbsp;name="struct1"&nbsp;caption="blah blah"&nbsp;diagram="show:yes,align:128,bitorder:decrement"<br/>--fields:<br/>-&nbsp;Field&nbsp;|&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Description<br/>-&nbsp;8x8&nbsp;&nbsp;&nbsp;|&nbsp;serial_number&nbsp;|&nbsp;The&nbsp;serial&nbsp;number&nbsp;of&nbsp;the&nbsp;device<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;some&nbsp;more&nbsp;description<br/>-&nbsp;8x12&nbsp;&nbsp;|&nbsp;part_number&nbsp;&nbsp;&nbsp;|&nbsp;The&nbsp;part&nbsp;number&nbsp;of&nbsp;the&nbsp;device<br/>-&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;some_number&nbsp;&nbsp;&nbsp;|&nbsp;Some&nbsp;random&nbsp;4&nbsp;byte&nbsp;number</div>
 </div>
 
 
 <div class='tblkps' >Will generate:</div>
-<div class='tblkps' >This is a caption. It is currently in the wrong place</div>
-<table class='bordered'>
-<tr><th colspan='3'>struct1</th></tr>
+
+<div class='bordered' >
+<div style='background-color:#ccc;padding:10px;'><b>Struct:</b> struct1</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >This is a caption. It is currently in the wrong place</div>
+</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Fields:</div>
+        <div style="margin:0px;"><table class='bordered'>
+<tr><th colspan='3'>Structure Fields</th></tr>
       <td colspan='3' class='header'>Diagram</td>
 <map name="diagram_struct1"><area border=1 shape="rectangle" coords="20,22,500,62" href="#struct1_serial_number" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>serial_number (64 bits)</font><br>The serial number of the device                           with some more description');" onMouseout="hideddrivetip();" >
 <area border=1 shape="rectangle" coords="500,22,1720,62" href="#struct1_part_number" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>part_number (96 bits)</font><br>The part number of the device');" onMouseout="hideddrivetip()" >
@@ -2077,10 +2088,7 @@ definition.
 </map>
 <tr><td colspan='3' style='background-color:white;padding:10px;'><img src='record_1.png' usemap='#diagram_struct1' style='border:0px;text-decoration:none'></img></th></td>
 <tr class='header'>
-  <td>Type</td>
-  <td>Name</td>
-  <td>Description</td>
-  </tr><tr>
+<td>Field</td><td>Name</td><td>Description</td></tr><tr>
       <td colspan='1'><div class='tblkps' >8x8</div>
 </td>
       <td colspan='1'><div class='tblkps' >serial_number</div>
@@ -2106,7 +2114,11 @@ with some more description
       <td colspan='1'><div class='tblkps' >Some random 4 byte number</div>
 </td>
 </tr>
-</table><br/><div class='tblkps' >Another example:</div>
+</table><br/></div>
+    </div>
+</div>
+
+</div><br/><div class='tblkps' >Another example:</div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
@@ -2121,24 +2133,34 @@ with some more description
 004  
 005  
 006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@struct</span>: title=<span class="str">"struct2"</span> caption=<span class="str">"blah</span> <span class="str">blah"</span><br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div><div style='clear:both;'></div></div>
+007  
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@struct</span>: name=<span class="str">"struct2"</span> caption=<span class="str">"blah blah"</span><br/>--fields:<br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_74">
-<div class='snippet'>@struct: title="struct2" caption="blah blah"<br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div>
+<div class='snippet'>@struct:&nbsp;name="struct2"&nbsp;caption="blah blah"<br/>--fields:<br/>-&nbsp;Field&nbsp;|&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Description<br/>-&nbsp;8x8&nbsp;&nbsp;&nbsp;|&nbsp;serial_number&nbsp;|&nbsp;The&nbsp;serial&nbsp;number&nbsp;of&nbsp;the&nbsp;device<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;some&nbsp;more&nbsp;description<br/>-&nbsp;8x12&nbsp;&nbsp;|&nbsp;part_number&nbsp;&nbsp;&nbsp;|&nbsp;The&nbsp;part&nbsp;number&nbsp;of&nbsp;the&nbsp;device<br/>-&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;some_number&nbsp;&nbsp;&nbsp;|&nbsp;Some&nbsp;random&nbsp;4&nbsp;byte&nbsp;number</div>
 </div>
 
 
 <div class='tblkps' >Will generate a structure without a picture:</div>
-<div class='tblkps' >This is a caption. It is currently in the wrong place</div>
-<table class='bordered'>
-<tr><th colspan='3'>struct2</th></tr>
+
+<div class='bordered' >
+<div style='background-color:#ccc;padding:10px;'><b>Struct:</b> struct2</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >This is a caption. It is currently in the wrong place</div>
+</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Fields:</div>
+        <div style="margin:0px;"><table class='bordered'>
+<tr><th colspan='3'>Structure Fields</th></tr>
 
 <tr class='header'>
-  <td>Type</td>
-  <td>Name</td>
-  <td>Description</td>
-  </tr><tr>
+<td>Field</td><td>Name</td><td>Description</td></tr><tr>
       <td colspan='1'><div class='tblkps' >8x8</div>
 </td>
       <td colspan='1'><div class='tblkps' >serial_number</div>
@@ -2164,7 +2186,11 @@ with some more description
       <td colspan='1'><div class='tblkps' >Some random 4 byte number</div>
 </td>
 </tr>
-</table><br/><div class='tblkps' >The bit order can also be reversed and the alignment can be changed:</div>
+</table><br/></div>
+    </div>
+</div>
+
+</div><br/><div class='tblkps' >The bit order can also be reversed and the alignment can be changed:</div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
@@ -2179,17 +2205,30 @@ with some more description
 004  
 005  
 006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@struct</span>: title=<span class="str">"struct3"</span> caption=<span class="str">"This</span> <span class="str">is</span> <span class="str">a</span> <span class="str">caption.</span> <span class="str">It</span> <span class="str">is</span> <span class="str">currently</span> <span class="str">in</span> <span class="str">the</span> <span class="str">wrong</span> <span class="str">place"</span> diagram=<span class="str">"show:yes</span>,<span class="str">align:64</span>,<span class="str">bitorder:increment"</span><br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div><div style='clear:both;'></div></div>
+007  
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@struct</span>: name=<span class="str">"struct3"</span> caption=<span class="str">"This is a caption. It is currently in the wrong place"</span> diagram=<span class="str">"show:yes,align:64,bitorder:increment"</span><br/>--fields:<br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div><div style='clear:both;'></div></div>
 </div>
 
 <div class='source' id="snippet_76">
-<div class='snippet'>@struct: title="struct3" caption="This is a caption. It is currently in the wrong place" diagram="show:yes,align:64,bitorder:increment"<br/>- Field | Name          | Description<br/>- 8x8   | serial_number | The serial number of the device<br/>                          with some more description<br/>- 8x12  | part_number   | The part number of the device<br/>- 4     | some_number   | Some random 4 byte number</div>
+<div class='snippet'>@struct:&nbsp;name="struct3"&nbsp;caption="This is a caption. It is currently in the wrong place"&nbsp;diagram="show:yes,align:64,bitorder:increment"<br/>--fields:<br/>-&nbsp;Field&nbsp;|&nbsp;Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;Description<br/>-&nbsp;8x8&nbsp;&nbsp;&nbsp;|&nbsp;serial_number&nbsp;|&nbsp;The&nbsp;serial&nbsp;number&nbsp;of&nbsp;the&nbsp;device<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;with&nbsp;some&nbsp;more&nbsp;description<br/>-&nbsp;8x12&nbsp;&nbsp;|&nbsp;part_number&nbsp;&nbsp;&nbsp;|&nbsp;The&nbsp;part&nbsp;number&nbsp;of&nbsp;the&nbsp;device<br/>-&nbsp;4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;some_number&nbsp;&nbsp;&nbsp;|&nbsp;Some&nbsp;random&nbsp;4&nbsp;byte&nbsp;number</div>
 </div>
 
 
-<div class='tblkps' >This is a caption. It is currently in the wrong place</div>
-<table class='bordered'>
-<tr><th colspan='3'>struct3</th></tr>
+
+<div class='bordered' >
+<div style='background-color:#ccc;padding:10px;'><b>Struct:</b> struct3</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >This is a caption. It is currently in the wrong place</div>
+</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Fields:</div>
+        <div style="margin:0px;"><table class='bordered'>
+<tr><th colspan='3'>Structure Fields</th></tr>
       <td colspan='3' class='header'>Diagram</td>
 <map name="diagram_struct3"><area border=1 shape="rectangle" coords="20,22,980,62" href="#struct3_serial_number" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>serial_number (64 bits)</font><br>The serial number of the device                           with some more description');" onMouseout="hideddrivetip()" >
 <area border=1 shape="rectangle" coords="20,67,3400,107" href="#struct3_part_number" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>part_number (96 bits)</font><br>The part number of the device');" onMouseout="hideddrivetip()" >
@@ -2198,10 +2237,7 @@ with some more description
 </map>
 <tr><td colspan='3' style='background-color:white;padding:10px;'><img src='record_2.png' usemap='#diagram_struct3' style='border:0px;text-decoration:none'></img></th></td>
 <tr class='header'>
-  <td>Type</td>
-  <td>Name</td>
-  <td>Description</td>
-  </tr><tr>
+<td>Field</td><td>Name</td><td>Description</td></tr><tr>
       <td colspan='1'><div class='tblkps' >8x8</div>
 </td>
       <td colspan='1'><div class='tblkps' >serial_number</div>
@@ -2227,248 +2263,97 @@ with some more description
       <td colspan='1'><div class='tblkps' >Some random 4 byte number</div>
 </td>
 </tr>
-</table><br/><h3>5.7.2. @vector<a name='@vector'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@vector'>@vector</a> is similar to the <a href='user_guide.html#@struct'>@struct</a> tag and creates a bitfield type containing multiple fields.
-Field sizes are generally outlined in bit ranges instead of bytes in the <a href='user_guide.html#@struct'>@struct</a> tag. 
+</table><br/></div>
+    </div>
+</div>
+
+</div><br/><h3>5.7.2. @vector<a name='@vector'></a></h3>
+<div class='tblkps' >The @vector is similar to the @struct tag and creates a bitfield type containing multiple fields.
+Field sizes are generally outlined in bit ranges instead of bytes in the @struct tag. 
 </div>
 <div class='tblkps' >The following structure defines a 128 bit long bitfield with the bits shown in little endian
 order on a 64 bit boundary.
 </div>
-
-
-<div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_78');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_78').innerHTML);">Print</span>
-</div>
-
-<div class='code'>
-<div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-002  
-003  
-004  
-005  
-006  
-007  
-008  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@vector</span>: title=<span class="str">"vector1"</span> caption=<span class="str">"blah</span> <span class="str">blah"</span> diagram=<span class="str">"show:yes</span>,<span class="str">align:64</span>,<span class="str">bitorder:increment"</span><br/>- Field  | Name       | Description<br/>- 0-8    | Blah       | Blah blah<br/>- 10     | *Reserved* | Reserved for future use<br/>- 12     | My field   | da da da<br/><br/>- 32-63  | TBD        | Something here<br/>- 64-127 | field2     | This is a description</div><div style='clear:both;'></div></div>
-</div>
-
-<div class='source' id="snippet_78">
-<div class='snippet'>@vector: title="vector1" caption="blah blah" diagram="show:yes,align:64,bitorder:increment"<br/>- Field  | Name       | Description<br/>- 0-8    | Blah       | Blah blah<br/>- 10     | *Reserved* | Reserved for future use<br/>- 12     | My field   | da da da<br/><br/>- 32-63  | TBD        | Something here<br/>- 64-127 | field2     | This is a description</div>
-</div>
-
-
-<div class='tblkps' >This renders to the following:</div>
-<table class='bordered'>
-<tr><th colspan='3'>vector1</th></tr>
-      <td colspan='3' class='header'>Diagram</td>
-<map name="diagram_vector1"><area border=1 shape="rectangle" coords="20,22,155,62" href="#vector1_Blah" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Blah (9 bits)</font><br>Blah blah');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="155,22,170,62" href="#vector1_reserved" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>reserved (1 bits)</font><br>reserved');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="170,22,185,62" href="#vector1_reserved" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>reserved (1 bits)</font><br>reserved');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="185,22,200,62" href="#vector1_reserved" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>reserved (1 bits)</font><br>reserved');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="200,22,215,62" href="#vector1_My field" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>My field (1 bits)</font><br>da da da');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="215,22,500,62" href="#vector1_reserved" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>reserved (19 bits)</font><br>reserved');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="500,22,980,62" href="#vector1_TBD" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>TBD (32 bits)</font><br>Something here');" onMouseout="hideddrivetip()" >
-<area border=1 shape="rectangle" coords="20,67,980,107" href="#vector1_field2" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>field2 (64 bits)</font><br>This is a description');" onMouseout="hideddrivetip()" >
-</map>
-<tr><td colspan='3' style='background-color:white;padding:10px;'><img src='record_3.png' usemap='#diagram_vector1' style='border:0px;text-decoration:none'></img></th></td>
-<tr class='header'>
-  <td>Type</td>
-  <td>Name</td>
-  <td>Description</td>
-  </tr><tr>
-      <td colspan='1'><div class='tblkps' >0-8</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Blah</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Blah blah</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-</tr>
-<tr>
-      <td colspan='1' style='background-color:#eee; color:#999;'><div class='tblkps' >10</div>
-</td>
-      <td colspan='1' style='background-color:#eee; color:#999;'><div class='tblkps' ><b>Reserved</b></div>
-</td>
-      <td colspan='1' style='background-color:#eee; color:#999;'><div class='tblkps' >Reserved for future use</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-</tr>
-<tr>
-      <td colspan='1'><div class='tblkps' >12</div>
-</td>
-      <td colspan='1'><div class='tblkps' >My field</div>
-</td>
-      <td colspan='1'><div class='tblkps' >da da da</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-      <td colspan='1' style='background-color:#eee; color:#999;'></td>
-</tr>
-<tr>
-      <td colspan='1'><div class='tblkps' >32-63</div>
-</td>
-      <td colspan='1'><div class='tblkps' >TBD</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Something here</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1'><div class='tblkps' >64-127</div>
-</td>
-      <td colspan='1'><div class='tblkps' >field2</div>
-</td>
-      <td colspan='1'><div class='tblkps' >This is a description</div>
-</td>
-</tr>
-</table><br/><div class='tblkps' >This is an example of the Ethernet Header shown in little endian format:</div>
-
-
-<div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_80');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_80').innerHTML);">Print</span>
-</div>
-
-<div class='code'>
-<div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-002  
-003  
-004  
-005  
-006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@vector</span>: title=<span class="str">"Ethernet</span> <span class="str">Header"</span> caption=<span class="str">""</span> diagram=<span class="str">"show:yes</span>,<span class="str">align:32</span>,<span class="str">bitorder:decrement"</span><br/>- Field   | Name          | Description<br/>- 0-47    | Dest Addr     | The destination MAC address<br/>- 48-95   | Source Addr   | The source MAC address<br/>- 96-111  | Ethernet Type | The ethernet type<br/>- 112-159 | Data          | Variable length data field</div><div style='clear:both;'></div></div>
-</div>
-
-<div class='source' id="snippet_80">
-<div class='snippet'>@vector: title="Ethernet Header" caption="" diagram="show:yes,align:32,bitorder:decrement"<br/>- Field   | Name          | Description<br/>- 0-47    | Dest Addr     | The destination MAC address<br/>- 48-95   | Source Addr   | The source MAC address<br/>- 96-111  | Ethernet Type | The ethernet type<br/>- 112-159 | Data          | Variable length data field</div>
-</div>
-
-
-<div class='tblkps' >Which renders to:</div>
-<table class='bordered'>
-<tr><th colspan='3'>Ethernet Header</th></tr>
-      <td colspan='3' class='header'>Diagram</td>
-<map name="diagram_Ethernet Header"><area border=1 shape="rectangle" coords="20,22,6760,62" href="#Ethernet Header_Dest Addr" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Dest Addr (48 bits)</font><br>The destination MAC address');" onMouseout="hideddrivetip()" >
-<area border=1 shape="rectangle" coords="20,67,500,107" href="#Ethernet Header_Dest Addr" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Dest Addr (48 bits)</font><br>The destination MAC address');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="500,67,6760,107" href="#Ethernet Header_Source Addr" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Source Addr (48 bits)</font><br>The source MAC address');" onMouseout="hideddrivetip()" >
-<area border=1 shape="rectangle" coords="20,112,980,152" href="#Ethernet Header_Source Addr" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Source Addr (48 bits)</font><br>The source MAC address');" onMouseout="hideddrivetip()" >
-<area border=1 shape="rectangle" coords="20,157,500,197" href="#Ethernet Header_Ethernet Type" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Ethernet Type (16 bits)</font><br>The ethernet type');" onMouseout="hideddrivetip();" >
-<area border=1 shape="rectangle" coords="500,157,6760,197" href="#Ethernet Header_Data" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Data (48 bits)</font><br>Variable length data field');" onMouseout="hideddrivetip()" >
-<area border=1 shape="rectangle" coords="20,202,980,242" href="#Ethernet Header_Data" onMouseover="ddrivetip('<b>Name: </b><font style=\'color: blue;\'>Data (48 bits)</font><br>Variable length data field');" onMouseout="hideddrivetip()" >
-</map>
-<tr><td colspan='3' style='background-color:white;padding:10px;'><img src='record_4.png' usemap='#diagram_Ethernet Header' style='border:0px;text-decoration:none'></img></th></td>
-<tr class='header'>
-  <td>Type</td>
-  <td>Name</td>
-  <td>Description</td>
-  </tr><tr>
-      <td colspan='1'><div class='tblkps' >0-47</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Dest Addr</div>
-</td>
-      <td colspan='1'><div class='tblkps' >The destination MAC address</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1'><div class='tblkps' >48-95</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Source Addr</div>
-</td>
-      <td colspan='1'><div class='tblkps' >The source MAC address</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1'><div class='tblkps' >96-111</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Ethernet Type</div>
-</td>
-      <td colspan='1'><div class='tblkps' >The ethernet type</div>
-</td>
-</tr>
-<tr>
-      <td colspan='1'><div class='tblkps' >112-159</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Data</div>
-</td>
-      <td colspan='1'><div class='tblkps' >Variable length data field</div>
-</td>
-</tr>
-</table><br/><h3>5.7.3. @define<a name='@define'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@define'>@define</a> is used to document a #define structure in C.</div>
+<h3>5.7.3. @define<a name='@define'></a></h3>
+<div class='tblkps' >The @define is used to document a #define structure in C.</div>
 <h3>5.7.4. @enum<a name='@enum'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@enum'>@enum</a> tag is used to define an enumeration.</div>
-<div class='tblkps' >This is a test enum</div>
-<table class='bordered'>
-<tr><th colspan='2'>e_my_test</th></tr>
+<div class='tblkps' >The @enum tag is used to define an enumeration.</div>
+
+<div class='bordered' >
+<div style='background-color:#ccc;padding:10px;'><b>Enum:</b> e_my_test</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >'This</div>
+</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div style="color: #396592; font-weight: bold;">Values:</div>
+        <div style="margin:0px;"><table class="bordered" style="margin-left:5px"><tr><th colspan='3'>Enum Values</th></tr>
 
 <tr class='header'>
   <td>Name</td>
   <td>Description</td>
-  </tr><tr>
+</tr><tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_1V_TX"></a>LEEDS_VLT_SUPPLY_1V_TX</td>
       <td colspan='1'><div class='tblkps' >1V supply TX</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_1V_RX"></a>LEEDS_VLT_SUPPLY_1V_RX</td>
       <td colspan='1'><div class='tblkps' >1V supply RX</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_1V_CRE"></a>LEEDS_VLT_SUPPLY_1V_CRE</td>
       <td colspan='1'><div class='tblkps' >1V supply digital core</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_1V_DIG_RX"></a>LEEDS_VLT_SUPPLY_1V_DIG_RX</td>
       <td colspan='1'><div class='tblkps' >1V supply digital RX</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_1p8V_RX"></a>LEEDS_VLT_SUPPLY_1p8V_RX</td>
       <td colspan='1'><div class='tblkps' >1.8V supply RX</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_1p8V_TX"></a>LEEDS_VLT_SUPPLY_1p8V_TX</td>
       <td colspan='1'><div class='tblkps' >1.8V supply TX</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_2p5V"></a>LEEDS_VLT_SUPPLY_2p5V</td>
       <td colspan='1'><div class='tblkps' >2.5V supply</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_TP_P"></a>LEEDS_VLT_SUPPLY_TP_P</td>
       <td colspan='1'><div class='tblkps' >Test point P</div>
 </td>
 </tr>
-<tr>
+<tr valign=top>
       <td colspan='1'><a name="LEEDS_VLT_SUPPLY_TP_N"></a>LEEDS_VLT_SUPPLY_TP_N</td>
       <td colspan='1'><div class='tblkps' >Test point N</div>
 </td>
 </tr>
-</table><br/><h3>5.7.5. @prototype<a name='@prototype'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@prototype'>@prototype</a> is used to describe a function prototype. This might be used
+</table></div>
+    </div>
+</div>
+</div><br/><h3>5.7.5. @prototype<a name='@prototype'></a></h3>
+<div class='tblkps' >The @prototype is used to describe a function prototype. This might be used
 when architecting code or it can also be extracted from existing source code (Currently
 only C sources can be parsed).
 </div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_82');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_82').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_78');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_78').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
@@ -2518,11 +2403,11 @@ only C sources can be parsed).
 044  
 045  
 046  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@prototype'>@prototype</a>: language=<span class="str">"c"</span><br/>- function: <a href='user_guide.html#my_function'>my_function</a><br/>- description:<br/>    This is a description of my function with some more text<br/>    and blah blah blah. I'm sure if I put enough text here then<br/>    it will likely wrap but I'm not absolutely sure. We'll see<br/>    what it looks like when it is actually formatted. For kicks<br/>    we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym<br/>- prototype:<br/>    int <a href='user_guide.html#my_function'>my_function</a>(int val1 [], int val2 [][5]);<br/>- returns:<br/>    TRUE on success, FALSE on failure<br/>- params:<br/>    -- val1 | I | <br/>            1 = blah blah<br/>                and more blah blah<br/>                plus blah<br/><br/>            2 = blah blah blah<br/><br/>            0 = turn beacon on<br/>    -- val2 | I |<br/>            *1* = blah blah<br/><br/>            *2* = blah blah blah<br/>- example:<br/>    rc = <a href='user_guide.html#my_function'>my_function</a>(val);<br/><br/>    if(rc != 0)<br/>    {<br/>        printf(<span class="str">"Uh</span> <span class="str">oh</span>,<span class="str"></span> <span class="str">something</span> <span class="str">bad</span> <span class="str">happened!n"</span>);<br/>    }<br/><br/>- pseudocode:<br/><br/>    <span class="cmt">// Blah blah blah</span><br/>    _call_sub_function()<br/><br/>    if(blah)<br/>    {<br/>        <span class="cmt">// Do something else</span><br/>        _call_sub_function2()<br/>    }<br/>    <br/>- see also:<br/>    THis is a test</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@prototype: language=<span class="str">"c"</span><br/>- function: my_function<br/>- description:<br/>    This is a description of my function with some more text<br/>    and blah blah blah. I'm sure if I put enough text here then<br/>    it will likely wrap but I'm not absolutely sure. We'll see<br/>    what it looks like when it is actually formatted. For kicks<br/>    we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym<br/>- prototype:<br/>    int my_function(int val1 [], int val2 [][5]);<br/>- returns:<br/>    TRUE on success, FALSE on failure<br/>- params:<br/>    -- val1 | I | <br/>            1 = blah blah<br/>                and more blah blah<br/>                plus blah<br/><br/>            2 = blah blah blah<br/><br/>            0 = turn beacon on<br/>    -- val2 | I |<br/>            *1* = blah blah<br/><br/>            *2* = blah blah blah<br/>- example:<br/>    rc = my_function(val);<br/><br/>    if(rc != 0)<br/>    {<br/>        printf(<span class="str">"Uh oh, something bad happened!n"</span>);<br/>    }<br/><br/>- pseudocode:<br/><br/>    <span class="cmt">// Blah blah blah</span><br/>    _call_sub_function()<br/><br/>    if(blah)<br/>    {<br/>        <span class="cmt">// Do something else</span><br/>        _call_sub_function2()<br/>    }<br/>    <br/>- see also:<br/>    THis is a test</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_82">
-<div class='snippet'>@prototype: language="c"<br/>- function: my_function<br/>- description:<br/>    This is a description of my function with some more text<br/>    and blah blah blah. I'm sure if I put enough text here then<br/>    it will likely wrap but I'm not absolutely sure. We'll see<br/>    what it looks like when it is actually formatted. For kicks<br/>    we'll link to the EPT acronym<br/>- prototype:<br/>    int my_function(int val1 [], int val2 [][5]);<br/>- returns:<br/>    TRUE on success, FALSE on failure<br/>- params:<br/>    -- val1 | I | <br/>            1 = blah blah<br/>                and more blah blah<br/>                plus blah<br/><br/>            2 = blah blah blah<br/><br/>            0 = turn beacon on<br/>    -- val2 | I |<br/>            *1* = blah blah<br/><br/>            *2* = blah blah blah<br/>- example:<br/>    rc = my_function(val);<br/><br/>    if(rc != 0)<br/>    {<br/>        printf("Uh oh, something bad happened!n");<br/>    }<br/><br/>- pseudocode:<br/><br/>    // Blah blah blah<br/>    _call_sub_function()<br/><br/>    if(blah)<br/>    {<br/>        // Do something else<br/>        _call_sub_function2()<br/>    }<br/>    <br/>- see also:<br/>    THis is a test</div>
+<div class='source' id="snippet_78">
+<div class='snippet'>@prototype:&nbsp;language="c"<br/>-&nbsp;function:&nbsp;my_function<br/>-&nbsp;description:<br/>&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;a&nbsp;description&nbsp;of&nbsp;my&nbsp;function&nbsp;with&nbsp;some&nbsp;more&nbsp;text<br/>&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;blah&nbsp;blah&nbsp;blah.&nbsp;I'm&nbsp;sure&nbsp;if&nbsp;I&nbsp;put&nbsp;enough&nbsp;text&nbsp;here&nbsp;then<br/>&nbsp;&nbsp;&nbsp;&nbsp;it&nbsp;will&nbsp;likely&nbsp;wrap&nbsp;but&nbsp;I'm&nbsp;not&nbsp;absolutely&nbsp;sure.&nbsp;We'll&nbsp;see<br/>&nbsp;&nbsp;&nbsp;&nbsp;what&nbsp;it&nbsp;looks&nbsp;like&nbsp;when&nbsp;it&nbsp;is&nbsp;actually&nbsp;formatted.&nbsp;For&nbsp;kicks<br/>&nbsp;&nbsp;&nbsp;&nbsp;we'll&nbsp;link&nbsp;to&nbsp;the&nbsp;EPT&nbsp;acronym<br/>-&nbsp;prototype:<br/>&nbsp;&nbsp;&nbsp;&nbsp;int&nbsp;my_function(int&nbsp;val1&nbsp;[],&nbsp;int&nbsp;val2&nbsp;[][5]);<br/>-&nbsp;returns:<br/>&nbsp;&nbsp;&nbsp;&nbsp;TRUE&nbsp;on&nbsp;success,&nbsp;FALSE&nbsp;on&nbsp;failure<br/>-&nbsp;params:<br/>&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;val1&nbsp;|&nbsp;I&nbsp;|&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;=&nbsp;blah&nbsp;blah<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;and&nbsp;more&nbsp;blah&nbsp;blah<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;plus&nbsp;blah<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;=&nbsp;blah&nbsp;blah&nbsp;blah<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;=&nbsp;turn&nbsp;beacon&nbsp;on<br/>&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;val2&nbsp;|&nbsp;I&nbsp;|<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*1*&nbsp;=&nbsp;blah&nbsp;blah<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*2*&nbsp;=&nbsp;blah&nbsp;blah&nbsp;blah<br/>-&nbsp;example:<br/>&nbsp;&nbsp;&nbsp;&nbsp;rc&nbsp;=&nbsp;my_function(val);<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;if(rc&nbsp;!=&nbsp;0)<br/>&nbsp;&nbsp;&nbsp;&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;printf("Uh oh, something bad happened!n");<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>-&nbsp;pseudocode:<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;// Blah blah blah<br/>&nbsp;&nbsp;&nbsp;&nbsp;_call_sub_function()<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;if(blah)<br/>&nbsp;&nbsp;&nbsp;&nbsp;{<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// Do something else<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_call_sub_function2()<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;&nbsp;<br/>-&nbsp;see&nbsp;also:<br/>&nbsp;&nbsp;&nbsp;&nbsp;THis&nbsp;is&nbsp;a&nbsp;test</div>
 </div>
 
 
@@ -2530,7 +2415,6 @@ only C sources can be parsed).
 with it's own header automatically added for wiki linking. This behavior
 may be controlled by the <b>prototype_add_header</b> field in the Shorte config file.
 </div>
-<h4>5.7.5.1. my_function<a name='my_function'></a></h4>
 
         <div class="bordered" style="margin-top:10px;">
         <div style='background-color:#ccc;padding:10px;'><b>Function:</b> my_function</div>
@@ -2551,8 +2435,15 @@ we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
                 
         <div>
             <div style="color: #396592; font-weight: bold;">Prototype:</div>
-            <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc; font-family:courier new;">
-                <div class='snippet' style='white-space:pre-wrap'><span class='kw'>int</span> my_function(<span class='kw'>int</span> val1 [], <span class='kw'>int</span> val2 [][5]);</div>
+            <div style="margin-left: 15px; margin-right:15px; font-family:courier new;">
+                
+
+<div class='code2'>
+<div class='snippet' style='white-space:pre-wrap'><span class='kw'>int</span> my_function(<span class='kw'>int</span> val1 [], <span class='kw'>int</span> val2 [][5]);</div>
+</div>
+
+
+
             </div>
         </div>
         
@@ -2607,9 +2498,9 @@ we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
                     </div>
                     
 
-<div class='code_header' style='width:80%;margin-left:10px;margin-top:2px;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_83');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_83').innerHTML);">Print</span>
+<div class='code_header' style='width:80%;margin-left:10px;margin-top:2px;background-color:transparent;;'>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_79');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_79').innerHTML);">Print</span>
 </div>
 
 <div class='code2'>
@@ -2619,11 +2510,11 @@ we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
 004  
 005  
 006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'>rc = <a href='user_guide.html#my_function'>my_function</a>(val);<br/><br/><span class='kw'>if</span>(rc != 0)<br/>{<br/>    printf(<span class="str">"Uh</span> <span class="str">oh</span>,<span class="str"></span> <span class="str">something</span> <span class="str">bad</span> <span class="str">happened!n"</span>);<br/>}</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>rc = my_function(val);<br/><br/><span class='kw'>if</span>(rc != 0)<br/>{<br/>    printf(<span class="str">"Uh oh, something bad happened!n"</span>);<br/>}</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_83">
-<div class='snippet'>rc = my_function(val);<br/><br/>if(rc != 0)<br/>{<br/>    printf("Uh oh, something bad happened!n");<br/>}</div>
+<div class='source' id="snippet_79">
+<div class='snippet'>rc&nbsp;=&nbsp;my_function(val);<br/><br/>if(rc&nbsp;!=&nbsp;0)<br/>{<br/>&nbsp;&nbsp;&nbsp;&nbsp;printf("Uh oh, something bad happened!n");<br/>}</div>
 </div>
 
 
@@ -2642,8 +2533,8 @@ we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
                     
 
 <div class='code_header' style='width:80%;margin-left:10px;margin-top:2px;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_84');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_84').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_80');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_80').innerHTML);">Print</span>
 </div>
 
 <div class='code2'>
@@ -2658,8 +2549,8 @@ we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
 </div><div style='width:95%;float:left;white-space:pre-wrap'><span class="cmt">// Blah blah blah</span><br/>_call_sub_function()<br/><br/><span class='kw'>if</span>(blah)<br/>{<br/>    <span class="cmt">// Do something else</span><br/>    _call_sub_function2()<br/>}</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_84">
-<div class='snippet'>// Blah blah blah<br/>_call_sub_function()<br/><br/>if(blah)<br/>{<br/>    // Do something else<br/>    _call_sub_function2()<br/>}</div>
+<div class='source' id="snippet_80">
+<div class='snippet'>// Blah blah blah<br/>_call_sub_function()<br/><br/>if(blah)<br/>{<br/>&nbsp;&nbsp;&nbsp;&nbsp;// Do something else<br/>&nbsp;&nbsp;&nbsp;&nbsp;_call_sub_function2()<br/>}</div>
 </div>
 
 
@@ -2680,9 +2571,9 @@ we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
         </div>
         </div>
         <h3>5.7.6. @functionsummary<a name='@functionsummary'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@functionsummary'>@functionsummary</a> tag creates a summary table of all prototypes
+<div class='tblkps' >The @functionsummary tag creates a summary table of all prototypes
 cross referenced or defined within the document. In this document we've
-defined a single prototype <a href='user_guide.html#my_function'>my_function</a> which should show up
+defined a single prototype my_function which should show up
 automatically when this tag is inserted into the document. Additionally
 if source code is included any prototypes would automatically get picked
 up in this table.
@@ -2690,120 +2581,44 @@ up in this table.
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_86');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_86').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_82');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_82').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@functionsummary'>@functionsummary</a></div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@functionsummary</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_86">
+<div class='source' id="snippet_82">
 <div class='snippet'>@functionsummary</div>
 </div>
 
 
 <div class='tblkps' >Generates:</div>
-<table style="border-collapse:collapse;border:0px;margin-left:30px;background-color:#fafafa;">
-<tr valign=top>
-    <td colspan=2 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">user_guide</td>
-</tr>
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">int </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'><div class='snippet' style='white-space:pre-wrap'><a href='user_guide.html#my_function'>my_function</a>(<span class='kw'>int</span> val1 [], <span class='kw'>int</span> val2 [][5]);</div></td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'><div class='tblkps' >This is a description of my function with some more text
-and blah blah blah. I'm sure if I put enough text here then
-it will likely wrap but I'm not absolutely sure. We'll see
-what it looks like when it is actually formatted. For kicks
-we'll link to the <a href='user_guide.html#EPT'>EPT</a> acronym
-</div>
-</td>
-</tr>
-</table><br/><h3>5.7.7. @typesummary<a name='@typesummary'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@typesummary'>@typesummary</a> tag creates a summary of all structures or enumerations
+<h3>5.7.7. @typesummary<a name='@typesummary'></a></h3>
+<div class='tblkps' >The @typesummary tag creates a summary of all structures or enumerations
 defined within the document or in any parsed source code.
 </div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_88');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_88').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_84');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_84').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@typesummary'>@typesummary</a></div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@typesummary</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_88">
+<div class='source' id="snippet_84">
 <div class='snippet'>@typesummary</div>
 </div>
 
 
 <div class='tblkps' >Generates:</div>
-<table style="border-collapse:collapse;border:0px;margin-left:30px;background-color:#fafafa;">
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">struct </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>struct1</td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'><div class='tblkps' >This is a caption. It is currently in the wrong place</div>
-</td>
-</tr>
-
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">struct </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>struct2</td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'><div class='tblkps' >This is a caption. It is currently in the wrong place</div>
-</td>
-</tr>
-
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">struct </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>struct3</td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'><div class='tblkps' >This is a caption. It is currently in the wrong place</div>
-</td>
-</tr>
-
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">struct </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>vector1</td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'></td>
-</tr>
-
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">struct </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>Ethernet Header</td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'></td>
-</tr>
-
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">enum </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>e_my_test</td>
-</tr>
-<tr valign=top>
-    <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
-    <td style='border-top:0px;border-bottom:1px solid #ccc;color:#888;padding:2px;'><div class='tblkps' >This is a test enum</div>
-</td>
-</tr>
-</table><br/><h2>5.8. Source Code Tags<a name='Source Code Tags'></a></h2>
+<h2>5.8. Source Code Tags<a name='Source Code Tags'></a></h2>
 <div class='tblkps' >Shorte was built with technical documentation in mind so it supports
 including a variety of source code snippets. These are described in the
 following section.
@@ -2820,7 +2635,7 @@ Execution is done bu adding the following attribute:
 adding the machine="xxx" and port="xxx" parameters.
 </div>
 <h3>5.8.2. @c<a name='@c'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@c'>@c</a> tag is used to embed C code directly into the document and
+<div class='tblkps' >The @c tag is used to embed C code directly into the document and
 highlight it appropriately. For example, the following block of code
 inlines a C snippet. The code can also be run locally using g++ by
 passing the exec="1" attribute. See <a href='#Executing Snippets'>Executing Snippets</a> for
@@ -2829,8 +2644,8 @@ more information on setting up Shorte to execute code snippets.
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_90');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_90').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_86');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_86').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
@@ -2842,11 +2657,11 @@ more information on setting up Shorte to execute code snippets.
 006  
 007  
 008  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@c</span>: exec=<span class="str">"0"</span><br/><span class="cmt">#include &lt;stdio.h&gt;</span><br/><span class="cmt">#include &lt;stdlib.h&gt;</span><br/>int main(void)<br/>{<br/>    printf(<span class="str">"hello</span> <span class="str">world!n"</span>);<br/>    return EXIT_SUCCESS;<br/>}</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@c</span>: exec=<span class="str">"0"</span><br/><span class="cmt">#include &lt;stdio.h&gt;</span><br/><span class="cmt">#include &lt;stdlib.h&gt;</span><br/>int main(void)<br/>{<br/>    printf(<span class="str">"hello world!n"</span>);<br/>    return EXIT_SUCCESS;<br/>}</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_90">
-<div class='snippet'>@c: exec="0"<br/>#include &lt;stdio.h&gt;<br/>#include &lt;stdlib.h&gt;<br/>int main(void)<br/>{<br/>    printf("hello world!n");<br/>    return EXIT_SUCCESS;<br/>}</div>
+<div class='source' id="snippet_86">
+<div class='snippet'>@c:&nbsp;exec="0"<br/>#include &lt;stdio.h&gt;<br/>#include &lt;stdlib.h&gt;<br/>int&nbsp;main(void)<br/>{<br/>&nbsp;&nbsp;&nbsp;&nbsp;printf("hello world!n");<br/>&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;EXIT_SUCCESS;<br/>}</div>
 </div>
 
 
@@ -2854,8 +2669,8 @@ more information on setting up Shorte to execute code snippets.
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_92');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_92').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_88');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_88').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
@@ -2866,11 +2681,11 @@ more information on setting up Shorte to execute code snippets.
 005  
 006  
 007  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class="cmt">#include &lt;stdio.h&gt;</span><br/><span class="cmt">#include &lt;stdlib.h&gt;</span><br/><span class='kw'>int</span> main(<span class='kw'>void</span>)<br/>{<br/>    printf(<span class="str">"hello</span> <span class="str">world!n"</span>);<br/>    <span class='kw'>return</span> EXIT_SUCCESS;<br/>}</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class="cmt">#include &lt;stdio.h&gt;</span><br/><span class="cmt">#include &lt;stdlib.h&gt;</span><br/><span class='kw'>int</span> main(<span class='kw'>void</span>)<br/>{<br/>    printf(<span class="str">"hello world!n"</span>);<br/>    <span class='kw'>return</span> EXIT_SUCCESS;<br/>}</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_92">
-<div class='snippet'>#include &lt;stdio.h&gt;<br/>#include &lt;stdlib.h&gt;<br/>int main(void)<br/>{<br/>    printf("hello world!n");<br/>    return EXIT_SUCCESS;<br/>}</div>
+<div class='source' id="snippet_88">
+<div class='snippet'>#include &lt;stdio.h&gt;<br/>#include &lt;stdlib.h&gt;<br/>int&nbsp;main(void)<br/>{<br/>&nbsp;&nbsp;&nbsp;&nbsp;printf("hello world!n");<br/>&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;EXIT_SUCCESS;<br/>}</div>
 </div>
 
 
@@ -2883,18 +2698,18 @@ for more information on setting up Shorte to execute code snippets.
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_94');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_94').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_90');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_90').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
 002  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@python</span>: exec=<span class="str">"1"</span><br/>print <span class="str">"Hello</span> <span class="str">world!"</span></div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@python</span>: exec=<span class="str">"1"</span><br/>print <span class="str">"Hello world!"</span></div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_94">
-<div class='snippet'>@python: exec="1"<br/>print "Hello world!"</div>
+<div class='source' id="snippet_90">
+<div class='snippet'>@python:&nbsp;exec="1"<br/>print&nbsp;"Hello world!"</div>
 </div>
 
 
@@ -2902,25 +2717,19 @@ for more information on setting up Shorte to execute code snippets.
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_96');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_96').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_92');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_92').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>print</span> <span class="str">"Hello</span> <span class="str">world!"</span></div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>print</span> <span class="str">"Hello world!"</span></div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_96">
-<div class='snippet'>print "Hello world!"</div>
+<div class='source' id="snippet_92">
+<div class='snippet'>print&nbsp;"Hello world!"</div>
 </div>
 
-
-    <br/>
-    <div class='code_result'>Result:</div>
-    <div class='code'>
-        Hello&nbsp;world!<br>
-    </div>
 
 <h3>5.8.4. @bash<a name='@bash'></a></h3>
 <div class='tblkps' >This tag is used to embed bash code directly into the document and
@@ -2955,34 +2764,34 @@ highlight it appropriately.
 highlight it appropriately.
 </div>
 <h3>5.8.12. @code<a name='@code'></a></h3>
-<div class='tblkps' >If the language is not supported by Shorte the <a href='user_guide.html#@code'>@code</a> tag can be
+<div class='tblkps' >If the language is not supported by Shorte the @code tag can be
 used to at least mark it as a block of code even if it can't properly
 support syntax highlighting.
 </div>
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_98');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_98').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_94');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_94').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
 <div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
 002  
 003  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@code'>@code</a><br/>This is a test of a language that isn't supported by<br/>Shorte.</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@code<br/>This is a test of a language that isn't supported by<br/>Shorte.</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_98">
-<div class='snippet'>@code<br/>This is a test of a language that isn't supported by<br/>Shorte.</div>
+<div class='source' id="snippet_94">
+<div class='snippet'>@code<br/>This&nbsp;is&nbsp;a&nbsp;test&nbsp;of&nbsp;a&nbsp;language&nbsp;that&nbsp;isn't&nbsp;supported&nbsp;by<br/>Shorte.</div>
 </div>
 
 
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_100');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_100').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_96');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_96').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
@@ -2991,8 +2800,8 @@ support syntax highlighting.
 </div><div style='width:95%;float:left;white-space:pre-wrap'>This is a test of a language that isn't supported by<br/>Shorte.</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_100">
-<div class='snippet'>This is a test of a language that isn't supported by<br/>Shorte.</div>
+<div class='source' id="snippet_96">
+<div class='snippet'>This&nbsp;is&nbsp;a&nbsp;test&nbsp;of&nbsp;a&nbsp;language&nbsp;that&nbsp;isn't&nbsp;supported&nbsp;by<br/>Shorte.</div>
 </div>
 
 
@@ -3007,8 +2816,8 @@ being expanded by shorte.
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_102');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_102').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_98');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_98').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
@@ -3027,19 +2836,19 @@ being expanded by shorte.
 013  
 014  
 015  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@xml'>@xml</a><br/>&lt;?xml version=<span class="str">"1.0"</span>?&gt;<br/>&lt;methodCall&gt;<br/>  &lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>  &lt;params&gt;<br/>    &lt;param&gt;<br/>      <span class="cmt">&lt;!--</span> <span class="cmt">The</span> <span class="cmt">die</span> <span class="cmt">being</span> <span class="cmt">accessed</span> <span class="cmt"></span>(<span class="cmt">in</span> <span class="cmt">decimal</span>)<span class="cmt"></span> <span class="cmt">--&gt;</span><br/>      &lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>    &lt;param&gt;<br/>      <span class="cmt">&lt;!--</span> <span class="cmt">The</span> <span class="cmt">address</span> <span class="cmt">of</span> <span class="cmt">the</span> <span class="cmt">register</span> <span class="cmt">being</span> <span class="cmt">accessed</span> <span class="cmt"></span>(<span class="cmt">in</span> <span class="cmt">decimal</span>)<span class="cmt"></span> <span class="cmt">--&gt;</span><br/>      &lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>  &lt;/params&gt;<br/>&lt;/methodCall&gt;</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>@xml<br/>&lt;?xml version=<span class="str">"1.0"</span>?&gt;<br/>&lt;methodCall&gt;<br/>  &lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>  &lt;params&gt;<br/>    &lt;param&gt;<br/>      <br/>      &lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>    &lt;param&gt;<br/>      <br/>      &lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>  &lt;/params&gt;<br/>&lt;/methodCall&gt;</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_102">
-<div class='snippet'>@xml<br/>&lt;?xml version="1.0"?&gt;<br/>&lt;methodCall&gt;<br/>  &lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>  &lt;params&gt;<br/>    &lt;param&gt;<br/>           ( ) <br/>      &lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>    &lt;param&gt;<br/>              ( ) <br/>      &lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>  &lt;/params&gt;<br/>&lt;/methodCall&gt;</div>
+<div class='source' id="snippet_98">
+<div class='snippet'>@xml<br/>&lt;?xml&nbsp;version="1.0"?&gt;<br/>&lt;methodCall&gt;<br/>&nbsp;&nbsp;&lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>&nbsp;&nbsp;&lt;params&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;param&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/param&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;param&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/param&gt;<br/>&nbsp;&nbsp;&lt;/params&gt;<br/>&lt;/methodCall&gt;</div>
 </div>
 
 
 
 
 <div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_104');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_104').innerHTML);">Print</span>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_100');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_100').innerHTML);">Print</span>
 </div>
 
 <div class='code'>
@@ -3057,11 +2866,11 @@ being expanded by shorte.
 012  
 013  
 014  
-</div><div style='width:95%;float:left;white-space:pre-wrap'>&lt;?<span class='kw'>xml</span> <span class='kw'>version</span>=<span class="str">"1.0"</span>?&gt;<br/>&lt;methodCall&gt;<br/>  &lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>  &lt;params&gt;<br/>    &lt;param&gt;<br/>      <span class="cmt">&lt;!--</span> <span class="cmt">The</span> <span class="cmt">die</span> <span class="cmt">being</span> <span class="cmt">accessed</span> <span class="cmt"></span>(<span class="cmt">in</span> <span class="cmt">decimal</span>)<span class="cmt"></span> <span class="cmt">--&gt;</span><br/>      &lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>    &lt;param&gt;<br/>      <span class="cmt">&lt;!--</span> <span class="cmt">The</span> <span class="cmt">address</span> <span class="cmt">of</span> <span class="cmt">the</span> <span class="cmt">register</span> <span class="cmt">being</span> <span class="cmt">accessed</span> <span class="cmt"></span>(<span class="cmt">in</span> <span class="cmt">decimal</span>)<span class="cmt"></span> <span class="cmt">--&gt;</span><br/>      &lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>  &lt;/params&gt;<br/>&lt;/methodCall&gt;</div><div style='clear:both;'></div></div>
+</div><div style='width:95%;float:left;white-space:pre-wrap'>&lt;?<span class='kw'>xml</span> <span class='kw'>version</span>=<span class="str">"1.0"</span>?&gt;<br/>&lt;methodCall&gt;<br/>  &lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>  &lt;params&gt;<br/>    &lt;param&gt;<br/>      <br/>      &lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>    &lt;param&gt;<br/>      <br/>      &lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>  &lt;/params&gt;<br/>&lt;/methodCall&gt;</div><div style='clear:both;'></div></div>
 </div>
 
-<div class='source' id="snippet_104">
-<div class='snippet'>&lt;?xml version="1.0"?&gt;<br/>&lt;methodCall&gt;<br/>  &lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>  &lt;params&gt;<br/>    &lt;param&gt;<br/>           ( ) <br/>      &lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>    &lt;param&gt;<br/>              ( ) <br/>      &lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>    &lt;/param&gt;<br/>  &lt;/params&gt;<br/>&lt;/methodCall&gt;</div>
+<div class='source' id="snippet_100">
+<div class='snippet'>&lt;?xml&nbsp;version="1.0"?&gt;<br/>&lt;methodCall&gt;<br/>&nbsp;&nbsp;&lt;methodName&gt;dev.dev_reg_read&lt;/methodName&gt;<br/>&nbsp;&nbsp;&lt;params&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;param&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;&lt;i4&gt;1&lt;/i4&gt;&lt;/value&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/param&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;param&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;value&gt;&lt;i4&gt;0&lt;/i4&gt;&lt;/value&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/param&gt;<br/>&nbsp;&nbsp;&lt;/params&gt;<br/>&lt;/methodCall&gt;</div>
 </div>
 
 
@@ -3076,7 +2885,7 @@ are automatically converted to .png files for inclusion since SVG files aren't
 widely supported.
 </div>
 <h3>5.9.2. @checklist<a name='@checklist'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@checklist'>@checklist</a> tag creates a non-interactive checklist</div>
+<div class='tblkps' >The @checklist tag creates a non-interactive checklist</div>
 <p style='font-weight:bold;text-decoration:underline;'>test</p><ul style='list-style-type:none'><li><input type='checkbox' name=' one' checked/> one <span style='color:#999;font-style:italic;'>(blah blah blah)</span></li><li><input type='checkbox' name=' two
 ' /> two
 </li><li><input type='checkbox' name=' three' checked/> three</li><li><input type='checkbox' name=' four' /> four</li></ul><p style='font-style:italic;margin-left:40px;'>Caption: test</p><h3>5.9.3. @acronyms<a name='@acronyms'></a></h3>
@@ -3099,315 +2908,19 @@ widely supported.
 </tr>
 </table><br/><h3>5.9.4. @embed<a name='@embed'></a></h3>
 <div class='tblkps' >TBD - Add description of this tag</div>
-<h2>5.10. Sequence Diagrams<a name='Sequence Diagrams'></a></h2>
-<div class='tblkps' >Shorte allows for automatic generation of sequence diagrams using the <a href='user_guide.html#@sequence'>@sequence</a>
-tag. The syntax is similar to creating a table. This section describes some
-examples of creating sequence diagrams.
-</div>
-<h3>5.10.1. @sequence<a name='@sequence'></a></h3>
-<div class='tblkps' >This tag is used to generate a sequence diagram.</div>
 
-
-<div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_106');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_106').innerHTML);">Print</span>
-</div>
-
-<div class='code'>
-<div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-002  
-003  
-004  
-005  
-006  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><span class='kw'>@sequence</span>: title=<span class="str">"Sequence</span> <span class="str">Diagram</span> <span class="str">Title"</span> caption=<span class="str">"Sequence</span> <span class="str">diagram</span> <span class="str">caption"</span><br/>- Type    | Source   | Sink         | Name                   | Description<br/><br/>- message | Master   | Slave        | Sync Message           | A sync message sent from master to slave.<br/>- message | Slave    | Master       | Sync Response          | A response message from the slave.<br/>- action  | Slave    |              | Random Event           | A random event on the slave.</div><div style='clear:both;'></div></div>
-</div>
-
-<div class='source' id="snippet_106">
-<div class='snippet'>@sequence: title="Sequence Diagram Title" caption="Sequence diagram caption"<br/>- Type    | Source   | Sink         | Name                   | Description<br/><br/>- message | Master   | Slave        | Sync Message           | A sync message sent from master to slave.<br/>- message | Slave    | Master       | Sync Response          | A response message from the slave.<br/>- action  | Slave    |              | Random Event           | A random event on the slave.</div>
-</div>
-
-
-<div class='tblkps' >The above code generates a sequence diagram that looks something like this:</div>
-
-<map name="Sequence_Diagram_Title">
-<area shape="circle" coords="125,29,12"
-      href="#Sequence_Diagram_Title_1"
-      onMouseover="ddrivetip(' A sync message sent from master to slave. ')" onMouseout="hideddrivetip()">
-
-<area shape="circle" coords="125,99,12"
-      href="#Sequence_Diagram_Title_2"
-      onMouseover="ddrivetip(' A response message from the slave. ')" onMouseout="hideddrivetip()">
-
-<area shape="rectangle" coords="195,175,207,237" href="#Sequence_Diagram_Title_2"
-      onMouseover="ddrivetip(' A random event on the slave. ')"
-      onMouseout="hideddrivetip()">
-</map>
-
-<div class='image_inline'>
-    <div style='float:left;'><img class="map" src='Sequence_Diagram_Title.png' style=""  usemap = '#Sequence_Diagram_Title' /></div>
-    <div style='float:left;'><b></b></div>
-    <div style='clear:both;'></div>
-</div>
-
-
-<style>
-table.inline
-{
-    border-collapse:collapse;
-    margin-left:30px;
-}
-table.inline tr.header td.tableheader
-{
-    border: 1px solid black;
-    color: #f0f0f0;
-    background-color:#202020;
-}
-table.inline td
-{
-    border:1px solid black;
-}
-table.inline tr.alternaterow
-{
-    background-color:#f0f0f0;
-}
-</style>
-<table class='bordered'><tr><th colspan='5'>Sequence Diagram Title</th></tr>
-<tr class='header'>
-<td  class='header'><div class='tblkp' >Event</div>
-</td>
-<td  class='header'><div class='tblkp' >Source</div>
-</td>
-<td  class='header'><div class='tblkp' >Sink</div>
-</td>
-<td  class='header'><div class='tblkp' >Name</div>
-</td>
-<td  class='header'><div class='tblkp' >Description</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a name='Sequence_Diagram_Title_1'>1</a></div>
-</td>
-<td ><div class='tblkp' >Master</div>
-</td>
-<td ><div class='tblkp' >Slave</div>
-</td>
-<td ><div class='tblkp' >Sync Message</div>
-</td>
-<td ><div class='tblkp' >A sync message sent from master to slave.</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a name='Sequence_Diagram_Title_2'>2</a></div>
-</td>
-<td ><div class='tblkp' >Slave</div>
-</td>
-<td ><div class='tblkp' >Master</div>
-</td>
-<td ><div class='tblkp' >Sync Response</div>
-</td>
-<td ><div class='tblkp' >A response message from the slave.</div>
-</td>
-</tr>
-<tr>
-<td ><div class='tblkp' ><a name='Sequence_Diagram_Title_2'>2</a></div>
-</td>
-<td ><div class='tblkp' >Slave</div>
-</td>
-<td ></td>
-<td ><div class='tblkp' >Random Event</div>
-</td>
-<td ><div class='tblkp' >A random event on the slave.</div>
-</td>
-</tr>
-<tr class='caption'><td colspan='5' class='caption' style='border:0px;text-align:left;'><b>Caption:</b> <div class='tblkp' >Sequence diagram caption</div>
-</td></tr>
-</table><h1>6. Test Cases<a name='Test Cases'></a></h1>
-<div class='tblkps' >Shorte allows the creation of test reports that include a summary section
-which links to the results of a particular test case defined by the <a href='user_guide.html#@testcase'>@testcase</a> tag.
-</div>
-<h3>6.1.1. @testcasesummary<a name='@testcasesummary'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@testcasesummary'>@testcasesummary</a> creates a summary of all the test cases defined in
-the document.
-</div>
-<div class='tblkps' >Adding this block of code:
-</div>
-
-
-<div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_108');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_108').innerHTML);">Print</span>
-</div>
-
-<div class='code'>
-<div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@testcasesummary'>@testcasesummary</a></div><div style='clear:both;'></div></div>
-</div>
-
-<div class='source' id="snippet_108">
-<div class='snippet'>@testcasesummary</div>
-</div>
-
-
-<div class='tblkps' >Will expand to:</div>
-<table class="bordered">
-<tr class='header'>
-<td style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#ddd;padding:2px;font-weight:bold;">Name</td>
-<td style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#ddd;padding:2px;font-weight:bold;">Status</td>
-<td style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#ddd;padding:2px;font-weight:bold;">Duration</td>
-<td style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#ddd;padding:2px;font-weight:bold;">Results</td></tr>
-<tr valign=top>
-    <td colspan=4 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">Category: user_guide</td>
-</tr>
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;"><a href="#Version">Version</a> </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;border-left:1px solid:#ccc;border-right:1px solid:#ccc;font-size:0.9em;padding:2px;'><span style='color:green;'>PASSED</span></td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;'>0.100000 sec</td>
-<td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;'><a href="#Status: Version">Status: Version</a></td></tr>
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;"><a href="#Register test">Register test</a> </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;border-left:1px solid:#ccc;border-right:1px solid:#ccc;font-size:0.9em;padding:2px;'><span style='color:green;'>PASSED</span></td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;'>10.480000 sec</td>
-<td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;'><a href="#Status: Register test">Status: Register test</a></td></tr>
-<tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;"><a href="#Register dump test">Register dump test</a> </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;border-left:1px solid:#ccc;border-right:1px solid:#ccc;font-size:0.9em;padding:2px;'><span style='color:green;'>PASSED</span></td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;'>11.760000 sec</td>
-<td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-size:0.9em;padding:2px;'><a href="#Status: Register dump test">Status: Register dump test</a></td></tr></table><br/><h3>6.1.2. @testcase<a name='@testcase'></a></h3>
-<div class='tblkps' >The <a href='user_guide.html#@testcase'>@testcase</a> tag is used to define information about a testcase.
-It looks something like this:
-</div>
-
-
-<div class='code_header' style='width:80%;margin-left:30px;margin-top:10px;width:100%;;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_110');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_110').innerHTML);">Print</span>
-</div>
-
-<div class='code'>
-<div class='snippet' style='white-space:pre-wrap'><div style='width:4%;float:left;white-space:pre;color:#ccc;'>001  
-002  
-003  
-004  
-005  
-006  
-007  
-008  
-009  
-010  
-011  
-012  
-013  
-014  
-015  
-016  
-017  
-018  
-019  
-020  
-021  
-022  
-023  
-024  
-025  
-026  
-027  
-028  
-029  
-030  
-031  
-032  
-</div><div style='width:95%;float:left;white-space:pre-wrap'><a href='user_guide.html#@testcase'>@testcase</a><br/>:name: <a href='user_guide.html#Version'>Version</a><br/>:desc:<br/>This is a diagnostic method that is used to retrieve the<br/>API version information. It reads the version string from the API<br/>and does a very simple check to validate the sanity of the<br/>version string.<br/><br/>:status: PASSED<br/>:duration: 0.100000 sec<br/><br/><a href='user_guide.html#@testcase'>@testcase</a><br/>:name: Register test<br/>:desc:<br/>This test validates basic register access<br/>by reading the ASIC IDs and verifying the match the<br/>expected value.<br/><br/>:status: PASSED<br/>:duration: 10.480000 sec<br/><br/><br/><a href='user_guide.html#@testcase'>@testcase</a><br/>:name: Register dump test<br/>:desc:<br/>This test validates the register dump<br/>from the API. Due to restrictions in SWIG it is impossible<br/>to test all the methods so it uses a high-level print<br/>method to display the register dump.<br/><br/>:status: PASSED<br/>:duration: 11.760000 sec</div><div style='clear:both;'></div></div>
-</div>
-
-<div class='source' id="snippet_110">
-<div class='snippet'>@testcase<br/>:name: Version<br/>:desc:<br/>This is a diagnostic method that is used to retrieve the<br/>API version information. It reads the version string from the API<br/>and does a very simple check to validate the sanity of the<br/>version string.<br/><br/>:status: PASSED<br/>:duration: 0.100000 sec<br/><br/>@testcase<br/>:name: Register test<br/>:desc:<br/>This test validates basic register access<br/>by reading the ASIC IDs and verifying the match the<br/>expected value.<br/><br/>:status: PASSED<br/>:duration: 10.480000 sec<br/><br/><br/>@testcase<br/>:name: Register dump test<br/>:desc:<br/>This test validates the register dump<br/>from the API. Due to restrictions in SWIG it is impossible<br/>to test all the methods so it uses a high-level print<br/>method to display the register dump.<br/><br/>:status: PASSED<br/>:duration: 11.760000 sec</div>
-</div>
-
-
-<div class='tblkps' >When rendered these examples look like:</div>
-<h4>6.1.2.1. Version<a name='Version'></a></h4>
-
-        <div class="bordered" style="margin-top:10px;">
-        <div class="question"><b>Test Case: </b> Version</div>
-        <div>
-            <div style="margin-left: 10px;margin-bottom:10px;">
-                <div style="color: #396592; font-weight: bold;">Status:&nbsp;&nbsp;&nbsp; <span style='color:green;'>PASSED</span></div>
-            </div>
-            
-    <div style="margin-left: 10px;margin-bottom:10px;">
-        <div style="color: #396592; font-weight: bold;">Duration:&nbsp;&nbsp;&nbsp; <span style='color:black;'>0.100000 sec</span></div>
-    </div>
-
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >This is a diagnostic method that is used to retrieve the
-API version information. It reads the version string from the API
-and does a very simple check to validate the sanity of the
-version string.
-</div>
-</p>
-            </div>
-        </div>
-        </div>
-        <h4>6.1.2.2. Register test<a name='Register test'></a></h4>
-
-        <div class="bordered" style="margin-top:10px;">
-        <div class="question"><b>Test Case: </b> Register test</div>
-        <div>
-            <div style="margin-left: 10px;margin-bottom:10px;">
-                <div style="color: #396592; font-weight: bold;">Status:&nbsp;&nbsp;&nbsp; <span style='color:green;'>PASSED</span></div>
-            </div>
-            
-    <div style="margin-left: 10px;margin-bottom:10px;">
-        <div style="color: #396592; font-weight: bold;">Duration:&nbsp;&nbsp;&nbsp; <span style='color:black;'>10.480000 sec</span></div>
-    </div>
-
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >This test validates basic register access
-by reading the ASIC IDs and verifying the match the
-expected value.
-</div>
-</p>
-            </div>
-        </div>
-        </div>
-        <h4>6.1.2.3. Register dump test<a name='Register dump test'></a></h4>
-
-        <div class="bordered" style="margin-top:10px;">
-        <div class="question"><b>Test Case: </b> Register dump test</div>
-        <div>
-            <div style="margin-left: 10px;margin-bottom:10px;">
-                <div style="color: #396592; font-weight: bold;">Status:&nbsp;&nbsp;&nbsp; <span style='color:green;'>PASSED</span></div>
-            </div>
-            
-    <div style="margin-left: 10px;margin-bottom:10px;">
-        <div style="color: #396592; font-weight: bold;">Duration:&nbsp;&nbsp;&nbsp; <span style='color:black;'>11.760000 sec</span></div>
-    </div>
-
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;"><div class='tblkps' >This test validates the register dump
-from the API. Due to restrictions in SWIG it is impossible
-to test all the methods so it uses a high-level print
-method to display the register dump.
-</div>
-</p>
-            </div>
-        </div>
-        </div>
-        
         </div>
     <div style="clear:both;"></div>
     </div>
+    <!--
     <div class="footer">
         <div style="height: 40px;margin-top:10px;">
             <span style="margin-left:10px;width:200px;"><a href="legal.html">Legal Information</a></span>
             <span style="width:200px;float:right;">Version: 1.0.58</span>
-            <span style="width:200px;float:right;">Last updated: 15 October 2013</span>
+            <span style="width:200px;float:right;">Last updated: 15 August 2014</span>
         </div>
     </div>
+    -->
 </div>
 </body>
 </html>
