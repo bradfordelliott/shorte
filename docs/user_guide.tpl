@@ -611,7 +611,8 @@ The @define is used to document a \#define structure in C.
 @h3 @enum
 The @enum tag is used to define an enumeration.
 
-@enum: name="e_my_test" caption="This is a test enum"
+@enum: name="e_my_test" caption="This is a test enum" description='This is a test enum'
+--values:
 - Name | Value | Description
 - LEEDS_VLT_SUPPLY_1V_TX | 0x0 |  1V supply TX 
 - LEEDS_VLT_SUPPLY_1V_RX | 0x1 |  1V supply RX 
@@ -684,7 +685,7 @@ print "Hello world!"
 @text
 This will execute the code on the local machine and return the output:
 
-@python: exec="1"
+@python:
 print "Hello world!"
 
 @h3 @bash
@@ -813,7 +814,7 @@ The @checklist tag creates a non-interactive checklist
 TBD - Add description of this tag
 
 
-@include "chapters/sequence_diagrams.tpl"
+#@include "chapters/sequence_diagrams.tpl"
 
-@include "chapters/test_cases.tpl"
+#@include "chapters/test_cases.tpl"
 
