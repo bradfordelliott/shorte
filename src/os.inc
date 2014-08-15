@@ -32,3 +32,11 @@ ifeq ("$(uname)", "windows32")
 	archive    := zip -R shorte.win32.${version}.zip *
     libdir     := libs/win32
 endif
+
+python:=python
+python-config:=python-config
+
+ifneq ("${PATH_PYTHON}","")
+    override python:=${PATH_PYTHON}/python
+    override python-config:=${PATH_PYTHON}/python-config
+endif
