@@ -6,12 +6,12 @@
 @h1 Comments
 A single line comment takes this format:
 
-  \# This is a single line comment. You shouldn't see the \ character
+  \# This is a single line comment. You shouldn't see the \\ character
 
 A multi-line comment takes this format:
 
   \<!--
-  This is a multi-line comment. You shouldn't see the \ character
+  This is a multi-line comment. You shouldn't see the \\ character
   blah blah blah -->
 
 The following block of text won't show up
@@ -27,6 +27,7 @@ The multi-line comment below should not show up.
    <!-- This is my multil-line comment
      that spans multiple lines -->
 
-   <!-- This comment shoudln't show up either -->
+   <!-- This comment shouldn't show up either -->
 
-However this text should be visible
+However this text should be visible because it is not
+commented out.

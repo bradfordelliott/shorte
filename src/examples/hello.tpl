@@ -8,6 +8,8 @@ shorte. The structure of a document is similar to HTML in that it
 starts with a document header followed by a document body. Tags
 are created using the @tag syntax.
 
+What happens if I type == in a text block?
+
 It supports lists
 - one
     - two

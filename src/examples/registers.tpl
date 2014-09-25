@@ -50,10 +50,14 @@
                           with some more description       | customer="CORTINA"
 - 1x56  | blah2         | A random field                   |
 
-@struct: name="clause45" description="Clause 45 address bits" diagram="show:yes,align:32,bitorder:decrement"
+@h2 Register Definitions
+This register definition should really look different than a structure
+definition.
+
+@register: name="clause45" description="Clause 45 address bits" diagram="show:yes,align:32,bitorder:decrement"
 -- fields:
-- Field | Name          | Description                      | Attributes
-- 1x8   | Reserved      | Reserved for future use          |
-- 1x8   | MMD           | The MMD section of clause 45     | 
-- 1x16  | Address       | The address within the MMD       |
+- Bits  | Name          | Description                      | Attributes
+- 8'b   | Reserved      | Reserved for future use          |
+- 8'b   | MMD           | The MMD section of clause 45     | 
+- 16'b  | Address       | The address within the MMD       |
 
