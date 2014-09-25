@@ -143,6 +143,7 @@ tests:
 #	make test_mx
 	make test_templates
 	make test_registers
+	make test_comments
 
 THEME:=shorte
 
@@ -159,9 +160,15 @@ test_hello:
 test_headings:
 	${python} shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
 
+test_comments:
+	${python} shorte.py -f examples/comments.tpl -t "${THEME}" -p "html+pdf" -o build-output/comments
+
 test_textblocks:
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html+pdf"
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock_inline -p "html_inline+pdf"
+
+test_inline_styling:
+	${python} shorte.py -f examples/inline_styling.tpl -t "${THEME}" -o build-output/inline_styling -p "html"
 
 test_tables:
 	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
@@ -246,9 +253,9 @@ test_sql:
 
 # This method is called to launch a test server and then generate several example documents.
 test_server:
-	mkdir -p build-output/server_example
-	${python} shorte.py --server --port=8400 &
-	sleep 1
+	${mkdir} -p build-output/server_example
+	${start} ${python} shorte.py --server --port=8400 &
+	${python} -c "import time;time.sleep(2)"
 	${python} server_test.py --package="html_inline" --theme="cortina_web" --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example.html
 	${python} server_test.py --package="html_inline+pdf" --theme="html=cortina_web;pdf=cortina_public" --zip --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example2.zip
 	${python} server_test.py --shutdown --ip=127.0.0.1 --port=8400
@@ -269,6 +276,8 @@ test_sequences:
 
 test_template_text:
 	${python} shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
+test_template_word:
+	${python} shorte.py -f examples/template_test.tpl -p "word" -o build-output/template_tests/word
 
 test_templates:
 	${python} shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
