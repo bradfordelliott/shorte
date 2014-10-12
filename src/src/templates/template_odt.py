@@ -3460,7 +3460,9 @@ ${desc}
             # Ignore errors
             errors = 0 
         
-        os.makedirs(scratchdir + os.path.sep + 'odt')
+        outdir = scratchdir + os.path.sep + 'odt'
+        if(not os.path.exists(outdir)):
+            os.makedirs(scratchdir + os.path.sep + 'odt')
 
         pages = self.m_engine.m_parser.get_pages()
 

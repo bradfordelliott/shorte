@@ -625,6 +625,7 @@ class field_t(type_t):
         if(field.has_key("array_elem_size")):
             self.array_elem_size = field["array_elem_size"]
         
+        #print self.attrs
         self.name = self.attrs[1]["text"]
         self.desc = self.attrs[2]["textblock"]
 

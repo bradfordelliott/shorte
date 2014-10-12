@@ -58,14 +58,22 @@ class image_t:
         self.extension = ""
 
     def parse_path(self, path):
-        self.source = path
+        self.source = os.path.abspath(path)
         dirname = os.path.dirname(path) + os.path.sep
         name = path.replace(dirname, "")
-        parts = os.path.splitext(name)
+        parts = os.path.split(name)
         self.name = name
         self.dirname = dirname
+
+        parts = os.path.splitext(parts[1])
         self.basename = parts[0]
         self.extension = parts[1]
+
+    def get_name(self):
+        return self.basename + self.extension
+
+        #print "BASENAME: %s" % self.basename
+        #print "DIRNAME:  %s" % dirname
 
     def dimensions(self):
 
@@ -122,6 +130,8 @@ class image_t:
             ERROR("Can't scale images by percentage yet")
             return self.name
 
+        #print "SOURCE: %s" % self.source
+
         im = Image.open(self.source)
         scale_width  = 1.0
         scale_height = 1.0
@@ -151,7 +161,7 @@ class image_t:
         #print "Creating thumbnail"
         return self.scale(new_height=100, new_width=100)
 
-    def thumbnail(self):
+    def get_thumbnail(self):
         #print "Creating thumbnail"
         return self.basename + "_100x100" + self.extension
 
@@ -590,7 +600,7 @@ class shorte_parser_t(parser_t):
             if(not tags.has_key("caption")):
                 tags["caption"] = matches.groups()[1]
 
-        return self.parse_inline_image_data(name, tags)
+        return self.parse_inline_image_data(tags)
 
 
     def parse_inline_image_data(self, tags):
@@ -1408,8 +1418,8 @@ a C/C++ like define that looks like:
         '''This method is called to parse an @struct tag containing a structure
            definition.
 
-           @param self [I] - The shorte parser instance
-           @param source [I] - The source code for the tag
+           @param self      [I] - The shorte parser instance
+           @param source    [I] - The source code for the tag
            @param modifiers [I] - A list of modifiers associated with the tag.
 
            @return A dictionary defining the structure
@@ -1625,6 +1635,7 @@ a C/C++ like define that looks like:
                 for field in fields:
                     if(not fields_are_bytes):
                         bits = field["attrs"][0]["text"]
+                        #print "BITS: %s" % bits
 
                         if(bits.find("b") != -1):
                             fields_are_bits = True
@@ -1678,6 +1689,7 @@ a C/C++ like define that looks like:
                     elif(fields_are_bits):
 
                         bits = field["attrs"][0]["text"]
+                        bits = bits.replace("'", '')
 
                         if((bits[0] >= '0') and (bits[0] <= '9')):
                             #print "BITS: %s" % bits
@@ -2098,6 +2110,7 @@ a C/C++ like define that looks like:
             ext = parts[1]
             
             image["src"] = os.path.abspath(tags["src"])
+            #print "parse_image.src = %s" % image["src"]
             image["name"] = basename
             image["ext"] = ext
         
@@ -2161,6 +2174,7 @@ a C/C++ like define that looks like:
 
                         image.parse_path(row["cols"][0]["text"])
 
+                        #print "PATH: %s" % image.source
                         # Add the image to the list of managed photos
                         self.m_engine.m_images.append(image.source)
 

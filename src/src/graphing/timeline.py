@@ -16,6 +16,22 @@ class timeline_graph_t(graph_t):
     def __init__(self, width, height):
 
         graph_t.__init__(self,width,height)
+    
+    
+    def get_max_xcoordiate(self):
+        maxX = 0
+        
+        for dataset in self.datasets:
+            for key in self.datasets[dataset]["data"]:
+                if(key > maxX):
+                    maxX = key
+
+        maxX = (math.ceil(maxX /10.0)) * 10;
+
+        #print "MAX X: %d" % maxX
+        
+        return maxX
+
 
     def draw_yaxis(self):
 
@@ -95,10 +111,10 @@ class timeline_graph_t(graph_t):
         right = self.right
         bottom = self.bottom
         
-        increment = maxX/10.0;
+        increment = 3;
         
-        if(1 == self.xaxis["autoscale"]):
-            increment = math.ceil(maxX/10.0)
+        #if(1 == self.xaxis["autoscale"]):
+        #    increment = math.ceil(maxX/10.0)
         
         #print "increment: %d" % increment
         #print "maxX: %d" % maxX
@@ -127,6 +143,12 @@ class timeline_graph_t(graph_t):
                label = math.ceil((count * maxX * increment)/(maxX))
             else:
                label = (count * maxX * increment)/(maxX)
+
+            labels = self.xaxis["labels"]
+
+            if(labels != None and len(labels) > count):
+                label = labels[count]
+
             
             graph.draw_text(x = horizontalPosition - 3, 
                             y = bottom + 15,
@@ -162,7 +184,7 @@ class timeline_graph_t(graph_t):
         yAxisIncrements = maxY/yincrement;
         xAxisIncrements = maxX/xincrement;
 
-        #print "increments: %d" % xAxisIncrements
+        print "increments: %d" % xAxisIncrements
 
         height = self.height
         width = self.width
@@ -200,12 +222,13 @@ class timeline_graph_t(graph_t):
             for key in self.datasets[dataset]["data"]:
                 xvalue = key;
                 #print "xvalue = %d" % xvalue
-                yvalue = self.datasets[dataset]["data"][key]
+                yvalue = self.datasets[dataset]["data"][key]["val"]
                 
                 #print "x = %d, y = %d" % (xvalue, yvalue)
                 # DEBUG BRAD: Currently the value, need more
                 #             information than just the y value
                 evalue = yvalue
+                elabel = self.datasets[dataset]["data"][key]["label"]
 
                 # For timeline the y-value is always 5. The
                 # data argument is the size/scale of the event.
@@ -233,6 +256,7 @@ class timeline_graph_t(graph_t):
                                    line_color = color,
                                    background_color = color)
 
+                color = color.replace("#", "")
                 r = int(color[0:2],16)
                 g = int(color[2:4],16)
                 b = int(color[4:],16)
@@ -272,11 +296,12 @@ class timeline_graph_t(graph_t):
                 # Now complete the pointer to the end of the graph area
                 graph.draw_line(x2,y2,right + 60,y2, line_color=color, line_pattern=2)
         
-                label = "%2.2f" % evalue
-                (text_width, text_height) = graph.image.text_extents(label)
+                #label = "%2.2f" % evalue
+                #(text_width, text_height) = graph.image.text_extents(label)
+                (text_width, text_height) = graph.image.text_extents(elabel)
 
                 # Draw some text at the end of the pointer
-                graph.draw_text(x=right + 65, y=y2 - (text_height/2), font_color=color, text=label, font_size=7)
+                graph.draw_text(x=right + 65, y=y2 - (text_height/2), font_color=color, text=elabel, font_size=7)
                
             #graph.draw_curve(points      = points,
             #                 line_color  = color,
@@ -297,12 +322,32 @@ class timeline_graph_t(graph_t):
 if __name__ == "__main__":
     timeline = timeline_graph_t(800, 400)
     timeline.set_title("This is a test graph", "A test timeline with some data")
-    timeline.set_xaxis("Time",   "red")
+    
+    labels = []
+    for i in range(1977, 2020, 3):
+        labels.append("%d" % i)
+    timeline.set_xaxis("Time",   "red", labels=labels)
     timeline.set_yaxis("Y-Axis", "red")
+
+    base = 1977
         
-    d = {0:5, 1:20, 6:35, 4:55, 12:100, 14:10, 15:100}
+    d = {
+            1977 - base: {"val" : 5,   "label" : "Test 0",  "caption" : "Test 1"},
+            1978 - base: {"val" : 20,  "label" : "Test 1",  "caption" : "Test 2"},
+            1979 - base: {"val" : 35,  "label" : "Test 6",  "caption" : "Test 3"},
+            1989 - base: {"val" : 55,  "label" : "Test 4",  "caption" : "Test 4"},
+            1993 - base: {"val" : 100, "label" : "Test 12", "caption" : "Test 5"},
+            1999 - base: {"val" : 10,  "label" : "Test 14", "caption" : "Test 6"},
+            2001 - base: {"val" : 100, "label" : "Test 15", "caption" : "Test 7"}
+        }
     timeline.add_data_set(d, "one", color="c0c0c0")
     
-    d2 = {1:6, 7:15}
+    d2 ={
+            1980 - base: {"val" : 6,   "label" : "Test 2",  "caption" : "Test 2"},
+            1983 - base: {"val" : 4,   "label" : "Test 3",  "caption" : "Test 3"},
+            1985 - base: {"val" : 15,  "label" : "Test 7",  "caption" : "Test 7"},
+            2007 - base: {"val" : 100, "label" : "Test 15", "caption" : "Test 7"}
+        }
+    
     timeline.add_data_set(d2, "two", color="f00000")
     timeline.draw_graph("timeline.png")

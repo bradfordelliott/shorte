@@ -86,8 +86,10 @@ object
 div.snippet span.operator {color: purple;}
 div.snippet span.kw {font-weight:bold;color: blue;} /* keyword */
 div.snippet span.str {color: #9933CC;}
+div.snippet span.def {color:red;}
 div.snippet span.mstring {color: #9933CC;}
-div.snippet span.cmt {font-style:italic;color: green;}
+div.snippet span.cmt {color: #009900;}
+div.snippet span.cmttg {color: #00dd00;}
 div.snippet span.ln {color: #C0C0C0;}
 
 /* Styling of text blocks */
@@ -121,8 +123,10 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
   div.snippet span.keyword {color: blue;}
   div.snippet span.kw {color: blue;}
   div.snippet span.str {color: #9933CC;}
+  div.snippet span.def {color:red;}
   div.snippet span.mstring {color: #9933CC;}
-  div.snippet span.cmt {color: green;}
+  div.snippet span.cmt {color: #009900;}
+  div.snippet span.cmttg {color: #00dd00;}
   div.snippet span.ln {color: #C0C0C0;}
 
   /* Styling of text blocks */
@@ -231,6 +235,17 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       background-color:${color_table_subheader_bg};
       border-top:1px solid #ccc;
       border-bottom:0px solid #ccc;
+  }
+  .bordered tr.reserved {
+      background-color:${color_table_reserved_bg};
+      border-top:1px solid #ccc;
+      border-bottom:0px solid #ccc;
+      color:${color_table_reserved_fg};
+  }
+  .bordered tr.spacer {
+      border-top:1px solid #ccc;
+      border-bottom:1px solid #ccc;
+      color:${color_table_reserved_fg};
   }
   .bordered tr td.reserved {
       background-color:${color_table_reserved_bg};

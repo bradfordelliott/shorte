@@ -80,7 +80,7 @@ $result
 
 note_template = string.Template(
 """
-<div style='margin-left: 20px; margin-top:10px; margin-bottom:10px; margin-right:30px;border:1px solid #ccc;background:#f8f7cf;border-radius:6px;-moz-border-radius:6px;-webkit-border-radius:6px;'>
+<div style='margin-left: 20px; margin-top:10px; margin-bottom:0px; margin-right:30px;border:1px solid #ccc;background:#f8f7cf;border-radius:6px;-moz-border-radius:6px;-webkit-border-radius:6px;'>
   <table>
     <tr valign="top">
         <td>
@@ -1953,6 +1953,7 @@ within an HTML document.
            @return The HTML output of the structure
         '''
 
+
         source = tag.source
         struct = tag.contents
         
@@ -2289,7 +2290,7 @@ $href_end
         html = '<div>'
         for image in gallery.images():
             html += "<a href='%s'><img style='float:left;width:100px;height:100px;margin:5px;border:10px solid #ccc;border-radius:10px;' src='%s'></img></a>" % (
-                image.name, image.thumbnail())
+                image.get_name(), image.get_thumbnail())
         html += "</div>"
         html += "<div style='clear:both;'></div>"
 
@@ -2515,6 +2516,8 @@ $href_end
 
         if(data == None):
             return
+
+        #data = data.replace("\[^\]", "\\");
 
         # Convert an < and > characters
         data = data.replace("<", "&lt;")   # re.sub("<", "&lt;", data)

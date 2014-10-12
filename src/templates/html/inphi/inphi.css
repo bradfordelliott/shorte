@@ -10,7 +10,7 @@
       margin-right: auto;
       text-align: left;
       margin: 0 auto;
-      background: #fff;
+      background: #f0f0f0;
       border: 0px;
       height: 100%;
       z-index: 100;
@@ -22,19 +22,33 @@
       height: 500px;
       min-height: 500px;
   }
+
+  div#logo
+  {
+     width: 1214px;
+     margin-left:auto;
+     margin-right:auto;
+     text-align:center;
+     height:90px;
+     background: #f0f0f0 url(images/logo.png) no-repeat;
+  }
   
   div.header
   {
-     width:      100%;
+     width:      1214px;
      border:     0px solid #fff;
      padding:    0px;
-     background: #68511e url(images/head_1024.png) no-repeat;
+     margin-left: auto;
+     margin-right:auto;
+     text-align:center;
+     /*background: #68511e url(images/head_1024.png) no-repeat;*/
+     background: #ffffff url(images/880_2.jpg) no-repeat;
      color:      #404040;
   }
   
   span.pdf
   {
-      padding-top:50px;
+      padding-top:10px;
   }
   
   
@@ -51,12 +65,12 @@
   
   #menu_div
   {
-     width:          100%;
-     margin:         0px;
-     height:         40px;
-     font-size:      0.9em;
+     width:          1214px;
+     margin-left:auto;
+     margin-right:auto;
+     height:         30px;
+     font-size:      0.8em;
      padding:        0px;
-     background:     url(images/menu.png);
      line-height:    normal;
   }
   
@@ -95,7 +109,7 @@
   #menu_div a
   {
      font-size: 1.0em;
-     color:           #2b3717;
+     color:           #c0c0c0;
      float:           left;
      margin:          0;
      text-decoration: none;
@@ -104,7 +118,7 @@
   #menu_div a div
   {
      display: block;
-     color:      #2b3717;
+     color:      #c0c0c0;
      margin: 0px;
      padding-top: 4px;
      padding-right: 20px;

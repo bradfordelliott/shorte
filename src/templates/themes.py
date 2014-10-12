@@ -58,7 +58,7 @@ class theme():
             colors["hyperlink.hover"] = color(fg="#ccc")
             
 
-        elif(theme in ("cortina", "cortina_web")):
+        elif(theme in ("cortina", "cortina_public", "cortina_web")):
             # Heading Colors
             colors["heading.1"] = color(fg="#000000")
             colors["heading.2"] = color(fg="#396592")
