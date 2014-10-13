@@ -8,7 +8,7 @@ help:
 	@${echo} " cairo_plugin = build the cairo plugin"
 	@${echo} " package      = build shorte and generate the tarball"
 	@${echo} " install      = install shorte over the network"
-	@${echo} " exe          = build a standalone executable"
+	@${echo} " exe          = build a standalone executable (windows only)"
 	@${echo} " docs         = generate the documentation for the site"
 	@${echo} " release_notes = generate the release notes for shorte"
 	@${echo} ""
@@ -34,6 +34,7 @@ help:
 	@${echo} "   test_templates       = test all the templates"
 	@${echo} "   test_template_text   = test the text template"
 	@${echo} "   test_string_methods  = test string handling methods like trim_leading_indent"
+	@${echo} ""
 	@${echo} "   image handling:"
 	@${echo} "     test_graphing        = test plot handling"
 	@${echo} "     test_gnuplot         = test GNU Plot integration"
@@ -41,6 +42,7 @@ help:
 	@${echo} "     test_sequences       = test for sequence diagrams"
 	@${echo} "     test_images          = test the use of images"
 	@${echo} "     test_images_encode   = test the encoding of images as base64"
+	@${echo} "   test_code_styling    = test the formatting of C code"
 
 env:
 	@${echo} " SHELL: ${SHELL}"
@@ -157,6 +159,9 @@ test_hello:
 	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
+test_hello_quick:
+	${python} shorte.py -f examples/hello.tpl -p "html" -t "${THEME}" -o build-output/hello_hsio
+
 test_headings:
 	${python} shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
 
@@ -175,6 +180,7 @@ test_tables:
 
 test_api_reference:
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html+pdf" -s "shorte.auto_summarize=0"
+#	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html" -s "shorte.auto_summarize=0"
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "shorte"
 
 test_code:
@@ -208,6 +214,10 @@ test_code_quick:
 	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
 	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "txt"
 
+test_c:
+	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
+
+
 test_functions:
 	${python} shorte.py -f examples/functions.tpl -t "${THEME}" -o build-output/functions -p "html+pdf"
 
@@ -218,7 +228,7 @@ test_bullets:
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets_shorte
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets2 --zip=bullets.zip
-	${python} shorte.py -f examples/bullets.tpl -t "html=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
+	${python} shorte.py -f examples/bullets.tpl -t "html_inline=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
@@ -292,6 +302,9 @@ test_templates:
 	${python} shorte.py -f examples/template_test.tpl -p "shorte" -o build-output/template_tests/shorte
 	${python} shorte.py -f examples/template_test.tpl -p "sql" -o build-output/template_tests/sql
 
+test_template_c:
+	${python} shorte.py -f examples/template_test.tpl -p "c" -o build-output/template_tests/c
+
 test_shorte:
 	${python} shorte.py -f examples/headings.tpl -p "html" -t shorte -o build-output/shorte_template
 
@@ -302,6 +315,8 @@ test_gnuplot:
 	${python} shorte.py -f examples/gnuplot.tpl -p "html+pdf" -t shorte -o build-output/gnuplot
 
 test_registers:
+	${python} shorte.py -f examples/registers.tpl -p "html+pdf" -t shorte -o build-output/registers
+test_registers_quick:
 	${python} shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers
 
 test_junk:
@@ -315,8 +330,17 @@ test_junk:
 	${python} shorte.py -f examples/functions.tpl -p "html_inline+pdf" -o build-output/functions
 	${python} shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
 
+
+# This test is used to convert source code files into HTML output code. This
+# is currently a prototype while I work on integrating full sources into the
+# generated package.
+test_code_styling:
+	${python} shorte.py -f examples/test.c -p html_inline -i c2html -o build-output/c_code_formatting
+	${python} shorte.py -f shorte.py -p html_inline -i c2html -o build-output/c_code_formatting
+	${python} shorte.py -f examples/code.tpl -p html_inline -i c2html -o build-output/c_code_formatting
+
 test_string_methods:
-	${python} tests/string_handling.py
+	${python} test_cases/string_handling.py
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python

@@ -2,7 +2,9 @@
 @docsubtitle World
 
 @body
-@h1 Hello There
+@h1: wikiword=HelloThere
+Hello There
+
 This is a very simple document to demonstrate the basics of
 shorte. The structure of a document is similar to HTML in that it
 starts with a document header followed by a document body. Tags
@@ -41,7 +43,8 @@ and a list with an inline table:
         @{image, src="examples/record_0.png"}
 - two
 
-This is some random stuff here with a link to [[->Example: Dynamic Reconfiguration, dynamically reconfigure something]]
+This is some random stuff here with a link to [[@Example: Dynamic Reconfiguration, dynamically reconfigure something]] and
+another link to HelloThere. Links within the same document will may be prefixed with the @ character.
 
 This is some more data
 
@@ -65,3 +68,8 @@ def one():
 @include "examples/images.tpl"
 
 @h1 Test
+This is a paragraph
+
+This is another paragraph
+
+@h1 Example: Dynamic Reconfiguration

@@ -595,8 +595,28 @@ class template_html_t(template_t):
         return ''.join(output)
 
 
-    def format_source_code(self, language, tags, exclude_wikiwords=[], show_line_numbers=True):
+    def format_source_code(self,
+            language,
+            tags,
+            exclude_wikiwords=[],
+            show_line_numbers=True,
+            convert_inline_styling=True,
+            tag_line_numbers=False):
+        '''This method is called to format a block of source code
+           into an HTML string.
 
+           @param [I] language          - The format of the input language
+           @param [I] tags              - The list of tags defining the source code
+           @param [I] exclude_wikiwords - A list of wikiwords to exclude
+                                          from cross referencing.
+           @param [I] show_line_numbers - Show line numbers on the left
+                                          hand side.
+           @param [I] convert_inline_styling - Convert inline styling
+                                          blocks to their HTML equivalent
+           @param [I] tag_line_numbers  - Tag line numbers so that structure
+                                          and functions can hyperlink to them.
+           @return The HTML string defining the structure.
+        '''
         
         lt = re.compile("<")
         gt = re.compile(">")
@@ -633,8 +653,9 @@ class template_html_t(template_t):
             #print "SOURCE: %s" % source
         
             # Convert any inline styling blocks
-            expr = re.compile("@\{(.*?)\}", re.DOTALL)
-            source = expr.sub(self.parse_inline_styling, source)
+            if(convert_inline_styling):
+                expr = re.compile("@\{(.*?)\}", re.DOTALL)
+                source = expr.sub(self.parse_inline_styling, source)
 
             #source = source.strip()
 
@@ -647,8 +668,17 @@ class template_html_t(template_t):
                 source = self._format_links(source)
                 if(self.allow_wikify_comments()):
                     source = self.wikify(source, exclude_wikiwords)
+
+                # Convert any doxygen tags
+                source = re.sub("(@[^ \t\n]+)", "<span class='cmttg'>\\1</span>", source)
+
                 output += '<span class="cmt">%s</span>' % source
 
+            elif(type == TAG_TYPE_PREPROCESSOR):
+                source = self._format_links(source)
+                if(self.allow_wikify_comments()):
+                    source = self.wikify(source, exclude_wikiwords)
+                output += '<span class="def">%s</span>' % source
             elif(type == TAG_TYPE_WHITESPACE):
                 #output += '&nbsp;'
                 output += ' '
@@ -662,7 +692,10 @@ class template_html_t(template_t):
                 if(allow_line_numbers == 1):
                     output += "<span class='ln'>%03d  </span>" % (line)
                 elif(allow_line_numbers == 2):
-                    line_number_div += '%03d  \n' % line
+                    if(tag_line_numbers):
+                        line_number_div += '<a name="l%d"></a>%03d  \n' % (line,line)
+                    else:
+                        line_number_div += '%03d  \n' % (line)
             else:
                 print "Skipping tag %s" % source
                 self.exit(-1)
@@ -888,11 +921,7 @@ class template_html_t(template_t):
 
             function = tag.contents
 
-            desc = ''
-            if(function.has_key("desc2")):
-                desc = self.format_textblock(function["desc2"])
-            elif(function.has_key("desc")):
-                desc = function["desc"]
+            desc = self.format_textblock(function.get_description())
             
             if(tag.hierarchy != hierarchy):
                 hierarchy = tag.hierarchy
@@ -901,8 +930,8 @@ class template_html_t(template_t):
     <td colspan=2 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">%s</td>
 </tr>''' % (hierarchy)
 
-            if(function.has_key("prototype")):
-                prototype = function["prototype"]["parsed"]
+            if(function.has_prototype()):
+                prototype = function.get_prototype()["parsed"]
                 (returns, prototype) = self.htmlize_prototype(prototype)
             else:
                 returns = ''
@@ -1027,9 +1056,11 @@ class template_html_t(template_t):
            @return The prototype formatted as HTML
         '''
 
+        #print tag
+
         template = string.Template("""
         <div class="bordered" style="margin-top:10px;${background}">
-        <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name}</div>
+        <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name} ${xref}</div>
         <div>
             <div style="margin-left: 10px;">
                 <div style="color: #396592; font-weight: bold;">Description:</div>
@@ -1139,7 +1170,7 @@ class template_html_t(template_t):
         
         file = "blah"
         function = {}
-        function["name"] = prototype["name"]
+        function["name"] = prototype.get_name()
         function["example"] = ''
         function["prototype"] = ''
         function["desc"] = ''
@@ -1151,21 +1182,14 @@ class template_html_t(template_t):
         function["calls"] = ''
         function["called_by"] = ''
 
-        if(prototype.has_key("desc")):
-            function["desc"] = self.format_text(prototype["desc"], expand_equals_block=True)
-        if(prototype.has_key("desc2")):
-            #print "Do I get here?"
-            tag = tag_t()
-            tag.contents = prototype["desc2"]
-            #print "CONTENTS [%s]" % tag["contents"]
-            function["desc"] = self.format_textblock(tag)
+        function["desc"] = self.format_textblock(prototype.get_description())
         
         exclude_wikiwords = []
-        exclude_wikiwords.append(function["name"])
+        exclude_wikiwords.append(prototype.get_name())
 
-        if(prototype.has_key("prototype")):
-            language = prototype["prototype"]["language"]
-            example = prototype["prototype"]["parsed"]
+        if(prototype.has_prototype()):
+            language = prototype.get_prototype()["language"]
+            example  = prototype.get_prototype()["parsed"]
             
             if(self.m_show_code_headers.has_key("prototype") and self.m_show_code_headers["prototype"]):
                 snippet_id = self.m_snippet_id
@@ -1193,8 +1217,8 @@ class template_html_t(template_t):
             function["prototype"] = code
             function["prototype"] = template_prototype.substitute(function)
 
-        if(prototype.has_key("params") and (len(prototype["params"]) > 0)):
-            params = prototype["params"]
+        if(prototype.has_params()):
+            params = prototype.get_params()
             
             param_template = string.Template("""
                         <tr style='border-bottom:1px solid #ccc;'>
@@ -1218,9 +1242,9 @@ class template_html_t(template_t):
                 param["desc"] = html_tmp
 
                 if(param.has_key("desc2")):
-                    tag = tag_t()
-                    tag.contents = param["desc2"]
-                    param["desc"] = self.format_textblock(tag)
+                    dtag = tag_t()
+                    dtag.contents = param["desc2"]
+                    param["desc"] = self.format_textblock(dtag)
                 else:
                     print "WTF?"
                     sys.exit(-1)
@@ -1236,13 +1260,13 @@ class template_html_t(template_t):
             params["params"] = output
             function["params"] = template_params.substitute(params)
 
-        if(prototype.has_key("returns")):
-            function["returns"] = template_returns.substitute(prototype)
+        if(prototype.has_returns()):
+            function["returns"] = template_returns.substitute({"returns" : prototype.get_returns()})
 
-        if(prototype.has_key("example")):
+        if(prototype.has_example()):
 
-            example = prototype["example"]["parsed"]
-            language = prototype["example"]["language"]
+            example  = prototype.get_example()["parsed"]
+            language = prototype.get_example()["language"]
             
             if(self.m_show_code_headers["example"]):
                 snippet_id = self.m_snippet_id
@@ -1270,10 +1294,10 @@ class template_html_t(template_t):
             function["example"] = template_example.substitute(function)
         
         
-        if(prototype.has_key("pseudocode")):
+        if(prototype.has_pseudocode()):
 
-            pseudocode = prototype["pseudocode"]["parsed"]
-            language = prototype["pseudocode"]["language"]
+            pseudocode = prototype.get_pseudocode()["parsed"]
+            language   = prototype.get_pseudocode()["language"]
             
             if(self.m_show_code_headers["pseudocode"]):
                 snippet_id = self.m_snippet_id
@@ -1298,33 +1322,38 @@ class template_html_t(template_t):
             function["pseudocode"] = code
             function["pseudocode"] = template_pseudocode.substitute(function)
 
-        if(prototype.has_key("see_also") and (len(prototype["see_also"]) > 0)):
+        if(prototype.has_see_also()):
             params = {}
-            params["see_also"] = self.format_text(prototype["see_also"])
+            params["see_also"] = self.format_text(prototype.get_see_also())
             function["see_also"] = template_see_also.substitute(params)
         
         is_deprecated = False
-        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
+        #if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
+        if(prototype.get_deprecated()):
             #print "prototype.deprecated = %s" % prototype["deprecated"]
             #print "         .msg        = %s" % prototype["deprecated_msg"]
             params = {}
-            params["deprecated"] = self.format_textblock(prototype["deprecated_msg"])
+            #params["deprecated"] = self.format_textblock(prototype["deprecated_msg"])
+            params["deprecated"] = self.format_textblock(prototype.get_deprecated_msg())
             function["deprecated"] = template_deprecated.substitute(params)
             is_deprecated = True
 
         is_private = False
         function["private"] = ""
-        if(prototype.has_key("private") and prototype["private"] == True):
+        #if(prototype.has_key("private") and prototype["private"] == True):
+        if(prototype.get_private()):
             function["private"] = self.insert_image("lock.png", height=20,width=20,wrap=True)
 
-        if(prototype.has_key("called_by")):
+        #if(prototype.has_key("called_by")):
+        if(prototype.has_called_by()):
             params = {}
-            params["called_by"] = self.format_text(prototype["called_by"])
+            params["called_by"] = self.format_text(prototype.get_called_by())
             function["called_by"] = template_called_by.substitute(params)
         
-        if(prototype.has_key("calls")):
+        #if(prototype.has_key("calls")):
+        if(prototype.has_calls()):
             params = {}
-            params["calls"] = self.format_text(prototype["calls"])
+            params["calls"] = self.format_text(prototype.get_calls())
             function["calls"] = template_calls.substitute(params)
 
         function["background"] = '';
@@ -1333,11 +1362,19 @@ class template_html_t(template_t):
             function["name"] += " (THIS METHOD IS DEPRECATED)"
             function["background"] = "background: url('css/images/deprecated.png') center;";
             
-        topic = topic_t({"name"   : prototype["name"],
-                         "file"   : file,
+        topic = topic_t({"name"   : prototype.get_name(),
+                         "file"   : tag.file,
                          "indent" : 3});
         index.append(topic)
 
+        path = tag.file.replace(os.path.dirname(prototype.get_file()), "")
+
+        xref = string.Template(
+            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
+            "source_html" : "%s.source.html" % path,
+            "source"      : prototype.get_file(),
+            "line"        : prototype.get_line()})
+        function["xref"] = xref
         
         return template.substitute(function)
     
@@ -1445,9 +1482,9 @@ class template_html_t(template_t):
                     cindex += 1
 
                     if(col.has_key("textblock")):
-                        tag = tag_t() 
-                        tag.contents = col["textblock"]
-                        text = self.format_textblock(tag, False)
+                        dtag = tag_t() 
+                        dtag.contents = col["textblock"]
+                        text = self.format_textblock(dtag, False)
                     else:
                         text = self.format_text(col["text"])
 
@@ -1734,6 +1771,7 @@ within an HTML document.
            @return The HTML snippet defining the enum
            '''
 
+        #print tag
         enum = tag.contents
 
         # The name of the enumeration
@@ -1846,10 +1884,17 @@ within an HTML document.
             i+=1
 
         values += "</table>"
+        
+        path = tag.file.replace(os.path.dirname(enum.get_file()), "")
+        xref = string.Template(
+            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
+            "source_html" : "%s.source.html" % path,
+            "source"      : enum.get_file(),
+            "line"        : enum.get_line()})
 
         html = string.Template('''
 <div class='bordered' $style>
-<div style='background-color:#ccc;padding:10px;'><b>Enum:</b> ${name}$img</div>
+<div style='background-color:#ccc;padding:10px;'><b>Enum:</b> ${name}$img${xref}</div>
 <div>
     <div style="margin-left: 10px;">
         <div style="color: #396592; font-weight: bold;">Description:</div>
@@ -1864,6 +1909,7 @@ within an HTML document.
 </div>
 </div><br/>''').substitute({
     "style"  : style,
+    "xref"   : xref,
     "img"    : img,
     "name"   :  name,
     "values" : values,
@@ -1873,12 +1919,20 @@ within an HTML document.
 
 
     def format_define(self, tag):
+        #print tag
 
         define = tag.contents
+        
+        path = tag.file.replace(os.path.dirname(define.get_file()), "")
+        xref = string.Template(
+            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
+            "source_html" : "%s.source.html" % path,
+            "source"      : define.get_file(),
+            "line"        : define.get_line()})
 
         html = string.Template('''
 <div class='bordered'>
-<div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}</div>
+<div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}${xref}</div>
 <div>
     <div style="margin-left: 10px;">
         <div style="color: #396592; font-weight: bold;">Value:</div>
@@ -1893,6 +1947,7 @@ within an HTML document.
 </div>
 </div><br/>''').substitute({
     "name" : define.name,
+    "xref" : xref,
     "value" : self.format_textblock(define.value),
     "desc" : self.format_textblock(define.description)})
 
@@ -1900,7 +1955,7 @@ within an HTML document.
 
     def format_object_example(self, obj):
 
-        if(obj.example == None):
+        if(not obj.has_example()):
             return ''
         
         template_example = string.Template('''
@@ -1953,6 +2008,7 @@ within an HTML document.
            @return The HTML output of the structure
         '''
 
+        #print tag
 
         source = tag.source
         struct = tag.contents
@@ -1962,14 +2018,15 @@ within an HTML document.
         
         html += "<table class='bordered'>\n"
         
+        label = tag.name.title()
+        
         if(struct.private == True):
             img = "<img src='css/lock.png'></img>"
         else:
             img = ''
-        html += "<tr><th colspan='%d'>%sStructure Fields</th></tr>\n" % (struct.max_cols, img)
+        html += "<tr><th colspan='%d'>%s%s Fields</th></tr>\n" % (struct.get_max_cols(), img, label)
 
        
-
         # If the structure has an image associated with it then
         # display it as part of the HTML describing the structure.
         if(struct.image != None):
@@ -1987,82 +2044,78 @@ within an HTML document.
                 name = os.path.basename(name)
 
             
-            html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.max_cols, "Diagram")
+            html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.get_max_cols(), "Diagram")
             html += struct.image["map"]
             html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none'></img></th></td>" % (struct.max_cols, name, struct.name)
 
-        # If the structure has associated headings
-        # then use them instead of the standard ones
-        if(struct.has_headings()):
+        if(struct.has_field_attributes()):
             html += '''
 <tr class='header'>
-'''
-            headings = struct.get_headings()
-            for heading in headings:
-                html += "<td>%s</td>" % headings[heading]
-
-            html += "</tr>"
-
+  <td>Type</td>
+  <td>Name</td>
+  <td>Description</td>
+  <td>Attributes</td>
+</tr>'''
         else:
             html += '''
 <tr class='header'>
   <td>Type</td>
   <td>Name</td>
   <td>Description</td>
-  </tr>'''
+</tr>'''
 
         i = 0
-        
+
         for field in struct.get_fields():
             
             is_header = False
 
-            is_reserved = field.is_reserved
-
-            if(is_header):
+            if(field.get_is_header()):
                 html += "    <tr class='header'>\n";
+            elif(field.get_is_reserved()):
+                html += "    <tr class='reserved'>\n";
+            elif(field.get_is_spacer()):
+                html += "    <tr class='spacer'>\n";
             else:
                 html += "<tr>\n"
 
-            if(field.is_caption):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td>\n" % (struct.max_cols, self.format_text(field.attrs[0]))
-            elif(field.is_spacer):
-                html += "      <td colspan='%d' class='caption' style='border:0px;text-align:center;'>&nbsp;</td>\n"
+            if(field.get_is_spacer()):
+                html += "      <td colspan='%d'>&nbsp;</td>\n" % struct.get_max_cols()
             else:
-                for attr in field.attrs:
+                desc = self.format_textblock(field.get_description())
 
-                    #print attr
-                    if(is_dict(attr)):
-                        #print "IS DICT"
-                        if(attr.has_key("textblock")):
-                            attr = self.format_textblock(attr["textblock"])
-                        else:
-                            attr = attr["text"]
-                    else:
-                        attr = ''
-                    #    print "Do I GET HERE? [%s]" % attr
-                    #    attr = self.format_text(attr)
+                attrs = ''
+                if(struct.has_field_attributes()):
+                    attrs = "<td>%s</td>" % field.attributes
 
-                    if(is_header):
-                        html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
-                    elif(is_reserved):
-                        html += "      <td colspan='%d' style='background-color:#eee; color:#999;'>%s</td>\n" % (1, attr)
-                    else:
-                        html += "      <td colspan='%d'>%s</td>\n" % (1, attr)
+                html += "    <td>%s</td><td>%s</td><td>%s</td>%s" % (field.get_type(), field.get_name(), desc, attrs)
             
             html += "</tr>\n"
 
             i+=1
         
-       
         html += "</table><br/>"
 
         html_example = self.format_object_example(struct)
+
+        path = tag.file.replace(os.path.dirname(struct.get_file()), "")
+
+        xref = string.Template(
+            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
+            "source_html" : "%s.source.html" % path,
+            "source"      : struct.get_file(),
+            "line"        : struct.get_line()})
+
+        desc = struct.get_description()
+        if(desc == None):
+            desc = ""
+        else:
+            desc = self.format_textblock(desc)
         
         style = ''
         html = string.Template('''
 <div class='bordered' $style>
-<div style='background-color:#ccc;padding:10px;'><b>Struct:</b> ${name}$img</div>
+<div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img$xref</div>
 <div>
     <div style="margin-left: 10px;">
         <div style="color: #396592; font-weight: bold;">Description:</div>
@@ -2078,11 +2131,13 @@ within an HTML document.
 ${example}
 </div><br/>''').substitute({
     "style"  : style,
+    "xref"   : xref,
     "img"    : img,
+    "label"  : label,
     "name"   : struct.name,
     "values" : html,
     "example": html_example,
-    "desc"   : self.format_textblock(struct.description)})
+    "desc"   : desc})
         
         return html
 
@@ -2535,7 +2590,7 @@ $href_end
         data = re.sub("\\\\n", "<br/>", data)
 
         if(expand_equals_block):
-            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
+            data = re.sub("===+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
         
         ## Hilite any text between **** ****
         #hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
@@ -2709,7 +2764,7 @@ $href_end
             self.m_contents.append(self.format_note(tag, "Warning", "warning.png"))
         elif(name == "table"):
             self.m_contents.append(self.format_table(tag.source, tag.contents))
-        elif(name == "struct"):
+        elif(name in ("struct", "register")):
             self.m_contents.append(self.format_struct(tag))
         elif(name == "define"):
             self.m_contents.append(self.format_define(tag))
@@ -2777,7 +2832,12 @@ $href_end
         
         css = '''<link rel="stylesheet" type="text/css" media="all" href="%scss/%s.css" title="Default" />''' % (basepath, self.m_theme)
 
-        theme = self.m_engine.get_theme()
+        if(self.is_inline()):
+            package = "html_inline"
+        else:
+            package = "html"
+
+        theme = self.m_engine.get_theme(package)
 
         # Inline the CSS if necessary
         if(self.is_inline() == True):
@@ -2797,9 +2857,9 @@ $href_end
     def _load_template(self, template_name):
         
         if(self.is_inline() == True):
-            handle = open(shorte_get_startup_path() + "/templates/html_inline/%s/%s" % (self.m_engine.get_theme(), template_name), "r")
+            handle = open(shorte_get_startup_path() + "/templates/html_inline/%s/%s" % (self.m_engine.get_theme("html_inline"), template_name), "r")
         else:
-            handle = open(shorte_get_startup_path() + "/templates/html/%s/%s" % (self.m_engine.get_theme(), template_name), "r")
+            handle = open(shorte_get_startup_path() + "/templates/html/%s/%s" % (self.m_engine.get_theme("html"), template_name), "r")
 
         contents = handle.read()
         handle.close()
@@ -3151,8 +3211,21 @@ $href_end
         handle.close()
         
         language = "c"
+
+        # Try to detect the source file
+        if(input.endswith(".py")):
+            language = "python"
+        elif(input.endswith(".tpl")):
+            language = "shorte"
+
         parser = self.m_engine.m_source_code_analyzer
         tags = parser.parse_source_code(language, contents)
+
+        html_src = self.format_source_code(
+                        language,
+                        tags,
+                        convert_inline_styling=False,
+                        tag_line_numbers=True)
 
         template = string.Template(self._load_template("index.html"))
         vars = {}
@@ -3164,7 +3237,7 @@ $href_end
         vars["css"] = self.get_css()
         vars["pdf"] = ""
         vars["links"] = ""
-        vars["contents"] = self.format_source_code(language, tags)
+        vars["contents"] = "<div class='code'>%s</div>" % html_src
         vars["title"] = ""
         vars["javascript"] = ""
         vars["link_index"] = "../index.html"
@@ -3172,6 +3245,7 @@ $href_end
         vars["link_legal"] = "../legal.html"
         vars["link_revisions"] = "../revisions.html"
         vars["html_tooltips"] = template_html_tooltips
+        vars["subtitle"] = ""
 
         html = template.substitute(vars)
 
@@ -3353,5 +3427,5 @@ $href_end
                 shutil.copy(image, self.get_content_dir() + "/" + parts[1])
                 pictures_copied[image] = True
 
-        print "Generating doc"  
+        INFO("Generating doc") 
 

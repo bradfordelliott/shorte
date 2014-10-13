@@ -406,7 +406,7 @@ within an HTML document.
         data = re.sub("\\\\n", "<br/>", data)
 
         if(expand_equals_block):
-            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
+            data = re.sub("===+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
         
         # Hilite any text between **** ****
         hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
@@ -476,17 +476,16 @@ within an HTML document.
         #print prototype
 
         function = {}
-        function["name"] = prototype["name"]
+        function["name"] = prototype.get_name()
         function["desc"] = ''
         function["help"] = self.sqlize(help)
         
-        if(prototype.has_key("desc")):
-            function["desc"] = self.format_text(prototype["desc"])
+        function["desc"] = self.format_textblock(prototype.get_description())
         
         sql = template.substitute(function)
 
-        if(prototype.has_key("params")):
-            params = prototype["params"]
+        if(prototype.has_params()):
+            params = prototype.get_params()
             
             for param in params:
                 
@@ -547,16 +546,8 @@ within an HTML document.
         # Add the structure fields
         if(obj.fields):
             for field in obj.fields:
-
-                if(field["attrs"][1].has_key("textblock")):
-                    name = field["attrs"][1]["textblock"][0]['text'].strip()
-                else:
-                    name = field["attrs"][1]["text"].strip()
-                
-                if(field["attrs"][2].has_key("textblock")):
-                    desc = self.format_textblock(field["attrs"][2]["textblock"])
-                else:
-                    desc = field["attrs"][2]["text"].strip()
+                name = field.get_name()
+                desc = self.format_textblock(field.get_description())
                 
                 sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('${belongs_to}', '${name}', '', '${desc}');\n").substitute(
                         {"belongs_to" : self.m_prototype_uid,

@@ -72,22 +72,16 @@ class template_text_t(template_t):
 
         return output
 
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    format_note()
-    #|
-    #| DESCRIPTION:
-    #|    This method is called to format a note tag
-    #|
-    #| PARAMETERS:
-    #|    content (I) - The content associated with the note tag
-    #|
-    #| RETURNS:
-    #|    The note data formatted as HTML.
-    #|
-    #+-----------------------------------------------------------------------------
+
     def format_note(self, tag, label="NOTE"):
+        '''This method is called to format a note tag.
+           
+           @param tag   [I] - The tag note object.
+           @param label [I] - The label to associate with the note (could
+                              also be something like a warning or a TBD)
+
+           @return The formatted note object
+        '''
 
         content = self.format_textblock(tag)
         lines = content.split('\n')
@@ -105,7 +99,27 @@ class template_text_t(template_t):
 %s
 %s
 ''' % (label,label_underline,output)
-            
+
+    def format_define(self, tag):
+        define = tag.contents
+
+        return '''Define: %s
+Value:
+    %s
+Description:
+%s
+''' % (define.name, define.value, self.format_textblock(define.description, prefix='    '))
+
+    def format_enum(self, tag):
+        enum = tag.contents
+
+        return '''Enum: %s
+Values:
+    %s
+Description:
+%s
+''' % (enum.name, "TBD", self.format_textblock(enum.description, prefix='    '))
+
     def format_checklist(self, tag):
         
         list = tag.contents
@@ -185,18 +199,14 @@ class template_text_t(template_t):
 
                 if(tag == "note"):
                     label = "Note"
-                    img = "note.png"
                 elif(tag == "warning"):
                     label = "Warning"
-                    img = "warning.png"
                 elif(tag == "tbd"):
                     label = "TBD"
-                    img = "tbd.png"
                 elif(tag == "question"):
                     label = "Question"
-                    img = "question.png"
 
-                return self.format_note(textblock, label, img)
+                return self.format_note(textblock, label)
 
         return prefix + replace + postfix
 
@@ -569,7 +579,7 @@ class template_text_t(template_t):
     def format_struct(self, tag):
 
         struct = tag.contents
-        
+
         i = 0
         fields = ''
         for field in struct.get_fields():
@@ -577,7 +587,7 @@ class template_text_t(template_t):
             fields += "| %2d | %20s | %s" % (field.width, field.name, self.format_textblock(field.desc, prefix="|    |                      | ", prefix_first_line=False))
             
             i+=1
-        
+
         output = string.Template('''
 +-----------------------------------------------------------------------------
 | Structure: $name
@@ -587,8 +597,8 @@ ${desc}|
 | Fields:
 +-----------------------------------------------------------------------------
 ${fields}+-----------------------------------------------------------------------------
-''').substitute({"name" : struct.name,
-                 "desc" : self.format_textblock(struct.description, "|  "),
+''').substitute({"name" : struct.get_name(),
+                 "desc" : self.format_textblock(struct.get_description(), "|  "),
                  "fields" : fields})
 
         return output
@@ -864,6 +874,10 @@ ${fields}+----------------------------------------------------------------------
             self.m_contents += self.format_questions(tag)
         elif(name == "image"):
             self.m_contents += self.format_image(tag)
+        elif(name == "define"):
+            self.m_contents += self.format_define(tag)
+        elif(name == "enum"):
+            self.m_contents += self.format_enum(tag)
 
         #elif(name == "checklist"):
         #    self.m_contents += self.format_checklist(tag)
@@ -873,10 +887,10 @@ ${fields}+----------------------------------------------------------------------
         #    self.m_contents += self.format_prototype(tag)
         elif(name in ("functionsummary", "typesummary")):
             WARNING("Unsupported tag %s" % name)
-        elif(name in ("define", "enum", "struct", "prototype")):
+        elif(name in ("struct", "prototype")):
             WARNING("Unsupported tag %s" % name)
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
 
     def get_contents(self):
@@ -1015,5 +1029,5 @@ Table of Contents
         #    for image in self.m_engine.m_parser.m_images:
         #        shutil.copy(image, self.m_engine.get_output_dir() + "/" + image)
 
-        print "Generating doc"  
+        INFO("Generating text document")
 

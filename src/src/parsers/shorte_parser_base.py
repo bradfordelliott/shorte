@@ -91,6 +91,12 @@ class parser_t:
         if(attributes.has_key(key)):
             return attributes[key]
         return ""
+
+    def get_attribute_as_int(self, attributes, key):
+        if(attributes.has_key(key)):
+            val = int(attributes[key], 10)
+            return val
+        return 0
     
     def strip_indent(self, input, indent):
         

@@ -336,30 +336,16 @@ class template_twiki_t(template_html.template_html_t):
             else:
                 is_header = False
 
-            is_reserved = field["is_reserved"]
+            is_reserved = field.get_is_reserved()
 
-            if(is_header):
-                html += "    <tr class='header'>\n";
+            if(field.get_is_reserved()):
+                html += "    <tr class='reserved'>\n";
             else:
-                html += "<tr>\n"
-            
-            for attr in field["attrs"]:
+                html += "    <tr>\n";
 
-                if(is_dict(attr)):
-                    #print "IS DICT"
-                    if(attr.has_key("textblock")):
-                        attr = self.format_textblock(attr["textblock"])
-                    else:
-                        attr = attr["text"]
-                else:
-                    attr = ''
-
-                if(is_header):
-                    html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
-                elif(is_reserved):
-                    html += "      <td colspan='%d' style='background-color:#eee; color:#999;'>%s</td>\n" % (1, attr)
-                else:
-                    html += "      <td colspan='%d'>%s</td>\n" % (1, attr)
+            html += "      <td>%s</td>\n" % field.get_type()
+            html += "      <td>%s</td>\n" % field.get_name()
+            html += "      <td>%s</td>\n" % self.format_textblock(field.get_description())
             
             html += "</tr>\n"
 

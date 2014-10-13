@@ -10,7 +10,7 @@
 - 1x8   | serial_number | The serial number of the device  
                           with some more description       | customer="CORTINA"
 - 1x2   | blah          | A random field                   |
-- 1x6   | blah2         | A random field                   |
+- 1x6   | blah2         | Another random field             |
 
 @struct: name="blah16d" description="blah blah" private="False" diagram="show:yes,align:16,bitorder:decrement"
 -- fields:
@@ -56,8 +56,18 @@ definition.
 
 @register: name="clause45" description="Clause 45 address bits" diagram="show:yes,align:32,bitorder:decrement"
 -- fields:
-- Bits  | Name          | Description                      | Attributes
-- 8'b   | Reserved      | Reserved for future use          |
-- 8'b   | MMD           | The MMD section of clause 45     | 
-- 16'b  | Address       | The address within the MMD       |
+- Bits  | Name          | Description
+- 8'b   | Reserved      | Reserved for future use
+-
+- 8'b   | MMD           | The MMD section of clause 45
+- 16'b  | Address       | The address within the MMD
+
+
+@struct: name="slice" diagram="show:yes,align:32"
+-- fields:
+- Bits   | Name             | Desc
+- 1x24   | user_defined     | User defined bits of the API. These get passed through from
+                              the *slice* parameter of higher level APIs and are typically
+                              used to accesses multiple ASICs.
+- 1x8    | channel_or_slice | The slice/port/channel of the device (0-7 duplex or 0-15 simplex)
 

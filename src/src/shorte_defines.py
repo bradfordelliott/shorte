@@ -58,6 +58,15 @@ class tag_t:
         # The heading that this tag belongs to (if applicable)
         self.heading = None
 
+    def __str__(self):
+        data = "Tag\n"
+        data += "  name %s\n" % self.name
+        data += "  file %s\n" % self.file
+        data += "  line %s\n" % self.line
+        data += "  page %s\n" % self.page
+
+        return data
+
 g_tools = tools_t()
 g_startup_path = None
 def shorte_get_startup_path():
@@ -365,6 +374,7 @@ TAG_TYPE_MCOMMENT = 3
 TAG_TYPE_WHITESPACE = 4
 TAG_TYPE_NEWLINE = 5
 TAG_TYPE_XMLCOMMENT = 6
+TAG_TYPE_PREPROCESSOR = 7
 
 if(sys.platform == "win32"):
     PATH_INKSCAPE = "c:\\usr\\tools\\InkscapePortable\\InkscapePortable"
@@ -663,11 +673,12 @@ STATE_MCOMMENT = 5
 STATE_MODIFIER = 6
 STATE_INLINE_STYLING = 7
 STATE_XMLCOMMENT = 8
+STATE_PREPROCESSOR = 9
 
 def zipper(dir, zip_file):
     import zipfile, os
 
-    print "%s" % zip_file
+    DEBUG("%s" % zip_file)
 
     zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
     root_len = len(os.path.abspath(dir))

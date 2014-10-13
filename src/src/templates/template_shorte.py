@@ -156,7 +156,7 @@ class template_shorte_t(template_t):
 
         template = string.Template("""
 $heading
-@enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" description='''
+@enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" file="$file" line="$line" description='''
 $description
 '''
 -- values:
@@ -178,6 +178,8 @@ $values
         vars["private"] = enum.private
         vars["deprecated"] = enum.deprecated
         vars["deprecated_msg"] = enum.deprecated_msg
+        vars["file"] = enum.get_file()
+        vars["line"] = enum.get_line()
 
         return template.substitute(vars)
 
@@ -186,7 +188,7 @@ $values
         template = string.Template("""
 # Start of define
 $heading
-@define: name="$name" value="$value" private="$private" deprecated="$deprecated" description='''
+@define: name="$name" value="$value" private="$private" deprecated="$deprecated" file="$file" line="$line" description='''
 $description
 '''
 #End of define
@@ -214,6 +216,8 @@ $description
         vars["value"] = escape_string(val)
         vars["private"] = define.private
         vars["deprecated"] = define.deprecated
+        vars["file"] = define.get_file()
+        vars["line"] = define.get_line()
 
         return template.substitute(vars)
 
@@ -222,13 +226,13 @@ $description
     def format_struct(self, tag):
         
         self.m_num_structs += 1
-
+        
         struct = tag.contents
 
-        title = struct.name
+        title = struct.get_name()
         title = re.sub("[ \n]+", " ", title).strip()
 
-        caption = self.format_textblock(struct.description)
+        caption = self.format_textblock(struct.get_description())
 
         values = ''
 
@@ -240,19 +244,22 @@ $description
         fields = "fields"
         attributes = "attrs"
 
-        for row in struct.fields:
+        for field in struct.get_fields():
 
-            bits = row[attributes][0]["text"]
-            name = row[attributes][1]["text"]
-            desc = row[attributes][2]["text"]
-            desc = desc.replace("#", "\#")
-
+            bits = field.get_type() #field.get_bits()
+            name = field.get_name()
+            desc = field.get_description()
+            if(desc == None):
+                desc = ''
+            else:
+                desc = desc[0]["text"]
+            
             values += '''- %s | %s | %s
 ''' % (bits, name, desc)
 
         template = string.Template("""
 $heading
-@struct: name="$name" private="$private" deprecated="$deprecated" description='''
+@struct: name="$name" private="$private" deprecated="$deprecated" file="$file" line="$line" description='''
 $description
 '''
 -- fields:
@@ -283,6 +290,8 @@ $example
         vars["values"] = values
         vars["deprecated"] = "False"
         vars["private"] = "False"
+        vars["file"] = struct.get_file()
+        vars["line"] = struct.get_line()
 
         return template.substitute(vars)
 
@@ -306,7 +315,7 @@ $example
        
         template = string.Template('''
 $title
-@prototype
+@prototype: file="${file}" line="${line}"
 -- function:
     $name
 $prototype
@@ -323,31 +332,33 @@ $heading
 ''')
         add_heading = shorte_get_config("shorte", "header_add_to_prototype")
         if(tag.heading == None and ("None" != add_heading)):
-            title = '@%s %s' % (add_heading,prototype["name"])
+            title = '@%s %s' % (add_heading,prototype.get_name())
         else:
             title = ''
         title = ''
 
         function = {}
         function["title"] = title
-        function["name"] = prototype["name"]
+        function["name"] = prototype.get_name()
         function["example"] = ''
         function["prototype"] = ''
-        function["desc"] = trim_blank_lines(prototype["desc"])
+        function["desc"] = trim_blank_lines(prototype.get_description(textblock=False))
         function["params"] = ''
-        function["returns"] = prototype["returns"]
+        function["returns"] = prototype.get_returns()
         function["pseudocode"] = ''
         function["heading"] = ''
+        function["file"] = prototype.get_file()
+        function["line"] = prototype.get_line()
 
-        if(prototype.has_key("prototype")):
+        if(prototype.has_prototype()):
             function["prototype"] = '''
 -- prototype:
     %s
-''' % prototype["prototype"]["unparsed"]
+''' % prototype.get_prototype()["unparsed"]
 
-        if(prototype.has_key("params")):
+        if(prototype.has_params):
             output = ''
-            params = prototype["params"]
+            params = prototype.get_params()
             
             for param in params:
 
@@ -360,44 +371,45 @@ $heading
 ''' % output
 
 
-        if(prototype.has_key("example")):
+        if(prototype.has_example()):
             import src.shorte_source_code
             func = src.shorte_source_code.prototype_t()
-            func.example = prototype["example"]
+            func.example = prototype.get_example()
             function["example"] = self.format_object_example(func)
         
-        if(prototype.has_key("pseudocode")):
+        if(prototype.has_pseudocode()):
             function["pseudocode"] = '''
 -- pseudocode:
 %s
-''' % self.format_source_code(prototype["pseudocode"]["unparsed"])
+''' % self.format_source_code(prototype.get_pseudocode()["unparsed"])
 
-        if(prototype.has_key("see_also") and prototype["see_also"] != None):
+        if(prototype.has_see_also()):
             function["seealso"] = '''
 -- see also:
 %s
-''' % (prototype["see_also"])
+''' % (prototype.get_see_also())
         else:
             function["seealso"] = ''
         
-        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
+        if(prototype.get_deprecated()):
             function["deprecated"] = '''
 -- deprecated:
 %s
-''' % (self.format_textblock(prototype["deprecated_msg"]))
+''' % (self.format_textblock(prototype.get_deprecated_msg()))
         else:
             function["deprecated"] = ''
         
-        if(prototype.has_key("heading") and prototype["heading"] != ""):
-            function["heading"] = '''
--- heading:
-%s
-''' % (prototype["heading"])
-        else:
-            function["heading"] = ''
+# DEBUG BRAD: Should I continue supporting this?
+#        if(prototype.has_key("heading") and prototype["heading"] != ""):
+#            function["heading"] = '''
+#-- heading:
+#%s
+#''' % (prototype["heading"])
+#        else:
+#            function["heading"] = ''
 
-        topic = topic_t({"name"   : prototype["name"],
-                         "file"   : file,
+        topic = topic_t({"name"   : prototype.get_name(),
+                         "file"   : tag.file, 
                          "indent" : 3})
 
         index.append(topic)

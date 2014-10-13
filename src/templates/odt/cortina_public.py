@@ -59,6 +59,8 @@ class custom_styles(styles):
                 "font_size"     : font_size,
                 "color_heading" : self.colors["heading.%d" % heading].fg})
     
+        common_styles = self.get_common_styles()
+
         list_styles = self.get_list_styles()
 
         # Table Styles
@@ -73,6 +75,8 @@ class custom_styles(styles):
       <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm" fo:margin-left="${standard_indent}cm"/>
       <style:text-properties fo:color="#000000"/>
     </style:style>
+
+    ${common_styles}
     
     ${heading_styles}
     
@@ -85,13 +89,13 @@ class custom_styles(styles):
     $prototype_styles
 
     $source_code_styles
-    ''').substitute(
-            {
-         "heading_styles" : heading_styles,
-         "list_styles" : list_styles,
-         "table_styles" : table_styles,
-         "prototype_styles" : prototype_styles,
-         "standard_indent" : self.standard_indent,
+    ''').substitute({
+         "heading_styles"     : heading_styles,
+         "list_styles"        : list_styles,
+         "table_styles"       : table_styles,
+         "prototype_styles"   : prototype_styles,
+         "standard_indent"    : self.standard_indent,
+         "common_styles"      : common_styles,
          "source_code_styles" : source_code_styles})
     
         return custom_styles

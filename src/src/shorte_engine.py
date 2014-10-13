@@ -188,7 +188,18 @@ class engine_t:
     def set_theme(self, theme):
         self.m_theme = theme
 
-    def get_theme(self):
+    def get_theme(self, package=None):
+
+        #if("=" in self.m_theme):
+        #    themes = self.m_theme.split(";")
+        #    for theme in themes:
+        #        parts = theme.split("=")
+        #        pkg  = parts[0]
+        #        name = parts[1]
+
+        #        if(package == pkg):
+        #            return name
+
         return self.m_theme
 
     def set_title(self, title):
@@ -467,7 +478,7 @@ class engine_t:
             # the list of images
             for i in self.m_images:
                 if(i == input):
-                    print "Removing %s from the list" % i
+                    DEBUG("Removing %s from the list" % i)
                     self.m_images.remove(i)
 
             # Once the image has been converted remove
@@ -551,7 +562,7 @@ class engine_t:
         # the list of images
         for i in self.m_images:
             if(i == image["src"]):
-                print "Removing %s from the list" % i
+                DEBUG("Removing %s from the list" % i)
                 self.m_images.remove(i)
 
         self.m_images.append(img)
@@ -814,11 +825,23 @@ class engine_t:
             name = "data:object/png;base64," + base64.encodestring(handle.read())
             name = name.replace("\n","")
             handle.close()
-            print "FILE %s:\n%s" % (file, name)
+            DEBUG("FILE %s:\n%s" % (file, name))
         
     
-    def info(self, keys):
+    def info(self, options):
         output = []
+
+        keys = options.info
+
+        if("c2html" in keys):
+            path_input = options.files
+            indexer = indexer_t()
+            template = template_html_t(self, indexer)
+            template.m_inline = True
+            template.set_template_dir("html_inline")
+            path_output = self.m_output_directory + "/" + os.path.basename(path_input) + ".html"
+            template.generate_source_file(path_input, path_output)
+            
 
         if("wikiwords" in keys):
             output.append("Summary of wiki words:")
@@ -834,7 +857,7 @@ class engine_t:
             pages = self.m_parser.get_pages()
 
             for page in pages:
-                print page["source_file"]
+                DEBUG(page["source_file"])
                 tags = page["tags"]
 
                 for tag in tags:
@@ -934,8 +957,7 @@ else:
             try:
                 eval(compile(to_eval, "example.py", "exec"), tmp_macros, tmp_macros)
             except:
-                print to_eval
-                sys.exit(-1)
+                FATAL(to_eval)
 
             result = tmp_macros["result"]
             #print "RESULT: %s = %s" % ("(" + define + ")", result)
@@ -1012,9 +1034,7 @@ def exists(s):
             try:
                 eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
             except:
-                print "ERROR parsing example2.py in %s" % os.getcwd()
-                sys.exc_info()
-                raise
+                FATAL("ERROR parsing example2.py in %s" % os.getcwd())
 
             contents = tmp_macros["result"]
             #print "CONTENTS = [%s]" % contents
@@ -1040,7 +1060,7 @@ def exists(s):
                         for path in paths:
                             (base, ext) = os.path.splitext(path)
                             if(ext == ".tpl"):
-                                print "PATH: %s" % path
+                                INFO("PATH: %s" % path)
         
                 else:
                     tmp = fname
@@ -1170,8 +1190,8 @@ def exists(s):
 
         if(zip_output != None):
             zip_output = "test.zip"
-            print "ZIP_OUTPUT: %s" % zip_output
-            print "OUTPUT: %s" % self.m_output_directory
+            DEBUG("ZIP_OUTPUT: %s" % zip_output)
+            DEBUG("OUTPUT: %s" % self.m_output_directory)
             #zipper("%s/." % self.m_output_directory, zip_output)
             zipper(self.m_output_directory, zip_output)
 

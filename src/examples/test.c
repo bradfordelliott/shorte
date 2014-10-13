@@ -317,9 +317,31 @@ int test_dot_c_my_test(int blah, int* dummy)
 
 /**
  * This is another test function
- *     @param blah [I] - This si a test
+ *
+ * @note
+ *   This is a random note here
+ *
+ * @param blah [I] - This is a test
+ *
+ * @preconditions
+ *   What has to happen before the function is called
+ *
+ * @postconditions
+ *   What happens after the function is called
+ *
+ * @sideeffects
+ *   Are there any side-effects caused by calling the function?
+ *
+ * @statespace
+ *   Is there any state used by the function?
  *
  * @return Always returns FALSE.
+ *
+ * @example: if("DEFINE1")
+ * Include this example only if DEFINE1 is set
+ *
+ * @example: if("DEFINE2")
+ * Include this example only if DEFINE2 is set
  */
 int test_dot_c_my_test21(int blah)
 {

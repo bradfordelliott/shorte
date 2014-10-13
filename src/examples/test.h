@@ -57,7 +57,10 @@ typedef enum
 typedef enum
 {
     /** This is a test */
-    e_public_test = 0
+    e_public_test = 0,
+
+    /** This is a second field */
+    e_public_test2 = 10
 }public_enum;
 
 struct cs_mx_handle_table_entry_tag * head, * tail;

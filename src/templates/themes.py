@@ -32,7 +32,7 @@ class theme():
             colors["table"]["normal"]    = color(fg="#000000", bg="#ffffff")
 
             # Hyperlink Colors
-            colors["hyperlink"]       = color(fg="#8ba327")
+            colors["hyperlink"]       = color(fg="#586a0d") #color(fg="#8ba327")
             colors["hyperlink.hover"] = color(fg="#ccc")
 
         elif(theme == "inphi"):

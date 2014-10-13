@@ -1186,7 +1186,7 @@ class template_odt_t(template_t):
             data = re.sub("\n\s*\n", "<text:line-break/><text:line-break/>", data)
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
-            data = re.sub("==+", "<text:line-break/>====================<text:line-break/>", data)
+            data = re.sub("===+", "<text:line-break/>====================<text:line-break/>", data)
         
         #data = data.replace("\n", " ")
         
@@ -1702,28 +1702,37 @@ ${desc}
     #|    None.
     #|
     #+-----------------------------------------------------------------------------
-    def format_struct(self, source, struct, style_name="default"):    
+    def format_struct(self, tag, style_name="default"):    
         '''This method is called to format a structure definition
            into a block of open office text
 
            @param self       [I] - The class instance
-           @param source     [I] - The original source text
-           @param struct     [I] - The structure object as a dictionary
+           @param tag        [I] - The tag containing the structure object
            @param style_name [I] - The open office style
 
            @return The XML defining the structure
         '''
+
+        source = tag.source
+        struct = tag.contents
+        label = tag.name.title()
         
         xml = ''
+
+        desc = struct.get_description()
+        if(desc == None):
+            desc = ''
+        else:
+            desc = self.format_textblock(desc) 
         
-        xml += self.format_textblock(struct.description)
+        xml += desc
         
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
         table = table_t()
-        table.title = struct.name
-        table.max_cols = struct.max_cols
+        table.title = struct.get_name()
+        table.max_cols = struct.get_max_cols()
 
         title = self.__table_format_title(table, style)
         xml += '''
@@ -1747,40 +1756,50 @@ ${desc}
         xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
         xml += "</table:table-row>\n"
 
-        for field in struct.fields:
+        for field in struct.get_fields():
             
             xml += '''
     <table:table-row>
 '''
-            for attr in field["attrs"]:                     
-                
-                frame_paragraph = True
+            frame_paragraph = True
+            if(field.get_is_spacer()):
+                xml += self.__format_table_cell({"span" : 3}, style, "default", "", frame_paragraph)
+            else:
+                xml += self.__format_table_cell({"span" : 1}, style, "default", field.get_type(), frame_paragraph)
+                xml += self.__format_table_cell({"span" : 1}, style, "default", field.get_name(), frame_paragraph)
 
-                # DEBUG BRAD: cells for a structure are currently not formatted
-                #             the same way as a table - need to convert them
-                #             into a dictionary for the time being - need to fix
-                #             this in future releases for easier maintainability.
-                if(is_dict(attr)):
+                desc = self.format_textblock(field.get_description())
+                xml += self.__format_table_cell({"span" : 1}, style, "default", desc, False)
 
-                    if(attr.has_key("textblock")):
-                        cell_text = self.format_textblock(attr["textblock"])
-                        frame_paragraph = False
-                    else:
-                        attr = attr["text"]
-                        cell_text = self.format_text(attr)
-                else:
-                    cell_text = self.format_text(attr)
+            #for attr in field["attrs"]:                     
+            #    
+            #    frame_paragraph = True
 
-                #print "S.CELL: [%s]" % cell_text
+            #    # DEBUG BRAD: cells for a structure are currently not formatted
+            #    #             the same way as a table - need to convert them
+            #    #             into a dictionary for the time being - need to fix
+            #    #             this in future releases for easier maintainability.
+            #    if(is_dict(attr)):
 
-                if(field["is_header"]):
-                    xml += self.__format_table_cell({"span" : 1}, style, "is_header", cell_text)
-                elif(field["is_subheader"]):
-                    xml += self.__format_table_cell({"span" : 1}, style, "is_subheader", cell_text)
-                elif(field["is_reserved"]):
-                    xml += self.__format_table_cell({"span" : 1}, style, "is_reserved", cell_text)
-                else:
-                    xml += self.__format_table_cell({"span" : 1}, style, "default", cell_text, frame_paragraph)
+            #        if(attr.has_key("textblock")):
+            #            cell_text = self.format_textblock(attr["textblock"])
+            #            frame_paragraph = False
+            #        else:
+            #            attr = attr["text"]
+            #            cell_text = self.format_text(attr)
+            #    else:
+            #        cell_text = self.format_text(attr)
+
+            #    #print "S.CELL: [%s]" % cell_text
+
+            #    if(field["is_header"]):
+            #        xml += self.__format_table_cell({"span" : 1}, style, "is_header", cell_text)
+            #    elif(field["is_subheader"]):
+            #        xml += self.__format_table_cell({"span" : 1}, style, "is_subheader", cell_text)
+            #    elif(field["is_reserved"]):
+            #        xml += self.__format_table_cell({"span" : 1}, style, "is_reserved", cell_text)
+            #    else:
+            #        xml += self.__format_table_cell({"span" : 1}, style, "default", cell_text, frame_paragraph)
 
 
             xml += "</table:table-row>\n"
@@ -2429,8 +2448,8 @@ ${desc}
             cols = []
 
             if(summary_type == "functions"):
-                name = obj["name"]
-                tmp = obj["prototype"]["parsed"]
+                name = obj.get_name()
+                tmp = obj.get_prototype()["parsed"]
                 (returns, prototype) = self.htmlize_prototype(tmp)
             
                 style = self.m_styles["table"]["cell"]["fname"]
@@ -2447,13 +2466,8 @@ ${desc}
                 cols.append({"span":1, 'text':'', "style": style, "text-style": text_style})
 
                 text_style = self.m_styles["para"]["fdesc"]
-                function_desc = ''
-                if(obj.has_key("desc2")):
-                    function_desc = obj["desc2"]
-                    cols.append({"span":1, 'textblock':function_desc, "style": style, "text-style": text_style})
-                elif(obj.has_key("desc")):
-                    function_desc = obj["desc"]
-                    cols.append({"span":1, 'text':xmlize(function_desc), "style": style, "text-style": text_style})
+                function_desc = obj.get_description()
+                cols.append({"span":1, 'textblock':function_desc, "style": style, "text-style": text_style})
             
             elif(summary_type == "types"):
                 name = ''
@@ -2589,11 +2603,11 @@ ${desc}
 
     def format_prototype(self, tag):
         
-        prototype = tag.contents
+        prototype2 = tag.contents
         
         file = "blah"
         function = {}
-        function["name"] = prototype["name"]
+        function["name"] = prototype2.get_name()
         function["example"] = ''
         function["pseudocode"] = ''
         function["prototype"] = ''
@@ -2606,7 +2620,7 @@ ${desc}
         is_deprecated = False
 
         wikiwords = []
-        wikiwords.append(function["name"])
+        wikiwords.append(prototype2.get_name())
 
         # Lookup the styles for formatting a prototypes
         function["style_table"] = self.m_styles["table"]["styles"]["prototype"]
@@ -2623,26 +2637,16 @@ ${desc}
         function["style_col2"] = self.m_styles["table"]["columns"]["prototype"][2]
         function["style_col3"] = self.m_styles["table"]["columns"]["prototype"][3]
 
+        # Format the description
+        function["desc"] = self.format_textblock(prototype2.get_description())
 
-        if(prototype.has_key("desc")):
-            tmp = '''<text:p text:style-name="%s">''' % self.m_styles["para"]["prototype"]["text"]
-            tmp += self.format_text(prototype["desc"],expand_equals_block=True)
-            tmp += "</text:p>"
-            function["desc"] = tmp
-
-        if(prototype.has_key("desc2")):
-            tag = tag_t()
-            tag.contents = prototype["desc2"]
-                    
-            function["desc"] = self.format_textblock(tag)
-
-        if(prototype.has_key("prototype")):
-            language = prototype["prototype"]["language"]
-            example = prototype["prototype"]["parsed"]
+        if(prototype2.has_prototype()):
+            language = prototype2.get_prototype()["language"]
+            example  = prototype2.get_prototype()["parsed"]
             function["prototype"] = self.format_source_code(language, example, wikiwords, False, False)
 
-        if(prototype.has_key("params")):
-            params = prototype["params"]
+        if(prototype2.has_params()):
+            params = prototype2.get_params()
 
             table = {}
             table["max_cols"] = 4 
@@ -2735,7 +2739,7 @@ ${desc}
                                            "style_para_section"     : function["style_para_section"],
                                            "params"                 : output})
 
-        if(prototype.has_key("returns") and len(prototype["returns"]) > 0):
+        if(prototype2.has_returns()):
         
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
@@ -2755,7 +2759,7 @@ ${desc}
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "returns" : self.format_text(prototype["returns"]),
+    "returns" : self.format_text(prototype2.get_returns()),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2765,8 +2769,7 @@ ${desc}
 
             function["returns"] = xml
 
-        if(prototype.has_key("see_also") and len(prototype["see_also"]) > 0):
-            #print "SEE ALSO: [%s]" % prototype["see_also"]
+        if(prototype2.has_see_also()):
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
@@ -2785,7 +2788,7 @@ ${desc}
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "see_also" : self.format_text(prototype["see_also"]),
+    "see_also" : self.format_text(prototype2.get_see_also()),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2796,7 +2799,7 @@ ${desc}
             function["see_also"] = xml
         
         
-        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
+        if(prototype2.get_deprecated()):
             is_deprecated = True
 
             xml = string.Template('''
@@ -2817,7 +2820,7 @@ ${desc}
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "deprecated" : self.format_textblock(prototype["deprecated_msg"]),
+    "deprecated" : self.format_textblock(prototype2.get_deprecated_msg()),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -2827,10 +2830,10 @@ ${desc}
 
             function["deprecated"] = xml
 
-        if(prototype.has_key("example")):
+        if(prototype2.has_example()):
 
-            language = prototype["example"]["language"]
-            example = prototype["example"]["parsed"]
+            language = prototype2.get_example()["language"]
+            example  = prototype2.get_example()["parsed"]
 
             example = self.format_source_code(language, example)
 
@@ -2866,10 +2869,10 @@ ${desc}
             function["example"] = xml
         
         
-        if(prototype.has_key("pseudocode")):
+        if(prototype2.has_pseudocode()):
 
-            language = prototype["pseudocode"]["language"]
-            example = prototype["pseudocode"]["parsed"]
+            language = prototype2.get_pseudocode()["language"]
+            example  = prototype2.get_pseudocode()["parsed"]
             example = self.format_source_code(language, example)
         
             xml = string.Template('''
@@ -2904,7 +2907,7 @@ ${desc}
             function["pseudocode"] = xml
 
 
-        topic = topic_t({"name"   : prototype["name"],
+        topic = topic_t({"name"   : prototype2.get_name(),
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
@@ -3041,8 +3044,8 @@ ${desc}
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_checklist(tag)
         elif(name == "image"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_image(tag.contents)
-        elif(name == "struct"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag.source, tag.contents)
+        elif(name in ("struct", "register")):
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag)
         elif(name == "define"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_define(tag)
         elif(name == "prototype"):

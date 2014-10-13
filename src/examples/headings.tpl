@@ -21,8 +21,10 @@ A multiline comment looks like \<!-- my comment here!!! -->.
 Some more text here
 -->This is some more text
 
+@h3 [[MyHeading,@MyHeading]]
+
 @h3 Heading 3
-Blah blah blah
+Blah blah blah MyHeading
 
 @note
 This is a test

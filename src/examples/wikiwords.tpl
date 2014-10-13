@@ -26,21 +26,24 @@ Test
 
 This is a dummy header
 
-@h3 [WikiTitle,Wiki Title]
+@h3 [[WikiTitle,Wiki Title]]
 This is a better way of doing wikiwords but shorte doesn't support it yet.
 
 
 @h1 This is some more data
 
-See if TheseAreSomeWikiwords that will link up and These are some Wikiwords that won't link but [[->These are some Wikiwords]] will
+See if TheseAreSomeWikiwords that will link up and These are some Wikiwords that won't link but [[@These are some Wikiwords, Some Wikiwords]] will
 also work as a link.
 
 Want to make sure that Test doesn't link to the Test section but if I enter
 TestSection it will link to the Test heading. Also double check bug \#28 to ensure
 that I can follow wikilinks with a period like TestSection.
 
-
 This is some random data
+
+This is another paragraph
+
+And another paragraph
 
 @h2: wikiword="ThePerformanceMonitor"
 The Performance Monitor
@@ -48,7 +51,28 @@ The Performance Monitor
 This is a test of the word ThePerformanceMonitor and some more information
 related to BlahBlahBlah
 
+Some random other stuff
+
+and still other stuff
+
 @h3: wikiword="BlahBlahBlah"
 Blah Blah Blah
 
-and some other random stuff here with a wiki link to TestSection
+Blah Blah Blah
+
+Blah Blah Blah
+
+Blah Blah Blah
+
+Blah Blah Blah
+
+Blah Blah Blah
+
+Blah Blah Blah
+
+Blah Blah Blah
+
+Blah Blah Blah
+
+and some other random stuff here with a wiki link to TestSection and another link
+to WikiTitle

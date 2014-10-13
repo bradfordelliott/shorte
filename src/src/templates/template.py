@@ -99,17 +99,31 @@ class template_t:
             source = matches.groups()[0].strip()
             label  = matches.groups()[1].strip()
             
+            # If the source begins with an @ sign then it is a local
+            # link within the same document so we need to convert the
+            # @ sign to # for HTML
+            if(source.startswith("@")):
+                external = False
+            else:
+                external = True
+
+            source = re.sub("^@", "#", source)
+            label = re.sub("(.*?@)", "", label)
+
             source = re.sub("^\"(.*)\"", "\\1", source) 
             label  = re.sub("^\"(.*)\"", "\\1", label) 
-            external = True
 
             #print "source = %s, label = %s" % (source, label)
         else:
             source = data.strip()
             label = source
 
-            source = re.sub("->", "#", source)
-            label = re.sub("(.*?->)", "", label)
+            # If the source begins with an @ sign then it is a local
+            # link within the same document so we need to convert the
+            # @ sign to # for HTML
+            source = re.sub("^@", "#", source)
+
+            label = re.sub("(.*?@)", "", label)
             external = False
 
             #print "source = %s, label = %s" % (source, label)

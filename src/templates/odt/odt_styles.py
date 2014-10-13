@@ -43,6 +43,14 @@ class styles():
     '''
     
         return outline_styles
+    
+    def get_common_styles(self):
+        return string.Template('''
+    <!-- Styling for hyperlinks -->
+    <style:style style:name="hyperlink" style:family="text">
+        <style:text-properties fo:color="${color_hyperlink}"/>
+    </style:style>
+    ''').substitute({"color_hyperlink" : self.colors["hyperlink"].fg})
        
 
     def get_table_styles(self):

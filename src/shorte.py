@@ -164,6 +164,9 @@ shorte = engine_t(output_dir, config, options.parser)
 if(options.replace):
     shorte.load_replace_strings(options.replace)
 
+if(options.theme):
+    shorte.set_theme(options.theme)
+
 # Override any global configuration options that the
 # user specified on the command line. Settings are
 # specified in the format:
@@ -252,7 +255,7 @@ shorte.parse_pages(options.file_list, options.files, options.macros)
 # exit
 if(options.info):
 
-    print shorte.info(options.info)
+    print shorte.info(options)
     sys.exit(0)
 
 shorte.generate_packages(options.package, options.theme, options, options.zip)
