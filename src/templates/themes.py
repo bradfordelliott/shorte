@@ -1,4 +1,6 @@
 
+import os
+from src.shorte_defines import *
 
 class color():
     def __init__(self,bg="#ffffff",fg="#000000"):
@@ -7,77 +9,43 @@ class color():
 
 class theme():
     def __init__(self):
-        pass
+
+        self.colors = {}
+
+        # Heading Colors
+        self.colors["shorte"] = {}
+        self.colors["shorte"]["heading.1"] = color(fg="#000000")
+        self.colors["shorte"]["heading.2"] = color(fg="#8ba327")
+        self.colors["shorte"]["heading.3"] = color(fg="#8ba327")
+        self.colors["shorte"]["heading.4"] = color(fg="#8ba327")
+        self.colors["shorte"]["heading.5"] = color(fg="#8ba327")
+        self.colors["shorte"]["heading.6"] = color(fg="#8ba327")
+        
+        # Table Colors
+        self.colors["shorte"]["table"] = {}
+        self.colors["shorte"]["table"]["title"]     = color(fg="#ffffff", bg="#8ba327")
+        self.colors["shorte"]["table"]["header"]    = color(fg="#000000", bg="#B0B0B0")
+        self.colors["shorte"]["table"]["alt.row"]   = color(fg="#000000", bg="#f0f0f0")
+        self.colors["shorte"]["table"]["subheader"] = color(fg="#000000", bg="#d0d0d0")
+        self.colors["shorte"]["table"]["reserved"]  = color(fg="#a0a0a0", bg="#f0f0f0")
+        self.colors["shorte"]["table"]["normal"]    = color(fg="#000000", bg="#ffffff")
+
+        # Hyperlink Colors
+        self.colors["shorte"]["hyperlink"]       = color(fg="#586a0d") #color(fg="#8ba327")
+        self.colors["shorte"]["hyperlink.hover"] = color(fg="#ccc")
+
+
+        dir_templates = shorte_get_startup_path() + os.path.sep + "templates"
+        templates = os.listdir(dir_templates)
+        sys.path.append(dir_templates)
+
+        for t in templates:
+            if("theme_" in t and t.endswith(".py")):
+                module_name = os.path.splitext(t)[0]
+                module = __import__("%s" % module_name)
+                module.load_colors(self.colors)
+
             
     def get_colors(self, theme="shorte"):
 
-        colors = {}
-
-        if(theme == "shorte"):
-            # Heading Colors
-            colors["heading.1"] = color(fg="#000000")
-            colors["heading.2"] = color(fg="#8ba327")
-            colors["heading.3"] = color(fg="#8ba327")
-            colors["heading.4"] = color(fg="#8ba327")
-            colors["heading.5"] = color(fg="#8ba327")
-            colors["heading.6"] = color(fg="#8ba327")
-            
-            # Table Colors
-            colors["table"] = {}
-            colors["table"]["title"]     = color(fg="#ffffff", bg="#8ba327")
-            colors["table"]["header"]    = color(fg="#000000", bg="#B0B0B0")
-            colors["table"]["alt.row"]   = color(fg="#000000", bg="#f0f0f0")
-            colors["table"]["subheader"] = color(fg="#000000", bg="#d0d0d0")
-            colors["table"]["reserved"]  = color(fg="#a0a0a0", bg="#f0f0f0")
-            colors["table"]["normal"]    = color(fg="#000000", bg="#ffffff")
-
-            # Hyperlink Colors
-            colors["hyperlink"]       = color(fg="#586a0d") #color(fg="#8ba327")
-            colors["hyperlink.hover"] = color(fg="#ccc")
-
-        elif(theme == "inphi"):
-            # Heading Colors
-            colors["heading.1"] = color(fg="#404040")
-            colors["heading.2"] = color(fg="#cc020C")
-            colors["heading.3"] = color(fg="#cc020C")
-            colors["heading.4"] = color(fg="#cc020C")
-            colors["heading.5"] = color(fg="#cc020C")
-            colors["heading.6"] = color(fg="#cc020C")
-            
-            # Table Colors
-            colors["table"] = {}
-            colors["table"]["title"]     = color(fg="#ffffff", bg="#404040")
-            colors["table"]["alt.row"]   = color(fg="#000000", bg="#f0f0f0")
-            colors["table"]["header"]    = color(fg="#000000", bg="#a0a0a0")
-            colors["table"]["subheader"] = color(fg="#000000", bg="#d0d0d0")
-            colors["table"]["reserved"]  = color(fg="#a0a0a0", bg="#f0f0f0")
-            colors["table"]["normal"]    = color(fg="#000000", bg="#ffffff")
-
-            # Hyperlink Colors
-            colors["hyperlink"]       = color(fg="#cc0000")
-            colors["hyperlink.hover"] = color(fg="#ccc")
-            
-
-        elif(theme in ("cortina", "cortina_public", "cortina_web")):
-            # Heading Colors
-            colors["heading.1"] = color(fg="#000000")
-            colors["heading.2"] = color(fg="#396592")
-            colors["heading.3"] = color(fg="#396592")
-            colors["heading.4"] = color(fg="#396592")
-            colors["heading.5"] = color(fg="#396592")
-            colors["heading.6"] = color(fg="#396592")
-            
-            # Table Colors
-            colors["table"] = {}
-            colors["table"]["title"]     = color(fg="#ffffff", bg="#396592")
-            colors["table"]["header"]    = color(fg="#ffffff", bg="#b0b0b0")
-            colors["table"]["alt.row"]   = color(fg="#000000", bg="#f0f0f0")
-            colors["table"]["subheader"] = color(fg="#000000", bg="#d0d0d0")
-            colors["table"]["reserved"]  = color(fg="#a0a0a0", bg="#f0f0f0")
-            colors["table"]["normal"]    = color(fg="#000000", bg="#ffffff")
-
-            # Hyperlink Colors
-            colors["hyperlink"]       = color(fg="#396592")
-            colors["hyperlink.hover"] = color(fg="#ccc")
-
-        return colors
+        return self.colors[theme]
