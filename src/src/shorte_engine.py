@@ -825,7 +825,7 @@ class engine_t:
             name = "data:object/png;base64," + base64.encodestring(handle.read())
             name = name.replace("\n","")
             handle.close()
-            DEBUG("FILE %s:\n%s" % (file, name))
+            print ("FILE %s:\n%s" % (file, name))
         
     
     def info(self, options):

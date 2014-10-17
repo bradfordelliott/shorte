@@ -345,7 +345,7 @@ int test_dot_c_my_test(int blah, int* dummy)
  */
 int test_dot_c_my_test21(int blah)
 {
-    return FALSE;
+    return test_dot_c_my_test(blah, NULL);
 }
 
 int test_dot_c_my_undocumented_function(int main)

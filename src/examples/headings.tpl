@@ -23,6 +23,8 @@ Some more text here
 
 @h3 [[MyHeading,@MyHeading]]
 
+@h4 @MyHeading4
+
 @h3 Heading 3
 Blah blah blah MyHeading
 
@@ -66,4 +68,9 @@ Some more stuff here
 Heading Other
 
 This is some text here
+
+@h1 @h1
+This is a top level heading which links with @h1 with
+an aperpersand up front. Hyperlinking should work if I type
+in @MyHeading4.
 

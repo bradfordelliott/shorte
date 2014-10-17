@@ -165,12 +165,12 @@ class source_code_t:
  @doctitle @docsubtitle @docversion @docnumber @docrevisions @docfilename
  @h1 @h2 @h3 @h4 @h5 @h
  @text @p @pre
- @c @python @java @perl @tcl @d @vera @verilog @bash
+ @code @c @python @java @perl @tcl @d @vera @verilog @bash @xml
  @include @include_child
  @sequence
  @table
  @vector
- @note
+ @note @tbd @warning @question
  @ul
  @ol
  @struct @enum @prototype

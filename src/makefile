@@ -57,6 +57,12 @@ cairo_plugin:
 	cp version.inc ${cairo_path}/.
 	cd ${cairo_path} && make
 
+checkout_vendor_templates:
+	rm -rf vendor_templates
+	mkdir vendor_templates
+	cd vendor_templates && cvs export -r HEAD -d templates design/sw/drivers/HSIO/shorte/templates
+	cp -r vendor_templates/templates/* templates/.
+
 # This target is used to package up shorte into a tarball
 # for distribution
 package: cairo_plugin
@@ -159,8 +165,12 @@ test_hello:
 	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
+test_hello2:
+	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=inphi;pdf=inphi2" -o build-output/hello_hsio
+
 test_hello_quick:
 	${python} shorte.py -f examples/hello.tpl -p "html" -t "${THEME}" -o build-output/hello_hsio
+	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
 test_headings:
 	${python} shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
@@ -245,6 +255,14 @@ test_images:
 
 test_images_encode:
 	${python} shorte.py -f examples/test.png -i "encode_images" 
+
+test_show_wikiwords:
+#	${python} shorte.py -f examples/headings.tpl -i "wikiwords"
+	${python} shorte.py -f examples/include_tests.tpl -i "wikiwords"
+
+test_include_tests:
+	${python} shorte.py -f examples/include_tests.tpl -p "html+pdf" -o build-output/include_tests
+
 
 test_graphing:
 	${python} shorte.py -f examples/graphing.tpl -p "html" -o build-output/graphing

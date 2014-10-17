@@ -329,6 +329,8 @@ class template_html_t(template_t):
 
         self.m_template_code_header = template_code_header
 
+        self.m_xrefs = []
+
     def is_inline(self):
         return self.m_inline
 
@@ -666,11 +668,12 @@ class template_html_t(template_t):
                     output += '%s' % source
             elif(type in (TAG_TYPE_COMMENT, TAG_TYPE_MCOMMENT, TAG_TYPE_XMLCOMMENT)):
                 source = self._format_links(source)
-                if(self.allow_wikify_comments()):
-                    source = self.wikify(source, exclude_wikiwords)
-
+                
                 # Convert any doxygen tags
                 source = re.sub("(@[^ \t\n]+)", "<span class='cmttg'>\\1</span>", source)
+
+                if(self.allow_wikify_comments()):
+                    source = self.wikify(source, exclude_wikiwords)
 
                 output += '<span class="cmt">%s</span>' % source
 
@@ -1367,13 +1370,7 @@ class template_html_t(template_t):
                          "indent" : 3});
         index.append(topic)
 
-        path = tag.file.replace(os.path.dirname(prototype.get_file()), "")
-
-        xref = string.Template(
-            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
-            "source_html" : "%s.source.html" % path,
-            "source"      : prototype.get_file(),
-            "line"        : prototype.get_line()})
+        xref = self.get_xref(prototype.get_file(), prototype.get_line())
         function["xref"] = xref
         
         return template.substitute(function)
@@ -1760,6 +1757,35 @@ within an HTML document.
             return "<img src='%s' title='%s'></img>" % (img_src,title)
 
         return img_src
+            
+    def get_xref(self, path, line):
+        if(len(path) == 0):
+            return ''
+
+        output = path
+        output = output.replace("/", "_")
+        output = output.replace("\\", "_")
+
+        base_output = "./" + output
+
+        output = self.m_engine.get_output_dir() + "/content/" + output + ".html"
+
+        self.m_xrefs.append((path, output))
+
+        # Move the line index so that it is always just before
+        # the object so that it is always in view
+        new_line = line - 5
+        if(new_line < 0):
+            new_line = 0
+        
+        xref = string.Template(
+            '<a style="float:right;" href="${source_html}#l${new_line}">${source} @ line ${line}</a>').substitute({
+            "source_html" : "%s.html" % base_output,
+            "source"      : path,
+            "new_line"    : new_line,
+            "line"        : line})
+
+        return xref
 
     def format_enum(self, tag):
         '''This method is called to format an enum for display within an
@@ -1884,14 +1910,9 @@ within an HTML document.
             i+=1
 
         values += "</table>"
-        
-        path = tag.file.replace(os.path.dirname(enum.get_file()), "")
-        xref = string.Template(
-            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
-            "source_html" : "%s.source.html" % path,
-            "source"      : enum.get_file(),
-            "line"        : enum.get_line()})
 
+        xref = self.get_xref(enum.get_file(), enum.get_line())
+        
         html = string.Template('''
 <div class='bordered' $style>
 <div style='background-color:#ccc;padding:10px;'><b>Enum:</b> ${name}$img${xref}</div>
@@ -1923,13 +1944,8 @@ within an HTML document.
 
         define = tag.contents
         
-        path = tag.file.replace(os.path.dirname(define.get_file()), "")
-        xref = string.Template(
-            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
-            "source_html" : "%s.source.html" % path,
-            "source"      : define.get_file(),
-            "line"        : define.get_line()})
-
+        xref = self.get_xref(define.get_file(), define.get_line())
+        
         html = string.Template('''
 <div class='bordered'>
 <div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}${xref}</div>
@@ -2097,14 +2113,8 @@ within an HTML document.
         html += "</table><br/>"
 
         html_example = self.format_object_example(struct)
-
-        path = tag.file.replace(os.path.dirname(struct.get_file()), "")
-
-        xref = string.Template(
-            '<a style="float:right;" href="./${source_html}#l${line}">${source} @ line ${line}</a>').substitute({
-            "source_html" : "%s.source.html" % path,
-            "source"      : struct.get_file(),
-            "line"        : struct.get_line()})
+        
+        xref = self.get_xref(struct.get_file(), struct.get_line())
 
         desc = struct.get_description()
         if(desc == None):
@@ -3205,7 +3215,10 @@ $href_end
         return output_file
 
     def generate_source_file(self, input, output):
-        
+
+        if(not os.path.exists(input)):
+            return
+
         handle = open(input, "rt")
         contents = handle.read()
         handle.close()
@@ -3234,11 +3247,12 @@ $href_end
         vars["version"] = ""
         vars["theme"] = self.m_engine.get_theme()
         vars["date"] = datetime.date.today()
-        vars["css"] = self.get_css()
+        css = self.get_css(basepath="./")
+        vars["css"] = css
         vars["pdf"] = ""
         vars["links"] = ""
         vars["contents"] = "<div class='code'>%s</div>" % html_src
-        vars["title"] = ""
+        vars["title"] = input
         vars["javascript"] = ""
         vars["link_index"] = "../index.html"
         vars["link_index_framed"] = "../index_framed.html"
@@ -3412,6 +3426,23 @@ $href_end
 
         if(self.is_inline() != True):
             self.install_support_files(self.get_content_dir())
+
+        # Generate any cross reference files
+        xref_generated = {}
+        for xref in self.m_xrefs:
+            input = xref[0]
+            output = xref[1]
+            WARNING("Parsing cross reference file %s" % input) 
+        
+            # DEBUG BRAD: Temporarily disable wikification until
+            #             I can fix it in the cross referenced HTML files.
+            saved = self.m_wikify 
+
+            if(not xref_generated.has_key(output)):
+                self.generate_source_file(input, output)
+                xref_generated[output] = True
+
+            #self.m_wikify = saved
        
         # Copy output images - really only required if we're generating
         # an HTML document.
