@@ -364,7 +364,7 @@ test_string_methods:
 # under Windows so that it is not necessary to re-distribute python
 exe:
 	rm -rf dist
-	${PATH_PYTHON} setup.py py2exe
+	${PATH_PYTHON}/python setup.py py2exe
 	cp libs/win32/msvc/msvcr100.dll dist
 	cp shorte.cfg dist/.
 	cp build-output/release_notes/index.html dist/release_notes.html

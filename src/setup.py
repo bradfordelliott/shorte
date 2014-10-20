@@ -37,20 +37,41 @@ def find_data_files(source,target,patterns):
 #data_files = find_data_files('templates', 'templates', ['*'])
 examples=find_data_files('examples','examples',[
         '*.tpl',
+        '*.png',
+        '*.svg',
+        '*.swf',
         '*.c',
         '*.h'])
 syntax=find_data_files('syntax','syntax',[
         'vim/*',
         'vim/syntax/*'])
 templates=find_data_files('templates','templates',[
+        '*.py',
         'c/*',
+        'html/*.py',
         'html/cortina/*',
+        'html/cortina/images/*',
         'html/cortina_public/*',
+        'html/cortina_public/images/*',
         'html/cortina_web/*',
+        'html/cortina_web/images/*',
+        'html/inphi/*',
+        'html/inphi/images/*',
+        'html/shorte/*',
+        'html/shorte/images/*',
+        'html_inline/*.py',
         'html_inline/cortina/*',
         'html_inline/cortina_public/*',
         'html_inline/cortina_web/*',
+        'html_inline/inphi/*',
+        'html_inline/shorte/*',
+        'reveal.js/shorte/*',
+        'reveal.js/shorte/css/*',
         'shared/*',
+        'shared/odt/*',
+        'shared/50x50/*',
+        'shared/20x20/*',
+        'shorte/*',
         'odt/*'])
 files = examples
 files.extend(templates)

@@ -60,26 +60,28 @@ class template_mergefile_t(template_t):
 
             for tag in tags:
 
-                #print "TAG = %s" % tag.name
+                if(not tag.has_source()):
+                    continue
 
-                source += "@" + tag.name
-                if(tag.modifiers != None and (len(tag.modifiers) > 0)):
-
+                source += "@" + tag.get_name()
+                if(tag.has_modifiers()):
                     source += ":"
-                    for modifier in tag.modifiers:
+                    for modifier in tag.get_modifiers():
 
                         name = modifier
-                        value = tag.modifiers[name]
+                        value = tag.get_modifier(name)
 
                         source += ' %s="%s"' % (name, value)
 
-                    source += "\n" + tag.source + "\n\n"
+                    source += '\n'
 
-                elif(tag.name in ("h1", "h2", "h3", "h4", "h5", "h")):
-                    source += " " + tag.source + "\n\n"
+                    #source += "\n" + tag.source + "\n\n"
+
+                if(tag.get_name() in ("h1", "h2", "h3", "h4", "h5", "h")):
+                    source += " " + tag.get_source() + "\n\n"
                 else:
-		    if(tag.source != None):
-                        source += "\n" + tag.source + "\n\n"
+                    if(tag.has_source()):
+                        source += "\n" + tag.get_source() + "\n\n"
 
         
         file = open(self.m_engine.m_output_directory + "/book.tpl", "w")

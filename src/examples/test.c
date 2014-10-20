@@ -14,12 +14,19 @@
 
 /**
  * @h1 Test.c
+ * This is some text related to this @h1 here.
+ *
  * @h2 A function summary example
+ * The following table is a function summary of this module.
+ *
  * @functionsummary
  * @text
  * @table: name="This is my table!"
  * - Blah  | Blah 
  * - Three | Four
+ *
+ * @h1 [[WikiHeader, A Wiki Header]]
+ * This is some random text here with a link to WikiHeader.
  */
 
 /**

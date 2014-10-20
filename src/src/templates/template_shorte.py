@@ -417,18 +417,19 @@ $heading
         return template.substitute(function)
 
     def format_header(self, tag):
-
-        output = "@%s" % tag.name
-        if(tag.modifiers):
-            output += ": %s\n" % tag.modifiers
+        
+        output = "@%s" % tag.get_name()
+        if(tag.has_modifiers()):
+            output += ": %s\n" % tag.get_modifiers_as_string()
         else:
             output += " "
-        output += tag.contents.strip() + "\n"
 
-        #print "HEADER"
-        #print "  name: [%s]" % tag.name
-        #print "  data: [",  tag.contents , "]"
-        #print "  output: %s" % output
+        heading = tag.get_contents().strip()
+
+        if(heading.startswith("@")):
+            output += "\\"
+
+        output += heading + "\n"
 
         return output
 

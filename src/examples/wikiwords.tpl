@@ -21,13 +21,14 @@ These are some Wikiwords
 This is a test
 This is another test
 
-@h2: wikiword="TestSection"
-Test
+@h2: wikiword='''TestSection'''
+Test Section
 
 This is a dummy header
 
 @h3 [[WikiTitle,Wiki Title]]
-This is a better way of doing wikiwords but shorte doesn't support it yet.
+This is a better way of doing wikiwords. Shorte should support it now. I should see a link to WikiTitle
+in the generated output.
 
 
 @h1 This is some more data

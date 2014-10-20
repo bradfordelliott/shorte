@@ -584,12 +584,13 @@ class parser_t:
         STATE_TAG = 0
         STATE_VALUE = 2
         STATE_STRING = 1
+        STATE_TRIPLE_QUOTES = 3
 
         tag = ""
         value = ""
         string = []
 
-        #print "MODIFIERS: [%s]" % modifiers
+        #WARNING("MODIFIERS: [%s]" % modifiers)
 
         tags = {}
         states = []
@@ -614,22 +615,37 @@ class parser_t:
                 else:
                     tag += modifiers[i]
                     #print "building tag: %s" % tag
+            
+            elif(state == STATE_TRIPLE_QUOTES):
+                FATAL("Ooops, can I ever get here?")
+                if((modifiers[i:i+3] == start_sequence) and modifiers[i-1] != '\\'):
+                    states.pop()
+                    i += 2
+                else:
+                    string.append(modifers[i])
 
             elif(state == STATE_STRING):
                 
-                if(modifiers[i] == '"' and modifiers[i-1] != '\\'):
+                if(modifiers[i] == start_sequence and modifiers[i-1] != '\\'):
                     states.pop()
                 else:
                     string.append(modifiers[i])
+
 
             elif(state == STATE_VALUE):
                
                 value += ''.join(string)
                 string = []
-                
-                if(modifiers[i] == '"'):
-                    states.append(STATE_STRING)
 
+                
+                if(modifiers[i:i+3] in ("'''", '"""')):
+                    FATAL("Ooops, can I ever get here?")
+                    states.append(STATE_TRIPLE_QUOTES)
+                    start_sequence = modifiers[i:i+3]
+                    i += 2
+                elif(modifiers[i] in ('"', "'")):
+                    states.append(STATE_STRING)
+                    start_sequence = modifiers[i]
                 elif(modifiers[i] == " "):
 
                     tags[tag.strip()] = value.strip()
