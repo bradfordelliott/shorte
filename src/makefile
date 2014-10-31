@@ -5,10 +5,12 @@ include os.inc
 help:
 	@${echo} "Available Targets:"
 	@${echo} "=================="
-	@${echo} " cairo_plugin = build the cairo plugin"
-	@${echo} " package      = build shorte and generate the tarball"
+	@${echo} " build"
+	@${echo} "   checkout_vendor_templates = Checkout and install vendor templates"
+	@${echo} "   cairo_plugin              = Build the cairo plugin"
+	@${echo} "   package                   = Build shorte and generate the tarball"
+	@${echo} "   exe                       = Build a standalone executable (windows only)"
 	@${echo} " install      = install shorte over the network"
-	@${echo} " exe          = build a standalone executable (windows only)"
 	@${echo} " docs         = generate the documentation for the site"
 	@${echo} " release_notes = generate the release notes for shorte"
 	@${echo} ""
@@ -50,6 +52,8 @@ env:
 all:
 	make package
 
+build: checkout_vendor_templates cairo_plugin package exe
+
 # Build the cairo plugin used for generating
 # images.
 cairo_plugin:
@@ -61,7 +65,7 @@ checkout_vendor_templates:
 	rm -rf vendor_templates
 	mkdir vendor_templates
 	cd vendor_templates && cvs export -r HEAD -d templates design/sw/drivers/HSIO/shorte/templates
-	cp -r vendor_templates/templates/* templates/.
+	cp -rf vendor_templates/templates/* templates/.
 
 # This target is used to package up shorte into a tarball
 # for distribution
@@ -298,6 +302,9 @@ test_revealjs:
 	${python} shorte.py -f examples/headings.tpl -p "reveal.js" --theme=shorte -o build-output/presentation3
 	${python} shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation4
 
+test_revealjs_quick:
+	${python} shorte.py -f examples/presentation.tpl -p "reveal.js" --theme="reveal.js=inphi" -o build-output/presentation2
+
 test_sequences:
 	${python} shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
 	${python} shorte.py -f examples/sequences.tpl -p "html+pdf" --theme="${THEME}" -o build-output/sequences_pdf
@@ -324,7 +331,7 @@ test_template_c:
 	${python} shorte.py -f examples/template_test.tpl -p "c" -o build-output/template_tests/c
 
 test_shorte:
-	${python} shorte.py -f examples/headings.tpl -p "html" -t shorte -o build-output/shorte_template
+	${python} shorte.py -f examples/shorte.tpl -p "html" -t shorte -o build-output/shorte_template
 
 test_inkscape:
 	${python} shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape

@@ -561,6 +561,7 @@ class template_html_t(template_t):
             #             that shorte tags should only be at the beginning of a line
             #             and not in the middle of a line.
             elif(language == "shorte" and c == '@'):
+                #if(i == 0 or (i > 0 and source[i-1] == '\n')):
                 keyword += c
             else:
                 if(keyword != ''):
@@ -934,7 +935,7 @@ class template_html_t(template_t):
 </tr>''' % (hierarchy)
 
             if(function.has_prototype()):
-                prototype = function.get_prototype()["parsed"]
+                prototype = function.get_prototype().get_parsed()
                 (returns, prototype) = self.htmlize_prototype(prototype)
             else:
                 returns = ''
@@ -1191,8 +1192,8 @@ class template_html_t(template_t):
         exclude_wikiwords.append(prototype.get_name())
 
         if(prototype.has_prototype()):
-            language = prototype.get_prototype()["language"]
-            example  = prototype.get_prototype()["parsed"]
+            language = prototype.get_prototype().get_language()
+            example  = prototype.get_prototype().get_parsed()
             
             if(self.m_show_code_headers.has_key("prototype") and self.m_show_code_headers["prototype"]):
                 snippet_id = self.m_snippet_id
@@ -1268,8 +1269,8 @@ class template_html_t(template_t):
 
         if(prototype.has_example()):
 
-            example  = prototype.get_example()["parsed"]
-            language = prototype.get_example()["language"]
+            example  = prototype.get_example().get_parsed()
+            language = prototype.get_example().get_language()
             
             if(self.m_show_code_headers["example"]):
                 snippet_id = self.m_snippet_id
@@ -1299,8 +1300,8 @@ class template_html_t(template_t):
         
         if(prototype.has_pseudocode()):
 
-            pseudocode = prototype.get_pseudocode()["parsed"]
-            language   = prototype.get_pseudocode()["language"]
+            pseudocode = prototype.get_pseudocode().get_parsed()
+            language   = prototype.get_pseudocode().get_language()
             
             if(self.m_show_code_headers["pseudocode"]):
                 snippet_id = self.m_snippet_id
@@ -1985,8 +1986,8 @@ within an HTML document.
             
         ''');
             
-        example  = obj.example["parsed"]
-        language = obj.example["language"]
+        example  = obj.example.get_parsed()
+        language = obj.example.get_language()
         
         if(self.m_show_code_headers["example"]):
             snippet_id = self.m_snippet_id

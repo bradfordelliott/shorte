@@ -1808,8 +1808,8 @@ ${desc}
         
         if(struct.example != None):
 
-            language = struct.example["language"]
-            example = struct.example["parsed"]
+            language = struct.example.get_language()
+            example = struct.example.get_parsed()
 
             example = self.format_source_code(language, example)
 
@@ -2449,7 +2449,7 @@ ${desc}
 
             if(summary_type == "functions"):
                 name = obj.get_name()
-                tmp = obj.get_prototype()["parsed"]
+                tmp = obj.get_prototype().get_parsed()
                 (returns, prototype) = self.htmlize_prototype(tmp)
             
                 style = self.m_styles["table"]["cell"]["fname"]
@@ -2641,8 +2641,8 @@ ${desc}
         function["desc"] = self.format_textblock(prototype2.get_description())
 
         if(prototype2.has_prototype()):
-            language = prototype2.get_prototype()["language"]
-            example  = prototype2.get_prototype()["parsed"]
+            language = prototype2.get_prototype().get_language()
+            example  = prototype2.get_prototype().get_parsed()
             function["prototype"] = self.format_source_code(language, example, wikiwords, False, False)
 
         if(prototype2.has_params()):
@@ -2832,8 +2832,8 @@ ${desc}
 
         if(prototype2.has_example()):
 
-            language = prototype2.get_example()["language"]
-            example  = prototype2.get_example()["parsed"]
+            language = prototype2.get_example().get_language()
+            example  = prototype2.get_example().get_parsed()
 
             example = self.format_source_code(language, example)
 
@@ -2871,8 +2871,8 @@ ${desc}
         
         if(prototype2.has_pseudocode()):
 
-            language = prototype2.get_pseudocode()["language"]
-            example  = prototype2.get_pseudocode()["parsed"]
+            language = prototype2.get_pseudocode().get_language()
+            example  = prototype2.get_pseudocode().get_parsed()
             example = self.format_source_code(language, example)
         
             xml = string.Template('''

@@ -217,6 +217,7 @@ class shorte_parser_t(parser_t):
             "graph"           : True,
             "shell"           : True,
             "prototype"       : True,
+            "class"           : True,
             "imagemap"        : True,
 
             "java"            : True,
@@ -1158,7 +1159,7 @@ a C/C++ like define that looks like:
 
         define = define_t()
         define.name = self.get_attribute_as_string(modifiers, "name")
-        define.description = self.parse_textblock(modifiers["description"])
+        define.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
         define.value = self.get_attribute_as_string(modifiers, "value")
         define.source = source
 
@@ -1167,6 +1168,23 @@ a C/C++ like define that looks like:
         define.private = self.get_attribute_as_bool(modifiers, "private")
         define.file = self.get_attribute_as_string(modifiers, "file")
         define.line = self.get_attribute_as_int(modifiers, "line")
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+        
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            elif(section.startswith("value:")):
+                define.value = section[6:len(section)].strip()
+            elif(section.startswith("name:")):
+                source = section[5:len(section)].strip()
+                define.name = source
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                define.description = self.parse_textblock(source)
 
         return define
 
@@ -1174,17 +1192,17 @@ a C/C++ like define that looks like:
         code = self.m_engine.m_source_code_analyzer
         language = "code"
         example = code.parse_source_code(language, source)
-        obj.example = {}
-        obj.example["language"] = language
-        obj.example["parsed"] = example 
-        obj.example["unparsed"] = source
+        obj.example = code_block_t()
+        obj.example.language = language
+        obj.example.parsed = example
+        obj.example.unparsed = source
 
     def parse_enum(self, source, modifiers):
         
         enum = enum_t()
         
-        enum.name = modifiers["name"]
-        enum.description = self.parse_textblock(modifiers["description"])
+        enum.name = self.get_attribute_as_string(modifiers, "name")
+        enum.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
         enum.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         enum.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         enum.private = self.get_attribute_as_bool(modifiers, "private")
@@ -1239,6 +1257,12 @@ a C/C++ like define that looks like:
 
                     word.link = os.path.basename(self.m_current_file)
                     self.m_wiki_links[word.wikiword] = word
+            elif(section.startswith("name:")):
+                source = section[5:len(section)].strip()
+                enum.name = source
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                enum.description = self.parse_textblock(source)
 
         return enum
 
@@ -1452,6 +1476,10 @@ a C/C++ like define that looks like:
         sections = splitter.split(source)
 
         struct2.headings = {}
+        
+
+        struct2.name = self.get_attribute_as_string(modifiers, "name")
+        struct2.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
 
         for section in sections:
 
@@ -1461,6 +1489,13 @@ a C/C++ like define that looks like:
             if(section.startswith("example:")):
                 example = section[8:len(section)]
                 self.parse_object_example(example, struct2)
+
+            elif(section.startswith("name:")):
+                struct2.name = section[5:len(section)]
+            
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                struct2.description = self.parse_textblock(source)
 
             elif(section.startswith("fields:")):
                     
@@ -1774,7 +1809,6 @@ a C/C++ like define that looks like:
 
         index = len(self.m_engine.m_images)
         image_name = "record_%d.png" % index
-        struct2.name = modifiers["name"]
 
         struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
@@ -1956,11 +1990,12 @@ a C/C++ like define that looks like:
 
                     code = self.m_engine.m_source_code_analyzer
                     prototype = code.parse_source_code(language, function_prototype)
-                    vars["prototype"] = {}
-                    vars["prototype"]["language"] = language
-                    vars["prototype"]["parsed"] = prototype
-                    vars["prototype"]["unparsed"] = function_prototype
-                    p2.set_prototype(vars["prototype"])
+
+                    code = code_block_t()
+                    code.language = language
+                    code.parsed = prototype
+                    code.unparsed = function_prototype
+                    p2.set_prototype(code)
                 
                 elif(section.startswith("called by:")):
                     vars["called_by"] = section[10:len(section)].strip()
@@ -2046,13 +2081,15 @@ a C/C++ like define that looks like:
                     #print "EXAMPLE: [%s]" % example
 
                     code = self.m_engine.m_source_code_analyzer
-                    example = code.parse_source_code(language, example)
-                    vars["example"] = {}
-                    vars["example"]["language"] = language
-                    vars["example"]["parsed"] = example 
-                    vars["example"]["unparsed"] = section[8:len(section)]
+                    src = code.parse_source_code(language, example)
+                    
+                    example = code_block_t()
+                    example.language = language
+                    example.parsed = src
+                    example.unparsed = section[8:len(section)]
 
-                    p2.set_example(vars["example"])
+
+                    p2.set_example(example) #vars["example"])
 
                 elif(section.startswith("pseudocode:")):
                     
@@ -2064,12 +2101,13 @@ a C/C++ like define that looks like:
 
                     code = self.m_engine.m_source_code_analyzer
                     pseudocode = code.parse_source_code(language, pseudocode)
-                    vars["pseudocode"] = {}
-                    vars["pseudocode"]["language"] = language
-                    vars["pseudocode"]["parsed"] = pseudocode
-                    vars["pseudocode"]["unparsed"] = section[11:len(section)]
+                    
+                    ps = code_block_t()
+                    ps.language = language
+                    ps.parsed = pseudocode
+                    ps.unparsed = section[11:len(section)]
 
-                    p2.set_pseudocode(vars["pseudocode"])
+                    p2.set_pseudocode(ps)
 
                 elif(section.startswith("see also:")):
                     vars["see_also"] = section[9:len(section)].strip()

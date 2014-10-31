@@ -954,6 +954,28 @@ class prototype_t(type_t):
         return attrs
 
 
+class code_block_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        
+        self.language = None
+        self.parsed = None
+        self.unparsed = None
+
+    def get_parsed(self):
+        return self.parsed
+    def set_parsed(self, parsed):
+        self.parsed = parsed
+    def get_unparsed(self):
+        return self.unparsed
+    def set_unparsed(self, unparsed):
+        self.unparsed = unparsed
+    def get_language(self):
+        return self.language
+    def set_language(self, language):
+        self.language = language
+
+
 class define_t(type_t):
     def __init__(self):
         type_t.__init__(self)

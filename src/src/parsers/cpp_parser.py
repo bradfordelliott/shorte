@@ -263,10 +263,10 @@ class cpp_parser_t(shorte_parser_t):
             code = self.m_engine.m_source_code_analyzer
             language = "c"
             tmp = code.parse_source_code(language, comment["example"])
-            example = {}
-            example["language"] = language
-            example["parsed"] = tmp
-            example["unparsed"] = comment["example"]
+            example = code_block_t()
+            example.set_language(language)
+            example.set_parsed(tmp)
+            example.set_unparsed(comment["example"])
             struct2.example = example
         
 
@@ -1320,27 +1320,27 @@ class cpp_parser_t(shorte_parser_t):
 
         if(output_pseudocode):
             tmp = code.parse_source_code(language, pseudocode)
-            function["pseudocode"] = {}
-            function["pseudocode"]["language"] = language
-            function["pseudocode"]["parsed"] = tmp
-            function["pseudocode"]["unparsed"] = pseudocode
-            p2.set_pseudocode(function["pseudocode"])
+            code = code_block_t()
+            code.set_language(language)
+            code.set_parsed(tmp)
+            code.set_unparsed(pseudocode)
+            p2.set_pseudocode(code)
 
         if(example != ""): 
             tmp = code.parse_source_code(language, example)
-            function["example"] = {}
-            function["example"]["language"] = language
-            function["example"]["parsed"] = tmp
-            function["example"]["unparsed"] = example
-            p2.set_example(function["example"])
+            code = code_block_t()
+            code.set_language(language)
+            code.set_parsed(tmp)
+            code.set_unparsed(example)
+            p2.set_example(code)
 
         if(prototype != ""):
             tmp = code.parse_source_code(language, prototype)
-            function["prototype"] = {}
-            function["prototype"]["language"] = language
-            function["prototype"]["parsed"] = tmp
-            function["prototype"]["unparsed"] = prototype
-            p2.set_prototype(function["prototype"])
+            code = code_block_t()
+            code.set_language(language)
+            code.set_parsed(tmp)
+            code.set_unparsed(prototype)
+            p2.set_prototype(code)
 
 
         #print "Function"

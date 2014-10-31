@@ -248,11 +248,7 @@ $description
 
             bits = field.get_type() #field.get_bits()
             name = field.get_name()
-            desc = field.get_description()
-            if(desc == None):
-                desc = ''
-            else:
-                desc = desc[0]["text"]
+            desc = self.format_textblock(field.get_description())
             
             values += '''- %s | %s | %s
 ''' % (bits, name, desc)
@@ -302,7 +298,7 @@ $example
             example = '''
 -- example:
 %s
-''' % self.format_source_code(obj.example["unparsed"])
+''' % self.format_source_code(obj.example.get_unparsed())
 
         return example
 
@@ -354,7 +350,7 @@ $heading
             function["prototype"] = '''
 -- prototype:
     %s
-''' % prototype.get_prototype()["unparsed"]
+''' % prototype.get_prototype().get_unparsed()
 
         if(prototype.has_params):
             output = ''
@@ -381,7 +377,7 @@ $heading
             function["pseudocode"] = '''
 -- pseudocode:
 %s
-''' % self.format_source_code(prototype.get_pseudocode()["unparsed"])
+''' % self.format_source_code(prototype.get_pseudocode().get_unparsed())
 
         if(prototype.has_see_also()):
             function["seealso"] = '''

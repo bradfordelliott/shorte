@@ -110,13 +110,13 @@ class template_c_t(template_t):
             end = ''
 
             name = prototype.get_name()
-            code     = prototype.get_pseudocode()["parsed"]
-            language = prototype.get_pseudocode()["language"]
+            code     = prototype.get_pseudocode().get_parsed()
+            language = prototype.get_pseudocode().get_language()
             has_prefix = True
 
             if(self.m_prototypes.has_key(name)):
                 comment = False
-                code = self.m_prototypes[name].get_pseudocode()["parsed"]
+                code = self.m_prototypes[name].get_pseudocode().get_parsed()
 
             if(self.m_comment_style == COMMENT_STYLE_SHORTE):
 
@@ -266,7 +266,7 @@ ${prototype}
         if(prototype.has_prototype()):
 
             # Replace any semicolons
-            code = prototype.get_prototype()["unparsed"]
+            code = prototype.get_prototype().get_unparsed()
             code = re.sub(";", "", code)
 
             function["prototype"] = code

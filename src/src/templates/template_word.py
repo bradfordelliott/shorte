@@ -837,8 +837,8 @@ class template_word_t(template_t):
 
         if(prototype.has_example()):
 
-            language = prototype.get_example()["language"]
-            example  = prototype.get_example()["parsed"]
+            language = prototype.get_example().get_language()
+            example  = prototype.get_example().get_parsed()
 
             example = self.format_source_code(language, example)
         
@@ -857,8 +857,8 @@ class template_word_t(template_t):
         
         if(prototype.has_pseudocode()):
 
-            language = prototype.get_pseudocode()["language"]
-            example  = prototype.get_pseudocode()["parsed"]
+            language = prototype.get_pseudocode().get_language()
+            example  = prototype.get_pseudocode().get_parsed()
             example = self.format_source_code(language, example)
         
             xml = '''
@@ -988,7 +988,7 @@ $box_end
 
             cols = []
             name = function["function_name"]
-            tmp = function["function_prototype"]["parsed"]
+            tmp = function["function_prototype"].get_parsed()
             (returns, prototype) = self.htmlize_prototype(tmp)
             #print prototype
             

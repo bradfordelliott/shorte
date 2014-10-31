@@ -557,6 +557,13 @@ def trim_blank_lines(source):
 
     return output
 
+def indent_lines(source, prefix):
+    lines = source.split('\n')
+
+    output = ''
+    for line in lines:
+        output += prefix + line + '\n'
+    return output
 
 def trim_leading_indent(source, allow_second_line_indent_check=True):
     '''This method is called to trim the leading indent from a string.
