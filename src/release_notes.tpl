@@ -6,9 +6,10 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.68 (Oct 17, 2014)
+@h3 Version 1.0.68 (Nov 28, 2014)
 This is the first release attempting to remove any vendor specific
-templates and allow them to be included from a different source.
+templates and allow them to be included from a different source. Also
+added clang as a parser option.
 
 @h3 Version 1.0.67 (Aug 14, 2014)
 This is a general cleanup release to push some cleanup work
