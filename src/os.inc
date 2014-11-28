@@ -48,3 +48,8 @@ ifneq ("${PATH_PYTHON}","")
     override python:=${PATH_PYTHON}/python
     override python-config:=${PATH_PYTHON}/python-config
 endif
+
+swig:=swig
+ifneq ("${PATH_SWIG}","")
+    override swig:=${PATH_SWIG}/swig
+endif

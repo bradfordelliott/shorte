@@ -14,8 +14,8 @@ else
 endif
 
 # Paths for Linux
-cairodir := /home/belliott/modules/${arch}/${RHEL}/include/cairo
-swig := /home/belliott/modules/${arch}/${RHEL}/tools/swig/swig-2.0.5/bin/swig
+#cairodir := /home/belliott/modules/${arch}/${RHEL}/include/cairo
+cairodir :=/usr/include/cairo
 extension:=.so
 
 python:
