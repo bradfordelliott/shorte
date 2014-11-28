@@ -12,6 +12,7 @@ except:
 from src.shorte_source_code import *
 from src.parsers.shorte_parser import *
 from src.parsers.cpp_parser import *
+from src.parsers.clang_parser import *
 from src.shorte_code_executor import *
 from src.templates.template_html import template_html_t
 from src.templates.template_odt  import template_odt_t
@@ -138,6 +139,7 @@ class engine_t:
         # A list of imagemaps associated with images
         self.m_imagemaps = {}
         self.m_macros = {}
+        self.m_includes = []
 
         self.m_package = ""
         self.m_doc_info = document_info_t()
@@ -150,6 +152,8 @@ class engine_t:
         
         self.m_source_code_analyzer = source_code_t()
 
+        self.m_wiki_links = {}
+
         # Create the output directory if it doesn't exist already
         #print "OUTPUT_DIR: %s" % self.m_output_directory
         if(not os.path.exists(self.m_output_directory)):
@@ -159,14 +163,28 @@ class engine_t:
 
         if(parser == "cpp"):
             self.m_parser = cpp_parser_t(self)
+        elif(parser == "clang"):
+            self.m_parser = clang_parser_t(self)
         else:
             self.m_parser = shorte_parser_t(self)
-            self.m_parser.set_cpp_parser(cpp_parser_t(self))
+            #self.m_parser.set_cpp_parser(cpp_parser_t(self))
+            # DEBUG BRAD: For some reason clang is skipping some methods
+            #             in cs4224.c. Need to debug why before I can
+            #             switch to it.
+            self.m_parser.set_cpp_parser(clang_parser_t(self))
 
         # Read the configuration file
         import ConfigParser
         self.m_config = ConfigParser.ConfigParser()
         self.m_config.read([config_file])
+
+
+        self.m_classes = {}
+
+    def class_get(self, name):
+        if(not self.m_classes.has_key(name)):
+            return class_t()
+        return self.m_classes[name]
 
     def set_output_directory(self, output_dir):
         self.m_output_directory = output_dir
@@ -387,7 +405,7 @@ class engine_t:
         #print "Page: %s" % source_file
         self.m_parser.parse(source_file)
 
-        #for link in self.m_parser.m_wiki_links:
+        #for link in self.m_wiki_links:
         #    print "LINK: [%s]" % link
 
     def parse_string(self, contents):
@@ -398,9 +416,9 @@ class engine_t:
            or None if it does not exist'''
         link = None
 
-        if(self.m_parser.m_wiki_links.has_key(phrase)):
+        if(self.m_wiki_links.has_key(phrase)):
 
-            link = self.m_parser.m_wiki_links[phrase]
+            link = self.m_wiki_links[phrase]
 
         return link
 
@@ -595,11 +613,14 @@ class engine_t:
     def get_macros(self):
         self.m_macros["SHORTE_DOC_TITLE"] = self.get_title()
         return self.m_macros
-        
 
     def set_macros(self, macros):
-
         self.m_macros = macros
+
+    def set_includes(self, includes):
+        self.m_includes = includes
+    def get_includes(self):
+        return self.m_includes
 
     def get_function_summary(self, tag=None):
 
@@ -846,7 +867,7 @@ class engine_t:
         if("wikiwords" in keys):
             output.append("Summary of wiki words:")
             output.append("----------------------")
-            links = self.m_parser.m_wiki_links
+            links = self.m_wiki_links
             for link in links:
                 output.append('''  %-24s
     - wikiword: %s,
@@ -1034,6 +1055,7 @@ def exists(s):
             try:
                 eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
             except:
+                print tmp_macros
                 FATAL("ERROR parsing example2.py in %s" % os.getcwd())
 
             contents = tmp_macros["result"]

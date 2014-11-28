@@ -272,6 +272,10 @@ class shorte_parser_t(parser_t):
 
             # Form tags
             "input"           : True,
+
+            # Just for doxygen compatibility
+            "cond"            : True,
+            "endcond"         : True,
         }
 
         # The tag hierarchy is used to determine
@@ -301,7 +305,7 @@ class shorte_parser_t(parser_t):
         self.m_subtitle = None
 
         # Track WikiWords in the document
-        self.m_wiki_links = {}
+        #self.m_wiki_links = {}
 
         # Rough parser position of current
         # tag
@@ -311,10 +315,16 @@ class shorte_parser_t(parser_t):
 
         self.m_headers = []
 
+    #def get_wiki_links(self):
+    #    return self.m_wiki_links
+
+    #def add_wiki_links(self, links):
+    #    self.m_wiki_links = dict(self.m_wiki_links.items() + links.items())
+
             
     def reset(self):
         self.m_headers = []
-        self.m_wiki_links = {}
+        self.m_engine.m_wiki_links = {}
         self.m_links = []
         self.m_urls = {}
         self.m_snippets = {}
@@ -1256,7 +1266,7 @@ a C/C++ like define that looks like:
                         word.wikiword = modifiers["wikiword"]
 
                     word.link = os.path.basename(self.m_current_file)
-                    self.m_wiki_links[word.wikiword] = word
+                    self.m_engine.m_wiki_links[word.wikiword] = word
             elif(section.startswith("name:")):
                 source = section[5:len(section)].strip()
                 enum.name = source
@@ -1265,6 +1275,36 @@ a C/C++ like define that looks like:
                 enum.description = self.parse_textblock(source)
 
         return enum
+    
+    def parse_class(self, source, modifiers):
+        
+        name = self.get_attribute_as_string(modifiers, "name")
+        cls = self.m_engine.class_get(name)
+        cls.name = name
+        
+        cls.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        cls.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        cls.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        cls.private = self.get_attribute_as_bool(modifiers, "private")
+        cls.file = self.get_attribute_as_string(modifiers, "file")
+        cls.line = self.get_attribute_as_int(modifiers, "line")
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            elif(section.startswith("name:")):
+                source = section[5:len(section)].strip()
+                cls.name = source
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                cls.description = self.parse_textblock(source)
+
+        return cls
 
     def parse_gnuplot(self, source, modifiers):
         '''This method is called to parse a gnuplot tag
@@ -1479,7 +1519,7 @@ a C/C++ like define that looks like:
         
 
         struct2.name = self.get_attribute_as_string(modifiers, "name")
-        struct2.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        struct_desc = self.get_attribute_as_string(modifiers, "description")
 
         for section in sections:
 
@@ -1495,7 +1535,7 @@ a C/C++ like define that looks like:
             
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
-                struct2.description = self.parse_textblock(source)
+                struct_desc = source
 
             elif(section.startswith("fields:")):
                     
@@ -1810,6 +1850,8 @@ a C/C++ like define that looks like:
         index = len(self.m_engine.m_images)
         image_name = "record_%d.png" % index
 
+        struct2.set_description(struct_desc, textblock=False)
+        struct2.set_description(self.parse_textblock(struct_desc), textblock=True)
         struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         struct2.private = self.get_attribute_as_bool(modifiers, "private")
@@ -1988,14 +2030,7 @@ a C/C++ like define that looks like:
 
                     function_prototype = section[10:len(section)].strip()
 
-                    code = self.m_engine.m_source_code_analyzer
-                    prototype = code.parse_source_code(language, function_prototype)
-
-                    code = code_block_t()
-                    code.language = language
-                    code.parsed = prototype
-                    code.unparsed = function_prototype
-                    p2.set_prototype(code)
+                    p2.set_prototype(function_prototype, self.m_engine.m_source_code_analyzer, language)
                 
                 elif(section.startswith("called by:")):
                     vars["called_by"] = section[10:len(section)].strip()
@@ -2042,12 +2077,18 @@ a C/C++ like define that looks like:
                             fields["desc"] = param_value
                             fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(desc))
 
-                            vars["params"].append(fields)
+                            p = param_t()
+                            p.set_name(param_name)
+                            p.set_io(param_io)
+                            p.set_description(param_value, textblock=False)
+                            p.set_description(self.parse_textblock(trim_leading_blank_lines(param_value)), textblock=True)
+                            #vars["params"].append(fields)
+                            vars["params"].append(p)
 
 
                         else:
                             #row = re.sub('\n', ' ', row).strip()
-
+#
                             if(row != ""):
                             
                                 #print "PARAM: [%s]" % row
@@ -2067,7 +2108,14 @@ a C/C++ like define that looks like:
                                     fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(trim_leading_indent(cols[2])))
                                     fields["desc2"] = self.parse_textblock(cols[2]) 
 
-                                    vars["params"].append(fields)
+                                    p = param_t()
+                                    p.set_name(cols[0].strip())
+                                    p.set_io(cols[1].strip())
+                                    p.set_description(cols[2], textblock=False)
+                                    p.set_description(self.parse_textblock(cols[2]),textblock=True)
+
+                                    #vars["params"].append(fields)
+                                    vars["params"].append(p)
 
                     p2.set_params(vars["params"])
                 
@@ -2080,16 +2128,7 @@ a C/C++ like define that looks like:
 
                     #print "EXAMPLE: [%s]" % example
 
-                    code = self.m_engine.m_source_code_analyzer
-                    src = code.parse_source_code(language, example)
-                    
-                    example = code_block_t()
-                    example.language = language
-                    example.parsed = src
-                    example.unparsed = section[8:len(section)]
-
-
-                    p2.set_example(example) #vars["example"])
+                    p2.set_example(example, self.m_engine.m_source_code_analyzer, language)
 
                 elif(section.startswith("pseudocode:")):
                     
@@ -2098,19 +2137,11 @@ a C/C++ like define that looks like:
                     # Now trim any leading lines
 
                     #print "PSEUDOCODE: [%s]" % pseudocode
-
-                    code = self.m_engine.m_source_code_analyzer
-                    pseudocode = code.parse_source_code(language, pseudocode)
                     
-                    ps = code_block_t()
-                    ps.language = language
-                    ps.parsed = pseudocode
-                    ps.unparsed = section[11:len(section)]
+                    p2.set_pseudocode(pseudocode, self.m_engine.m_source_code_analyzer, language)
 
-                    p2.set_pseudocode(ps)
-
-                elif(section.startswith("see also:")):
-                    vars["see_also"] = section[9:len(section)].strip()
+                elif(section.startswith("see:")):
+                    vars["see_also"] = section[4:len(section)].strip()
 
                     p2.set_see_also(vars["see_also"])
                 
@@ -2120,6 +2151,42 @@ a C/C++ like define that looks like:
                     vars["deprecated_msg"] = msg
                     p2.set_deprecated(True, msg)
 
+                elif(section.startswith("class:")):
+                    class_name = section[6:len(section)].strip()
+                    WARNING("Class name: %s" % class_name)
+
+                    cls = self.m_engine.class_get(class_name)
+                    cls.prototype_add(p2)
+
+        # This section attempts to search the prototype of the
+        # method for the type of each argument and sets the type
+        # associated with each parameter.
+        matches = re.search("\((.*)\)", function_prototype, re.DOTALL)
+        if(matches != None):
+            args = matches.groups()[0].split(',')
+
+            arg_types = {}
+            for arg in args:
+                # Strip any brackets since we won't count
+                # that as the type
+                arg = re.sub("\[.*\]", '', arg)
+                arg = arg.strip()
+                parts = arg.split(' ')
+
+                # The last word must be the argument
+                # name.
+                arg_name = parts[-1]
+
+                # Everthing before it is the argument
+                # type.
+                arg_type = ' '.join(parts[0:-1])
+
+                arg_types[arg_name] = arg_type
+
+        if(p2.has_params()):
+            for param in p2.get_params():
+                if(not param.has_type() and arg_types.has_key(param.get_name())):
+                    param.set_type(arg_types[param.get_name()])
 
         return (vars, p2)
 
@@ -2440,7 +2507,7 @@ else:
             # DEBUG BRAD: old way of dealing with headers
             #    tmp = data
             #    tmp = re.sub("\n", " ", tmp).strip()
-            #    self.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
+            #    self.m_engine.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
             #    self.m_headers.append(tag)
             
             # DEBUG BRAD: This is the new way of dealing with
@@ -2474,7 +2541,7 @@ else:
                     word.wikiword = modifiers["wikiword"]
 
                 word.link = os.path.basename(self.m_current_file)
-                self.m_wiki_links[word.wikiword] = word
+                self.m_engine.m_wiki_links[word.wikiword] = word
 
             self.m_headers.append(tag)
         
@@ -2566,6 +2633,9 @@ else:
 
         elif(name == "input"):
             tag.contents = self.parse_input(modifiers)
+
+        elif(name in ("cond", "endcond")):
+            return
         
         elif(name == "prototype"):
 
@@ -2605,7 +2675,7 @@ else:
 
                     word.link = os.path.basename(self.m_current_file)
 
-                    self.m_wiki_links[word.wikiword] = word
+                    self.m_engine.m_wiki_links[word.wikiword] = word
 
                     tags.append(header)
                 else:
@@ -2645,7 +2715,7 @@ else:
 
                     word.link = os.path.basename(self.m_current_file)
 
-                    self.m_wiki_links[word.wikiword] = word
+                    self.m_engine.m_wiki_links[word.wikiword] = word
 
                     tags.append(header)
                 else:
@@ -2680,6 +2750,10 @@ else:
             tag.contents = self.parse_enum(data, modifiers)
             tag.name = "enum"
 
+        elif(name == "class"):
+            tag.contents = self.parse_class(data, modifiers)
+            tag.name = "class"
+
         elif(name == "acronyms"):
             tag.contents = self.parse_table(data, modifiers)
 
@@ -2702,7 +2776,7 @@ else:
                     word.wikiword = modifiers["wikiword"]
 
                 word.link = os.path.basename(self.m_current_file)
-                self.m_wiki_links[word.wikiword] = word
+                self.m_engine.m_wiki_links[word.wikiword] = word
             
             # If the table has no title then default it
             if(table.title == None):

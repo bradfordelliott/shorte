@@ -1,20 +1,27 @@
 /** @file test.c
  *
  * @brief
+ *
+ * @h1 Test.c
  * This is some random data about this file here
  *
  * - One
  *     - Two
  *     - Three
- * -
  *
  * @{note, It should support an inline note}
  *
  */
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "test.h"
+
+int test_dot_c_my_test(int blah, int* dummy);
 
 /**
- * @h1 Test.c
- * This is some text related to this @h1 here.
+ * This is some text related to the @h1 from the file brief
+ * here.
  *
  * @h2 A function summary example
  * The following table is a function summary of this module.
@@ -27,10 +34,15 @@
  *
  * @h1 [[WikiHeader, A Wiki Header]]
  * This is some random text here with a link to WikiHeader.
- */
-
-/**
+ *
+ * @brief
  * This is an example of a define
+ *
+ * @example
+ *   if(my_bool == FALSE):
+ *   {
+ *       printf("False value!\\n");
+ *   }
  */
 #define FALSE 0
 
@@ -116,6 +128,11 @@ typedef struct {
  * This still needs to be done}
  *
  * @heading My Heading
+ *
+ * @example
+ *   e_test_dot_c_blah myenum;
+ *   my_enum.xxx = 10;
+ *   my_enum.yyy = 22;
  */
 typedef enum
 {
@@ -250,6 +267,47 @@ typedef enum
 }e_test_dot_c_cs4224_prbs_polynomial;
 
 
+
+
+/**
+ * This is another test function
+ *
+ * @note
+ *   This is a random note here
+ *
+ * @param blah [I] - This is a test
+ *
+ * @preconditions
+ *   What has to happen before the function is called
+ *
+ * @postconditions
+ *   What happens after the function is called
+ *
+ * @sideeffects
+ *   Are there any side-effects caused by calling the function?
+ *
+ * @statespace
+ *   Is there any state used by the function?
+ *
+ * @return Always returns FALSE.
+ *
+ * @todo
+ *   I need to update shorte to support handing
+ *   the if attribute on example tags as shown
+ *   in the example below.
+ *
+ * @example: if("DEFINE1")
+ * Include this example only if DEFINE1 is set
+ *
+ * @example: if("DEFINE2")
+ * Include this example only if DEFINE2 is set
+ */
+int test_dot_c_my_test21(int blah)
+{
+    return test_dot_c_my_test(blah, NULL);
+}
+
+
 /**
  * This is a description of my function
  *
@@ -321,38 +379,17 @@ int test_dot_c_my_test(int blah, int* dummy)
     return TRUE;
 }
 
-
 /**
- * This is another test function
+ * @h2 Another heading
+ * This is a brief description of this heading
  *
- * @note
- *   This is a random note here
  *
- * @param blah [I] - This is a test
- *
- * @preconditions
- *   What has to happen before the function is called
- *
- * @postconditions
- *   What happens after the function is called
- *
- * @sideeffects
- *   Are there any side-effects caused by calling the function?
- *
- * @statespace
- *   Is there any state used by the function?
- *
- * @return Always returns FALSE.
- *
- * @example: if("DEFINE1")
- * Include this example only if DEFINE1 is set
- *
- * @example: if("DEFINE2")
- * Include this example only if DEFINE2 is set
+ * @brief
+ * This method has is public but has no parameters and
+ * no return value.
  */
-int test_dot_c_my_test21(int blah)
+void test_doc_function_no_return(void)
 {
-    return test_dot_c_my_test(blah, NULL);
 }
 
 int test_dot_c_my_undocumented_function(int main)
@@ -366,3 +403,7 @@ int test_dot_c_my_private_function(void)
 {
 }
 
+int main(void)
+{
+    return 0;
+}

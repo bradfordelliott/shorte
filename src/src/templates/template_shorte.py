@@ -159,7 +159,7 @@ $heading
 @enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" file="$file" line="$line" description='''
 $description
 '''
--- values:
+--values:
 - Enum Name | Enum Value | Enum Description
 $values
 """)
@@ -186,12 +186,14 @@ $values
     def format_define(self, tag):
 
         template = string.Template("""
-# Start of define
 $heading
-@define: name="$name" value="$value" private="$private" deprecated="$deprecated" file="$file" line="$line" description='''
-$description
-'''
-#End of define
+@define: private="$private" deprecated="$deprecated" file="$file" line="$line"
+--name:
+    $name
+--value:
+    $value
+--description:
+    $description
 """)
 
         vars = {}
@@ -209,7 +211,7 @@ $description
         vars["name"] = define.name
         vars["heading"] = heading
         val = self.format_textblock(define.description)
-        vars["description"] = trim_leading_indent(val)
+        vars["description"] = indent_lines(trim_leading_indent(val), '    ')
             
         val = define.value
         val = re.sub("\|", "\\\\\\|", val)
@@ -232,6 +234,7 @@ $description
         title = struct.get_name()
         title = re.sub("[ \n]+", " ", title).strip()
 
+
         caption = self.format_textblock(struct.get_description())
 
         values = ''
@@ -248,17 +251,19 @@ $description
 
             bits = field.get_type() #field.get_bits()
             name = field.get_name()
-            desc = self.format_textblock(field.get_description())
+            desc = indent_lines(self.format_textblock(field.get_description()), '    ')
             
-            values += '''- %s | %s | %s
+            values += '''- %s | %s |\n%s
 ''' % (bits, name, desc)
 
         template = string.Template("""
 $heading
-@struct: name="$name" private="$private" deprecated="$deprecated" file="$file" line="$line" description='''
+@struct: private="$private" deprecated="$deprecated" file="$file" line="$line"
+--name:
+$name
+--description:
 $description
-'''
--- fields:
+--fields:
 - Type | Name | Description
 $values
 $example
@@ -282,7 +287,7 @@ $example
         vars["name"] = title
         vars["parent"] = parent
         vars["heading"] = heading
-        vars["description"] = caption
+        vars["description"] = indent_lines(caption, '    ')
         vars["values"] = values
         vars["deprecated"] = "False"
         vars["private"] = "False"
@@ -296,7 +301,7 @@ $example
 
         if(obj.example != None):
             example = '''
--- example:
+--example:
 %s
 ''' % self.format_source_code(obj.example.get_unparsed())
 
@@ -312,13 +317,13 @@ $example
         template = string.Template('''
 $title
 @prototype: file="${file}" line="${line}"
--- function:
+--function:
     $name
 $prototype
--- description:
+--description:
 $desc
 $params
--- returns:
+--returns:
     $returns
 $example
 $pseudocode
@@ -348,7 +353,7 @@ $heading
 
         if(prototype.has_prototype()):
             function["prototype"] = '''
--- prototype:
+--prototype:
     %s
 ''' % prototype.get_prototype().get_unparsed()
 
@@ -358,11 +363,11 @@ $heading
             
             for param in params:
 
-                output += '''-- %s | %s | %s\n    ''' % (param["name"], param["io"], param["desc"])
+                output += '''-- %s | %s | %s\n    ''' % (param.get_name(), param.get_io(), param.get_description(textblock=False))
 
 
             function["params"] = '''
--- params:
+--params:
     %s
 ''' % output
 
@@ -375,13 +380,13 @@ $heading
         
         if(prototype.has_pseudocode()):
             function["pseudocode"] = '''
--- pseudocode:
+--pseudocode:
 %s
 ''' % self.format_source_code(prototype.get_pseudocode().get_unparsed())
 
         if(prototype.has_see_also()):
             function["seealso"] = '''
--- see also:
+--see:
 %s
 ''' % (prototype.get_see_also())
         else:
@@ -389,7 +394,7 @@ $heading
         
         if(prototype.get_deprecated()):
             function["deprecated"] = '''
--- deprecated:
+--deprecated:
 %s
 ''' % (self.format_textblock(prototype.get_deprecated_msg()))
         else:

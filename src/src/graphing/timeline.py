@@ -184,7 +184,7 @@ class timeline_graph_t(graph_t):
         yAxisIncrements = maxY/yincrement;
         xAxisIncrements = maxX/xincrement;
 
-        print "increments: %d" % xAxisIncrements
+        #print "increments: %d" % xAxisIncrements
 
         height = self.height
         width = self.width

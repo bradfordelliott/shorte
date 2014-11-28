@@ -138,6 +138,17 @@ class cpp_parser_t(shorte_parser_t):
             return True
 
         return False
+        
+    def set_example(self, comment, object):
+        if(comment.has_key("example") and comment["example"] != ""): 
+            code = self.m_engine.m_source_code_analyzer
+            language = "c"
+            tmp = code.parse_source_code(language, comment["example"])
+            example = code_block_t()
+            example.set_language(language)
+            example.set_parsed(tmp)
+            example.set_unparsed(comment["example"])
+            struct2.example = example
     
     # Parse a C++ structure and store it
     def parse_cpp_struct(self, tokens, i):
@@ -716,6 +727,20 @@ class cpp_parser_t(shorte_parser_t):
         comment["deprecated"] = False
         comment["deprecated_msg"] = ""
         comment["heading"] = ""
+        
+        # Anything before the @brief tag is a block of standard
+        # shorte text that needs to be processed separately
+        if("@brief" in text):
+            INFO("Found an @brief tag") 
+            parts = text.split('@brief')
+
+            prefix = parts[0]
+            shorte = shorte_parser_t(self.m_engine)
+            shorte.parse_string(prefix, self.m_source_file)
+            tags = shorte.m_pages[0]["tags"]
+            self.page["tags"].extend(tags)
+
+            text = parts[1]
 
         # Strip off any \ref sequences since shorte doesn't use them
         # Also search for any heading references used to group the
@@ -929,7 +954,7 @@ class cpp_parser_t(shorte_parser_t):
         enum.deprecated_msg = comment2.deprecated_msg
         enum.line = start_of_enum
         enum.file = self.m_current_file
-
+                 
         max_cols = 0
         for row in rows:
             cols = len(row["cols"])
@@ -982,13 +1007,16 @@ class cpp_parser_t(shorte_parser_t):
                 ptype += "*"
 
             #print "NAME: [%s]" % pname
+            param = param_t()
+            param.set_name(pname)
+            param.set_type(ptype)
             field["name"] = pname
             field["io"] = ""
             field["type"] = ptype
             field["desc"] = ("")
             field["desc2"] = self.parse_textblock("")
 
-            return field
+            return param
 
         return None
 
@@ -1319,62 +1347,42 @@ class cpp_parser_t(shorte_parser_t):
         language = "c"
 
         if(output_pseudocode):
-            tmp = code.parse_source_code(language, pseudocode)
-            code = code_block_t()
-            code.set_language(language)
-            code.set_parsed(tmp)
-            code.set_unparsed(pseudocode)
-            p2.set_pseudocode(code)
+            p2.set_pseudocode(pseudocode, self.m_engine.m_source_code_analyzer, "c")
 
         if(example != ""): 
-            tmp = code.parse_source_code(language, example)
-            code = code_block_t()
-            code.set_language(language)
-            code.set_parsed(tmp)
-            code.set_unparsed(example)
-            p2.set_example(code)
+            p2.set_example(example, self.m_engine.m_source_code_analyzer, "c")
 
         if(prototype != ""):
-            tmp = code.parse_source_code(language, prototype)
-            code = code_block_t()
-            code.set_language(language)
-            code.set_parsed(tmp)
-            code.set_unparsed(prototype)
-            p2.set_prototype(code)
-
+            p2.set_prototype(prototype, self.m_engine.m_source_code_analyzer, "c")
 
         #print "Function"
         #print "    name: %s" % function["function_name"]
         #print "    returns: %s" % function["function_returns"]
         #function["function_prototype"] = prototype
-        function["params"] = self.parse_params(prototype)
-            
-        params = function["params"]
+        params = self.parse_params(prototype)
         new_params = []
 
         for param in func_comment2.params:
-
             for p in params:
-
-                if(p["name"] == param):
+                if(p.get_name() == param):
                     desc = func_comment2.params[param]["desc"]
-                    p["desc"] = desc
-                    p["desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
-                    p["io"] = func_comment2.params[param]["io"]
+                    p.set_description(desc, textblock=False)
+                    p.set_description(self.parse_textblock(trim_leading_blank_lines(desc)), textblock=True)
+                    p.set_io(func_comment2.params[param]['io'])
 
         # Check the list of parameter definitions and generate
         # a warning if a comment is missing.
         for param in params:
             #print "PARAM: %s" % param["name"]
-            if(not func_comment2.params.has_key(param["name"])):
+            if(not func_comment2.params.has_key(param.get_name())):
                 if(None == self.m_source_file):
                     self.m_source_file = self.m_current_file
 
-                WARNING("%s missing parameter definition for %s in %s:%d" % (function["name"], param["name"], self.m_source_file, start_of_func))
+                WARNING("%s missing parameter definition for %s in %s:%d" % (p2.get_name(), param.get_name(), self.m_source_file, start_of_func))
+        
+        p2.set_params(params)
 
-        p2.set_params(function["params"])
-
-        return (i, function, p2)
+        return (i, p2)
 
     # Parse the tokenized representation of a C/C++ file 
     def parse_tokens(self, page, tokens, source):
@@ -1398,25 +1406,25 @@ class cpp_parser_t(shorte_parser_t):
             # This is an alternative way of documenting the source code. In
             # this case the users inserts headings directly into the sources
             # which gets interpreted as code.
-            if(token["type"] == TOKEN_COMMENT and 
-                (("@h1" in token["data"] or 
-                  "@h2" in token["data"] or
-                  "@h3" in token["data"] or
-                  "@h4" in token["data"] or
-                  "@h5" in token["data"]))):
-                    text = self.format_comment(token["data"], strip_single_line_comments=False)
+            #if(token["type"] == TOKEN_COMMENT and 
+            #    (("@h1" in token["data"] or 
+            #      "@h2" in token["data"] or
+            #      "@h3" in token["data"] or
+            #      "@h4" in token["data"] or
+            #      "@h5" in token["data"]))):
+            #        text = self.format_comment(token["data"], strip_single_line_comments=False)
 
-                    shorte = shorte_parser_t(self.m_engine)
-                    shorte.parse_string(text, "blah.h")
-                    tags = shorte.m_pages[0]["tags"]
-                    i += 1
+            #        shorte = shorte_parser_t(self.m_engine)
+            #        shorte.parse_string(text, self.m_current_file)
+            #        tags = shorte.m_pages[0]["tags"]
+            #        i += 1
 
-                    # Don't want to treat this as a comment
-                    # for another type so mark it as invalid
-                    token["type"] = TOKEN_INVALID
-                    page["tags"].extend(tags)
-                    #print text
-                    continue
+            #        # Don't want to treat this as a comment
+            #        # for another type so mark it as invalid
+            #        token["type"] = TOKEN_INVALID
+            #        page["tags"].extend(tags)
+            #        #print text
+            #        continue
 
             if(self.match_token(token, TOKEN_KEYWORD, "struct")):
                 start_i = i 
@@ -1468,6 +1476,13 @@ class cpp_parser_t(shorte_parser_t):
                 text = token["data"]
                 words = text.split(" ")
                 command = words[0].strip()
+
+                #if(command == "if"):
+                #    WARNING("FOUND IF [%s]" % text)
+                #if(command == "ifdef"):
+                #    WARNING("FOUND IFDEF [%s]" % text)
+                #if(command == "endif"):
+                #    WARNING("FOUND ENDIF")
 
                 if(command == "define"):
                     try:
@@ -1604,20 +1619,20 @@ class cpp_parser_t(shorte_parser_t):
 
                 try:
                     start_i = i
-                    (i, function, prototype) = self.parse_cpp_function(tokens, i, source, is_prototype)
+                    (i, prototype) = self.parse_cpp_function(tokens, i, source, is_prototype)
                 except:
                     #import traceback
                     #tb = sys.exc_info()[2]
                     #traceback.print_tb(tb)
                     #WARNING("Encountered Exception parsing what looked like C++ function") # at %s" % (source[start_i:start_i+100]))
                     #print sys.exc_info()
-                    function = None
+                    prototype = None
                     i += 1
                     
                 # If this wasn't a function and it wasn't an
                 # extern then we need to walk
                 # forward till we hit the closing brace
-                if(function == None):
+                if(prototype == None):
                     i = saved_i
                     cnt_brace = 0
                     while(1):
@@ -1681,14 +1696,14 @@ class cpp_parser_t(shorte_parser_t):
 
         self.m_current_file = source_file
 
-        page = {}
-        page["title"] = source_file
+        self.page = {}
+        self.page["title"] = source_file
 
         #self.set_title(source_file)
         #self.set_subtitle(source_file)
-        page["tags"] = []
-        page["source_file"] = source_file
-        page["links"] = []
+        self.page["tags"] = []
+        self.page["source_file"] = source_file
+        self.page["links"] = []
 
 
         tag = {}
@@ -1954,7 +1969,7 @@ class cpp_parser_t(shorte_parser_t):
             else:
                 tokens.append(tokens_in[i])
 
-        self.parse_tokens(page, tokens, input)
+        self.parse_tokens(self.page, tokens, input)
         
         auto_summary = self.m_engine.get_config("shorte", "auto_summarize")
         if("1" == auto_summary): 
@@ -1979,18 +1994,18 @@ The following section describes the methods and structures exported by this modu
                  "brief" : self.m_file_brief})
                     
             shorte = shorte_parser_t(self.m_engine)
-            shorte.parse_string(summary, "blah.h")
+            shorte.parse_string(summary, self.m_current_file)
             tags = shorte.m_pages[0]["tags"]
 
-            tags.extend(page["tags"])
-            page["tags"] = tags
+            tags.extend(self.page["tags"])
+            self.page["tags"] = tags
 
-        page["file_brief"] = self.m_file_brief
-        page["file_author"] = self.m_author
+        self.page["file_brief"] = self.m_file_brief
+        self.page["file_author"] = self.m_author
 
-        for tag in page["tags"]:
-            tag.source_file = page["source_file"]
-            tag.page_title  = page["source_file"]
+        for tag in self.page["tags"]:
+            tag.source_file = self.page["source_file"]
+            tag.page_title  = self.page["source_file"]
 
 
         ## Check to see if there were any includes found. If there are then
@@ -1999,9 +2014,9 @@ The following section describes the methods and structures exported by this modu
         #    path = self.m_include_queue.pop(-1)
         #    self.parse(path)
 
-        self.m_pages.append(page)
+        self.m_pages.append(self.page)
 
-        return page
+        return self.page
 
     def parse(self, source_file):
 

@@ -16,7 +16,7 @@ class html_styles():
 <head>
 <style>
 * html {width: 500px;}
-body {width: 500px;}
+body {width: 500px;font-family:"Helvetica Neue",helvetica,arial,sans-serif;}
 /* Table of Contents */
 div.toc1 {margin-top:8px;margin-bottom:4px;"}
 div.toc1 a{margin-left:20px;font-size:1.1em;color:${heading_1_fg};}
@@ -196,6 +196,7 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       -moz-border-radius: 6px;
       -webkit-border-radius: 6px;
       border-radius: 6px;
+      /*overflow-x:auto;*/
   }
   
   .bordered td, .bordered th {
@@ -348,6 +349,12 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       font-family: courier new;
       font-size: 0.9em;
   }
+
+  div.cb_title
+  {
+      color:${color_codeblock_section};
+      font-weight:bold;
+  }
   
   div.code a
   {
@@ -404,5 +411,6 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
                    "color_table_reserved_bg" : self.colors["table"]["reserved"].bg,
                    "color_table_reserved_fg" : self.colors["table"]["reserved"].fg,
                    "color_hyperlink"       : self.colors["hyperlink"].fg,
-                   "color_hyperlink_hover" : self.colors["hyperlink.hover"].fg})
+                   "color_hyperlink_hover" : self.colors["hyperlink.hover"].fg,
+                   "color_codeblock_section" : self.colors["codeblock.section"].fg})
 

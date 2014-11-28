@@ -25,6 +25,7 @@ help:
 	@${echo} "                          only generate HTML for faster results"
 	@${echo} "   test_functions       = test the @prototype source code tag"
 	@${echo} "   test_enums           = test the @enum source code tag"
+	@${echo} "   test_structs         = test the @struct source code tag"
 	@${echo} "   test_bullets         = test the @ul and @ol list tags"
 	@${echo} "   test_wkiwords        = test the use of wikiwords"
 	@${echo} "   test_mergefile       = test the generation of mergefiles used for diffing"
@@ -48,6 +49,7 @@ help:
 
 env:
 	@${echo} " SHELL: ${SHELL}"
+	@${echo} " OS:    ${uname}"
 
 all:
 	make package
@@ -142,6 +144,7 @@ tests:
 	make test_defines
 	make test_functions
 	make test_enums
+	make test_structs
 	make test_bullets
 	make test_wikiwords
 	make test_conditionals
@@ -216,10 +219,23 @@ test_preprocessor:
 
 test_defines:
 	${python} shorte.py -f examples/defines.h -t "${THEME}" -x cpp -o build-output/defines -p "html+pdf"
+test_defines_quick:
+	${python} shorte.py -f examples/defines.h -t "${THEME}" -x clang -o build-output/defines -p "html"
+#	${python} shorte.py -f examples/defines.h -t "${THEME}" -x cpp -o build-output/defines -p "html"
 
 
 test_cpp_parser:
 	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/cpp_parser -p "html+pdf"
+
+test_clang:
+#	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "html_inline+pdf"
+	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
+
+test_classes:
+	${python} shorte.py -f "examples/classes.tpl" -t "${THEME}" -o build-output/classes -p "html"
+
+test_doxygen:
+	doxygen -s examples/doxy.cfg
 
 test_code_quick:
 	${python} shorte.py -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
@@ -237,6 +253,10 @@ test_functions:
 
 test_enums:
 	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "html+pdf" -o build-output/enums
+test_structs:
+	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "html+pdf" -o build-output/structs
+test_structs_quick:
+	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "html" -o build-output/structs
 
 test_bullets:
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets --zip=bullets.zip

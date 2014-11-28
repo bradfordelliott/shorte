@@ -94,6 +94,9 @@ parser.add_option("-m", "--macros",
 parser.add_option("-D", "--define",
                   action="store",type="string",dest="define",
                   help="Macro substitution")
+parser.add_option("-I", "--include",
+                  action="store",type="string",dest="include",
+                  help="Include paths - currently only used for Clang")
 parser.add_option("-r", "--search_and_replace",
                   action="store",type="string",dest="replace",
                   help="An input search and replace module that is loaded to pre-process input files and replace any references")
@@ -221,6 +224,9 @@ if(options.define):
 
     shorte.set_macros(defines)
 
+if(options.include):
+    includes = options.include.split(";")
+    shorte.set_includes(includes)
 
 scratchdir = shorte.get_config("shorte", "scratchdir")
 if(not os.path.exists(scratchdir)):

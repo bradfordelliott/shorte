@@ -707,13 +707,13 @@ class template_html_t(template_t):
         
         html = ''
         if(allow_line_numbers == 2 and show_line_numbers):
-            html = "<div class='snippet' style='white-space:pre-wrap'>"
-            html += "<div style='width:4%;float:left;white-space:pre;color:#ccc;'>" + line_number_div + "</div>"
-            html += "<div style='width:95%;float:left;white-space:pre-wrap'>" + output + "</div>"
+            html = "<div class='snippet' style='white-space:pre;'>"
+            html += "<div style='width:5%;float:left;white-space:pre;color:#ccc;'>" + line_number_div + "</div>"
+            html += "<div style='width:94%;float:left;white-space:pre;'>" + output + "</div>"
             html += "<div style='clear:both;'></div>"
             html += "</div>"
         else:
-            html = "<div class='snippet' style='white-space:pre-wrap'>" + output + "</div>"
+            html = "<div class='snippet' style='white-space:pre;'>" + output + "</div>"
         
         return html
     
@@ -1064,58 +1064,39 @@ class template_html_t(template_t):
 
         template = string.Template("""
         <div class="bordered" style="margin-top:10px;${background}">
-        <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name} ${xref}</div>
-        <div>
+            <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name} ${xref}</div>
             <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
+                <div class='cb_title'>Description:</div>
                 <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
             </div>
-        </div>
-        <div class='prototype' style="font-size: 0.9em;">
-            <div style="margin-left: 10px; margin-top: 10px;">
-                ${prototype}
-                
-                ${params}
-                ${returns}
-                
-
-                ${example}
-                ${called_by}
-                ${calls}
-                ${pseudocode}
-                ${see_also}
-                ${deprecated}
-                
+            <div class='prototype' style="font-size: 0.9em;">
+                <div style="margin-left: 10px; margin-top: 10px;">
+                    ${prototype}
+                    ${params}
+                    ${returns}
+                    ${example}
+                    ${called_by}
+                    ${calls}
+                    ${pseudocode}
+                    ${see_also}
+                    ${deprecated}
+                </div>
             </div>
-            
-        </div>
         </div>
         """)
     
         template_prototype = string.Template("""
         <div>
-            <div style="color: #396592; font-weight: bold;">Prototype:</div>
+            <div class='cb_title'>Prototype:</div>
             <div style="margin-left: 15px; margin-right:15px; font-family:courier new;">
                 ${prototype}
             </div>
         </div>
         """);
 
-        template_example = string.Template('''
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Example:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
-                        The following example demonstrates the use of this method:<br>
-                    </div>
-                    ${example}
-                </div>
-            
-        ''');
-        
-        
         template_pseudocode = string.Template('''
                 <div>
-                    <div style="color: #396592; font-weight: bold;">Pseudocode:</div>
+                    <div class='cb_title'>Pseudocode:</div>
                     <div style="margin-left: 10px; margin-top: 5px;">
                         The following pseudocode describes the implementation of this method:<br>
                     </div>
@@ -1126,49 +1107,49 @@ class template_html_t(template_t):
                 
         template_returns = string.Template('''
             <div>
-                <div style="color: #396592; font-weight: bold;">Returns:</div>
+                <div class='cb_title'>Returns:</div>
                 <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${returns}</p>
             </div>
         ''')
         
         template_see_also = string.Template('''
             <div>
-                <div style="color: #396592; font-weight: bold;">See Also:</div>
+                <div class='cb_title'>See Also:</div>
                 <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${see_also}</p>
             </div>
         ''')
         
         template_deprecated = string.Template('''
             <div>
-                <div style="color: #396592; font-weight: bold;">Deprecated:</div>
+                <div class='cb_title'>Deprecated:</div>
                 <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${deprecated}</p>
             </div>
         ''')
         
         template_called_by = string.Template('''
             <div>
-                <div style="color: #396592; font-weight: bold;">Called By:</div>
+                <div class='cb_title'>Called By:</div>
                 <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${called_by}</p>
             </div>
         ''')
         
         template_calls = string.Template('''
             <div>
-                <div style="color: #396592; font-weight: bold;">Calls:</div>
+                <div class='cb_title'>Calls:</div>
                 <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${calls}</p>
             </div>
         ''')
         
         template_params = string.Template('''
         <div>
-                    <div style="color: #396592; font-weight: bold;">Params:</div>
-                    <div style="margin-left: 0px;">
-                        <table style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px; border: 0px solid black;">
-                            ${params}
-                        </table>
-                    </div>
-                </div>
-                ''')
+            <div class='cb_title'>Params:</div>
+            <div style="margin-left: 0px;">
+                <table style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px; border: 0px solid black;">
+                    ${params}
+                </table>
+            </div>
+        </div>
+        ''')
         
         prototype = tag.contents
         
@@ -1187,7 +1168,7 @@ class template_html_t(template_t):
         function["called_by"] = ''
 
         function["desc"] = self.format_textblock(prototype.get_description())
-        
+
         exclude_wikiwords = []
         exclude_wikiwords.append(prototype.get_name())
 
@@ -1223,42 +1204,33 @@ class template_html_t(template_t):
 
         if(prototype.has_params()):
             params = prototype.get_params()
-            
             param_template = string.Template("""
                         <tr style='border-bottom:1px solid #ccc;'>
-                            ${type}
+                            <td style="vertical-align:text-top;border: 0px;">${type}</td>
                             <td style="vertical-align:text-top;border: 0px;"><b>${name}</b></td>
-                            <td style="vertical-align:text-top;font-family: courier new; border: 0px;">(${io})</td>
+                            <td style="vertical-align:text-top;font-family: courier new; border: 0px;">${io}</td>
                             <td style="vertical-align:text-top;border: 0px;">-</td>
                             <td style="vertical-align:text-top;border: 0px;">${desc}</td>
                         </tr>""")
 
             output = ''
             for param in params:
+                p = {}
+                #print param
+                p['name'] = param.get_name()
+                p['desc'] = self.format_textblock(param.get_description())
 
-                html_tmp = ''
-                for val in param["desc"]:
-                    if(len(val) == 2):
-                        html_tmp += '<b>%s</b> = %s<br/>' % (val[0], self.format_text(val[1]))
-                    else:
-                        html_tmp += self.format_text(val)
-
-                param["desc"] = html_tmp
-
-                if(param.has_key("desc2")):
-                    dtag = tag_t()
-                    dtag.contents = param["desc2"]
-                    param["desc"] = self.format_textblock(dtag)
+                if(param.has_type()):
+                    p['type'] = param.get_type()
                 else:
-                    print "WTF?"
-                    sys.exit(-1)
+                    p['type'] = ''
 
-                if(param.has_key("type")):
-                    param["type"] = '''<td style="vertical-align:text-top;border: 0px;">%s</td>''' % param["type"]
+                if(param.has_io()):
+                    p['io'] = '[%s]' % param.get_io()
                 else:
-                    param["type"] = ''
+                    p['io'] = ''
 
-                output += param_template.substitute(param)
+                output += param_template.substitute(p)
             
             params = {}
             params["params"] = output
@@ -1269,34 +1241,8 @@ class template_html_t(template_t):
 
         if(prototype.has_example()):
 
-            example  = prototype.get_example().get_parsed()
-            language = prototype.get_example().get_language()
-            
-            if(self.m_show_code_headers["example"]):
-                snippet_id = self.m_snippet_id
-                self.m_snippet_id += 1
-                code_header = self.m_template_code_header.substitute(
-                        {"id" : snippet_id,
-                         "style" : "margin-left:10px;margin-top:2px;background-color:transparent;"})
-                source = template_source.substitute({
-                    "id":     snippet_id,
-                    "source": self.format_source_code_no_lines(language, example)})
-            else:
-                code_header = ""
-                source = ""
-            
-            example = self.format_source_code(language, example)
-
-            code = template_code.substitute(
-                       {"contents" : example,
-                        "source"   : source,
-                        "code_header" : code_header,
-                        "template" : "code2",
-                        "result"   : ""})
-
-            function["example"] = code
-            function["example"] = template_example.substitute(function)
-        
+            html_example = self.format_object_example(prototype)
+            function["example"] = html_example
         
         if(prototype.has_pseudocode()):
 
@@ -1376,6 +1322,42 @@ class template_html_t(template_t):
         
         return template.substitute(function)
     
+    def format_class(self, tag):
+        '''This method is called to format a class within an HTML
+           document.
+
+           @param self [I] - The instance of the formatter class
+           @param tag  [I] - The tag containing the class object
+
+           @return The class formatted as HTML
+        '''
+
+        #print tag
+
+        template = string.Template("""
+        <div class="bordered" style="margin-top:10px;${background}">
+            <div style='background-color:#ccc;padding:10px;'>${private}<b>Class:</b> ${name} ${xref}</div>
+            <div style="margin-left: 10px;">
+                <div class='cb_title'>Description:</div>
+                <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+            </div>
+            <div class='prototype' style="font-size: 0.9em;">
+                <div style="margin-left: 10px; margin-top: 10px;">
+                </div>
+            </div>
+        </div>
+        """)
+    
+        obj = tag.contents
+        WARNING("Printing class")
+        print obj
+
+        return template.substitute({
+            "background" : "",
+            "xref"       : "",
+            "name" : obj.get_name(),
+            "private" : "",
+            "desc" : self.format_textblock(obj.get_description())})
     
     def format_testcase(self, tag):
         
@@ -1583,6 +1565,9 @@ within an HTML document.
                         within another element like a table?
 '''
 
+        if(tag == None):
+            return ''
+
         if(isinstance(tag, tag_t)):
             paragraphs = tag.contents
         else:
@@ -1760,6 +1745,11 @@ within an HTML document.
         return img_src
             
     def get_xref(self, path, line):
+
+        # Cross references not currently supported in inline HTML documents
+        if(self.is_inline()):
+            return ''
+
         if(len(path) == 0):
             return ''
 
@@ -1771,19 +1761,19 @@ within an HTML document.
 
         output = self.m_engine.get_output_dir() + "/content/" + output + ".html"
 
-        self.m_xrefs.append((path, output))
+        exists = False
+        for i in range(0, len(self.m_xrefs)):
+            if(self.m_xrefs[i] == (path, output)):
+                exists = True
+                break
+        if(not exists):
+            self.m_xrefs.append((path, output))
 
-        # Move the line index so that it is always just before
-        # the object so that it is always in view
-        new_line = line - 5
-        if(new_line < 0):
-            new_line = 0
-        
         xref = string.Template(
             '<a style="float:right;" href="${source_html}#l${new_line}">${source} @ line ${line}</a>').substitute({
             "source_html" : "%s.html" % base_output,
             "source"      : path,
-            "new_line"    : new_line,
+            "new_line"    : line,
             "line"        : line})
 
         return xref
@@ -1815,6 +1805,10 @@ within an HTML document.
 
         if(enum.private == True):
             img += self.insert_image("lock.png", height=20, width=20, wrap=True, float="right", title="This enum is private")
+        
+        html_example = ''
+        if(enum.has_example()):
+            html_example = self.format_object_example(enum)
         
         
         if(self.m_engine.get_config("shorte", "show_enum_values") == "1"):
@@ -1911,6 +1905,7 @@ within an HTML document.
             i+=1
 
         values += "</table>"
+        
 
         xref = self.get_xref(enum.get_file(), enum.get_line())
         
@@ -1919,14 +1914,15 @@ within an HTML document.
 <div style='background-color:#ccc;padding:10px;'><b>Enum:</b> ${name}$img${xref}</div>
 <div>
     <div style="margin-left: 10px;">
-        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div class='cb_title'>Description:</div>
         <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
     </div>
 </div>
 <div>
     <div style="margin-left: 10px;">
-        <div style="color: #396592; font-weight: bold;">Values:</div>
+        <div class='cb_title'>Values:</div>
         <div style="margin:0px;">${values}</div>
+        $example
     </div>
 </div>
 </div><br/>''').substitute({
@@ -1935,7 +1931,8 @@ within an HTML document.
     "img"    : img,
     "name"   :  name,
     "values" : values,
-    "desc"   : self.format_textblock(enum.description)})
+    "example": html_example,
+    "desc"   : self.format_textblock(enum.get_description(textblock=True))})
 
         return html
 
@@ -1945,28 +1942,34 @@ within an HTML document.
 
         define = tag.contents
         
+        html_example = ''
+        if(define.has_example()):
+            html_example = self.format_object_example(define)
+
         xref = self.get_xref(define.get_file(), define.get_line())
         
         html = string.Template('''
 <div class='bordered'>
 <div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}${xref}</div>
 <div>
-    <div style="margin-left: 10px;">
-        <div style="color: #396592; font-weight: bold;">Value:</div>
+    <div style="margin-left: 10px;margin-top:10px;">
+        <div class='cb_title'>Value:</div>
         <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${value}</div>
     </div>
 </div>
 <div>
     <div style="margin-left: 10px;">
-        <div style="color: #396592; font-weight: bold;">Description:</div>
+        <div class='cb_title'>Description:</div>
         <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+        $example
     </div>
 </div>
 </div><br/>''').substitute({
     "name" : define.name,
     "xref" : xref,
     "value" : self.format_textblock(define.value),
-    "desc" : self.format_textblock(define.description)})
+    "desc" : self.format_textblock(define.description),
+    "example" : html_example})
 
         return html
 
@@ -1976,8 +1979,8 @@ within an HTML document.
             return ''
         
         template_example = string.Template('''
-                <div style="margin-left:10px;">
-                    <div style="color: #396592; font-weight: bold;">Example:</div>
+                <div>
+                    <div class='cb_title'>Example:</div>
                     <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
                         The following example demonstrates the use of this ${type}:<br>
                     </div>
@@ -2128,18 +2131,18 @@ within an HTML document.
 <div class='bordered' $style>
 <div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img$xref</div>
 <div>
-    <div style="margin-left: 10px;">
-        <div style="color: #396592; font-weight: bold;">Description:</div>
-        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+    <div style="margin-left: 10px;margin-top:10px;">
+        <div class='cb_title'>Description:</div>
+        <div style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${desc}</div>
     </div>
 </div>
 <div>
     <div style="margin-left: 10px;">
-        <div style="color: #396592; font-weight: bold;">Fields:</div>
+        <div class='cb_title'>Fields:</div>
         <div style="margin:0px;">${values}</div>
+        ${example}
     </div>
 </div>
-${example}
 </div><br/>''').substitute({
     "style"  : style,
     "xref"   : xref,
@@ -2585,6 +2588,13 @@ $href_end
 
         #data = data.replace("\[^\]", "\\");
 
+        # Replace any \\ with a single \
+        if("\\" in data):
+            #print data
+            data = re.sub(r"\\([^\\])", "\\1", data)
+            #print data
+            #ERROR("found a backslash")
+
         # Convert an < and > characters
         data = data.replace("<", "&lt;")   # re.sub("<", "&lt;", data)
         data = data.replace(">", "&gt;")   # re.sub(">", "&gt;", data)
@@ -2793,6 +2803,8 @@ $href_end
             self.m_contents.append(self.format_imagemap(tag))
         elif(name == "prototype"):
             self.m_contents.append(self.format_prototype(tag))
+        elif(name == "class"):
+            self.m_contents.append(self.format_class(tag))
         elif(name == "testcase"):
             self.m_contents.append(self.format_testcase(tag))
         elif(name == "testcasesummary"):
@@ -2823,8 +2835,10 @@ $href_end
             pass
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
+        elif(name in "doctitle", "docsubtitle"):
+            FATAL("Undefined tag: %s [%s], did you forget the @body tag" % (name, tag.source))
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
 
         #elif(tag == "pycairo"):
@@ -3433,7 +3447,7 @@ $href_end
         for xref in self.m_xrefs:
             input = xref[0]
             output = xref[1]
-            WARNING("Parsing cross reference file %s" % input) 
+            INFO("Parsing cross reference file %s" % input) 
         
             # DEBUG BRAD: Temporarily disable wikification until
             #             I can fix it in the cross referenced HTML files.

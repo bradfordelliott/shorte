@@ -275,20 +275,22 @@ ${prototype}
             params = prototype.get_params()
 
             output = ''
-            for param in params:
+            for p in params:
                 
                 if(self.m_comment_style == COMMENT_STYLE_SHORTE):
                     prefix = "//|      "
                 else:
                     prefix = " *      "
 
-                tmp = ''
-                for val in param["desc"]:
-                    if(len(val) == 2):
-                        tmp += self.format_comment("%s = %s" % (val[0], val[1]), prefix)
-                    else:
-                        tmp += self.format_comment("%s" % (val), prefix)
+                param = {}
+                param['name'] = p.get_name()
+                param['type'] = p.get_type()
+                if(p.has_io()):
+                    param['io']   = p.get_io()
+                else:
+                    param['io'] = ''
 
+                tmp = self.format_comment(p.get_description(textblock=False), prefix)
 
                 param["desc"] = tmp
 

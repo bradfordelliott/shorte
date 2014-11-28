@@ -24,10 +24,9 @@ However this text should show up.
 
 The multi-line comment below should not show up.
 
-   <!-- This is my multil-line comment
-     that spans multiple lines -->
-
-   <!-- This comment shouldn't show up either -->
+<!-- This is my multi-line comment
+  that spans multiple lines -->
+<!-- This comment shouldn't show up either -->
 
 However this text should be visible because it is not
 commented out.

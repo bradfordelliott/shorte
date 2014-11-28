@@ -1178,7 +1178,11 @@ class template_odt_t(template_t):
 
         # Trim leading and trailing whitespace
         data = data.strip()
-        data = re.sub("->", "#", data)
+        #data = re.sub("->", "#", data)
+        
+        # Replace any \\ with a single \
+        if("\\" in data):
+            data = re.sub(r"\\([^\\])", "\\1", data)
 
         data = self.xmlize(data)
 
@@ -2035,6 +2039,9 @@ ${desc}
         indent_style="indent",
         list_style="list_level"):
 
+        if(tag == None):
+            return ''
+
         if(isinstance(tag, tag_t)):
             paragraphs = tag.contents
         else:
@@ -2450,6 +2457,7 @@ ${desc}
             if(summary_type == "functions"):
                 name = obj.get_name()
                 tmp = obj.get_prototype().get_parsed()
+                
                 (returns, prototype) = self.htmlize_prototype(tmp)
             
                 style = self.m_styles["table"]["cell"]["fname"]
@@ -2466,8 +2474,14 @@ ${desc}
                 cols.append({"span":1, 'text':'', "style": style, "text-style": text_style})
 
                 text_style = self.m_styles["para"]["fdesc"]
-                function_desc = obj.get_description()
-                cols.append({"span":1, 'textblock':function_desc, "style": style, "text-style": text_style})
+
+                if(obj.has_description(textblock=True)):
+                    function_desc = obj.get_description(textblock=True)
+                    cols.append({"span":1, 'textblock':function_desc, "style": style, "text-style": text_style})
+                else:
+                    function_desc = ''
+                    cols.append({"span":1, 'text':function_desc, "style": style, "text-style": text_style})
+
             
             elif(summary_type == "types"):
                 name = ''
@@ -2671,58 +2685,45 @@ ${desc}
     <text:p text:style-name="$para_prototype_param"></text:p>
   </table:table-cell>
   <table:table-cell table:style-name="shorte_table_prototype_parameter_io" office:value-type="string">
-    <text:p text:style-name="$para_prototype_param">[${io}]</text:p>
+    <text:p text:style-name="$para_prototype_param">${io}</text:p>
   </table:table-cell>
   <table:table-cell table:style-name="shorte_table_prototype_parameter_data" office:value-type="string">${desc}</table:table-cell>
 </table:table-row>
 """)
             
             output = ''
-            for param in params:
+            for p in params:
+
+                param = {}
             
                 row = {}
                 row["is_header"] = False
                 row["cols"] = []
-                row["cols"].append(param["name"])
-                row["cols"].append(param["io"])
+                row["cols"].append(p.get_name())
+
+                if(p.has_io()):
+                    row["cols"].append(p.get_io())
+                else:
+                    row["cols"].append('')
+
                 row["cols"].append("-")
-                row["cols"].append(param["desc"])
+                pstyle = self.m_styles['para']['prototype']['param']
+                row["cols"].append(self.format_textblock(p.get_description(), style=pstyle))
 
                 table["rows"].append(row)
-
-                #print "Param: %s" % param["param_name"]
-                #print "Desc:  " , param["param_desc"]
-
-                tmp = ''
-                desc = param["desc"]
-
-                if(isinstance(desc, str) or isinstance(desc, unicode)):
-                    tmp += desc # self.format_text(desc)
-                else:
-                    for val in param["desc"]:
-                        if(len(val) == 2):
-                            tmp += '''
-                                <text:span text:style-name="%s">%s</text:span>
-                                <text:span>%s</text:span>
-                                <text:line-break/>
-                            ''' % (self.m_styles["span"]["prototype"]["param_name"],
-                                   val[0],
-                                   self.format_text(val[1]))
-                        else:
-                            tmp += self.format_text(val)
-
-                param["desc"] = tmp
-                
-                if(param.has_key("desc2")):
-                    tag = tag_t()
-                    tag.contents = param["desc2"]
-                    param["desc"] = self.format_textblock(tag, style=self.m_styles["para"]["prototype"]["param"])
-                    #param["desc"] = self.format_textblock(tag)
 
                 param["table_row_prototype"] = self.m_styles["table"]["row"]["prototype"]
                 param["table_cell_prototype"] = self.m_styles["table"]["cell"]["prototype"]
                 param["para_prototype_param"] = self.m_styles["para"]["prototype"]["param"]
                 param["para_prototype_param_name"] = self.m_styles["para"]["prototype"]["param_name"]
+
+                param["name"] = p.get_name()
+
+                if(p.has_io()):
+                    param["io"] = "[%s]" % p.get_io()
+                else:
+                    param["io"] = ''
+                param["desc"] = self.format_textblock(p.get_description(), style=pstyle)
 
                 output += param_template.substitute(param)
 

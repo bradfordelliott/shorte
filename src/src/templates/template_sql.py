@@ -487,25 +487,17 @@ within an HTML document.
         if(prototype.has_params()):
             params = prototype.get_params()
             
-            for param in params:
-                
-                if(not param.has_key('type')):
-                    param["type"] = ''
+            for p in params:
 
-                if(not param.has_key('desc')):
-                    param["desc"] = ''
-                
-                param_desc = ''
-                for val in param["desc"]:
-                    if(len(val) == 2):
-                        param_desc += '<b>%s</b> = %s<br/>' % (val[0], self.format_text(val[1]))
-                        #param_desc += 'tbd' self.format_text(val[1])
-                    else:
-                        param_desc += self.format_text(val)
+                print p
 
-                #print "DESC: ", param["param_desc"]
-
-                param["desc"] = param_desc
+                param = {}
+                param["type"] = p.get_type()
+                param["name"] = p.get_name()
+                if(p.has_description()):
+                    param["desc"] = self.format_textblock(p.get_description(textblock=True))
+                else:
+                    param['desc'] = ''
 
                 sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('%d', '${name}', '${type}', '${desc}');\n" % self.m_prototype_uid).substitute(param);
 

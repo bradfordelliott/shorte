@@ -78,7 +78,7 @@
     }
     
 
--- see also:
+-- see:
     THis is a test
 
 @h3 my_function2
@@ -96,13 +96,11 @@
     TRUE on success, FALSE on failure
 -- params:
     -- val1 | I |
-        1 = blah blah
-            and more blah blah
-            plus blah;
-        
-        2 = blah @{u,blah blah};
-        
-        0 = turn @{hl,beacon} on
+        - 1 = blah blah
+              and more blah blah
+              plus blah;
+        - 2 = blah @{u,blah blah}
+        - 0 = turn @{hl,beacon} on
     -- val2 | I |
         *1* = blah blah
         
@@ -116,4 +114,35 @@
     void my_function3(void)
 -- returns:
     None
+
+
+@h3 function4
+@prototype
+-- function: function4
+-- prototype:
+    int function4(char* arg1, int* arg2, struct x* arg3, double arg4);
+-- description:
+    This a description of function4.
+-- params:
+    -- arg1 | I |
+        This is a description of argument 1 that wraps
+        around to a new line and contains a list within it
+        - One
+            - Two
+            - Three
+        - Four
+
+        And another line
+        
+        It even contains a table:
+        @{table,
+        -h Header
+        - One   ! Two
+        - Three ! Four
+        }
+    -- arg2 | I | Argument 2
+    -- arg3 | O | Argument 3
+    -- arg4 | I | Argument 4
+-- returns:
+    Always 0
 

@@ -33,6 +33,11 @@
      color:      white;
   }
   
+  span.pdf
+  {
+      padding-top:50px;
+  }
+  
   div.footer
   {
      color: #666;

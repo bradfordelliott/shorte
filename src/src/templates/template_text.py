@@ -120,6 +120,10 @@ Description:
 %s
 ''' % (enum.name, "TBD", self.format_textblock(enum.description, prefix='    '))
 
+    def format_prototype(self, tag):
+        prototype = tag.contents
+        return prototype.__str__()
+
     def format_checklist(self, tag):
         
         list = tag.contents
@@ -347,145 +351,6 @@ Description:
 
         return output
 
-    
-    
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    ()
-    #|
-    #| DESCRIPTION:
-    #|    
-    #| 
-    #| PARAMETERS:
-    #|    
-    #| 
-    #| RETURNS:
-    #|    
-    #|
-    #+-----------------------------------------------------------------------------
-    def format_prototype(self, tag):
-        
-        template = string.Template("""
-        <div style='margin-left:30px;border:1px solid #ccc;'>
-        <div>
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Function:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${function_name}</p>
-            </div>
-        </div>
-        <div>
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${function_desc}</p>
-            </div>
-        </div>
-        <div style="font-size: 0.9em;">
-            <div style="margin-left: 10px; margin-top: 10px;">
-                ${function_prototype}
-                
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Params:</div>
-                    <div style="margin-left: 0px;">
-                        <table style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px; border: 0px;">
-                            ${function_params}
-                        </table>
-                    </div>
-                </div>
-                
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Returns:</div>
-                    <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${function_returns}</p>
-                </div>
-
-                ${function_example}
-                
-            </div>
-            
-        </div>
-        </div>
-        """)
-    
-        template_prototype = string.Template("""
-        <div>
-            <div style="color: #396592; font-weight: bold;">Prototype:</div>
-            <div style="font-family: courier;padding:10px;">
-                ${function_prototype}
-            </div>
-        </div>
-        """);
-
-        template_example = string.Template('''
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Example:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;">
-                        The following example demonstrates the use of this method:<br><br>
-                    </div>
-                    <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc;">
-                        ${function_example}
-                    </div>
-                </div>
-            
-        ''');
-        
-        prototype = tag["contents"]
-        
-        file = "blah"
-        function = {}
-        function["function_name"] = prototype["function_name"]
-        function["function_example"] = ''
-        function["function_prototype"] = ''
-        function["function_desc"] = ''
-        function["function_params"] = ''
-        function["function_returns"] = ''
-
-        if(prototype.has_key("function_desc")):
-            function["function_desc"] = prototype["function_desc"]
-
-        if(prototype.has_key("function_prototype")):
-            function["function_prototype"] = template_prototype.substitute(prototype)
-
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
-            
-            param_template = string.Template("""
-                        <tr>
-                            <td style="border: 0px;"><b>${param_name}</b></td>
-                            <td style="font-family: courier; border: 0px;">${param_io}</td>
-                            <td style="border: 0px;">-</td>
-                            <td style="border: 0px;">${param_desc}</td>
-                        </tr>""")
-
-            output = ''
-            for param in params:
-
-                output += param_template.substitute(param)
-
-            function["function_params"] = output
-
-        if(prototype.has_key("function_returns")):
-            function["function_returns"] = prototype["function_returns"]
-
-        if(prototype.has_key("function_example")):
-
-            example = prototype["function_example"]["parsed"]
-            language = prototype["function_example"]["language"]
-
-            example = self.format_source_code(language, example)
-            function["function_example"] = example
-            function["function_example"] = template_example.substitute(function)
-
-
-        topic = topic_t({"name"   : prototype["function_name"],
-                         "file"   : file,
-                         "indent" : 3});
-        index.append(topic)
-        
-        return template.substitute(function)
-    
-    
-
-    
     def format_table(self, source, table):
 
         html = '\n'
@@ -883,8 +748,8 @@ ${fields}+----------------------------------------------------------------------
         #    self.m_contents += self.format_checklist(tag)
         #elif(name == "image"):
         #    self.m_contents += self.format_image(tag["contents"])
-        #elif(name == "prototype"):
-        #    self.m_contents += self.format_prototype(tag)
+        elif(name == "prototype"):
+            self.m_contents += self.format_prototype(tag)
         elif(name in ("functionsummary", "typesummary")):
             WARNING("Unsupported tag %s" % name)
         elif(name in ("struct", "prototype")):

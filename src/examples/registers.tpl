@@ -4,7 +4,7 @@
 @docfilename blah_blah
 @body
 @h1 Registers
-@struct: name="blah16" description="blah blah" private="False" diagram="show:yes,align:16,bitorder:increment"
+@struct: name="blah16" description="blah blah" private="False" diagram="width:600px;show:yes,align:16,bitorder:increment"
 -- fields:
 - Field | Name          | Description                      | Attributes
 - 1x8   | serial_number | The serial number of the device  

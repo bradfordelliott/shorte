@@ -16,8 +16,8 @@ class theme():
         self.colors["shorte"] = {}
         self.colors["shorte"]["heading.1"] = color(fg="#000000")
         self.colors["shorte"]["heading.2"] = color(fg="#8ba327")
-        self.colors["shorte"]["heading.3"] = color(fg="#8ba327")
-        self.colors["shorte"]["heading.4"] = color(fg="#8ba327")
+        self.colors["shorte"]["heading.3"] = color(fg="#666")
+        self.colors["shorte"]["heading.4"] = color(fg="#aaa")
         self.colors["shorte"]["heading.5"] = color(fg="#8ba327")
         self.colors["shorte"]["heading.6"] = color(fg="#8ba327")
         
@@ -32,7 +32,10 @@ class theme():
 
         # Hyperlink Colors
         self.colors["shorte"]["hyperlink"]       = color(fg="#586a0d") #color(fg="#8ba327")
-        self.colors["shorte"]["hyperlink.hover"] = color(fg="#ccc")
+        self.colors["shorte"]["hyperlink.hover"] = color(fg="#666")
+
+        # Code Bocks
+        self.colors["shorte"]["codeblock.section"] = color(fg="#8ba327")
 
 
         dir_templates = shorte_get_startup_path() + os.path.sep + "templates"
