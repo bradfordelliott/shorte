@@ -467,6 +467,8 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'method', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
         
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Cross references don't currently work in the SQL template so we'll disable them for now
+        html.set_allow_xrefs(False)
         html.m_show_code_headers["prototype"] = True
         html.set_template_code_header(sql_template_code_header)
         html.m_wikiword_path_prefix = False
@@ -489,8 +491,7 @@ within an HTML document.
             
             for p in params:
 
-                print p
-
+                #print p
                 param = {}
                 param["type"] = p.get_type()
                 param["name"] = p.get_name()
@@ -523,13 +524,15 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'struct', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Cross references don't currently work in the SQL template so we'll disable them for now
+        html.set_allow_xrefs(False)
         html.m_wikiword_path_prefix = False
         help = html.format_struct(tag)
         
         obj = tag.contents
 
         struct = {}
-        struct["name"] = obj.name
+        struct["name"] = obj.get_name()
         struct["desc"] = self.format_textblock(obj.description)
         struct["help"] = self.sqlize(help)
         
@@ -553,6 +556,8 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'enum', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Cross references don't currently work in the SQL template so we'll disable them for now
+        html.set_allow_xrefs(False)
         html.m_wikiword_path_prefix = False
         help = html.format_enum(tag)
 

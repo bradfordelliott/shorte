@@ -1132,7 +1132,7 @@ $box_end
         elif(name == "embed"):
             print "WARNING: Skipping embed for now"
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
  
 
     def _doc_pages_to_xml(self):

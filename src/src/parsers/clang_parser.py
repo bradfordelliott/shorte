@@ -17,10 +17,12 @@ if("cygwin" in osname):
 else:
     if(osname == "darwin"):
         osname = "osx"
-    sys.path.append(shorte_get_startup_path() + "/3rdparty")
+    sys.path.insert(0, shorte_get_startup_path() + "/3rdparty")
     import clang.cindex
+    WARNING("CLANG FILE:")
+    print clang.__file__
     clang_path = os.path.normpath(shorte_get_startup_path() + '/3rdparty/clang/%s' % osname)
-    #WARNING("CLANG_PATH: %s" % clang_path)
+    WARNING("CLANG_PATH: %s" % clang_path)
     clang.cindex.Config.set_library_path(clang_path)
 
 class comment_t:
@@ -407,7 +409,7 @@ class clang_parser_t(shorte_parser_t):
                 raise Exception("Doesn't belong to this file")
                 #pass
 
-            #print 'visiting %s %s' % (cursor.kind, cursor.spelling)
+            #print 'visiting %s [%s]' % (cursor.kind, cursor.spelling)
             #tag = tag_t()
             #tag.name = "h"
             #tag.contents = "%s @%s:%d => %s" % (cursor.kind, cursor.location.file, cursor.location.line, cursor.spelling)
@@ -417,18 +419,26 @@ class clang_parser_t(shorte_parser_t):
             #tag.modifiers = {}
             #page["tags"].append(tag)
 
+            access_spec = None
+            if(cursor.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL):
+                access_spec = cursor.access_specifier
+                #"access: %d" % access_spec
+
+                
+
             if cursor.kind in (clang.cindex.CursorKind.ENUM_DECL,
                                clang.cindex.CursorKind.FUNCTION_DECL,
                                clang.cindex.CursorKind.STRUCT_DECL,
                                clang.cindex.CursorKind.MACRO_DEFINITION,
-                               clang.cindex.CursorKind.CLASS_DECL):
+                               clang.cindex.CursorKind.CLASS_DECL,
+                               clang.cindex.CursorKind.CXX_METHOD,
+                               clang.cindex.CursorKind.CONSTRUCTOR):
     
                 comment = self.query_comment(cursor)
 
                 # If the object has no comment then assume it is private
                 if(comment == None or comment.is_private()):
                     raise Exception("Assumed private function")
-
 
                 file = path
                 line = cursor.location.line
@@ -438,7 +448,7 @@ class clang_parser_t(shorte_parser_t):
                     object_name = cursor.displayname
                 if(object_name == None or len(object_name) == 0):
                     object_name = cursor.type.spelling
-
+                        
                 #if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
                 #    object_name = cursor.displayname
                 #elif(cursor.kind == clang.cindex.CursorKind.FUNCTION_DECL):
@@ -512,14 +522,18 @@ class clang_parser_t(shorte_parser_t):
                     # because they are stripped by the preprocessor
                     # print cursor.raw_comment
 
-                elif(cursor.kind == clang.cindex.CursorKind.FUNCTION_DECL):
-                    
+                elif(cursor.kind in (clang.cindex.CursorKind.FUNCTION_DECL,
+                                     clang.cindex.CursorKind.CXX_METHOD,
+                                     clang.cindex.CursorKind.CONSTRUCTOR)):
+
+
                     prototype = prototype_t()
                     object_data = prototype
                     prototype.set_name(object_name)
                     prototype.set_returns(comment.returns)
                     prototype.set_description(comment.desc, textblock=False)
                     prototype.set_description(comment.description, textblock=True)
+
 
                     if(comment.has_pseudocode()):
                         prototype.set_pseudocode(
@@ -593,6 +607,15 @@ class clang_parser_t(shorte_parser_t):
                                 p.set_io(io)
 
                     prototype.validate_params()
+                    
+                    if(cursor.kind in (clang.cindex.CursorKind.CXX_METHOD, clang.cindex.CursorKind.CONSTRUCTOR)):
+                        # Get the name of the class that this belongs to
+                        cname = cursor.lexical_parent.displayname
+                        access = cursor.access_specifier
+                        cls = self.m_engine.class_get(cname)
+                        prototype.set_class(cls)
+                        prototype.set_access_spec(access)
+                        cls.prototype_add(prototype)
 
                     tag = tag_t()
                     tag.name = "prototype"
@@ -710,9 +733,9 @@ class clang_parser_t(shorte_parser_t):
                         field.set_type(bits)
                         struct.fields.append(field)
                         
-                    struct.name = object_name 
-                    struct.desc = comment.desc
-                    struct.description = comment.description
+                    struct.set_name(object_name)
+                    struct.set_description(comment.desc, textblock=False)
+                    struct.set_description(comment.description)
                     struct.private = comment.private
                     struct.heading = comment.heading
                     struct.line = cursor.location.line
@@ -730,10 +753,27 @@ class clang_parser_t(shorte_parser_t):
                     page["tags"].append(tag)
                     
                 elif(cursor.kind == clang.cindex.CursorKind.CLASS_DECL):
-                    #print "@class: file=%s line=%d" % (file, line)
-                    #print "--name: " , cursor.type.spelling
-                    #print "--description:"
-                    #print indent_lines(comment.desc, '    ')
+
+                    cls = self.m_engine.class_get(object_name)
+                    cls.set_name(object_name)
+                    cls.set_description(comment.desc, textblock=False)
+                    cls.set_description(comment.description)
+                    cls.line = cursor.location.line
+                    cls.file = path
+
+                    print "@class: file=%s line=%d" % (file, line)
+                    print "--name: " , cursor.type.spelling
+                    print "--description:"
+                    print indent_lines(comment.desc, '    ')
+
+                    tag = tag_t()
+                    tag.name = "class"
+                    tag.contents = cls
+                    tag.line = cls.line
+                    tag.file = cls.file
+                    tag.modifiers = {}
+                    page["tags"].append(tag)
+
                     pass
     
                 #print ''

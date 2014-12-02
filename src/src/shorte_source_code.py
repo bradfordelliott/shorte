@@ -596,7 +596,7 @@ class type_t:
     def get_title(self):
         return self.name
     def set_name(self, name):
-        self.name = name
+        self.name = name.strip()
 
     def has_description(self,textblock=True):
         if(textblock == True):
@@ -939,6 +939,27 @@ class prototype_t(type_t):
         self.returns = None
         self.pseudocode = None
         self.params = None
+        self.classobj = None
+        self.access_spec = None
+
+    def has_class(self):
+        if(None != self.classobj):
+            return True
+        return False
+    def set_class(self, obj):
+        self.classobj = obj
+    def get_class(self):
+        return self.classobj
+
+    def has_access_spec(self):
+        if(None != self.access_spec):
+            return True
+        return False
+    def set_access_spec(self, spec):
+        self.access_spec = spec
+    def get_access_spec(self):
+        return self.access_spec
+
 
     def has_prototype(self):
         if(None != self.prototype):
@@ -1063,9 +1084,17 @@ class class_t(type_t):
         self.m_prototypes = {}
         self.id = class_uid
         class_uid += 1
+        self.m_types = {}
 
-    def prototype_add(self, prototype):
-        self.m_prototypes[prototype.get_prototype()] = prototype
+    def prototype_add(self, ptype):
+        print "Adding prototype %s" % ptype.get_name()
+        self.m_prototypes[ptype.get_prototype().get_unparsed()] = ptype
+
+    def types_add(self, t):
+        self.m_types[t] = t
+
+    #def prototype_add(self, category, pt):
+    #    self.m_prototypes[category][pt] = pt
 
     def __str__(self):
         output = '''Class

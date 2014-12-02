@@ -3065,12 +3065,14 @@ ${desc}
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_enum(tag)
         elif(name == "sequence"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_sequence(tag)
+        elif(name == "class"):
+            WARNING("Classes not supported in OTD documents yet")
         # These tags are not supported in OTD documents
         elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns", "gallery")):
             #print "WARNING: %s tag not supported in ODT documents" % name
             pass
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
     
 
     def _doc_pages_to_xml(self):

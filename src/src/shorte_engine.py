@@ -183,7 +183,12 @@ class engine_t:
 
     def class_get(self, name):
         if(not self.m_classes.has_key(name)):
-            return class_t()
+            WARNING("Constructing class [%s]" % name)
+            cls = class_t()
+            cls.set_name(name)
+            self.m_classes[name] = cls
+            return cls
+        WARNING("Retrieving class")
         return self.m_classes[name]
 
     def set_output_directory(self, output_dir):

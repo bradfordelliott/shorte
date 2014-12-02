@@ -11,8 +11,21 @@ This example file attempts to demonstrate how shorte manages class objects.
 -- extends: my_base_class
 -- description:
     This is a description of my class here
--- members:
+-- public.functions:
     -- my_class
+    -- method1
+-- private.functions:
+    -- method2
+    -- method3
+-- public.types:
+    -- int a
+    -- string b
+-- private.types:
+    -- int c
+    -- int d
+-- properties:
+    -- a
+    -- b
 
 @prototype
 -- name: my_class

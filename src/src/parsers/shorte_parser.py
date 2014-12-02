@@ -1278,19 +1278,19 @@ a C/C++ like define that looks like:
     
     def parse_class(self, source, modifiers):
         
-        name = self.get_attribute_as_string(modifiers, "name")
-        cls = self.m_engine.class_get(name)
-        cls.name = name
+        cname = self.get_attribute_as_string(modifiers, "name")
         
-        cls.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
-        cls.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
-        cls.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
-        cls.private = self.get_attribute_as_bool(modifiers, "private")
-        cls.file = self.get_attribute_as_string(modifiers, "file")
-        cls.line = self.get_attribute_as_int(modifiers, "line")
+        cdescription = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        cdeprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        cdeprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        cprivate = self.get_attribute_as_bool(modifiers, "private")
+        cfile = self.get_attribute_as_string(modifiers, "file")
+        cline = self.get_attribute_as_int(modifiers, "line")
         
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
+
+        cprivfunc = None
 
         for section in sections:
 
@@ -1299,10 +1299,31 @@ a C/C++ like define that looks like:
 
             elif(section.startswith("name:")):
                 source = section[5:len(section)].strip()
-                cls.name = source
+                cname = source
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
-                cls.description = self.parse_textblock(source)
+                cdescription = self.parse_textblock(source)
+            elif(section.startswith("private.functions:")):
+                source = section[18:].strip()
+                cprivfunc = source
+            elif(section.startswith("public.functions:")):
+                source = section[17:].strip()
+                cpubfunc = source
+
+        cls = self.m_engine.class_get(cname)
+        cls.set_name(cname)
+        cls.set_description(cdescription)
+        cls.deprecated = cdeprecated
+        cls.deprecated_msg = cdeprecated_msg
+        cls.private = cprivate
+        cls.file = cfile
+        cls.line = cline
+
+        if(cprivfunc):
+            WARNING("PRIVATE.FUNCTIONS")
+            funcs = cprivfunc.split("--")
+            for func in funcs:
+                print func
 
         return cls
 
@@ -1518,7 +1539,7 @@ a C/C++ like define that looks like:
         struct2.headings = {}
         
 
-        struct2.name = self.get_attribute_as_string(modifiers, "name")
+        struct2.set_name(self.get_attribute_as_string(modifiers, "name"))
         struct_desc = self.get_attribute_as_string(modifiers, "description")
 
         for section in sections:
@@ -1531,7 +1552,7 @@ a C/C++ like define that looks like:
                 self.parse_object_example(example, struct2)
 
             elif(section.startswith("name:")):
-                struct2.name = section[5:len(section)]
+                struct2.set_name(section[5:len(section)])
             
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
@@ -2007,9 +2028,13 @@ a C/C++ like define that looks like:
         p2.file = self.get_attribute_as_string(modifiers, "file")
         p2.line = self.get_attribute_as_int(modifiers, "line")
         
+        p2.set_name(self.get_attribute_as_string(modifiers, "name"))
+        
         language = "code"
         if(modifiers.has_key("language")):
             language = modifiers["language"]
+
+        class_name = None
 
         for section in sections:
             if(section != ""):
@@ -2017,7 +2042,10 @@ a C/C++ like define that looks like:
                 if(section.startswith("function:")):
                     vars["name"] = section[9:len(section)].strip()
                     p2.set_name(vars["name"])
-                
+                elif(section.startswith("name:")):
+                    vars["name"] = section[5:len(section)].strip()
+                    p2.set_name(vars["name"])
+
                 elif(section.startswith("description:")):
                     vars["desc"] = section[12:len(section)].strip()
                     p2.set_description(vars["desc"],False)
@@ -2153,10 +2181,14 @@ a C/C++ like define that looks like:
 
                 elif(section.startswith("class:")):
                     class_name = section[6:len(section)].strip()
-                    WARNING("Class name: %s" % class_name)
 
-                    cls = self.m_engine.class_get(class_name)
-                    cls.prototype_add(p2)
+        if(class_name != None):
+            WARNING("Class name: %s" % class_name)
+
+            cls = self.m_engine.class_get(class_name)
+            print p2
+            cls.prototype_add(p2)
+            
 
         # This section attempts to search the prototype of the
         # method for the type of each argument and sets the type

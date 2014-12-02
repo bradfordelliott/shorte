@@ -260,8 +260,9 @@ class cpp_parser_t(shorte_parser_t):
         
         struct2 = struct_t()
         struct2.fields = fields
-        struct2.name = struct_name
-        struct2.description = self.parse_textblock(comment["desc"])
+        struct2.set_name(struct_name)
+        struct2.set_description(comment["desc"], textblock=False)
+        struct2.set_description(self.parse_textblock(comment["desc"]), textblock=True)
         struct2.comment = comment2
         struct2.private = comment2.private
         struct2.deprecated = comment2.deprecated
