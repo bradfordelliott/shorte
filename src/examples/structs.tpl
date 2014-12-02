@@ -1,3 +1,6 @@
+@doctitle Shorte Examples
+@docsubtitle Structures
+@body
 
 @h1 Some Example Structures
 @struct: name="blah2" description="blah blah" diagram="show:yes,align:64,bitorder:decrement"

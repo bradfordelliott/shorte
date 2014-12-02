@@ -89,7 +89,7 @@ div.snippet span.str {color: #9933CC;}
 div.snippet span.def {color:red;}
 div.snippet span.mstring {color: #9933CC;}
 div.snippet span.cmt {color: #009900;}
-div.snippet span.cmttg {color: #00dd00;}
+div.snippet span.cmttg {color: #00cc00;}
 div.snippet span.ln {color: #C0C0C0;}
 
 /* Styling of text blocks */
@@ -126,7 +126,7 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
   div.snippet span.def {color:red;}
   div.snippet span.mstring {color: #9933CC;}
   div.snippet span.cmt {color: #009900;}
-  div.snippet span.cmttg {color: #00dd00;}
+  div.snippet span.cmttg {color: #00cc00;}
   div.snippet span.ln {color: #C0C0C0;}
 
   /* Styling of text blocks */

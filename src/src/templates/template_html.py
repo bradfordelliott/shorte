@@ -329,6 +329,7 @@ class template_html_t(template_t):
 
         self.m_template_code_header = template_code_header
 
+        self.m_allow_xrefs = True
         self.m_xrefs = []
 
     def is_inline(self):
@@ -1155,7 +1156,11 @@ class template_html_t(template_t):
         
         file = "blah"
         function = {}
-        function["name"] = prototype.get_name()
+
+        if(prototype.has_class()):
+            function["name"] = prototype.get_class().get_name() + "::" + prototype.get_name()
+        else:
+            function["name"] = prototype.get_name()
         function["example"] = ''
         function["prototype"] = ''
         function["desc"] = ''
@@ -1341,22 +1346,36 @@ class template_html_t(template_t):
                 <div class='cb_title'>Description:</div>
                 <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
             </div>
-            <div class='prototype' style="font-size: 0.9em;">
-                <div style="margin-left: 10px; margin-top: 10px;">
-                </div>
+            <div style="margin-left: 10px;">
+                <div class='cb_title'>Public Functions:</div>
+                $public_prototypes
+            </div>
+            <div style="margin-left: 10px;">
+                <div class='cb_title'>Public Types:</div>
+                $public_types
             </div>
         </div>
         """)
     
         obj = tag.contents
-        WARNING("Printing class")
-        print obj
+
+        prototypes = '<ul>'
+        for p in obj.m_prototypes:
+            try:
+                prototypes += "<li>%s</li>" % obj.m_prototypes[p].get_prototype().get_unparsed()
+            except:
+                prototypes += "<li>%s</li>" % p
+
+        prototypes += '</ul>'
 
         return template.substitute({
             "background" : "",
             "xref"       : "",
             "name" : obj.get_name(),
             "private" : "",
+            "public_prototypes" : prototypes,
+            "public_types" : "",
+            "private_prototypes" : prototypes,
             "desc" : self.format_textblock(obj.get_description())})
     
     def format_testcase(self, tag):
@@ -1743,11 +1762,39 @@ within an HTML document.
             return "<img src='%s' title='%s'></img>" % (img_src,title)
 
         return img_src
+
+    def set_allow_xrefs(self, allow):
+        '''This method is used to control where source code cross reference links
+           are shown in the generated document. This currently doesn't work for
+           templates like SQL so it can be disabled
+
+           @param allow [I] - Allow cross references
+        '''
+        self.m_allow_xrefs = allow
+        
+    def get_allow_xrefs(self):
+        '''This method determines whether source code cross reference links
+           are show show in the generated document. This currently doesn't work
+           for templates like SQL so it can be disabled.
+
+           @return True if cross references are allowed and False if they shouldn't
+                   be displayed.
+           '''
+        if(self.is_inline()):
+            return False
+        return self.m_allow_xrefs
             
     def get_xref(self, path, line):
+        '''This method returns a cross reference link for the specified document
+
+           @param path [I] - The path to the source file
+           @param line [I] - The line number in the source file
+
+           @return The cross reference link
+        '''
 
         # Cross references not currently supported in inline HTML documents
-        if(self.is_inline()):
+        if(not self.get_allow_xrefs()):
             return ''
 
         if(len(path) == 0):

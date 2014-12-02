@@ -159,6 +159,7 @@ tests:
 	make test_templates
 	make test_registers
 	make test_comments
+	make test_classes
 
 THEME:=shorte
 
@@ -232,7 +233,9 @@ test_clang:
 	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
 
 test_classes:
-	${python} shorte.py -f "examples/classes.tpl" -t "${THEME}" -o build-output/classes -p "html"
+	${python} shorte.py -f "examples/classes.cpp" -x clang -t "${THEME}" -o build-output/class_parser -p "shorte"
+	${python} shorte.py -f "examples/classes.cpp" -x clang -t "${THEME}" -o build-output/class_parser -p "html"
+#	${python} shorte.py -f "examples/classes.tpl" -t "${THEME}" -o build-output/classes -p "html"
 
 test_doxygen:
 	doxygen -s examples/doxy.cfg

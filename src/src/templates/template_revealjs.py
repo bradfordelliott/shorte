@@ -182,7 +182,7 @@ class template_revealjs_t(template_html_t):
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
 
         #elif(tag == "pycairo"):

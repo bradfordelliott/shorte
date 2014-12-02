@@ -307,6 +307,38 @@ $example
 
         return example
 
+    def format_class(self, tag):
+        cls = tag.contents
+        
+        template = string.Template('''$title
+@class: file="${file}" line="${line}"
+--name: $name
+--description:
+$desc
+''')
+        
+        add_heading = shorte_get_config("shorte", "header_add_to_prototype")
+        if(tag.heading == None and ("None" != add_heading)):
+            title = '@%s %s' % (add_heading,cls.get_name())
+        else:
+            title = ''
+        title = ''
+
+        vars = {}
+        vars["title"] = title
+        vars["name"] = cls.get_name()
+        vars["desc"] = trim_blank_lines(cls.get_description(textblock=False))
+        vars["file"] = cls.get_file()
+        vars["line"] = cls.get_line()
+        
+        topic = topic_t({"name"   : cls.get_name(),
+                         "file"   : tag.file, 
+                         "indent" : 3})
+
+        index.append(topic)
+        
+        return template.substitute(vars)
+    
 
     def format_prototype(self, tag):
 
@@ -330,6 +362,7 @@ $pseudocode
 $seealso
 $deprecated
 $heading
+$class
 ''')
         add_heading = shorte_get_config("shorte", "header_add_to_prototype")
         if(tag.heading == None and ("None" != add_heading)):
@@ -350,6 +383,7 @@ $heading
         function["heading"] = ''
         function["file"] = prototype.get_file()
         function["line"] = prototype.get_line()
+        function["class"] = ''
 
         if(prototype.has_prototype()):
             function["prototype"] = '''
@@ -399,6 +433,9 @@ $heading
 ''' % (self.format_textblock(prototype.get_deprecated_msg()))
         else:
             function["deprecated"] = ''
+
+        if(prototype.has_class()):
+            function['class'] = prototype.get_class().get_name()
         
 # DEBUG BRAD: Should I continue supporting this?
 #        if(prototype.has_key("heading") and prototype["heading"] != ""):
@@ -467,6 +504,8 @@ $heading
             return
         elif(name == "prototype"):
             self.m_contents.append(self.format_prototype(tag))
+        elif(name == "class"):
+            self.m_contents.append(self.format_class(tag))
         elif(name == "enum"):
             self.m_contents.append(self.format_enum(tag))
         elif(name == "struct"):
