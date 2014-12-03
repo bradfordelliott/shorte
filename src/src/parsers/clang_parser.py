@@ -19,10 +19,10 @@ else:
         osname = "osx"
     sys.path.insert(0, shorte_get_startup_path() + "/3rdparty")
     import clang.cindex
-    WARNING("CLANG FILE:")
-    print clang.__file__
+    #WARNING("CLANG FILE:")
+    #print clang.__file__
     clang_path = os.path.normpath(shorte_get_startup_path() + '/3rdparty/clang/%s' % osname)
-    WARNING("CLANG_PATH: %s" % clang_path)
+    #WARNING("CLANG_PATH: %s" % clang_path)
     clang.cindex.Config.set_library_path(clang_path)
 
 class comment_t:

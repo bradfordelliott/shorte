@@ -145,8 +145,18 @@ if(output_dir == None):
     output_dir = "build-output"
 
 if(options.about):
-    version_string = "<<VERSION>>"
-    print "Shorte Version %s" % version_string
+    handle = open('version.inc', 'rt')
+    contents = handle.read()
+    contents = contents.replace("version \:= ", "")
+    matches = re.search("version := ([0-9]+\.[0-9]+\.[0-9]+)", contents)
+    if(matches != None):
+        version = matches.groups()[0]
+        print "Shorte Version:"
+        print "==============="
+        print version
+    else:
+        FATAL("Version not found")
+    handle.close()
     sys.exit(0)
 
 if(options.resize):
