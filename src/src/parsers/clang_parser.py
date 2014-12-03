@@ -351,36 +351,57 @@ class clang_parser_t(shorte_parser_t):
         self.m_file_src = handle.read()
         handle.close()
 
+        WARNING("Loading %s" % source_file)
+
         # At least under cygwin there is no difference with or without
         # this defined
-        options = clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | clang.cindex.TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION
+        options = clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | clang.cindex.TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
 
         # Add the list of include files
         includes = self.m_engine.get_includes()
         args = []
         args.append('-xc++')
+        #args.append('-xc')
+        #args.append('-nostdlib')
+        #args.append('-nostdinc')
+        ##args.append('--help')
+        #args.append('-nostdinc++')
+        #args.append('-nobuiltininc')
+        #args.append('-mrelax-all')
+
+        # If we're on Linux we might need this to get things
+        # to work
+        #args.append('-I/home/belliott/projects/shorte/src/3rdparty/clang/include')
+        #args.append('-I/usr/include')
         for include in includes:
             args.append("-I%s" % include)
+        
+        #args.append('-w')
+        #args.append('-Xanalyzer')
+        #args.append('-analyzer-disable-all-checks')
 
         # Add the list of preprocessor defines.
         defines = self.m_engine.get_macros()
         for define in defines:
             args.append("-D%s=%s" % (define, defines[define]))
 
+        #WARNING("ARGS")
+        #print ' '.join(args)
+
         #args = ['-DCS_LITTLE_ENDIAN', '-Imodules', '-Iplatform']
         tu = self.cindex.parse(source_file, args=args, options=options)
 
         for diag in tu.diagnostics:
             if(diag.severity >= 3):
-                print "Error:"
+                print "CLANG Parser Error:"
                 print "  severity: %d" % diag.severity
                 print "  location: %s @ %d" % (diag.location.file, diag.location.line)
                 print "  message:  %s" % diag.spelling
                 #print diag.severity
                 #print diag.location
                 #print diag.spelling
-                #print diag.option
-                FATAL("Parse error, cannot continue")
+                print diag.option
+                ERROR("Parse error parsing %s" % diag.location.file)
             elif(diag.severity == 2):
                 message  = "CLANG Parser Warning\n"
                 message += "  severity: %d\n" % diag.severity
@@ -399,6 +420,7 @@ class clang_parser_t(shorte_parser_t):
         enums = {}
         
         try:
+            #print 'visiting %s [%s]' % (cursor.kind, cursor.spelling)
            
             #raise Exception("Doing nothing for now")
             # Skip anything like global constants that don't belong to
@@ -409,7 +431,6 @@ class clang_parser_t(shorte_parser_t):
                 raise Exception("Doesn't belong to this file")
                 #pass
 
-            #print 'visiting %s [%s]' % (cursor.kind, cursor.spelling)
             #tag = tag_t()
             #tag.name = "h"
             #tag.contents = "%s @%s:%d => %s" % (cursor.kind, cursor.location.file, cursor.location.line, cursor.spelling)
@@ -420,11 +441,15 @@ class clang_parser_t(shorte_parser_t):
             #page["tags"].append(tag)
 
             access_spec = None
-            if(cursor.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL):
-                access_spec = cursor.access_specifier
-                #"access: %d" % access_spec
 
-                
+            # access_specifier is not available in older versions of clang (3.4 or older)
+            # so we'll wrapper it in an catch block to prevent it from bombing out.
+            try:
+                if(cursor.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL):
+                    access_spec = cursor.access_specifier
+                    #"access: %d" % access_spec
+            except:
+                WARNING("This version of clang is too old, can't get access specifiers")
 
             if cursor.kind in (clang.cindex.CursorKind.ENUM_DECL,
                                clang.cindex.CursorKind.FUNCTION_DECL,
@@ -611,10 +636,17 @@ class clang_parser_t(shorte_parser_t):
                     if(cursor.kind in (clang.cindex.CursorKind.CXX_METHOD, clang.cindex.CursorKind.CONSTRUCTOR)):
                         # Get the name of the class that this belongs to
                         cname = cursor.lexical_parent.displayname
-                        access = cursor.access_specifier
                         cls = self.m_engine.class_get(cname)
                         prototype.set_class(cls)
-                        prototype.set_access_spec(access)
+                        
+                        # access_specifier is only available in newer versions of clang (> 3.4)
+                        # so we'll trap the error here.
+                        try:
+                            access = cursor.access_specifier
+                            prototype.set_access_spec(access)
+                        except:
+                            WARNING("This version of clang is too old, can't get access specifiers")
+
                         cls.prototype_add(prototype)
 
                     tag = tag_t()
@@ -799,7 +831,7 @@ class clang_parser_t(shorte_parser_t):
             if(len(object_name) == 0):
                 object_name = cursor.type.spelling
 
-            #print "SKIPPING %s" % object_name
+            #WARNING("SKIPPING %s" % object_name)
             #traceback.print_exc()
             #sys.exc_info()
             #WARNING(str(e))

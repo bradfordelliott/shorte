@@ -63,6 +63,9 @@ cairo_plugin:
 	cp version.inc ${cairo_path}/.
 	cd ${cairo_path} && make
 
+clang_plugin_rh6:
+	cd 3rdparty/clang && cp linux/rh6/* .
+
 checkout_vendor_templates:
 	rm -rf vendor_templates
 	mkdir vendor_templates

@@ -1,3 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+
+/** This is a test function
+ *
+ * @return Just junk for now
+ */
+int test(void)
+{
+    return 0;
+}
+
 
 /**
  * This is my example class
