@@ -334,6 +334,22 @@ class template_html_t(template_t):
 
     def is_inline(self):
         return self.m_inline
+    def get_is_inline(self):
+        '''This method is used to determine whether the template is
+           in inline HTML mode or normal mode.
+
+           @return True if in inline mode, False otherwise
+        '''
+        return self.m_inline
+
+    def set_is_inline(self, inline):
+        '''This method is called to control whether this is an inline
+           HTML document. This controls how images are managed
+
+           @param inline [I] - True to set into inline mode, False
+                               to set to normal mode.
+        '''
+        self.m_inline = inline
 
     def set_template_code_header(self, template):
         self.m_template_code_header = template

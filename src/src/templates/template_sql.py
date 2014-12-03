@@ -467,6 +467,8 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'method', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
         
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Make sure to inline images in the SQL template
+        html.set_is_inline(True)
         # Cross references don't currently work in the SQL template so we'll disable them for now
         html.set_allow_xrefs(False)
         html.m_show_code_headers["prototype"] = True
@@ -524,6 +526,8 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'struct', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Make sure to inline images in the SQL template
+        html.set_is_inline(True)
         # Cross references don't currently work in the SQL template so we'll disable them for now
         html.set_allow_xrefs(False)
         html.m_wikiword_path_prefix = False
@@ -556,6 +560,8 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'enum', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Make sure to inline images in the SQL template
+        html.set_is_inline(True)
         # Cross references don't currently work in the SQL template so we'll disable them for now
         html.set_allow_xrefs(False)
         html.m_wikiword_path_prefix = False

@@ -2129,7 +2129,13 @@ ${desc}
 
         #print "format_note, image=%s, label=%s\n" % (image, label)
 
+        # DEBUG BRAD: the @note is having an issue when you use an inline
+        #             note in source code snippets as if you end up with
+        #             a cross reference it ends up causing a corrupt document
+        save_wikify = self.m_wikify
+        self.m_wikify = False
         source = self.format_textblock(tag, style="shorte_standard")
+        self.m_wikify = save_wikify
 
         xml = '''
 <text:p text:style-name="shorte_standard">

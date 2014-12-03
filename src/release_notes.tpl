@@ -6,6 +6,13 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.69 (Dec 3, 2014)
+Bug fix release that addresses the following issues:
+- Issue with wikification in the @note keyword in source
+  code cross references. This issue needs to be debugged
+- SQL template doesn't inline images so they don't show
+  up properly.
+
 @h3 Version 1.0.68 (Dec 3, 2014)
 This is the first release attempting to remove any vendor specific
 templates and allow them to be included from a different source. Also
