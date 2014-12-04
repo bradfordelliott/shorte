@@ -1402,11 +1402,11 @@ a C/C++ like define that looks like:
                             else:
                                 col += row[i]
 
-	                elif(state == STATE_INLINE_STYLING):
-	                    col += row[i]
+                        elif(state == STATE_INLINE_STYLING):
+                            col += row[i]
 
-		            if(row[i] == '}'):
-                            	state = states.pop()
+                            if(row[i] == '}'):
+                                state = states.pop()
 
                         elif(state == STATE_ESCAPE):
                             col += row[i]
@@ -1539,12 +1539,29 @@ a C/C++ like define that looks like:
                                 new_field["attrs"] = []
 
                                 if(new_width > 1):
-                                    new_field["attrs"].append("%d - %d" % (new_start, new_end))
+                                    attr = {}
+                                    attr["text"] = "%d - %d" % (new_start, new_end)
+                                    new_field["attrs"].append(attr)
                                 else:
-                                    new_field["attrs"].append("%d" % (new_start))
+                                    attr = {}
+                                    attr["text"] = '%d' % (new_start)
+                                    new_field["attrs"].append(attr)
                                         
-                                new_field["attrs"].append("Reserved")
-                                new_field["attrs"].append("Automatically generated")
+                                new_field["attrs"].append({"text" : "Reserved"})
+                                new_field["attrs"].append({"text" : "Automatically generated"})
+                                
+                                # If the structure has alternate headings then
+                                # add the extra column so that the reserved field
+                                # spans the entire table. There is probably a better
+                                # way to do this.
+                                if(struct2.has_headings()):
+                                    num_headings = len(struct2.get_headings().keys())
+
+                                    h = 3
+                                    while(h < num_headings):
+                                        new_field["attrs"].append({"text" : ""})
+                                        h += 1
+
                                 new_field["is_reserved"] = True
                                 new_field["is_header"] = False
                                 new_field["is_title"] = False
@@ -1553,6 +1570,8 @@ a C/C++ like define that looks like:
                                 new_field["is_spacer"] = False
                                 new_field["is_array"] = False
                                 new_field["type"] = ""
+                                new_field["textblock"] = "Reserved"
+                                new_field["text"] = "Reserved"
                                 struct["fields"].append(new_field)
                                 struct2.fields.append(new_field)
 
@@ -2295,7 +2314,7 @@ else:
             modifiers["treat_fields_as"] = "bits"
             (struct,struct2) = self.parse_struct(data, modifiers)
             tag.contents = struct2
-            tag.name = "struct"
+            tag.name = "register"
 
         elif(name in ("ol", "ul")):
             tag.contents = self.parse_list(data, modifiers)

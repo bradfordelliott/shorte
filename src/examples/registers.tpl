@@ -4,13 +4,13 @@
 @docfilename blah_blah
 @body
 @h1 Registers
-@struct: name="blah16" description="blah blah" private="False" diagram="show:yes,align:16,bitorder:increment"
+@register: name="blah16" description="blah blah" private="False" diagram="show:yes,align:16,bitorder:increment"
 -- fields:
 - Field | Name          | Description                      | Attributes
-- 1x8   | serial_number | The serial number of the device  
+- 0-5   | serial_number | The serial number of the device  
                           with some more description       | customer="CORTINA"
-- 1x2   | blah          | A random field                   |
-- 1x6   | blah2         | A random field                   |
+- 7     | blah          | A random field                   |
+- 8-15  | blah2         | A random field                   |
 
 @struct: name="blah16d" description="blah blah" private="False" diagram="show:yes,align:16,bitorder:decrement"
 -- fields:

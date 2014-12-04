@@ -1943,18 +1943,20 @@ within an HTML document.
         
     
     # Called for format a structure for HTML output 
-    def format_struct(self, source, struct):
+    def format_struct(self, tag, type="struct"):
         '''This method is called to format the contents of an @struct tag
            as an HTML entity.
 
            @param self [I] - The instance of the formatter class
-           @param source [I] - The original source of the structure
-           @param struct [I] - The object defining the structure.
+           @param tag  [I] - The tag to parse
+           @param type [I] - The type of the tagged data (struct or register)
 
            @return The HTML output of the structure
         '''
         
-        
+        struct = tag.contents
+        source = tag.source
+
         html = ""
         
         html += "<table class='bordered'>\n"
@@ -1963,7 +1965,13 @@ within an HTML document.
             img = "<img src='css/lock.png'></img>"
         else:
             img = ''
-        html += "<tr><th colspan='%d'>%sStructure Fields</th></tr>\n" % (struct.max_cols, img)
+
+        if(type == "struct"):
+            label = "Structure"
+        else:
+            label = "Register"
+
+        html += "<tr><th colspan='%d'>%s%s Fields</th></tr>\n" % (struct.max_cols, label, img)
        
 
         # If the structure has an image associated with it then
@@ -2059,7 +2067,7 @@ within an HTML document.
         style = ''
         html = string.Template('''
 <div class='bordered' $style>
-<div style='background-color:#ccc;padding:10px;'><b>Struct:</b> ${name}$img</div>
+<div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img</div>
 <div>
     <div style="margin-left: 10px;">
         <div style="color: #396592; font-weight: bold;">Description:</div>
@@ -2074,6 +2082,7 @@ within an HTML document.
 </div>
 ${example}
 </div><br/>''').substitute({
+    "label"  : label,
     "style"  : style,
     "img"    : img,
     "name"   : struct.name,
@@ -2696,7 +2705,9 @@ $href_end
         elif(name == "table"):
             self.m_contents.append(self.format_table(tag.source, tag.contents))
         elif(name == "struct"):
-            self.m_contents.append(self.format_struct(tag.source, tag.contents))
+            self.m_contents.append(self.format_struct(tag))
+        elif(name == "register"):
+            self.m_contents.append(self.format_struct(tag, type="register"))
         elif(name == "define"):
             self.m_contents.append(self.format_define(tag))
         elif(name == "ul"):

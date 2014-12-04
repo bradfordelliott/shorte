@@ -1640,19 +1640,22 @@ class template_odt_t(template_t):
     #|    None.
     #|
     #+-----------------------------------------------------------------------------
-    def format_struct(self, source, struct, style_name="default"):    
+    def format_struct(self, tag, style_name="default", type="struct"):    
         '''This method is called to format a structure definition
            into a block of open office text
 
            @param self       [I] - The class instance
-           @param source     [I] - The original source text
-           @param struct     [I] - The structure object as a dictionary
+           @param tag        [I] - The tag being formatted
            @param style_name [I] - The open office style
+           @param type       [I] - The type of object (struct or register)
 
            @return The XML defining the structure
         '''
         
         xml = ''
+
+        source = tag.source
+        struct = tag.contents
         
         xml += self.format_textblock(struct.description)
         
@@ -1733,7 +1736,7 @@ class template_odt_t(template_t):
             example = self.format_source_code(language, example)
 
             xml += string.Template('''
-            <text:p text:style-name="${param_style}">The following example demonstrates the usage of this method:</text:p>
+            <text:p text:style-name="${param_style}">The following example demonstrates the usage of this object:</text:p>
             <text:p text:style-name="${param_style}"></text:p>
             ${example}
             <text:p text:style-name="${param_style}"></text:p>
@@ -2992,8 +2995,8 @@ class template_odt_t(template_t):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_checklist(tag)
         elif(name == "image"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_image(tag.contents)
-        elif(name == "struct"):
-            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag.source, tag.contents)
+        elif(name in ("struct", "register")):
+            self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_struct(tag, type="name")
         elif(name == "define"):
             self.m_sections[0]["Headings"][self.m_header_id]["Content"] += self.format_define(tag)
         elif(name == "prototype"):

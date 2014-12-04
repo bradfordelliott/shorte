@@ -113,7 +113,7 @@ tag:
 	git tag SHORTE_VERSION_${version_str}
 	
 
-tests:
+test_cases:
 	rm -rf build-output
 	make test_hello
 	make test_headings
@@ -272,7 +272,7 @@ test_inkscape:
 	python shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape
 
 test_registers:
-	python shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers
+	python shorte.py -f examples/registers.tpl -p "html+pdf" -t shorte -o build-output/registers
 
 test_junk:
 #	python shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
