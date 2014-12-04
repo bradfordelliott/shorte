@@ -156,10 +156,10 @@ class template_shorte_t(template_t):
 
         template = string.Template("""
 $heading
-@enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" description='''
+@enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" file="$file" line="$line" description='''
 $description
 '''
--- values:
+--values:
 - Enum Name | Enum Value | Enum Description
 $values
 """)
@@ -178,18 +178,22 @@ $values
         vars["private"] = enum.private
         vars["deprecated"] = enum.deprecated
         vars["deprecated_msg"] = enum.deprecated_msg
+        vars["file"] = enum.get_file()
+        vars["line"] = enum.get_line()
 
         return template.substitute(vars)
 
     def format_define(self, tag):
 
         template = string.Template("""
-# Start of define
 $heading
-@define: name="$name" value="$value" private="$private" deprecated="$deprecated" description='''
-$description
-'''
-#End of define
+@define: private="$private" deprecated="$deprecated" file="$file" line="$line"
+--name:
+    $name
+--value:
+    $value
+--description:
+    $description
 """)
 
         vars = {}
@@ -207,13 +211,15 @@ $description
         vars["name"] = define.name
         vars["heading"] = heading
         val = self.format_textblock(define.description)
-        vars["description"] = trim_leading_indent(val)
+        vars["description"] = indent_lines(trim_leading_indent(val), '    ')
             
         val = define.value
         val = re.sub("\|", "\\\\\\|", val)
         vars["value"] = escape_string(val)
         vars["private"] = define.private
         vars["deprecated"] = define.deprecated
+        vars["file"] = define.get_file()
+        vars["line"] = define.get_line()
 
         return template.substitute(vars)
 
@@ -222,13 +228,14 @@ $description
     def format_struct(self, tag):
         
         self.m_num_structs += 1
-
+        
         struct = tag.contents
 
-        title = struct.name
+        title = struct.get_name()
         title = re.sub("[ \n]+", " ", title).strip()
 
-        caption = self.format_textblock(struct.description)
+
+        caption = self.format_textblock(struct.get_description())
 
         values = ''
 
@@ -240,22 +247,23 @@ $description
         fields = "fields"
         attributes = "attrs"
 
-        for row in struct.fields:
+        for field in struct.get_fields():
 
-            bits = row[attributes][0]["text"]
-            name = row[attributes][1]["text"]
-            desc = row[attributes][2]["text"]
-            desc = desc.replace("#", "\#")
-
-            values += '''- %s | %s | %s
+            bits = field.get_type() #field.get_bits()
+            name = field.get_name()
+            desc = indent_lines(self.format_textblock(field.get_description()), '    ')
+            
+            values += '''- %s | %s |\n%s
 ''' % (bits, name, desc)
 
         template = string.Template("""
 $heading
-@struct: name="$name" private="$private" deprecated="$deprecated" description='''
+@struct: private="$private" deprecated="$deprecated" file="$file" line="$line"
+--name:
+$name
+--description:
 $description
-'''
--- fields:
+--fields:
 - Type | Name | Description
 $values
 $example
@@ -279,10 +287,12 @@ $example
         vars["name"] = title
         vars["parent"] = parent
         vars["heading"] = heading
-        vars["description"] = caption
+        vars["description"] = indent_lines(caption, '    ')
         vars["values"] = values
         vars["deprecated"] = "False"
         vars["private"] = "False"
+        vars["file"] = struct.get_file()
+        vars["line"] = struct.get_line()
 
         return template.substitute(vars)
 
@@ -291,12 +301,44 @@ $example
 
         if(obj.example != None):
             example = '''
--- example:
+--example:
 %s
-''' % self.format_source_code(obj.example["unparsed"])
+''' % self.format_source_code(obj.example.get_unparsed())
 
         return example
 
+    def format_class(self, tag):
+        cls = tag.contents
+        
+        template = string.Template('''$title
+@class: file="${file}" line="${line}"
+--name: $name
+--description:
+$desc
+''')
+        
+        add_heading = shorte_get_config("shorte", "header_add_to_prototype")
+        if(tag.heading == None and ("None" != add_heading)):
+            title = '@%s %s' % (add_heading,cls.get_name())
+        else:
+            title = ''
+        title = ''
+
+        vars = {}
+        vars["title"] = title
+        vars["name"] = cls.get_name()
+        vars["desc"] = trim_blank_lines(cls.get_description(textblock=False))
+        vars["file"] = cls.get_file()
+        vars["line"] = cls.get_line()
+        
+        topic = topic_t({"name"   : cls.get_name(),
+                         "file"   : tag.file, 
+                         "indent" : 3})
+
+        index.append(topic)
+        
+        return template.substitute(vars)
+    
 
     def format_prototype(self, tag):
 
@@ -306,98 +348,106 @@ $example
        
         template = string.Template('''
 $title
-@prototype
--- function:
+@prototype: file="${file}" line="${line}"
+--function:
     $name
 $prototype
--- description:
+--description:
 $desc
 $params
--- returns:
+--returns:
     $returns
 $example
 $pseudocode
 $seealso
 $deprecated
 $heading
+$class
 ''')
         add_heading = shorte_get_config("shorte", "header_add_to_prototype")
         if(tag.heading == None and ("None" != add_heading)):
-            title = '@%s %s' % (add_heading,prototype["name"])
+            title = '@%s %s' % (add_heading,prototype.get_name())
         else:
             title = ''
         title = ''
 
         function = {}
         function["title"] = title
-        function["name"] = prototype["name"]
+        function["name"] = prototype.get_name()
         function["example"] = ''
         function["prototype"] = ''
-        function["desc"] = trim_blank_lines(prototype["desc"])
+        function["desc"] = trim_blank_lines(prototype.get_description(textblock=False))
         function["params"] = ''
-        function["returns"] = prototype["returns"]
+        function["returns"] = prototype.get_returns()
         function["pseudocode"] = ''
         function["heading"] = ''
+        function["file"] = prototype.get_file()
+        function["line"] = prototype.get_line()
+        function["class"] = ''
 
-        if(prototype.has_key("prototype")):
+        if(prototype.has_prototype()):
             function["prototype"] = '''
--- prototype:
+--prototype:
     %s
-''' % prototype["prototype"]["unparsed"]
+''' % prototype.get_prototype().get_unparsed()
 
-        if(prototype.has_key("params")):
+        if(prototype.has_params):
             output = ''
-            params = prototype["params"]
+            params = prototype.get_params()
             
             for param in params:
 
-                output += '''-- %s | %s | %s\n    ''' % (param["name"], param["io"], param["desc"])
+                output += '''-- %s | %s | %s\n    ''' % (param.get_name(), param.get_io(), param.get_description(textblock=False))
 
 
             function["params"] = '''
--- params:
+--params:
     %s
 ''' % output
 
 
-        if(prototype.has_key("example")):
+        if(prototype.has_example()):
             import src.shorte_source_code
             func = src.shorte_source_code.prototype_t()
-            func.example = prototype["example"]
+            func.example = prototype.get_example()
             function["example"] = self.format_object_example(func)
         
-        if(prototype.has_key("pseudocode")):
+        if(prototype.has_pseudocode()):
             function["pseudocode"] = '''
--- pseudocode:
+--pseudocode:
 %s
-''' % self.format_source_code(prototype["pseudocode"]["unparsed"])
+''' % self.format_source_code(prototype.get_pseudocode().get_unparsed())
 
-        if(prototype.has_key("see_also") and prototype["see_also"] != None):
+        if(prototype.has_see_also()):
             function["seealso"] = '''
--- see also:
+--see:
 %s
-''' % (prototype["see_also"])
+''' % (prototype.get_see_also())
         else:
             function["seealso"] = ''
         
-        if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
+        if(prototype.get_deprecated()):
             function["deprecated"] = '''
--- deprecated:
+--deprecated:
 %s
-''' % (prototype["deprecated_msg"])
+''' % (self.format_textblock(prototype.get_deprecated_msg()))
         else:
             function["deprecated"] = ''
-        
-        if(prototype.has_key("heading") and prototype["heading"] != ""):
-            function["heading"] = '''
--- heading:
-%s
-''' % (prototype["heading"])
-        else:
-            function["heading"] = ''
 
-        topic = topic_t({"name"   : prototype["name"],
-                         "file"   : file,
+        if(prototype.has_class()):
+            function['class'] = prototype.get_class().get_name()
+        
+# DEBUG BRAD: Should I continue supporting this?
+#        if(prototype.has_key("heading") and prototype["heading"] != ""):
+#            function["heading"] = '''
+#-- heading:
+#%s
+#''' % (prototype["heading"])
+#        else:
+#            function["heading"] = ''
+
+        topic = topic_t({"name"   : prototype.get_name(),
+                         "file"   : tag.file, 
                          "indent" : 3})
 
         index.append(topic)
@@ -405,18 +455,19 @@ $heading
         return template.substitute(function)
 
     def format_header(self, tag):
-
-        output = "@%s" % tag.name
-        if(tag.modifiers):
-            output += ": %s\n" % tag.modifiers
+        
+        output = "@%s" % tag.get_name()
+        if(tag.has_modifiers()):
+            output += ": %s\n" % tag.get_modifiers_as_string()
         else:
             output += " "
-        output += tag.contents.strip() + "\n"
 
-        #print "HEADER"
-        #print "  name: [%s]" % tag.name
-        #print "  data: [",  tag.contents , "]"
-        #print "  output: %s" % output
+        heading = tag.get_contents().strip()
+
+        if(heading.startswith("@")):
+            output += "\\"
+
+        output += heading + "\n"
 
         return output
 
@@ -453,6 +504,8 @@ $heading
             return
         elif(name == "prototype"):
             self.m_contents.append(self.format_prototype(tag))
+        elif(name == "class"):
+            self.m_contents.append(self.format_class(tag))
         elif(name == "enum"):
             self.m_contents.append(self.format_enum(tag))
         elif(name == "struct"):

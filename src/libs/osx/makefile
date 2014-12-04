@@ -1,9 +1,9 @@
 SHELL:=/bin/bash
 gcc:=gcc
 g++:=g++
-python:=/usr/bin/python
-python_config:=/usr/bin/python-config
-swig:=/usr/local/bin/swig
+python:=${PATH_PYTHON}/python
+python_config:=${PATH_PYTHON}/python-config
+swig:=${PATH_SWIG}
 
 args:=  -fPIC -Wall -I. -Iplatform -I/opt/local/include/cairo
 

@@ -91,6 +91,12 @@ class parser_t:
         if(attributes.has_key(key)):
             return attributes[key]
         return ""
+
+    def get_attribute_as_int(self, attributes, key):
+        if(attributes.has_key(key)):
+            val = int(attributes[key], 10)
+            return val
+        return 0
     
     def strip_indent(self, input, indent):
         
@@ -228,46 +234,63 @@ class parser_t:
         item_indent = 0
         #print "PARSING LIST: [%s]" % source
 
+        STATE_NORMAL = 0
+        STATE_INLINE_FORMATTING = 1
+
+        state = STATE_NORMAL
+
         for i in range(0, len(source)):
 
-            if(source[i] in ('-')):
+            if(state == STATE_INLINE_FORMATTING):
+                if(source[i] == '}'):
+                    state = STATE_NORMAL
 
-                # Look backwards till the first newline
-                # to ensure this is a list item and not
-                # a dash between two words:
-                j = i-1
-                is_list_item = True
-                while(j > 0):
-                    if(source[j] == "\n"):
-                        break
-                    elif(source[j] != " "):
-                        is_list_item = False
-                    j -= 1
-
-                if(not is_list_item):
-                    item.append(source[i])
-                    continue
-
-                # Output the last item if it exists
-                if(len(item) != 0):
-                    litem = list_item_t()
-                    litem.set_text(''.join(item))
-                    litem.indent = item_indent
-                    items.append(litem)
-                item = []
-
-                # Figure out the indent level of this item
-                item_indent = 0
-                j = i
-                while(j >= 0):
-                    if(source[j] == '\n'):
-                        break
-                    j -= 1
-                    item_indent += 1
-                
-
-            else:
                 item.append(source[i])
+            
+            elif(state == STATE_NORMAL):
+                if(source[i] == '@' and source[i+1] == '{'):
+                    item.append(source[i])
+                    state = STATE_INLINE_FORMATTING
+                    continue
+                
+                elif(source[i] in ('-')):
+
+                    # Look backwards till the first newline
+                    # to ensure this is a list item and not
+                    # a dash between two words:
+                    j = i-1
+                    is_list_item = True
+                    while(j > 0):
+                        if(source[j] == "\n"):
+                            break
+                        elif(source[j] != " "):
+                            is_list_item = False
+                        j -= 1
+
+                    if(not is_list_item):
+                        item.append(source[i])
+                        continue
+
+                    # Output the last item if it exists
+                    if(len(item) != 0):
+                        litem = list_item_t()
+                        litem.set_text(''.join(item))
+                        litem.indent = item_indent
+                        items.append(litem)
+                    item = []
+
+                    # Figure out the indent level of this item
+                    item_indent = 0
+                    j = i
+                    while(j >= 0):
+                        if(source[j] == '\n'):
+                            break
+                        j -= 1
+                        item_indent += 1
+                    
+
+                else:
+                    item.append(source[i])
 
         if(len(item) != 0):
             litem = list_item_t()
@@ -561,12 +584,13 @@ class parser_t:
         STATE_TAG = 0
         STATE_VALUE = 2
         STATE_STRING = 1
+        STATE_TRIPLE_QUOTES = 3
 
         tag = ""
         value = ""
         string = []
 
-        #print "MODIFIERS: [%s]" % modifiers
+        #WARNING("MODIFIERS: [%s]" % modifiers)
 
         tags = {}
         states = []
@@ -591,22 +615,37 @@ class parser_t:
                 else:
                     tag += modifiers[i]
                     #print "building tag: %s" % tag
+            
+            elif(state == STATE_TRIPLE_QUOTES):
+                FATAL("Ooops, can I ever get here?")
+                if((modifiers[i:i+3] == start_sequence) and modifiers[i-1] != '\\'):
+                    states.pop()
+                    i += 2
+                else:
+                    string.append(modifers[i])
 
             elif(state == STATE_STRING):
                 
-                if(modifiers[i] == '"' and modifiers[i-1] != '\\'):
+                if(modifiers[i] == start_sequence and modifiers[i-1] != '\\'):
                     states.pop()
                 else:
                     string.append(modifiers[i])
+
 
             elif(state == STATE_VALUE):
                
                 value += ''.join(string)
                 string = []
-                
-                if(modifiers[i] == '"'):
-                    states.append(STATE_STRING)
 
+                
+                if(modifiers[i:i+3] in ("'''", '"""')):
+                    FATAL("Ooops, can I ever get here?")
+                    states.append(STATE_TRIPLE_QUOTES)
+                    start_sequence = modifiers[i:i+3]
+                    i += 2
+                elif(modifiers[i] in ('"', "'")):
+                    states.append(STATE_STRING)
+                    start_sequence = modifiers[i]
                 elif(modifiers[i] == " "):
 
                     tags[tag.strip()] = value.strip()

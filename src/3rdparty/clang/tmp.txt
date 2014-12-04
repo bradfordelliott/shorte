@@ -1,0 +1,1470 @@
+python test.py test.c
+@body
+@h1 test.c
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __llvm__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __clang__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __clang_major__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __clang_minor__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __clang_patchlevel__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __clang_version__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GNUC_MINOR__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GNUC_PATCHLEVEL__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GNUC__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GXX_ABI_VERSION
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ATOMIC_RELAXED
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ATOMIC_CONSUME
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ATOMIC_ACQUIRE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ATOMIC_RELEASE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ATOMIC_ACQ_REL
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ATOMIC_SEQ_CST
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __PRAGMA_REDEFINE_EXTNAME
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __VERSION__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __CONSTANT_CFSTRINGS__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __block
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __BLOCKS__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GXX_RTTI
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ORDER_LITTLE_ENDIAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ORDER_BIG_ENDIAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ORDER_PDP_ENDIAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __BYTE_ORDER__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: _LP64
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LP64__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __CHAR_BIT__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SCHAR_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SHRT_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INT_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LONG_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LONG_LONG_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __WCHAR_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INTMAX_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZE_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_DOUBLE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_FLOAT__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_INT__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_LONG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_LONG_DOUBLE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_LONG_LONG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_POINTER__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_SHORT__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_PTRDIFF_T__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_SIZE_T__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_WCHAR_T__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_WINT_T__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZEOF_INT128__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INTMAX_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __UINTMAX_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INTMAX_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __PTRDIFF_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __PTRDIFF_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INTPTR_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INTPTR_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZE_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIZE_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __WCHAR_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __WCHAR_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __WINT_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __WINT_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SIG_ATOMIC_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __CHAR16_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __CHAR32_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_DENORM_MIN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_HAS_DENORM__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_EPSILON__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_HAS_INFINITY__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_HAS_QUIET_NAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MANT_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MAX_10_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MAX_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MIN_10_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MIN_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_MIN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_DENORM_MIN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_HAS_DENORM__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_EPSILON__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_HAS_INFINITY__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_HAS_QUIET_NAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MANT_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MAX_10_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MAX_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MIN_10_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MIN_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DBL_MIN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_DENORM_MIN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_HAS_DENORM__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_EPSILON__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_HAS_INFINITY__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_HAS_QUIET_NAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MANT_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MAX_10_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MAX_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MAX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MIN_10_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MIN_EXP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LDBL_MIN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __POINTER_WIDTH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INT8_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INT16_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INT32_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INT64_TYPE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __INT64_C_SUFFIX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __USER_LABEL_PREFIX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FINITE_MATH_ONLY__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GNUC_STDC_INLINE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_TEST_AND_SET_TRUEVAL
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_BOOL_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_CHAR_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_CHAR16_T_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_CHAR32_T_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_WCHAR_T_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_SHORT_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_INT_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_LONG_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_LLONG_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_ATOMIC_POINTER_LOCK_FREE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __NO_INLINE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __PIC__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __pic__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_EVAL_METHOD__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __FLT_RADIX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DECIMAL_DIG__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSP__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __amd64__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __amd64
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __x86_64
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __x86_64__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __core2
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __core2__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __tune_core2__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __LITTLE_ENDIAN__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __REGISTER_PREFIX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __NO_MATH_INLINES
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_HAVE_SYNC_COMPARE_AND_SWAP_16
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSSE3__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSE3__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSE2__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSE2_MATH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __SSE_MATH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __MMX__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_HAVE_SYNC_COMPARE_AND_SWAP_1
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_HAVE_SYNC_COMPARE_AND_SWAP_2
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __APPLE_CC__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __APPLE__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: OBJC_NEW_PROPERTIES
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __apple_build_version__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __weak
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __strong
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __unsafe_unretained
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __DYNAMIC__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __MACH__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __STDC__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __STDC_HOSTED__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __STDC_VERSION__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __STDC_UTF_16__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION None
+@define:
+--name: __STDC_UTF_32__
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION test.c
+@define:
+--name: FALSE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION test.c
+@define:
+--name: TRUE
+--description:
+None
+
+@h CursorKind.MACRO_DEFINITION test.c
+@define:
+--name: TEST_DOT_C_BLAH_BLAH_BLAH
+--description:
+None
+
+@h CursorKind.ENUM_DECL test.c
+@enum
+--name:  e_test_dot_c_blah
+--description:
+    This enum description has a list in it
+    - one
+      - two
+      - three
+    - four
+    
+    This is a new parapraph
+    
+    @{table,
+    -t One
+    -  Three ! Four
+    }
+    
+    and a new paragraph
+    
+    @{table,
+    -x Another table
+    -r A reserved row
+    -  This is a test
+    }
+    
+    @{tbd,
+    This still needs to be done}
+    
+    
+
+-- values:
+- Enum Name | Enum Value | Enum Description
+
+- xxx | 1 |
+    Some description of a
+    with a list
+    - One
+      - Two
+      - Three
+    - Four
+    
+    and a table:
+    
+    @{table,
+    -x One   ! two
+    -  Three ! Four
+    }
+
+- yyy | 2 |
+    Some value for b
+
+
+@h CursorKind.ENUM_DECL test.c
+@enum
+--name:  e_test_dot_c_blah
+--description:
+    This enum description has a list in it
+    - one
+      - two
+      - three
+    - four
+    
+    This is a new parapraph
+    
+    @{table,
+    -t One
+    -  Three ! Four
+    }
+    
+    and a new paragraph
+    
+    @{table,
+    -x Another table
+    -r A reserved row
+    -  This is a test
+    }
+    
+    @{tbd,
+    This still needs to be done}
+    
+    
+
+-- values:
+- Enum Name | Enum Value | Enum Description
+
+- xxx | 1 |
+    Some description of a
+    with a list
+    - One
+      - Two
+      - Three
+    - Four
+    
+    and a table:
+    
+    @{table,
+    -x One   ! two
+    -  Three ! Four
+    }
+
+- yyy | 2 |
+    Some value for b
+
+
+@h CursorKind.STRUCT_DECL test.c
+@struct
+--name:  test_dot_c_mystruct_t
+--description:
+    This is a description of mystruct
+    
+    @{warning,
+    This is a warning inside the structure
+    description}
+    
+    
+
+-- fields:
+- Type | Name | Description
+- int | a |
+    This is a description of the field 'a'
+
+
+- char * | b |
+    This is a description of field 'b'
+
+
+
+@h CursorKind.STRUCT_DECL test.c
+@struct
+--name:  test_dot_c_mystruct_t
+--description:
+    This is a description of mystruct
+    
+    @{warning,
+    This is a warning inside the structure
+    description}
+    
+    
+
+-- fields:
+- Type | Name | Description
+- int | a |
+    This is a description of the field 'a'
+
+
+- char * | b |
+    This is a description of field 'b'
+
+
+
+@h CursorKind.STRUCT_DECL test.c
+@struct
+--name:  test_dot_c_mystruct2_t
+--description:
+    THis is a test
+    
+    
+
+-- fields:
+- Type | Name | Description
+- int | y |
+    Test
+
+
+
+@h CursorKind.STRUCT_DECL test.c
+@struct
+--name:  test_dot_c_mystruct2_t
+--description:
+    THis is a test
+    
+    
+
+-- fields:
+- Type | Name | Description
+- int | y |
+    Test
+
+
+
+@h CursorKind.ENUM_DECL test.c
+@enum
+--name:  e_test_dot_c_cs4224_prbs_polynomial
+--description:
+    The supported PRBS polynomials 
+    
+    With a list
+    - one
+      - two
+    - three
+    - four
+    
+    And another paragraph
+    
+    And still another paragraph
+    
+    And a new list
+    
+    - a new list
+      - a list item
+    
+    Some @{i, italic text} and some @{b, bold text}.
+    
+    @{note,
+        This should be a note
+        with a list inside of it but it probably doesn't
+        work.
+        
+        - one
+        - two
+        - three
+    }
+
+-- values:
+- Enum Name | Enum Value | Enum Description
+
+- CS4224_PRBS_Tx_2exp31 | 0 |
+    1 + x^28 + x^31
+    - a list
+      - a subitem
+    - Some *bold* data
+    
+    A new paragraph
+
+- CS4224_PRBS_Tx_2exp23 | 1 |
+    1 + x^18 + x^23
+    
+    With a table
+    
+    @{table,
+    - One  ! Two  ! Three
+    - Four ! Five ! Six
+    }
+
+- CS4224_PRBS_Tx_2exp15 | 2 |
+    1 + x^14 + x^15
+    
+    @{note, Should not really use this. This should be a list but it doesn't appear to work.
+    
+     - one
+     - two
+     }
+
+- CS4224_PRBS_Tx_2exp7 | 3 |
+    1 + x^6 + x^7
+
+- CS4224_PRBS_Tx_2exp9 | 4 |
+    1 + x^4 + x^9
+
+- CS4224_PRBS_Tx_2exp9_5 | 5 |
+    1 + x^5 + x^9
+
+- CS4224_PRBS_Tx_2exp58 | 6 |
+    1 + x^5 + x^58
+
+
+@h CursorKind.ENUM_DECL test.c
+@enum
+--name:  e_test_dot_c_cs4224_prbs_polynomial
+--description:
+    The supported PRBS polynomials 
+    
+    With a list
+    - one
+      - two
+    - three
+    - four
+    
+    And another paragraph
+    
+    And still another paragraph
+    
+    And a new list
+    
+    - a new list
+      - a list item
+    
+    Some @{i, italic text} and some @{b, bold text}.
+    
+    @{note,
+        This should be a note
+        with a list inside of it but it probably doesn't
+        work.
+        
+        - one
+        - two
+        - three
+    }
+
+-- values:
+- Enum Name | Enum Value | Enum Description
+
+- CS4224_PRBS_Tx_2exp31 | 0 |
+    1 + x^28 + x^31
+    - a list
+      - a subitem
+    - Some *bold* data
+    
+    A new paragraph
+
+- CS4224_PRBS_Tx_2exp23 | 1 |
+    1 + x^18 + x^23
+    
+    With a table
+    
+    @{table,
+    - One  ! Two  ! Three
+    - Four ! Five ! Six
+    }
+
+- CS4224_PRBS_Tx_2exp15 | 2 |
+    1 + x^14 + x^15
+    
+    @{note, Should not really use this. This should be a list but it doesn't appear to work.
+    
+     - one
+     - two
+     }
+
+- CS4224_PRBS_Tx_2exp7 | 3 |
+    1 + x^6 + x^7
+
+- CS4224_PRBS_Tx_2exp9 | 4 |
+    1 + x^4 + x^9
+
+- CS4224_PRBS_Tx_2exp9_5 | 5 |
+    1 + x^5 + x^9
+
+- CS4224_PRBS_Tx_2exp58 | 6 |
+    1 + x^5 + x^58
+
+
+@h CursorKind.FUNCTION_DECL test.c
+@prototype: language="c"
+--function: test_dot_c_my_test
+--prototype:
+    int test_dot_c_my_test(int blah,int * dummy);
+--description:
+    This is a description of my function
+    
+    With another line here and some *bold* text.
+    
+    And a table
+    @{table,
+    - One  ! Two  ! Three
+    - Four ! Five ! Six
+    }
+    
+    @{question,
+    What should I do here?}
+    
+    @{note,
+    This is a random note here that contains a list
+    - one
+        - two
+    -}
+    
+    
+
+--returns:
+    TRUE on success, FALSE on failure.
+
+
+--params:
+  -- blah | I | 
+    Some data associated with blah
+    with some more data
+
+    @{table,
+    - One   ! Two
+    - Three ! Four
+    }
+
+    and a note
+
+    @{note,
+    - This is a note that is really a list
+    }
+
+    This is more @{b,data}.
+
+
+
+  -- dummy | O | Some other dumb variable.
+
+
+
+--example:
+
+    0         1         2         3         4         5         6         7
+    01234567890123456789012345678901234567890123456789012345678901234567890123456789
+    int blah = 0;
+    int dummy = TRUE;
+
+    // The text doesn't work properly and comments
+    // aren't showing up in the parsed text
+    dummy = blah;
+
+    if(1)
+    {
+        my_test(blah,dummy);
+    }
+
+
+--see also:
+    
+    test_dot_c_my_test21
+
+
+
+@h CursorKind.FUNCTION_DECL test.c
+@prototype: language="c"
+--function: test_dot_c_my_test21
+--prototype:
+    int test_dot_c_my_test21(int blah);
+--description:
+    This is another test function
+    
+    
+
+--returns:
+    Always returns FALSE.
+
+
+--params:
+  -- blah | I | This is a test
+
+
+
+--example:
+: if("DEFINE1")
+Include this example only if DEFINE1 is set
+
+
+

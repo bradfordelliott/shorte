@@ -371,7 +371,7 @@ class template_mediawiki_t(template_html.template_html_t):
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += "<sticky>" + self.format_struct(tag.source, tag.contents) + "</sticky>"
+            self.m_contents += "<sticky>" + self.format_struct(tag) + "</sticky>"
         elif(name == "ul"):
             self.m_contents += "<sticky>" + self.format_list(tag.contents, False) + "</sticky>"
         elif(name == "ol"):

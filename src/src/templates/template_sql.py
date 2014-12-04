@@ -406,7 +406,7 @@ within an HTML document.
         data = re.sub("\\\\n", "<br/>", data)
 
         if(expand_equals_block):
-            data = re.sub("==+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
+            data = re.sub("===+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
         
         # Hilite any text between **** ****
         hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
@@ -467,45 +467,40 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'method', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
         
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Make sure to inline images in the SQL template
+        html.set_is_inline(True)
+        # Cross references don't currently work in the SQL template so we'll disable them for now
+        html.set_allow_xrefs(False)
         html.m_show_code_headers["prototype"] = True
         html.set_template_code_header(sql_template_code_header)
         html.m_wikiword_path_prefix = False
         help = html.format_prototype(tag)
         
         prototype = tag.contents
+        #print prototype
 
         function = {}
-        function["name"] = prototype["name"]
+        function["name"] = prototype.get_name()
         function["desc"] = ''
         function["help"] = self.sqlize(help)
         
-        if(prototype.has_key("desc")):
-            function["desc"] = self.format_text(prototype["desc"])
+        function["desc"] = self.format_textblock(prototype.get_description())
         
         sql = template.substitute(function)
 
-        if(prototype.has_key("params")):
-            params = prototype["params"]
+        if(prototype.has_params()):
+            params = prototype.get_params()
             
-            for param in params:
-                
-                if(not param.has_key('type')):
-                    param["type"] = ''
+            for p in params:
 
-                if(not param.has_key('desc')):
-                    param["desc"] = ''
-                
-                param_desc = ''
-                for val in param["desc"]:
-                    if(len(val) == 2):
-                        param_desc += '<b>%s</b> = %s<br/>' % (val[0], self.format_text(val[1]))
-                        #param_desc += 'tbd' self.format_text(val[1])
-                    else:
-                        param_desc += self.format_text(val)
-
-                #print "DESC: ", param["param_desc"]
-
-                param["desc"] = param_desc
+                #print p
+                param = {}
+                param["type"] = p.get_type()
+                param["name"] = p.get_name()
+                if(p.has_description()):
+                    param["desc"] = self.format_textblock(p.get_description(textblock=True))
+                else:
+                    param['desc'] = ''
 
                 sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('%d', '${name}', '${type}', '${desc}');\n" % self.m_prototype_uid).substitute(param);
 
@@ -531,13 +526,17 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'struct', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Make sure to inline images in the SQL template
+        html.set_is_inline(True)
+        # Cross references don't currently work in the SQL template so we'll disable them for now
+        html.set_allow_xrefs(False)
         html.m_wikiword_path_prefix = False
-        help = html.format_struct(tag.source, tag.contents)
+        help = html.format_struct(tag)
         
         obj = tag.contents
 
         struct = {}
-        struct["name"] = obj.name
+        struct["name"] = obj.get_name()
         struct["desc"] = self.format_textblock(obj.description)
         struct["help"] = self.sqlize(help)
         
@@ -546,16 +545,8 @@ within an HTML document.
         # Add the structure fields
         if(obj.fields):
             for field in obj.fields:
-
-                if(field["attrs"][1].has_key("textblock")):
-                    name = field["attrs"][1]["textblock"][0]['text'].strip()
-                else:
-                    name = field["attrs"][1]["text"].strip()
-                
-                if(field["attrs"][2].has_key("textblock")):
-                    desc = self.format_textblock(field["attrs"][2]["textblock"])
-                else:
-                    desc = field["attrs"][2]["text"].strip()
+                name = field.get_name()
+                desc = self.format_textblock(field.get_description())
                 
                 sql += string.Template("INSERT INTO Params (belongs_to, name, type, description) VALUES ('${belongs_to}', '${name}', '', '${desc}');\n").substitute(
                         {"belongs_to" : self.m_prototype_uid,
@@ -569,6 +560,10 @@ within an HTML document.
         template = string.Template("INSERT INTO Types (id, type, name, description, help) VALUES ('%d', 'enum', '${name}', '${desc}', '${help}');\n" % self.m_prototype_uid);
 
         html = template_html.template_html_t(self.m_engine, self.m_indexer)
+        # Make sure to inline images in the SQL template
+        html.set_is_inline(True)
+        # Cross references don't currently work in the SQL template so we'll disable them for now
+        html.set_allow_xrefs(False)
         html.m_wikiword_path_prefix = False
         help = html.format_enum(tag)
 

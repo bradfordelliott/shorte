@@ -29,7 +29,7 @@ from src.shorte_source_code import *
 try:
     from libs.cairo_access import cairo
 except:
-    print "WARNIING: Failed to load cairo_access library"
+    WARNING("Failed to load cairo_access library")
     
 from libs.records import *
 
@@ -70,13 +70,6 @@ def TARGET(tokens):
         skip[token] = 1
 
     return skip
-
-class field_t:
-    def __init__(self):
-        self.name = ""
-        self.desc = ""
-        self.desc_source = ""
-        self.type = ""
 
 class comment_t:
     def __init__(self):
@@ -126,7 +119,7 @@ class cpp_parser_t(shorte_parser_t):
 
     def get_next_token(self, tokens, pos, token_types):
 
-        token = tokes[pos+1]
+        token = tokens[pos+1]
 
         return (pos+1, token)
 
@@ -145,6 +138,17 @@ class cpp_parser_t(shorte_parser_t):
             return True
 
         return False
+        
+    def set_example(self, comment, object):
+        if(comment.has_key("example") and comment["example"] != ""): 
+            code = self.m_engine.m_source_code_analyzer
+            language = "c"
+            tmp = code.parse_source_code(language, comment["example"])
+            example = code_block_t()
+            example.set_language(language)
+            example.set_parsed(tmp)
+            example.set_unparsed(comment["example"])
+            struct2.example = example
     
     # Parse a C++ structure and store it
     def parse_cpp_struct(self, tokens, i):
@@ -155,6 +159,10 @@ class cpp_parser_t(shorte_parser_t):
            @param self   [I] - The parser class instance
            @param tokens [I] - The list of tokens from the parsed file.
            @param i      [I] - The current position in the token list.
+
+           @return A tuple containing:
+                     - The index of the next character after the struct
+                     - The struct object
            '''
 
         pos_saved = i
@@ -243,8 +251,7 @@ class cpp_parser_t(shorte_parser_t):
         
         fields = self.parse_struct_fields2(struct_body, struct_name, start_of_struct)
         rows = self.parse_struct_fields(struct_body)
-
-
+        
         max_cols = 0
         for row in rows:
             cols = len(row["cols"])
@@ -252,35 +259,27 @@ class cpp_parser_t(shorte_parser_t):
                 max_cols = cols
         
         struct2 = struct_t()
-        struct2.fields = rows
-        struct2.name = struct_name
-        struct2.description = self.parse_textblock(comment["desc"])
+        struct2.fields = fields
+        struct2.set_name(struct_name)
+        struct2.set_description(comment["desc"], textblock=False)
+        struct2.set_description(self.parse_textblock(comment["desc"]), textblock=True)
         struct2.comment = comment2
         struct2.private = comment2.private
         struct2.deprecated = comment2.deprecated
         struct2.deprecated_msg = comment2.deprecated_msg
         struct2.max_cols = max_cols
+        struct2.file = self.m_current_file
+        struct2.line = start_of_struct
 
-        struct = {}
-        struct["rows"] = rows
-        struct["fields"] = rows
-        struct["title"] = struct_name
-        struct["caption"] = self.parse_textblock(comment["desc"])
-        struct["max_cols"] = max_cols
-        struct["heading"] = comment2.heading
-        struct["private"] = comment2.private
-
-        example = comment["example"]
-        
         if(comment.has_key("example") and comment["example"] != ""): 
             code = self.m_engine.m_source_code_analyzer
             language = "c"
-            tmp = code.parse_source_code(language, example)
-            struct["example"] = {}
-            struct["example"]["language"] = language
-            struct["example"]["parsed"] = tmp
-            struct["example"]["unparsed"] = example
-            struct2.example = struct["example"]
+            tmp = code.parse_source_code(language, comment["example"])
+            example = code_block_t()
+            example.set_language(language)
+            example.set_parsed(tmp)
+            example.set_unparsed(comment["example"])
+            struct2.example = example
         
 
         i = pos_saved
@@ -315,8 +314,7 @@ class cpp_parser_t(shorte_parser_t):
             
         #print "    STRUCT: %s" % struct
         
-
-        return (i, struct, struct2)
+        return (i, struct2)
 
 
     def parse_enum_values(self, text):
@@ -517,9 +515,9 @@ class cpp_parser_t(shorte_parser_t):
                         #print "FIELD: %s - [%s]" % (data.strip(), parts2[1])
                         field = field_t()
                         field.name = parts2[1]
-                        field.desc_source = comment
-                        field.desc = self.parse_textblock(trim_leading_blank_lines(comment))
-                        field.type = parts2[0]
+                        tmp = trim_leading_blank_lines(comment)
+                        field.set_description(self.parse_textblock(trim_leading_blank_lines(comment)))
+                        field.set_type(parts2[0])
                         fields.append(field)
 
                         data = ''
@@ -547,14 +545,14 @@ class cpp_parser_t(shorte_parser_t):
 
             field = field_t()
             field.name = parts2[1]
-            field.desc_source = comment
-            field.desc = self.parse_textblock(trim_leading_blank_lines(comment))
-            field.type = parts2[0]
+            tmp = trim_leading_blank_lines(comment)
+            field.set_description(self.parse_textblock(trim_leading_blank_lines(comment)))
+            field.set_type(parts2[0])
             fields.append(field)
 
         for field in fields:
-            if(0 == len(field.desc)):
-                WARNING("Field %s.%s has no description in %s:%d" % (struct_name,field.name, self.m_source_file, start_of_struct))
+            if(0 == len(field.get_description())):
+                WARNING("Field %s.%s has no description in %s:%d" % (struct_name,field.get_name(), self.m_source_file, start_of_struct))
                 
         return fields
     
@@ -730,6 +728,20 @@ class cpp_parser_t(shorte_parser_t):
         comment["deprecated"] = False
         comment["deprecated_msg"] = ""
         comment["heading"] = ""
+        
+        # Anything before the @brief tag is a block of standard
+        # shorte text that needs to be processed separately
+        if("@brief" in text):
+            INFO("Found an @brief tag") 
+            parts = text.split('@brief')
+
+            prefix = parts[0]
+            shorte = shorte_parser_t(self.m_engine)
+            shorte.parse_string(prefix, self.m_source_file)
+            tags = shorte.m_pages[0]["tags"]
+            self.page["tags"].extend(tags)
+
+            text = parts[1]
 
         # Strip off any \ref sequences since shorte doesn't use them
         # Also search for any heading references used to group the
@@ -827,10 +839,13 @@ class cpp_parser_t(shorte_parser_t):
         expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
         matches = expr_deprecated.search(text)
         if(matches != None):
+            
+            msg = trim_leading_blank_lines(matches.groups()[0])
+            msg = self.parse_textblock(msg)
             comment["deprecated"] = True
-            comment["deprecated_msg"] = matches.groups()[0]
+            comment["deprecated_msg"] = msg #matches.groups()[0]
             comment2.deprecated = True
-            comment2.deprecated_msg = matches.groups()[0]
+            comment2.deprecated_msg = msg # matches.groups()[0]
 
         
         return (comment,comment2)
@@ -866,6 +881,8 @@ class cpp_parser_t(shorte_parser_t):
 
         desc.reverse()
         desc = " ".join(desc)
+
+        start_of_enum = token["line"] + 1
 
         if(not desc.startswith("/**")):
             return None
@@ -932,32 +949,21 @@ class cpp_parser_t(shorte_parser_t):
         enum.values = rows
         enum.comment = comment2
 
-        table = {}
-        table["rows"] = rows
-        table["title"] = enum_name
-
-        # DEBUG BRAD: Not ready yet to treat enums as text blocks
-        table["caption"] = self.parse_textblock(text)
-        #table["caption"] = text
-
-        table["heading"] = comment["heading"]
-
-        enum.description = table["caption"]
+        enum.description = self.parse_textblock(text)
         enum.private = comment2.private
         enum.deprecated = comment2.deprecated
         enum.deprecated_msg = comment2.deprecated_msg
-
-        #print enum
+        enum.line = start_of_enum
+        enum.file = self.m_current_file
+                 
         max_cols = 0
         for row in rows:
             cols = len(row["cols"])
             if(cols > max_cols):
                 max_cols = cols
-        table["max_cols"] = max_cols
-
         enum.max_cols = max_cols
 
-        return (i, table, enum)
+        return (i, enum)
 
 
     # This method is called to a single parameter out of
@@ -1002,13 +1008,16 @@ class cpp_parser_t(shorte_parser_t):
                 ptype += "*"
 
             #print "NAME: [%s]" % pname
+            param = param_t()
+            param.set_name(pname)
+            param.set_type(ptype)
             field["name"] = pname
             field["io"] = ""
             field["type"] = ptype
             field["desc"] = ("")
             field["desc2"] = self.parse_textblock("")
 
-            return field
+            return param
 
         return None
 
@@ -1106,6 +1115,9 @@ class cpp_parser_t(shorte_parser_t):
             val = val[0:-1]
 
         define.value = val
+        start_of_define = token["line"] + 1
+        define.line = start_of_define
+        define.file = self.m_current_file
 
         try:
             # Search backwards till we find something that
@@ -1160,6 +1172,8 @@ class cpp_parser_t(shorte_parser_t):
         function["heading"] = ""
         params = ''
 
+        p2 = prototype_t()
+
         #print "PARSING FUNCTION"
 
         # Search backwards till we find the closing
@@ -1176,6 +1190,7 @@ class cpp_parser_t(shorte_parser_t):
         # Find the function name
         (i, src) = self.walk_backwards(i, tokens, TARGET([TOKEN_CODE]), SKIP([TOKEN_COMMENT, TOKEN_LINE_COMMENT, TOKEN_WHITESPACE]))
         function["name"] = src.strip()
+        p2.set_name(src.strip())
         #print "NAME: [%s]" % function["name"]
 
         # Find the function return type
@@ -1233,10 +1248,13 @@ class cpp_parser_t(shorte_parser_t):
         (func_comment,func_comment2) = self.parse_cpp_func_comment(desc)
 
         function["see_also"] = func_comment2.see_also
+        p2.set_see_also(function["see_also"])
 
         function["deprecated"] = func_comment2.deprecated
         function["deprecated_msg"] = func_comment2.deprecated_msg
+        p2.set_deprecated(func_comment2.deprecated, func_comment2.deprecated_msg)
         function["private"] = func_comment2.private
+        p2.set_private(func_comment2.private)
 
         if(func_comment2.heading != None):
             function["heading"] = func_comment2.heading
@@ -1257,9 +1275,16 @@ class cpp_parser_t(shorte_parser_t):
             raise Exception("Not outputting private functions")
 
         function["desc"] = func_comment2.desc
+        p2.set_description(func_comment2.desc,textblock=False)
         function["desc2"] = self.parse_textblock(func_comment2.desc)
+        p2.set_description(function["desc2"], textblock=True)
         function["returns"] = func_comment2.returns
+        p2.set_returns(function["returns"])
         example = func_comment2.example
+
+        function["line"] = start_of_func
+        p2.set_line(start_of_func)
+        p2.set_file(self.m_current_file)
 
         # Build up the prototype
         prototype = ''
@@ -1323,61 +1348,42 @@ class cpp_parser_t(shorte_parser_t):
         language = "c"
 
         if(output_pseudocode):
-            tmp = code.parse_source_code(language, pseudocode)
-            function["pseudocode"] = {}
-            function["pseudocode"]["language"] = language
-            function["pseudocode"]["parsed"] = tmp
-            function["pseudocode"]["unparsed"] = pseudocode
+            p2.set_pseudocode(pseudocode, self.m_engine.m_source_code_analyzer, "c")
 
         if(example != ""): 
-            tmp = code.parse_source_code(language, example)
-            function["example"] = {}
-            function["example"]["language"] = language
-            function["example"]["parsed"] = tmp
-            function["example"]["unparsed"] = example
+            p2.set_example(example, self.m_engine.m_source_code_analyzer, "c")
 
         if(prototype != ""):
-            tmp = code.parse_source_code(language, prototype)
-            function["prototype"] = {}
-            function["prototype"]["language"] = language
-            function["prototype"]["parsed"] = tmp
-            function["prototype"]["unparsed"] = prototype
-
+            p2.set_prototype(prototype, self.m_engine.m_source_code_analyzer, "c")
 
         #print "Function"
         #print "    name: %s" % function["function_name"]
         #print "    returns: %s" % function["function_returns"]
         #function["function_prototype"] = prototype
-        function["params"] = self.parse_params(prototype)
-            
-        params = function["params"]
+        params = self.parse_params(prototype)
         new_params = []
 
         for param in func_comment2.params:
-
             for p in params:
-
-                if(p["name"] == param):
+                if(p.get_name() == param):
                     desc = func_comment2.params[param]["desc"]
-                    p["desc"] = desc
-                    p["desc2"] =  self.parse_textblock(trim_leading_blank_lines(desc))
-                    p["io"] = func_comment2.params[param]["io"]
+                    p.set_description(desc, textblock=False)
+                    p.set_description(self.parse_textblock(trim_leading_blank_lines(desc)), textblock=True)
+                    p.set_io(func_comment2.params[param]['io'])
 
         # Check the list of parameter definitions and generate
         # a warning if a comment is missing.
         for param in params:
             #print "PARAM: %s" % param["name"]
-            if(not func_comment2.params.has_key(param["name"])):
+            if(not func_comment2.params.has_key(param.get_name())):
                 if(None == self.m_source_file):
                     self.m_source_file = self.m_current_file
 
-                WARNING("%s missing parameter definition for %s in %s:%d" % (function["name"], param["name"], self.m_source_file, start_of_func))
+                WARNING("%s missing parameter definition for %s in %s:%d" % (p2.get_name(), param.get_name(), self.m_source_file, start_of_func))
+        
+        p2.set_params(params)
 
-
-        #if(len(new_params) > 0):
-        #    function["function_params"] = new_params
-
-        return (i, function)
+        return (i, p2)
 
     # Parse the tokenized representation of a C/C++ file 
     def parse_tokens(self, page, tokens, source):
@@ -1401,35 +1407,36 @@ class cpp_parser_t(shorte_parser_t):
             # This is an alternative way of documenting the source code. In
             # this case the users inserts headings directly into the sources
             # which gets interpreted as code.
-            if(token["type"] == TOKEN_COMMENT and 
-                (("@h1" in token["data"] or 
-                  "@h2" in token["data"] or
-                  "@h3" in token["data"] or
-                  "@h4" in token["data"] or
-                  "@h5" in token["data"]))):
-                    text = self.format_comment(token["data"], strip_single_line_comments=False)
+            #if(token["type"] == TOKEN_COMMENT and 
+            #    (("@h1" in token["data"] or 
+            #      "@h2" in token["data"] or
+            #      "@h3" in token["data"] or
+            #      "@h4" in token["data"] or
+            #      "@h5" in token["data"]))):
+            #        text = self.format_comment(token["data"], strip_single_line_comments=False)
 
-                    shorte = shorte_parser_t(self.m_engine)
-                    shorte.parse_string(text, "blah.h")
-                    tags = shorte.m_pages[0]["tags"]
-                    i += 1
+            #        shorte = shorte_parser_t(self.m_engine)
+            #        shorte.parse_string(text, self.m_current_file)
+            #        tags = shorte.m_pages[0]["tags"]
+            #        i += 1
 
-                    # Don't want to treat this as a comment
-                    # for another type so mark it as invalid
-                    token["type"] = TOKEN_INVALID
-                    page["tags"].extend(tags)
-                    #print text
-                    continue
+            #        # Don't want to treat this as a comment
+            #        # for another type so mark it as invalid
+            #        token["type"] = TOKEN_INVALID
+            #        page["tags"].extend(tags)
+            #        #print text
+            #        continue
 
             if(self.match_token(token, TOKEN_KEYWORD, "struct")):
                 start_i = i 
                 try:
-                    (i,struct,struct2) = self.parse_cpp_struct(tokens, i)
+                    (i,struct) = self.parse_cpp_struct(tokens, i)
                 except:
-                    import traceback
-                    tb = sys.exc_info()[2]
-                    traceback.print_tb(tb)
-                    print "Encountered Exception parsing what looked like C++ struct at %s" % (source[start_i:start_i+100])
+                    #import traceback
+                    #tb = sys.exc_info()[2]
+                    #traceback.print_tb(tb)
+                    #line = tokens[i]["line"]
+                    #WARNING("Encountered Exception parsing what looked like C++ struct in %s @ line %d\n%s" % (self.m_current_file, line, source[start_i:start_i+100]))
                     struct = None
                     i += 1
 
@@ -1439,7 +1446,7 @@ class cpp_parser_t(shorte_parser_t):
                 
                 if(struct != None):
 
-                    if(struct["private"] and not extract_private):
+                    if(struct.private and not extract_private):
                         pass
                     else:
                         parent = None
@@ -1447,7 +1454,9 @@ class cpp_parser_t(shorte_parser_t):
                         if(header != None):
                             tag = tag_t()
                             tag.name = header
-                            tag.contents = struct2.name
+                            tag.contents = struct.name
+                            tag.file = self.m_current_file
+                            tag.line = struct.line
                             tag.source = ""
                             tag.modifiers = {}
                             page["tags"].append(tag)
@@ -1456,8 +1465,10 @@ class cpp_parser_t(shorte_parser_t):
                         #print "Found structure %s" % struct["title"]
                         tag = tag_t()
                         tag.name = "struct"
-                        tag.contents = struct2
+                        tag.contents = struct
                         tag.source = ""
+                        tag.file = self.m_current_file
+                        tag.line = struct.line
                         tag.modifiers = {}
                         tag.heading = parent
                         page["tags"].append(tag)
@@ -1466,6 +1477,13 @@ class cpp_parser_t(shorte_parser_t):
                 text = token["data"]
                 words = text.split(" ")
                 command = words[0].strip()
+
+                #if(command == "if"):
+                #    WARNING("FOUND IF [%s]" % text)
+                #if(command == "ifdef"):
+                #    WARNING("FOUND IFDEF [%s]" % text)
+                #if(command == "endif"):
+                #    WARNING("FOUND ENDIF")
 
                 if(command == "define"):
                     try:
@@ -1487,6 +1505,8 @@ class cpp_parser_t(shorte_parser_t):
                                 tag.name = header
                                 tag.contents = define.name
                                 tag.source = define.name
+                                tag.line = define.line
+                                tag.file = self.m_current_file
                                 tag.modifiers = {}
                                 page["tags"].append(tag)
                                 parent = tag
@@ -1494,6 +1514,8 @@ class cpp_parser_t(shorte_parser_t):
                             tag = tag_t()
                             tag.name = "define"
                             tag.contents = define
+                            tag.line = define.line
+                            tag.file = self.m_current_file
                             tag.source = define.source
                             tag.modifiers = {}
                             tag.heading = parent
@@ -1529,14 +1551,14 @@ class cpp_parser_t(shorte_parser_t):
             elif(self.match_token(token, TOKEN_KEYWORD, "enum")):
                 #print "Found enum"
                 try:
-                    (i,enum,enum2) = self.parse_cpp_enum(tokens, i)
+                    (i,enum) = self.parse_cpp_enum(tokens, i)
                 except:
                     i += 1
                     enum = None
 
                 #print enum
                 if(enum != None):
-                    if(enum2.private and not extract_private):
+                    if(enum.private and not extract_private):
                         pass
                     else:
                         parent = None
@@ -1546,7 +1568,9 @@ class cpp_parser_t(shorte_parser_t):
                         if(header != "None"):
                             tag = tag_t()
                             tag.name = header
-                            tag.contents = enum2.name
+                            tag.contents = enum.name
+                            tag.line = enum.line
+                            tag.file = self.m_current_file
                             tag.source = ""
                             tag.modifiers = {}
                             page["tags"].append(tag)
@@ -1554,8 +1578,10 @@ class cpp_parser_t(shorte_parser_t):
 
                         tag = tag_t()
                         tag.name = "enum"
-                        tag.contents = enum2
+                        tag.contents = enum
                         tag.source = ""
+                        tag.line = enum.line
+                        tag.file = self.m_current_file
                         tag.modifiers = {}
                         tag.heading = parent
                         page["tags"].append(tag)
@@ -1572,7 +1598,7 @@ class cpp_parser_t(shorte_parser_t):
                     is_prototype = True
                 
                 if(("{" != char) and (";" != char)):
-                    print "{ != [%s]" % char
+                    FATAL("{ != [%s]" % char)
                     sys.exit(-1)
 
                 try:
@@ -1594,19 +1620,20 @@ class cpp_parser_t(shorte_parser_t):
 
                 try:
                     start_i = i
-                    (i, function) = self.parse_cpp_function(tokens, i, source, is_prototype)
+                    (i, prototype) = self.parse_cpp_function(tokens, i, source, is_prototype)
                 except:
                     #import traceback
                     #tb = sys.exc_info()[2]
                     #traceback.print_tb(tb)
-                    #print "Encountered Exception parsing what looked like C++ function at %s" % (source[start_i:start_i+100])
-                    function = None
+                    #WARNING("Encountered Exception parsing what looked like C++ function") # at %s" % (source[start_i:start_i+100]))
+                    #print sys.exc_info()
+                    prototype = None
                     i += 1
                     
                 # If this wasn't a function and it wasn't an
                 # extern then we need to walk
                 # forward till we hit the closing brace
-                if(function == None):
+                if(prototype == None):
                     i = saved_i
                     cnt_brace = 0
                     while(1):
@@ -1643,16 +1670,20 @@ class cpp_parser_t(shorte_parser_t):
                     if(header != "None"):
                         tag = tag_t()
                         tag.name = header
-                        tag.contents = function["name"]
+                        tag.contents = prototype.get_name()
                         tag.source = ""
+                        tag.file = prototype.get_file()
+                        tag.line = prototype.get_line()
                         tag.modifiers = {}
                         page["tags"].append(tag)
                         parent = tag
 
                     tag = tag_t()
                     tag.name = "prototype"
-                    tag.contents = function
+                    tag.contents = prototype
                     tag.source = ""
+                    tag.file = prototype.get_file()
+                    tag.line = prototype.get_line()
                     tag.modifiers = {}
                     tag.heading = parent 
                     page["tags"].append(tag)
@@ -1666,14 +1697,14 @@ class cpp_parser_t(shorte_parser_t):
 
         self.m_current_file = source_file
 
-        page = {}
-        page["title"] = source_file
+        self.page = {}
+        self.page["title"] = source_file
 
         #self.set_title(source_file)
         #self.set_subtitle(source_file)
-        page["tags"] = []
-        page["source_file"] = source_file
-        page["links"] = []
+        self.page["tags"] = []
+        self.page["source_file"] = source_file
+        self.page["links"] = []
 
 
         tag = {}
@@ -1915,7 +1946,7 @@ class cpp_parser_t(shorte_parser_t):
                 if(input[i] == '\n'):
                     line += 1
             except:
-                print "SOURCE: [%s]" % input[i-40:]
+                WARNING("SOURCE: [%s]" % input[i-40:])
             
             i = i+1
 
@@ -1939,7 +1970,7 @@ class cpp_parser_t(shorte_parser_t):
             else:
                 tokens.append(tokens_in[i])
 
-        self.parse_tokens(page, tokens, input)
+        self.parse_tokens(self.page, tokens, input)
         
         auto_summary = self.m_engine.get_config("shorte", "auto_summarize")
         if("1" == auto_summary): 
@@ -1964,18 +1995,18 @@ The following section describes the methods and structures exported by this modu
                  "brief" : self.m_file_brief})
                     
             shorte = shorte_parser_t(self.m_engine)
-            shorte.parse_string(summary, "blah.h")
+            shorte.parse_string(summary, self.m_current_file)
             tags = shorte.m_pages[0]["tags"]
 
-            tags.extend(page["tags"])
-            page["tags"] = tags
+            tags.extend(self.page["tags"])
+            self.page["tags"] = tags
 
-        page["file_brief"] = self.m_file_brief
-        page["file_author"] = self.m_author
+        self.page["file_brief"] = self.m_file_brief
+        self.page["file_author"] = self.m_author
 
-        for tag in page["tags"]:
-            tag.source_file = page["source_file"]
-            tag.page_title  = page["source_file"]
+        for tag in self.page["tags"]:
+            tag.source_file = self.page["source_file"]
+            tag.page_title  = self.page["source_file"]
 
 
         ## Check to see if there were any includes found. If there are then
@@ -1984,9 +2015,9 @@ The following section describes the methods and structures exported by this modu
         #    path = self.m_include_queue.pop(-1)
         #    self.parse(path)
 
-        self.m_pages.append(page)
+        self.m_pages.append(self.page)
 
-        return page
+        return self.page
 
     def parse(self, source_file):
 

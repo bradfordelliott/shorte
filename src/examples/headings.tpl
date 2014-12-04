@@ -21,8 +21,12 @@ A multiline comment looks like \<!-- my comment here!!! -->.
 Some more text here
 -->This is some more text
 
+@h3 [[MyHeading,@MyHeading]]
+
+@h4 @MyHeading4
+
 @h3 Heading 3
-Blah blah blah
+Blah blah blah MyHeading
 
 @note
 This is a test
@@ -64,4 +68,9 @@ Some more stuff here
 Heading Other
 
 This is some text here
+
+@h1 @h1
+This is a top level heading which links with @h1 with
+an ampersand up front. Hyperlinking should work if I type
+in @MyHeading4.
 

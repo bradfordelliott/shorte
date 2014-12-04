@@ -22,6 +22,23 @@ def min(one, two):
     if(one < two):
         return one
     return two
+    
+SPACER = '<img class="spacer" src="images/spacer.gif"></img>';
+
+def make_tooltip(tooltip):
+    tooltip = tooltip.replace('\n', ' ')
+    tooltip = tooltip.replace('\t', ' ')
+    tooltip = tooltip.replace('\\n', '\\<br\\>')
+    tooltip = tooltip.replace('{', '\\<')
+    tooltip = tooltip.replace('}', '\\>')
+    tooltip = tooltip.replace('\\t', SPACER)
+    tooltip = tooltip.replace('"', "\\'")
+    tooltip = tooltip.replace('"', "&apos;")
+    tooltip = tooltip.replace("'", "&apos;")
+    tooltip = re.sub(" +", " ", tooltip)
+
+    return tooltip
+     
         
 def generate_diagram(events, title, description, target_width, target_height, base_file_name):
 
@@ -31,7 +48,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     RIGHT_BREAK = 0x01
     LEFT_BREAK  = 0x02
     RESERVED    = 0x04
-    SPACER = '<img class="spacer" src="images/spacer.gif"></img>';
     ALIGNMENT = 32;
     
     eventPoints = {}
@@ -145,6 +161,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
        xml += '''<line x1="%d" y1="%d"  x2="%d" y2="%d" fill="white" stroke="red" stroke-width="1.5" stroke-dasharray="5,3,2"/>
 ''' % (keys[source]["x"], y, keys[source]["x"], height)
 
+       # Draw veritical lines for each source point
        cairo.draw_line(
            x1=keys[source]["x"],
            y1=y,
@@ -162,9 +179,10 @@ def generate_diagram(events, title, description, target_width, target_height, ba
 </text>
 ''' % (keys[source]["x"], y-14, source)
        
+       # Draw the source label for each line
        cairo.draw_text(
            x=keys[source]["x"],
-           y=y-15,
+           y=y-20,
            text=source,
            text_anchor="middle")
        
@@ -176,6 +194,8 @@ def generate_diagram(events, title, description, target_width, target_height, ba
       stroke-width="2"/>
 ''' % (keys[source]["x"] - 6, y)
 
+       # Draw a litle beige rectangle at the
+       # start of each source line.
        cairo.draw_rect(
            x=keys[source]["x"]-6,
            y=y,
@@ -196,43 +216,49 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     for event in events:
         etype = event["type"]
     
-        if(etype == "action"):
+        if(etype == "action" or etype == "loop"):
             name   = event["name"]
             desc   = event["desc"]
             
-            tooltip = event["desc"]
+            tooltip = make_tooltip(event["desc"])
 
-            tooltip = tooltip.replace('\n', ' ')
-            tooltip = tooltip.replace('\t', ' ')
-            tooltip = tooltip.replace('\\n', '\\<br\\>')
-            tooltip = tooltip.replace('{', '\\<')
-            tooltip = tooltip.replace('}', '\\>')
-            
             spacer = '''<img src='images/spacer.gif' width='10' height='1'></img>'''
 
-            tooltip = tooltip.replace('\\t', SPACER)
-            tooltip = tooltip.replace('"', "\\'")
-    
             source = event["from"]
             xml += '''
 <rect x="%d" y="%d" rx="4" ry="4"
       width="20"
       height="%d"
-      fill="#f0f0f0" stroke="#c0c0c0"
+      fill="#f0f0f0" stroke="#a0a0a0"
       stroke-width="3"/>
 ''' % (keys[source]["x"] - 10, y - gap_between_events/2, gap_between_events - 10)
+
+            ex = keys[source]["x"] - 10
+            ey = y-(gap_between_events/2)
+            eheight = (gap_between_events-10)
+            ewidth=20
 
             cairo.draw_rect(
                 x=keys[source]["x"] - 10,
                 y=y-(gap_between_events/2),
-                width=20,
+                width=ewidth,
                 height=gap_between_events - 10,
-                background_color="#f0f0f0",
+                background_color="#e8dfac",
                 line_color="#c0c0c0",
                 rounding=5,
                 line_weight=3,
                 text="%s" % event_count,
                 )
+
+            if(etype == "loop"):
+                points = []
+                points.append((ex+(ewidth/2),ey - 10))
+                points.append((ex+50+(ewidth/2),ey - 10))
+                points.append((ex+50+(ewidth/2),ey+eheight + 10))
+                points.append((ex+(ewidth/2),ey+eheight + 10))
+                points.reverse()
+                #cairo.draw_curve(points=points,line_color="#0000ff",line_weight=1.5)
+                cairo.draw_lines(points=points,line_color="#0000ff",line_weight=1.5)
             
             text_position = keys[source]["x"]
     
@@ -304,19 +330,8 @@ def generate_diagram(events, title, description, target_width, target_height, ba
            
             # Replace the new line and tab characters with their HTML
             # equivalents
-            tooltip = event["desc"]
-
-            tooltip = tooltip.replace('\n', ' ')
-            tooltip = tooltip.replace('\t', ' ')
-            tooltip = tooltip.replace('\\n', '\\<br\\>')
-            tooltip = tooltip.replace('{', '\\<')
-            tooltip = tooltip.replace('}', '\\>')
-
+            tooltip = make_tooltip(event["desc"])
             spacer = "<img src=\\'images/spacer.gif\\' width=\\'10\\' height=\\'1\\'></img>"
-            tooltip = tooltip.replace('\\t', SPACER)
-            tooltip = tooltip.replace('"', "&apos;")
-            tooltip = tooltip.replace("'", "&apos;")
-            tooltip = re.sub(" +", " ", tooltip)
            
             event["desc"] = event["desc"].replace('\\n', '<br>')
             event["desc"] = event["desc"].replace('\\t', SPACER)
@@ -553,9 +568,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     xml_header = xml_header.replace("680", "%d" % width)
     xml_header = xml_header.replace("300", "%d" % height)
             
-    #import tempfile
-    #(tmphandle,path) = tempfile.mkstemp(suffix=".png") #shorte_get_config("shorte", "scratchdir")
-    scratch_dir = shorte_get_config("shorte", "scratchdir")
+    scratch_dir = shorte_get_scratch_path()
     image_name = scratch_dir + "/" + base_file_name
 
     #hdiagram = open(image_name + ".svg", "wb")
@@ -571,7 +584,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     #cmd = 'java -Djava.awt.headless=true -jar %s -bg 1.255.255.255 -w %d -h %d -m image/png %s' % (BATIK, width, height, base_file_name + ".svg")
     #print "CMD: [%s]" % cmd
     #result = os.popen(cmd)
-        
+
     #cairo.image.write_to_png("test2.png", width, height)
     cairo.image.write_to_png(output_file, width, height)
     

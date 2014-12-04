@@ -31,8 +31,10 @@ class template_t:
         self.m_end_characters.append('\r')
         self.m_end_characters.append('\n')
         # Can't use _ as a separator for wikiwords because we want to hyperlink
-        # C Code
+        # C Code. Also, don't use @ as a separator since we need it for documenting
+        # shorte tags.
         self.m_end_characters.remove('_')
+        self.m_end_characters.remove('@')
 
     def allow_wikify_comments(self):
         return self.m_wikify_comments
@@ -99,17 +101,31 @@ class template_t:
             source = matches.groups()[0].strip()
             label  = matches.groups()[1].strip()
             
+            # If the source begins with an @ sign then it is a local
+            # link within the same document so we need to convert the
+            # @ sign to # for HTML
+            if(source.startswith("@")):
+                external = False
+            else:
+                external = True
+
+            source = re.sub("^@", "#", source)
+            label = re.sub("(.*?@)", "", label)
+
             source = re.sub("^\"(.*)\"", "\\1", source) 
             label  = re.sub("^\"(.*)\"", "\\1", label) 
-            external = True
 
             #print "source = %s, label = %s" % (source, label)
         else:
             source = data.strip()
             label = source
 
-            source = re.sub("->", "#", source)
-            label = re.sub("(.*?->)", "", label)
+            # If the source begins with an @ sign then it is a local
+            # link within the same document so we need to convert the
+            # @ sign to # for HTML
+            source = re.sub("^@", "#", source)
+
+            label = re.sub("(.*?@)", "", label)
             external = False
 
             #print "source = %s, label = %s" % (source, label)
@@ -164,8 +180,8 @@ class template_t:
         output = ''
         for word in words:
             
-            #if(debug):
-            #    print "    Checking [%s]" % word
+            if(debug):
+                print "    Checking [%s]" % word
 
             if(word in end_characters):
                 output += word 

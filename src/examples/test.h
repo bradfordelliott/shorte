@@ -1,6 +1,13 @@
+/** @file test.h
+ *
+ * @brief
+ *
+ * @h1 Test.h: Section 1
+ * This is a description of this test file
+ */
 
-/**
- * @h1 Test.h: Section 1!!!!
+/** @cond SHORTE
+ * @h1 Test.h: Section 2!!!!
  * This is a test block with some random data here. For
  * some reason this breaks the parsing of func1
  *
@@ -14,8 +21,8 @@
  * @h2 Test.h: Function Summary
  * @functionsummary
  * @text
+ * @endcond
  */
-
 class myclass
 {
 public:
@@ -25,15 +32,13 @@ public:
 };
 
 /** the class keeps a doubly linked list of all instances of the class that have been created
- * insertion at the tail.  This list is used by the classes instance iterator
- * class_iterator_func refer to cs_mx_class_instances_iterator
+ * insertion at the tail.
  *
  * @example
  *    tail.one = 0;
  * 
- * @private
  */
-typedef struct cs_mx_handle_table_entry_tag
+typedef struct handle_table_entry_tag
 {
     /** This is a field */
     int one;
@@ -53,22 +58,34 @@ typedef enum
 
 /**
  * This is a description of my public enum
+ *
+ * A second paragraph
+ *
+ * @example
+ *   if(curr_val == e_public_test)
+ *   {
+ *       printf("Found e_public_test");
+ *   }
  */
 typedef enum
 {
     /** This is a test */
-    e_public_test = 0
+    e_public_test = 0,
+
+    /** This is a second field */
+    e_public_test2 = 10
 }public_enum;
 
-struct cs_mx_handle_table_entry_tag * head, * tail;
+struct handle_table_entry_tag * phead, * ptail;
 
 
 
-typedef struct tag_name struct_alias;
-struct tag_name struct_instance_1;
-struct_alias struct_instance_2;
+//typedef struct tag_name struct_alias;
+//struct tag_name struct_instance_1;
+//struct_alias struct_instance_2;
 
 /**
+ * @cond SHORTE
  * @h2 Section 2!!!!
  * This is a test block with some random data here. For
  * some reason this breaks the parsing of func1
@@ -79,6 +96,8 @@ struct_alias struct_instance_2;
  *
  * @text
  * Blah blah blah
+ *
+ * @endcond
  */
 
 /**
@@ -86,6 +105,7 @@ struct_alias struct_instance_2;
  *
  * With another line here and some *bold* text.
  *
+ * @cond SHORTE
  * @{table,
  * -t Title of my table here
  * -h One   ! Two
@@ -131,8 +151,6 @@ struct_alias struct_instance_2;
  *     - Three ! Four
  *     }
  *
- * @return TRUE on success, FALSE on failure.
- *
  * @example
  *     int blah = 0;
  *     bool dummy = TRUE;
@@ -145,6 +163,10 @@ struct_alias struct_instance_2;
  *
  * @see
  *     my_test21
+ *
+ * @endcond
+ *
+ * @return TRUE on success, FALSE on failure.
  */
 int func1(int blah2, bool* dummy);
 
@@ -167,26 +189,24 @@ int private_func1(int blah, char* dummy);
  * interrupt handler.
  *
  * @example
- *    cs_t100_irq_handler_data_t handler;
+ *    irq_handler_data_t handler;
  *    handler.dev_id     = NULL;
  *    handler.irq_handle = NULL;
  */
 typedef struct {
     /** Hello ! */
-    cs_t100_handle_t dev_id;     /**< Device Handle value */
-    cs_t100_handle_t irq_handle; /**< IRQ Handle Value */
-/* start bugzilla 28081 */
-    cs_uint32        ireg_address; /**< Interrupt Register Address */
-/* bugzilla end 28081 */
-    cs_uint16        ireg_data;  /**< Current values of the interrupt register */
-    cs_uint16        ereg_data;  /**< Current values of the enable register */
-    cs_uint16        sreg_data;  /**< Current values of the status register,
-                                  *   Will be 0 when there is no status
-                                  *   register for a node */
-    cs_uint8         slice;      /**< For interrupts with multiple instances,
-                                  *   which instance has interrupted. */
-    cs_uint8 xxx;
-} cs_t100_irq_handler_data_t;
+    int  dev_id;       /**< Device Handle value */
+    int  irq_handle;   /**< IRQ Handle Value */
+    int  ireg_address; /**< Interrupt Register Address */
+    int  ireg_data;    /**< Current values of the interrupt register */
+    int  ereg_data;    /**< Current values of the enable register */
+    int  sreg_data;    /**< Current values of the status register,
+                         *   Will be 0 when there is no status
+                         *   register for a node */
+    int  slice;        /**< For interrupts with multiple instances,
+                         *   which instance has interrupted. */
+    int  xxx;
+} irq_handler_data_t;
 
 
 /**
@@ -199,6 +219,7 @@ typedef struct {
  * and the CS_PRINTF() macro to display output which may not be
  * possible on systems that do not have a console.
  *
+ * @cond SHORTE
  * @{table,
  * -t SERDES Status
  * -h Column  ! Description
@@ -215,29 +236,42 @@ typedef struct {
  * - 0.9V     ! The measured voltage of the die
  * }
  *
- * @param slice_start         [I] - The slice to start the dump from
- * @param slice_end           [I] - The slice to end the dump at.
- * @param sections_to_display [I] - A mask defining the sections of the report
- *                                  to display.
  *
  * @return CS_OK on success, CS_ERROR on failure.
  * 
  * @example
  *
  *     // Print the full status for slices 0-7
- *     cs4224_diags_show_status(0, 7, CS4224_STATUS_ALL);
+ *     my_diags_show_status(0, 7, DIAGS_STATUS_ALL);
  *
  *     // Only print the global information for slices 0-3
- *     cs4224_diags_show_status(0, 3, CS4224_STATUS_GLOBAL);
+ *     my_diags_show_status(0, 3, DIAGS_STATUS_GLOBAL);
+ *
+ * @pseudocode
+ *     This is some randome info
+ *     and some more code here
+ *     with a while loop:
+ *
+ *     while(1)
+ *     {
+ *     }
+ *
+ *     and some other stuff
+ * @endcond
  */
-cs_status cs4224_diags_show_status(
-    cs_uint32 slice_start2,
-    cs_uint32 slice_end,
-    cs_uint16 sections_to_display);
+int my_diags_show_status(
+    /** [I] - The starting slice */
+    int slice_start2,
+    /** [I] - The ending slice */
+    int slice_end,
+    /** [I] - A mask defining the sections of the report to display */
+    int sections_to_display);
 
 
 /** This one should show up */
 #define my_test2 0 /* TODO ccw consider making this dynamic */
+
+
 
 /**
  * This one shouldn't show up

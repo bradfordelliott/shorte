@@ -2,16 +2,17 @@ import os
 import datetime
 import string
 from string import Template;
+from src.shorte_defines import *
 
 try:
     import Image
 except:
     WARNING("Failed to load Image library")
 
-from src.shorte_defines import *
 from src.shorte_source_code import *
 from src.parsers.shorte_parser import *
 from src.parsers.cpp_parser import *
+from src.parsers.clang_parser import *
 from src.shorte_code_executor import *
 from src.templates.template_html import template_html_t
 from src.templates.template_odt  import template_odt_t
@@ -98,6 +99,8 @@ class document_info_t:
             self.m_revision_history = revision_history
 
     def number(self):
+        if(self.m_docnumber == None):
+            return ""
         return self.m_docnumber
 
     def set_number(self, number):
@@ -136,6 +139,7 @@ class engine_t:
         # A list of imagemaps associated with images
         self.m_imagemaps = {}
         self.m_macros = {}
+        self.m_includes = []
 
         self.m_package = ""
         self.m_doc_info = document_info_t()
@@ -148,6 +152,8 @@ class engine_t:
         
         self.m_source_code_analyzer = source_code_t()
 
+        self.m_wiki_links = {}
+
         # Create the output directory if it doesn't exist already
         #print "OUTPUT_DIR: %s" % self.m_output_directory
         if(not os.path.exists(self.m_output_directory)):
@@ -157,14 +163,33 @@ class engine_t:
 
         if(parser == "cpp"):
             self.m_parser = cpp_parser_t(self)
+        elif(parser == "clang"):
+            self.m_parser = clang_parser_t(self)
         else:
             self.m_parser = shorte_parser_t(self)
-            self.m_parser.set_cpp_parser(cpp_parser_t(self))
+            #self.m_parser.set_cpp_parser(cpp_parser_t(self))
+            # DEBUG BRAD: For some reason clang is skipping some methods
+            #             in cs4224.c. Need to debug why before I can
+            #             switch to it.
+            self.m_parser.set_cpp_parser(clang_parser_t(self))
 
         # Read the configuration file
         import ConfigParser
         self.m_config = ConfigParser.ConfigParser()
         self.m_config.read([config_file])
+
+
+        self.m_classes = {}
+
+    def class_get(self, name):
+        if(not self.m_classes.has_key(name)):
+            WARNING("Constructing class [%s]" % name)
+            cls = class_t()
+            cls.set_name(name)
+            self.m_classes[name] = cls
+            return cls
+        WARNING("Retrieving class")
+        return self.m_classes[name]
 
     def set_output_directory(self, output_dir):
         self.m_output_directory = output_dir
@@ -186,7 +211,18 @@ class engine_t:
     def set_theme(self, theme):
         self.m_theme = theme
 
-    def get_theme(self):
+    def get_theme(self, package=None):
+
+        #if("=" in self.m_theme):
+        #    themes = self.m_theme.split(";")
+        #    for theme in themes:
+        #        parts = theme.split("=")
+        #        pkg  = parts[0]
+        #        name = parts[1]
+
+        #        if(package == pkg):
+        #            return name
+
         return self.m_theme
 
     def set_title(self, title):
@@ -374,7 +410,7 @@ class engine_t:
         #print "Page: %s" % source_file
         self.m_parser.parse(source_file)
 
-        #for link in self.m_parser.m_wiki_links:
+        #for link in self.m_wiki_links:
         #    print "LINK: [%s]" % link
 
     def parse_string(self, contents):
@@ -385,9 +421,9 @@ class engine_t:
            or None if it does not exist'''
         link = None
 
-        if(self.m_parser.m_wiki_links.has_key(phrase)):
+        if(self.m_wiki_links.has_key(phrase)):
 
-            link = self.m_parser.m_wiki_links[phrase]
+            link = self.m_wiki_links[phrase]
 
         return link
 
@@ -450,6 +486,9 @@ class engine_t:
         if(not os.path.exists(output)):
             FATAL("Image source file %s does not exist, cannot convert" % output)
 
+        if(converter == "gnuplot"):
+            FATAL("Converting inkscape image %s" % name)
+
         if(converter == "inkscape"):
             input = image["src"]
             output = self.inkscape_to_png(input)
@@ -462,7 +501,7 @@ class engine_t:
             # the list of images
             for i in self.m_images:
                 if(i == input):
-                    print "Removing %s from the list" % i
+                    DEBUG("Removing %s from the list" % i)
                     self.m_images.remove(i)
 
             # Once the image has been converted remove
@@ -539,14 +578,14 @@ class engine_t:
         img = scratchdir + os.path.sep + name + image["ext"]
         image["name"] = name
         image["src"] = img
-        print img
+        #print img
         im.save(img)
             
         # If we've found the source image than remove it from
         # the list of images
         for i in self.m_images:
             if(i == image["src"]):
-                print "Removing %s from the list" % i
+                DEBUG("Removing %s from the list" % i)
                 self.m_images.remove(i)
 
         self.m_images.append(img)
@@ -579,11 +618,14 @@ class engine_t:
     def get_macros(self):
         self.m_macros["SHORTE_DOC_TITLE"] = self.get_title()
         return self.m_macros
-        
 
     def set_macros(self, macros):
-
         self.m_macros = macros
+
+    def set_includes(self, includes):
+        self.m_includes = includes
+    def get_includes(self):
+        return self.m_includes
 
     def get_function_summary(self, tag=None):
 
@@ -809,16 +851,28 @@ class engine_t:
             name = "data:object/png;base64," + base64.encodestring(handle.read())
             name = name.replace("\n","")
             handle.close()
-            print "FILE %s:\n%s" % (file, name)
+            print ("FILE %s:\n%s" % (file, name))
         
     
-    def info(self, keys):
+    def info(self, options):
         output = []
+
+        keys = options.info
+
+        if("c2html" in keys):
+            path_input = options.files
+            indexer = indexer_t()
+            template = template_html_t(self, indexer)
+            template.m_inline = True
+            template.set_template_dir("html_inline")
+            path_output = self.m_output_directory + "/" + os.path.basename(path_input) + ".html"
+            template.generate_source_file(path_input, path_output)
+            
 
         if("wikiwords" in keys):
             output.append("Summary of wiki words:")
             output.append("----------------------")
-            links = self.m_parser.m_wiki_links
+            links = self.m_wiki_links
             for link in links:
                 output.append('''  %-24s
     - wikiword: %s,
@@ -829,7 +883,7 @@ class engine_t:
             pages = self.m_parser.get_pages()
 
             for page in pages:
-                print page["source_file"]
+                DEBUG(page["source_file"])
                 tags = page["tags"]
 
                 for tag in tags:
@@ -929,8 +983,7 @@ else:
             try:
                 eval(compile(to_eval, "example.py", "exec"), tmp_macros, tmp_macros)
             except:
-                print to_eval
-                sys.exit(-1)
+                FATAL(to_eval)
 
             result = tmp_macros["result"]
             #print "RESULT: %s = %s" % ("(" + define + ")", result)
@@ -1007,9 +1060,8 @@ def exists(s):
             try:
                 eval(compile(contents, "example2.py", "exec"), tmp_macros, tmp_macros)
             except:
-                print "ERROR parsing example2.py in %s" % os.getcwd()
-                sys.exc_info()
-                raise
+                print tmp_macros
+                FATAL("ERROR parsing example2.py in %s" % os.getcwd())
 
             contents = tmp_macros["result"]
             #print "CONTENTS = [%s]" % contents
@@ -1035,7 +1087,7 @@ def exists(s):
                         for path in paths:
                             (base, ext) = os.path.splitext(path)
                             if(ext == ".tpl"):
-                                print "PATH: %s" % path
+                                INFO("PATH: %s" % path)
         
                 else:
                     tmp = fname
@@ -1165,8 +1217,8 @@ def exists(s):
 
         if(zip_output != None):
             zip_output = "test.zip"
-            print "ZIP_OUTPUT: %s" % zip_output
-            print "OUTPUT: %s" % self.m_output_directory
+            DEBUG("ZIP_OUTPUT: %s" % zip_output)
+            DEBUG("OUTPUT: %s" % self.m_output_directory)
             #zipper("%s/." % self.m_output_directory, zip_output)
             zipper(self.m_output_directory, zip_output)
 

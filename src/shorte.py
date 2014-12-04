@@ -62,7 +62,7 @@ parser.add_option("-v", "--version",
                   action="store", dest="version",
                   help="The version of the document")
 parser.add_option("-t", "--theme",
-                  action="store",type="string",dest="theme",default="cortina",
+                  action="store",type="string",dest="theme",default="shorte",
                   help="The output theme")
 parser.add_option("-n", "--name",
                   action="store",type="string",dest="name",
@@ -94,6 +94,9 @@ parser.add_option("-m", "--macros",
 parser.add_option("-D", "--define",
                   action="store",type="string",dest="define",
                   help="Macro substitution")
+parser.add_option("-I", "--include",
+                  action="store",type="string",dest="include",
+                  help="Include paths - currently only used for Clang")
 parser.add_option("-r", "--search_and_replace",
                   action="store",type="string",dest="replace",
                   help="An input search and replace module that is loaded to pre-process input files and replace any references")
@@ -142,8 +145,18 @@ if(output_dir == None):
     output_dir = "build-output"
 
 if(options.about):
-    version_string = "<<VERSION>>"
-    print "Shorte Version %s" % version_string
+    handle = open('version.inc', 'rt')
+    contents = handle.read()
+    contents = contents.replace("version \:= ", "")
+    matches = re.search("version := ([0-9]+\.[0-9]+\.[0-9]+)", contents)
+    if(matches != None):
+        version = matches.groups()[0]
+        print "Shorte Version:"
+        print "==============="
+        print version
+    else:
+        FATAL("Version not found")
+    handle.close()
     sys.exit(0)
 
 if(options.resize):
@@ -163,6 +176,9 @@ shorte = engine_t(output_dir, config, options.parser)
 
 if(options.replace):
     shorte.load_replace_strings(options.replace)
+
+if(options.theme):
+    shorte.set_theme(options.theme)
 
 # Override any global configuration options that the
 # user specified on the command line. Settings are
@@ -198,7 +214,11 @@ if(options.macros):
            
             macros[key] = val
 
+    #for macro in macros:
+    #    print "MACRO: %s = [%s]" % (macro, macros[macro])
+
     shorte.set_macros(macros)
+
 if(options.define):
     fields = options.define.split(";")
     defines = {}
@@ -214,6 +234,9 @@ if(options.define):
 
     shorte.set_macros(defines)
 
+if(options.include):
+    includes = options.include.split(";")
+    shorte.set_includes(includes)
 
 scratchdir = shorte.get_config("shorte", "scratchdir")
 if(not os.path.exists(scratchdir)):
@@ -248,7 +271,7 @@ shorte.parse_pages(options.file_list, options.files, options.macros)
 # exit
 if(options.info):
 
-    print shorte.info(options.info)
+    print shorte.info(options)
     sys.exit(0)
 
 shorte.generate_packages(options.package, options.theme, options, options.zip)

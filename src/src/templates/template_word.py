@@ -325,49 +325,16 @@ class template_word_t(template_t):
             
             col_width = 4788
 
-            is_subheader = False
-            is_caption = False
-            is_reserved = field["is_reserved"]
-
-            if(field.has_key("is_header") and field["is_header"] == True):
-                is_header = True
-            else:
-                is_header = False
-
-            for attr in field["attrs"]:
-
-                if(is_dict(attr)):
-                    if(attr.has_key("textblock")):
-                        attr = self.format_textblock(attr["textblock"],False)
-                    else:
-                        attr = attr["text"]
-                else:
-                    attr = ''
-
-                if(is_header):
-                    xml += '''
+            parts = [field.get_type(), field.get_name(), self.format_textblock(field.get_description())]
+            
+            is_reserved = field.get_is_reserved()
+                    
+            for part in parts:
+                xml += '''
                 <w:tc>
                   <w:tcPr>
                     <w:tcW w:w="%d" w:type="dxa"/>
-                    <w:shd w:val="clear" w:color="auto" w:fill="D9D9D9"/>
-                  </w:tcPr>
-                  <w:p>
-                    <w:pPr>
-                      <w:rPr>
-                          <w:b/>
-                      </w:rPr>
-                      <w:ind w:left="0"/>
-                    </w:pPr>
-                    %s
-                  </w:p>
-                </w:tc>
-''' % (col_width, attr)
-
-                elif(is_subheader or is_reserved):
-                    xml += '''
-                <w:tc>
-                  <w:tcPr>
-                    <w:tcW w:w="%d" w:type="dxa"/>
+                    <!--<w:shd w:val="clear" w:color="auto" w:fill="D0D0D0"/>-->
                   </w:tcPr>
                   <w:p>
                     <w:pPr>
@@ -376,36 +343,7 @@ class template_word_t(template_t):
                     %s
                   </w:p>
                 </w:tc>
-''' % (col_width, attr)
-                        
-                elif(is_caption):
-                    xml += '''
-                <w:tc>
-                  <w:tcPr>
-                    <w:tcW w:w="%d" w:type="dxa"/>
-                  </w:tcPr>
-                  <w:p>
-                    <w:pPr>
-                      <w:ind w:left="0"/>
-                    </w:pPr>
-                    %s
-                  </w:p>
-                </w:tc>
-''' % (col_width, attr)
-                else:
-                    xml += '''
-                <w:tc>
-                  <w:tcPr>
-                    <w:tcW w:w="%d" w:type="dxa"/>
-                  </w:tcPr>
-                  <w:p>
-                    <w:pPr>
-                      <w:ind w:left="0"/>
-                    </w:pPr>
-                    %s
-                  </w:p>
-                </w:tc>
-''' % (col_width, attr)
+''' % (col_width, part)
 
             xml += "</w:tr>\n"
                         
@@ -811,7 +749,7 @@ class template_word_t(template_t):
         
         file = "blah"
         function = {}
-        function["function_name"] = self.format_text(prototype["name"])
+        function["function_name"] = self.format_text(prototype.get_name())
         function["function_example"] = ''
         function["function_pseudocode"] = ''
         function["function_prototype"] = ''
@@ -820,19 +758,17 @@ class template_word_t(template_t):
         function["function_returns"] = ''
         function["function_see_also"] = ''
 
-        if(prototype.has_key("desc")):
-            function["function_desc"] = self.format_text(prototype["desc"])
+        function["function_desc"] = self.format_textblock(prototype.get_description())
 
-        if(prototype.has_key("prototype")):
-            function["function_prototype"] = prototype["prototype"]
+        if(prototype.has_prototype()):
+            function["function_prototype"] = prototype.get_prototype()
 
-        if(prototype.has_key("params")):
-            params = prototype["params"]
+        if(prototype.has_params()):
+            params = prototype.get_params()
 
             table = {}
             table["max_cols"] = 4 
             table["rows"] = []
-
 
             param_template = string.Template("""
                         <text:p text:style-name="prototype_indent">
@@ -844,28 +780,15 @@ class template_word_t(template_t):
                         """)
 
             output = ''
-            for param in params:
+            for p in params:
             
-                row = {}
-                row["is_header"] = False
-                row["cols"] = []
-                row["cols"].append(param["name"])
-                row["cols"].append(param["io"])
-                row["cols"].append("-")
-                row["cols"].append(param["desc"])
-
-                table["rows"].append(row)
-                
-                tmp = ''
-                for val in param["desc"]:
-                    if(len(val) == 2):
-                        tmp += '''%s = %s\n''' % (val[0], self.format_text(val[1]))
-                    else:
-                        tmp += self.format_text(val)
-
-                param["desc"] = tmp
-
-                param["desc"] = self.format_text(param["desc"])
+                param = {}
+                param["name"] = p.get_name()
+                if(p.has_io()):
+                    param['io']   = p.get_io()
+                else:
+                    param['io'] = ''
+                param["desc"] = p.get_description()
 
                 output += param_template.substitute(param)
 
@@ -874,7 +797,7 @@ class template_word_t(template_t):
             
             #print "output = %s" % output
 
-        if(prototype.has_key("returns")):
+        if(prototype.has_returns()):
         
             xml = '''
 <text:p text:style-name="prototype">
@@ -883,11 +806,11 @@ class template_word_t(template_t):
 <text:p text:style-name="prototype_indent">
     %s
 </text:p>
-''' % prototype["returns"]
+''' % prototype.get_returns()
 
             function["function_returns"] = xml
 
-        if(prototype.has_key("see_also")):
+        if(prototype.has_see_also()):
             xml = '''
 <text:p text:style-name="prototype">
     <text:span text:style-name="prototype_bold">See Also:</text:span>
@@ -895,14 +818,14 @@ class template_word_t(template_t):
 <text:p text:style-name="prototype_indent">
     %s
 </text:p>
-''' % self.format_text(prototype["see_also"])
+''' % self.format_text(prototype.get_see_also())
 
             function["function_see_also"] = xml
 
-        if(prototype.has_key("example")):
+        if(prototype.has_example()):
 
-            language = prototype["example"]["language"]
-            example = prototype["example"]["parsed"]
+            language = prototype.get_example().get_language()
+            example  = prototype.get_example().get_parsed()
 
             example = self.format_source_code(language, example)
         
@@ -919,10 +842,10 @@ class template_word_t(template_t):
             function["function_example"] = xml
         
         
-        if(prototype.has_key("pseudocode")):
+        if(prototype.has_pseudocode()):
 
-            language = prototype["pseudocode"]["language"]
-            example = prototype["pseudocode"]["parsed"]
+            language = prototype.get_pseudocode().get_language()
+            example  = prototype.get_pseudocode().get_parsed()
             example = self.format_source_code(language, example)
         
             xml = '''
@@ -938,7 +861,7 @@ class template_word_t(template_t):
             function["function_pseudocode"] = xml
 
 
-        topic = topic_t({"name"   : prototype["name"],
+        topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
@@ -1052,7 +975,7 @@ $box_end
 
             cols = []
             name = function["function_name"]
-            tmp = function["function_prototype"]["parsed"]
+            tmp = function["function_prototype"].get_parsed()
             (returns, prototype) = self.htmlize_prototype(tmp)
             #print prototype
             
@@ -1209,7 +1132,7 @@ $box_end
         elif(name == "embed"):
             print "WARNING: Skipping embed for now"
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
  
 
     def _doc_pages_to_xml(self):

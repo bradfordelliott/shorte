@@ -162,18 +162,25 @@ class source_code_t:
 ''',
             "shorte" : '''
  @body
- @doctitle @docsubtitle @docversion @docnumber @docrevisions
- @h1 @h2 @h3 @h4 @h5
+ @doctitle @docsubtitle @docversion @docnumber @docrevisions @docfilename
+ @h1 @h2 @h3 @h4 @h5 @h
  @text @p @pre
- @c @python @java @perl @tcl @d @vera @verilog
+ @code @c @python @java @perl @tcl @d @vera @verilog @bash @xml
  @include @include_child
  @sequence
  @table
- @struct
  @vector
- @note
+ @note @tbd @warning @question
  @ul
  @ol
+ @struct @enum @prototype
+ @acronyms @questions
+ @input @embed @columns @column
+ @testcasesummary @testcase @functionsummary @typesummary
+ @inkscape
+ @checklist
+ @imagemap
+ @image
 ''',
             "xml" : '''
  xml version
@@ -257,7 +264,8 @@ class source_code_t:
             "sql" : '''
  CREATE TABLE INTEGER AUTO_INCREMENT
  TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
-'''
+''',
+            "gnuplot" : ''''''
         }
        
         self.m_keywords = {}
@@ -332,7 +340,7 @@ class source_code_t:
                 i+=1
                 continue
 
-            if(not (state in (STATE_MCOMMENT, STATE_COMMENT, STATE_INLINE_STYLING, STATE_STRING)) and (source[i] in (' ', '(', ')', ','))):
+            if(not (state in (STATE_MCOMMENT, STATE_COMMENT, STATE_PREPROCESSOR, STATE_INLINE_STYLING, STATE_STRING)) and (source[i] in (' ', '(', ')', ','))):
                 type = tag["type"]
                 tags.append(tag)
 
@@ -358,7 +366,7 @@ class source_code_t:
                 tag = self.create_tag(TAG_TYPE_NEWLINE, '\n')
                 tags.append(tag)
 
-                if(state == STATE_COMMENT):
+                if(state in [STATE_COMMENT, STATE_PREPROCESSOR]):
                     states.pop()
                     tag = self.create_tag(TAG_TYPE_CODE, '')
                 else:
@@ -370,14 +378,25 @@ class source_code_t:
 
     
             if(state == STATE_NORMAL):
-                # Treat # as a single line comment
+                # Treat # as either a single line comment or
+                # a pre-processor statement
                 if(source[i] == '#'):
-                    states.append(STATE_COMMENT)
-                    tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = "#"
-                    tag["type"] = TAG_TYPE_COMMENT
+                    if(source_lang != 'c'):
+                        states.append(STATE_COMMENT)
+                        tags.append(tag)
+
+                        tag = {}
+                        tag["data"] = "#"
+                        tag["type"] = TAG_TYPE_COMMENT
+                    else:
+                        states.append(STATE_PREPROCESSOR)
+                        tags.append(tag)
+
+                        tag = {}
+                        tag["data"] = "#"
+                        tag["type"] = TAG_TYPE_PREPROCESSOR
+                        
 
                 # Treat // as a single line comment
                 elif(source[i] == '/' and source[i+1] == '/'):
@@ -454,7 +473,7 @@ class source_code_t:
                 else:
                     tag["data"] += source[i] 
 
-            elif(state == STATE_COMMENT):
+            elif(state in (STATE_COMMENT, STATE_PREPROCESSOR)):
 
                 if(source[i] == '\n'):
                     tag["data"] += source[i]
@@ -559,14 +578,92 @@ class source_code_t:
 class type_t:
     def __init__(self):
         self.name = ""
-        self.description = ""
+        self.description = None
+        self.description_unparsed=None
         self.deprecated = False
         self.deprecated_msg = ""
         self.private = False
         self.comment = None
         self.source = None
         self.example = None
+        self.file = None
+        self.line = None
         self.type = ""
+        self.see_also = None
+
+    def get_name(self):
+        return self.name
+    def get_title(self):
+        return self.name
+    def set_name(self, name):
+        self.name = name.strip()
+
+    def has_description(self,textblock=True):
+        if(textblock == True):
+            if(self.description == None):
+                return False
+            return True
+        else:
+            if(self.description_unparsed == None):
+                return False
+            return True
+
+    def get_description(self,textblock=True):
+        if(textblock==True):
+            return self.description
+        return self.description_unparsed
+
+    def set_description(self,desc,textblock=True):
+        if(textblock==True):
+            self.description = desc
+        else:
+            self.description_unparsed = desc
+    
+    def get_file(self):
+        return self.file
+    def set_file(self, file):
+        self.file = file
+
+    def get_line(self):
+        return self.line
+    def set_line(self, line):
+        self.line = line
+
+    def has_example(self):
+        if(None != self.example):
+            return True
+        return False
+    def get_example(self):
+        return self.example
+    def set_example(self, example, analyzer=None, language=None):
+        tmp = analyzer.parse_source_code(language, example)
+        cb = code_block_t()
+        cb.set_language(language)
+        cb.set_parsed(tmp)
+        cb.set_unparsed(example)
+        self.example = cb
+
+    def get_deprecated(self):
+        return self.deprecated
+    def get_deprecated_msg(self):
+        return self.deprecated_msg
+    def set_deprecated(self, deprecated, msg):
+        self.deprecated = deprecated
+        self.deprecated_msg = msg
+
+    def has_see_also(self):
+        if(None != self.see_also):
+            return True
+        return False
+    def get_see_also(self):
+        return self.see_also
+    def set_see_also(self, see_also):
+        self.see_also = see_also
+
+    def get_private(self):
+        return self.private
+    def set_private(self, priv):
+        self.private = priv
 
 class enum_t(type_t):
     def __init__(self):
@@ -592,14 +689,157 @@ class enum_t(type_t):
 
         return attrs
 
+class field_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.attrs = []
+        self.is_reserved = False
+        self.is_header = False
+        self.is_title = False
+        self.is_subheader = False
+        self.is_spacer = False
+        self.is_array = False
+        self.array_elem_size = 1
+        self.width = 0
+        self.start = 0
+        self.end = 0
+        self.type = None
+        self.name = None
+        self.desc = None
+        self.desc_unparsed = None
+        self.attributes = None
+
+    def get_bits(self):
+        return "[%d:%d]" % (self.start, self.end)
+
+    def from_hash(self, field):
+        self.attrs = field["attrs"]
+        self.is_reserved = field["is_reserved"]
+        self.is_header = field["is_header"]
+        self.is_title = field["is_title"]
+        self.is_subheader = field["is_subheader"]
+        self.is_spacer = field["is_spacer"]
+        if(field.has_key("is_array")):
+            self.is_array = field["is_array"]
+        if(field.has_key("array_elem_size")):
+            self.array_elem_size = field["array_elem_size"]
+        
+        if(self.is_spacer):
+            self.type = "spacer"
+            self.name = ""
+            self.desc = ""
+            self.desc_unparsed = ""
+            self.attributes = ""
+        else:
+            self.type = self.attrs[0]["text"]
+            self.name = self.attrs[1]["text"]
+            self.desc = self.attrs[2]["textblock"]
+            self.desc_unparsed = self.attrs[2]["text"]
+            self.attributes = self.attrs[3]["text"]
+
+        if(field.has_key("width")):
+            self.width = field["width"]
+            self.start = field["start"]
+            self.end   = field["end"]
+        #    self.type  = field["type"]
+        #else:
+        #    self.type = self.attrs[0]["text"]
+        #else:
+        #    print field
+        #    WARNING("Field %s has no type" % self.name)
+        #
+        #
+    
+    def get_name(self):
+        if(self.name == None):
+            if(len(self.attrs) >= 2):
+                return self.attrs[1]["text"]
+            return ""
+        return self.name
+    #def get_title(self):
+    #    return self.get_name()
+
+    #def set_name(self, name):
+    #    self.name = name
+
+    def get_description(self):
+        if(self.desc == None):
+            if(len(self.attrs) >= 3):
+                return self.attrs[2]["textblock"]
+            return "empty"
+
+        return self.desc
+    def get_description_unparsed(self):
+        return self.desc_unparsed
+
+    def set_description(self, desc):
+        self.desc = desc
+
+    def set_description_unparsed(self, desc):
+        self.desc_unparsed = desc
+
+    def get_field_is_bits(self):
+        bits = self.get_type()
+        if(bits.find("'b") != -1):
+            return True
+        return False
+
+    def get_is_header(self):
+        return False
+
+    def get_is_spacer(self):
+        return self.is_spacer
+    
+    def get_is_reserved(self):
+        return self.is_reserved
+
+    def get_type(self):
+        if(len(self.attrs) >= 2):
+            return self.attrs[0]["text"]
+        return self.type
+
+    def append_attr(self, val):
+        self.attrs.append(val)
+
+        if(len(self.attrs) == 1):
+            self.set_type(val["text"])
+        elif(len(self.attrs) == 2):
+            self.set_name(val["text"])
+        elif(len(self.attrs) == 3):
+            self.set_description(val["textblock"])
+            self.set_description_unparsed(val["text"])
+        else:
+            self.attributes = val["text"]
+
+    def has_attributes(self):
+        if(self.attributes != None):
+            return True
+        return False
+
+    def set_type(self, type):
+        self.type = type
+
+    def __str__(self):
+        try:
+            attrs =  "Field\n"
+            attrs += "  type: %s\n" % self.type
+            attrs += "  name: %s\n" % self.name
+            attrs += "  desc: %s\n" % self.desc
+            attrs += "  attrs:\n"
+            attrs += "    %s\n" % self.attrs[1]["text"]
+        except:
+            WARNING(self.get_name())
+
+        return attrs
+
+
 class struct_t(type_t):
     def __init__(self):
         type_t.__init__(self)
-        self.fields = {}
+        self.fields = []
         self.record = None
         self.image = None
         self.type = "struct"
-        self.private = False
 
         # This contains a list of any headings to associate
         # with the structure.
@@ -611,16 +851,22 @@ class struct_t(type_t):
         attrs += "  desc:     %s\n" % self.description
         attrs += "  deprecated: %s (%s)\n" % (self.deprecated, self.deprecated_msg)
         attrs += "  private:    %s\n" % self.private
+        attrs += "  file:       %s\n" % self.file
+        if(self.line == None):
+            attrs += "  line:       None\n"
+        else:
+            attrs += "  line:       %d\n" % self.line
         attrs += "  fields:\n"  
 
-        for val in self.fields:
-            attrs += "    "
-            for col in val['cols']:
-                attrs += col["text"]
-                break
-            attrs += "\n"
+        fields = self.get_fields()
+
+        for val in fields:
+            attrs += val.__str__()
 
         return attrs
+
+    def get_max_cols(self):
+        return self.max_cols
 
     def has_headings(self):
         if(len(self.headings) > 0):
@@ -631,25 +877,254 @@ class struct_t(type_t):
 
         return self.headings
 
+    def get_fields(self):
+        
+        #fields = []
+        #for f in self.fields:
+        #    f2 = field_t()
+        #    f2.from_hash(f)
+        #    fields.append(f2)
 
+        #return fields
+        return self.fields
+
+    def has_field_attributes(self):
+
+        for f in self.fields:
+            if(f.has_attributes()):
+                return True
+        
+        return False
+
+
+
+class param_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.param_io = None
+        self.param_type = None
+
+    def has_io(self):
+        if(self.param_io != None):
+            return True
+        return False
+    def get_io(self):
+        return self.param_io
+    def set_io(self, io):
+        self.param_io = io
+
+    def set_type(self, type):
+        self.param_type = type
+    def get_type(self):
+        return self.param_type
+    def has_type(self):
+        if(self.param_type != None):
+            return True
+        return False
+
+    def __str__(self):
+        output = '''param_t
+  name: %s
+  type: %s
+  io:   %s
+  desc: %s
+''' % (self.name, self.param_type, self.param_io, self.get_description(textblock=False))
+        return output
 
 class prototype_t(type_t):
     def __init__(self):
         type_t.__init__(self)
         self.type = "prototype"
+        self.prototype = None
+        self.returns = None
+        self.pseudocode = None
+        self.params = None
+        self.classobj = None
+        self.access_spec = None
+
+    def has_class(self):
+        if(None != self.classobj):
+            return True
+        return False
+    def set_class(self, obj):
+        self.classobj = obj
+    def get_class(self):
+        return self.classobj
+
+    def has_access_spec(self):
+        if(None != self.access_spec):
+            return True
+        return False
+    def set_access_spec(self, spec):
+        self.access_spec = spec
+    def get_access_spec(self):
+        return self.access_spec
+
+
+    def has_prototype(self):
+        if(None != self.prototype):
+            return True
+        return False
+    def get_prototype(self):
+        return self.prototype
+    
+    def set_prototype(self, prototype, analyzer=None, language=None):
+        tmp = analyzer.parse_source_code(language, prototype)
+        cb = code_block_t()
+        cb.set_language(language)
+        cb.set_parsed(tmp)
+        cb.set_unparsed(prototype)
+        self.prototype = cb
+
+    def has_returns(self):
+        if(None != self.returns):
+            return True
 
     def __str__(self):
-        attrs =  "Prototype"
-        attrs += "  name:      %s\n" % self.name
-        attrs += "  desc:      %s\n" % self.description
+
+        return False
+    def get_returns(self):
+        return self.returns
+    def set_returns(self, returns):
+        self.returns = returns
+
+    def has_pseudocode(self):
+        if(None != self.pseudocode):
+            return True
+        return False
+    def get_pseudocode(self):
+        return self.pseudocode
+    def set_pseudocode(self, pseudocode, analyzer=None, language=None):
+        tmp = analyzer.parse_source_code(language, pseudocode)
+        cb = code_block_t()
+        cb.set_language(language)
+        cb.set_parsed(tmp)
+        cb.set_unparsed(pseudocode)
+        self.pseudocode = cb
+    
+
+    def has_params(self):
+        if(None != self.params and len(self.params) > 0):
+            return True
+        return False
+    def get_params(self):
+        return self.params
+    def set_params(self, params):
+        self.params = params
+    def validate_params(self):
+        for param in self.params:
+            if(not param.has_description()):
+                WARNING("Parameter %s has no description" % param.name)
+
+    def has_called_by(self):
+        return False
+    def get_called_by(self):
+        return "TBD"
+    def has_calls(self):
+        return False
+    def get_calls(self):
+        return "TBD"
+
+    def __str__(self):
+        attrs =  "Prototype:\n"
+        attrs += "===================================================\n"
+        attrs += "  Name:      %s\n" % self.name
+        attrs += "  Prototype: %s\n" % self.prototype.get_unparsed()
+        attrs += "  Description:\n"
+        lines = self.get_description(textblock=False).split("\n")
+        for line in lines:
+            if(len(line) > 0):
+                attrs += "    %s\n" % line
+        attrs += "  Returns:\n"
+        attrs += "    %s\n" % self.returns
+
+        if(self.has_example()):
+            attrs += "  Example:\n"
+            attrs += indent_lines(self.get_example().get_unparsed(), '    ')
 
         return attrs
 
+
+class code_block_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        
+        self.language = None
+        self.parsed = None
+        self.unparsed = None
+
+    def get_parsed(self):
+        return self.parsed
+    def set_parsed(self, parsed):
+        self.parsed = parsed
+    def get_unparsed(self):
+        return self.unparsed
+    def set_unparsed(self, unparsed):
+        self.unparsed = unparsed
+    def get_language(self):
+        return self.language
+    def set_language(self, language):
+        self.language = language
+
+    def __str__(self):
+        output =  'code_block_t'
+        output += '  language = %s' % self.language
+        output += '  unparsed'
+        output += indent_lines(self.unparsed, '    ')
+        return output
+
+class_uid = 0
+
+class class_t(type_t):
+    def __init__(self):
+        global class_uid
+        type_t.__init__(self)
+        self.value = ""
+        self.type = "class"
+        self.m_prototypes = {}
+        self.id = class_uid
+        class_uid += 1
+        self.m_types = {}
+
+    def prototype_add(self, ptype):
+        print "Adding prototype %s" % ptype.get_name()
+        self.m_prototypes[ptype.get_prototype().get_unparsed()] = ptype
+
+    def types_add(self, t):
+        self.m_types[t] = t
+
+    #def prototype_add(self, category, pt):
+    #    self.m_prototypes[category][pt] = pt
+
+    def __str__(self):
+        output = '''Class
+  id:    %d
+  name:  %s
+''' % (self.id, self.name)
+
+        if(len(self.m_prototypes) > 0):
+            output += '  prototypes:\n'
+
+            for key in self.m_prototypes:
+                if(key != None):
+                    print "KEY: %s" % key
+                    output += '    ' + key + '\n'
+
+        return output
 
 class define_t(type_t):
     def __init__(self):
         type_t.__init__(self)
         self.value = ""
         self.type = "define"
+
+    def __str__(self):
+        output = '''Define
+  name:  %s
+  value: %s
+''' % (self.name, self.value)
+
+        return output
+
 
 

@@ -1,28 +1,57 @@
 /** @file test.c
  *
  * @brief
+ *
+ * @h1 Test.c
  * This is some random data about this file here
  *
  * - One
  *     - Two
  *     - Three
- * -
  *
  * @{note, It should support an inline note}
  *
  */
-#define FALSE 0
-#define TRUE !FALSE
+#include <stdlib.h>
+#include <stdio.h>
+
+#include "test.h"
+
+int test_dot_c_my_test(int blah, int* dummy);
 
 /**
- * @h1 Test.c
- * @h2 Function Summary: test.c
+ * This is some text related to the @h1 from the file brief
+ * here.
+ *
+ * @h2 A function summary example
+ * The following table is a function summary of this module.
+ *
  * @functionsummary
  * @text
  * @table: name="This is my table!"
  * - Blah  | Blah 
  * - Three | Four
+ *
+ * @h1 [[WikiHeader, A Wiki Header]]
+ * This is some random text here with a link to WikiHeader.
+ *
+ * @brief
+ * This is an example of a define
+ *
+ * @example
+ *   if(my_bool == FALSE):
+ *   {
+ *       printf("False value!\\n");
+ *   }
  */
+#define FALSE 0
+
+/**
+ * This is another define that is the opposite
+ * of FALSE
+ */
+#define TRUE !FALSE
+
 
 #if defined(BRAD)
 
@@ -99,6 +128,11 @@ typedef struct {
  * This still needs to be done}
  *
  * @heading My Heading
+ *
+ * @example
+ *   e_test_dot_c_blah myenum;
+ *   my_enum.xxx = 10;
+ *   my_enum.yyy = 22;
  */
 typedef enum
 {
@@ -233,6 +267,47 @@ typedef enum
 }e_test_dot_c_cs4224_prbs_polynomial;
 
 
+
+
+/**
+ * This is another test function
+ *
+ * @note
+ *   This is a random note here
+ *
+ * @param blah [I] - This is a test
+ *
+ * @preconditions
+ *   What has to happen before the function is called
+ *
+ * @postconditions
+ *   What happens after the function is called
+ *
+ * @sideeffects
+ *   Are there any side-effects caused by calling the function?
+ *
+ * @statespace
+ *   Is there any state used by the function?
+ *
+ * @return Always returns FALSE.
+ *
+ * @todo
+ *   I need to update shorte to support handing
+ *   the if attribute on example tags as shown
+ *   in the example below.
+ *
+ * @example: if("DEFINE1")
+ * Include this example only if DEFINE1 is set
+ *
+ * @example: if("DEFINE2")
+ * Include this example only if DEFINE2 is set
+ */
+int test_dot_c_my_test21(int blah)
+{
+    return test_dot_c_my_test(blah, NULL);
+}
+
+
 /**
  * This is a description of my function
  *
@@ -247,6 +322,12 @@ typedef enum
  * @{question,
  * What should I do here?}
  *
+ * @{note,
+ * This is a random note here that contains a list
+ * - one
+ *     - two
+ * -}
+ *
  * @param blah  [I] -
  *     Some data associated with blah
  *     with some more data
@@ -256,6 +337,12 @@ typedef enum
  *     - Three ! Four
  *     }
  *
+ *     and a note
+ *
+ *     @{note,
+ *     - This is a note that is really a list
+ *     }
+ *
  *     This is more @{b,data}.
  *
  * @param dummy [O] - Some other dumb variable.
@@ -263,6 +350,8 @@ typedef enum
  * @return TRUE on success, FALSE on failure.
  *
  * @example
+ *     0         1         2         3         4         5         6         7
+ *     01234567890123456789012345678901234567890123456789012345678901234567890123456789
  *     int blah = 0;
  *     int dummy = TRUE;
  *
@@ -279,7 +368,10 @@ typedef enum
  *     test_dot_c_my_test21
  *
  * @deprecated This method has been deprecated. Please
- *             refer to my_test21 for future use.
+ *             refer to my_test21 for future use. Can deprecated
+ *             contain a note:
+ *             @{note,
+ *             This is a random note here}
  */
 int test_dot_c_my_test(int blah, int* dummy)
 {
@@ -287,16 +379,17 @@ int test_dot_c_my_test(int blah, int* dummy)
     return TRUE;
 }
 
-
 /**
- * This is another test function
- *     @param blah [I] - This si a test
+ * @h2 Another heading
+ * This is a brief description of this heading
  *
- * @heading Blah Blah
+ *
+ * @brief
+ * This method has is public but has no parameters and
+ * no return value.
  */
-int test_dot_c_my_test21(int blah)
+void test_doc_function_no_return(void)
 {
-    return FALSE;
 }
 
 int test_dot_c_my_undocumented_function(int main)
@@ -310,3 +403,7 @@ int test_dot_c_my_private_function(void)
 {
 }
 
+int main(void)
+{
+    return 0;
+}

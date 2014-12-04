@@ -168,8 +168,8 @@ and some more stuff
 
 @h2 Perl Example
 @perl:
-    print "Hello world!\n";
-    print "Hello world2!\n";
+    print "Hello world!\\n";
+    print "Hello world2!\\n";
 
 @p Blah blah [[code.html->C Example]] with a link to the EPC
 
@@ -256,8 +256,9 @@ program test
 
 @h2 Python Example
 
-@python: machine="gateway.neterion.com" port="2202" exec="0"
+@python: exec="1"
 print "Hello world!"
+print '''Hello world!'''
 
 @h2 Verilog Example
 @verilog: machine="gateway.neterion.com" port="2202" exec="0"

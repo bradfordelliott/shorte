@@ -138,7 +138,7 @@ class template_revealjs_t(template_html_t):
         elif(name == "table"):
             self.m_contents.append(self.format_table(tag.source, tag.contents))
         elif(name == "struct"):
-            self.m_contents.append(self.format_struct(tag.source, tag.contents))
+            self.m_contents.append(self.format_struct(tag))
         elif(name == "define"):
             self.m_contents.append(self.format_define(tag))
         elif(name == "ul"):
@@ -182,7 +182,7 @@ class template_revealjs_t(template_html_t):
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
 
         #elif(tag == "pycairo"):

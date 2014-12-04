@@ -104,19 +104,19 @@ class template_c_t(template_t):
         pseudocode = ''
         prefix = '    '
 
-        if(prototype.has_key("function_pseudocode")):
+        if(prototype.has_pseudocode()):
        
             start = ''
             end = ''
 
-            name = prototype["function_name"]
-            code = prototype["function_pseudocode"]["parsed"]
-            language = prototype["function_pseudocode"]["language"]
+            name = prototype.get_name()
+            code     = prototype.get_pseudocode().get_parsed()
+            language = prototype.get_pseudocode().get_language()
             has_prefix = True
 
             if(self.m_prototypes.has_key(name)):
                 comment = False
-                code = self.m_prototypes[name]["function_pseudocode"]["parsed"]
+                code = self.m_prototypes[name].get_pseudocode().get_parsed()
 
             if(self.m_comment_style == COMMENT_STYLE_SHORTE):
 
@@ -216,7 +216,7 @@ ${prototype}
  * ${function_name}
  *${function_params}
  *
- * ${function_desc}
+${function_desc}
  */
 ${prototype}
 {${pseudocode}}
@@ -224,7 +224,7 @@ ${prototype}
         
         templates["module"][HEADER_STYLE_DOXYGEN] = string.Template("""
 /**
- * ${function_desc}
+${function_desc}
  *
  *${function_params}
  *
@@ -251,7 +251,7 @@ ${prototype}
         
         file = "blah"
         function = {}
-        function["function_name"] = prototype["name"]
+        function["function_name"] = prototype.get_name()
         function["function_example"] = ''
         function["prototype"] = ''
         function["function_desc"] = ''
@@ -260,36 +260,37 @@ ${prototype}
         function["function_returns"] = ''
         function["pseudocode"] = ''
 
-        if(prototype.has_key("desc")):
-            function["function_desc"] = self._format_desc(prototype["desc"])
-            function["function_desc_header"] = self._format_desc_header(prototype["desc"])
+        function["function_desc"] = self._format_desc(prototype.get_description(textblock=False))
+        function["function_desc_header"] = self._format_desc_header(prototype.get_description(textblock=False))
 
-        if(prototype.has_key("prototype")):
+        if(prototype.has_prototype()):
 
             # Replace any semicolons
-            code = prototype["prototype"]["unparsed"]
+            code = prototype.get_prototype().get_unparsed()
             code = re.sub(";", "", code)
 
             function["prototype"] = code
 
-        if(prototype.has_key("params")):
-            params = prototype["params"]
+        if(prototype.has_params()):
+            params = prototype.get_params()
 
             output = ''
-            for param in params:
+            for p in params:
                 
                 if(self.m_comment_style == COMMENT_STYLE_SHORTE):
                     prefix = "//|      "
                 else:
                     prefix = " *      "
 
-                tmp = ''
-                for val in param["desc"]:
-                    if(len(val) == 2):
-                        tmp += self.format_comment("%s = %s" % (val[0], val[1]), prefix)
-                    else:
-                        tmp += self.format_comment("%s" % (val), prefix)
+                param = {}
+                param['name'] = p.get_name()
+                param['type'] = p.get_type()
+                if(p.has_io()):
+                    param['io']   = p.get_io()
+                else:
+                    param['io'] = ''
 
+                tmp = self.format_comment(p.get_description(textblock=False), prefix)
 
                 param["desc"] = tmp
 
@@ -297,12 +298,12 @@ ${prototype}
 
             function["function_params"] = output
 
-        if(prototype.has_key("returns")):
-            function["function_returns"] = prototype["returns"]
+        if(prototype.get_returns()):
+            function["function_returns"] = prototype.get_returns()
 
         function["pseudocode"] = self._format_pseudocode(prototype, comment_pseudocode)
                 
-        topic = topic_t({"name"   : prototype["name"],
+        topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
@@ -411,36 +412,15 @@ $fields
    
     def format_comment(self, data, prefix, start=0):
 
-        # Replace any links
-        data = re.sub(r'\[\[(->)?(.*?)\]\]', r'\2', data)
-
-        # Replace any bold
-        data = re.sub(r'\*(.*?)\*', r'\1', data)
-
-
-        # Collapse any newlines and multiple whitespace
-        data = re.sub(r'\n', ' ', data)
-        data = re.sub(r' +', ' ', data)
-        
-        # Replace any \n's with a <br>
-        data = re.sub("\\\\n", "\n%s    " % prefix, data)
-       
-        words = re.split(r' ', data)
-
-        line_length = start
+        lines = data.split("\n")
         output = ''
 
-        for word in words:
-
-            output += word + ' '
-            line_length += (len(word) + 1)
-            
-            if(line_length > (80 - len(prefix))):
-                line_length = 0
-                output += '\n' + prefix
+        for line in lines:
+            output += prefix
+            output += line
+            output += "\n"
 
         return output
-
 
     def format_text(self, data):
 
@@ -517,7 +497,7 @@ $fields
         elif(name == "enum"):
             self.m_header["structs"] += self.format_enum(tag)
         else:
-            WARNING("Tag %s not supported" % name)
+            INFO("Tag %s not supported" % name)
 
 
     def get_contents(self, what):
@@ -678,6 +658,6 @@ $fields
             self.m_header["structs"] = ""
             self.m_header["prototypes"] = ""
     
-        self.generate_index(theme)
+        #self.generate_index(theme)
 
 

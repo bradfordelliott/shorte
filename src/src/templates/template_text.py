@@ -72,22 +72,16 @@ class template_text_t(template_t):
 
         return output
 
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    format_note()
-    #|
-    #| DESCRIPTION:
-    #|    This method is called to format a note tag
-    #|
-    #| PARAMETERS:
-    #|    content (I) - The content associated with the note tag
-    #|
-    #| RETURNS:
-    #|    The note data formatted as HTML.
-    #|
-    #+-----------------------------------------------------------------------------
+
     def format_note(self, tag, label="NOTE"):
+        '''This method is called to format a note tag.
+           
+           @param tag   [I] - The tag note object.
+           @param label [I] - The label to associate with the note (could
+                              also be something like a warning or a TBD)
+
+           @return The formatted note object
+        '''
 
         content = self.format_textblock(tag)
         lines = content.split('\n')
@@ -105,7 +99,31 @@ class template_text_t(template_t):
 %s
 %s
 ''' % (label,label_underline,output)
-            
+
+    def format_define(self, tag):
+        define = tag.contents
+
+        return '''Define: %s
+Value:
+    %s
+Description:
+%s
+''' % (define.name, define.value, self.format_textblock(define.description, prefix='    '))
+
+    def format_enum(self, tag):
+        enum = tag.contents
+
+        return '''Enum: %s
+Values:
+    %s
+Description:
+%s
+''' % (enum.name, "TBD", self.format_textblock(enum.description, prefix='    '))
+
+    def format_prototype(self, tag):
+        prototype = tag.contents
+        return prototype.__str__()
+
     def format_checklist(self, tag):
         
         list = tag.contents
@@ -185,18 +203,14 @@ class template_text_t(template_t):
 
                 if(tag == "note"):
                     label = "Note"
-                    img = "note.png"
                 elif(tag == "warning"):
                     label = "Warning"
-                    img = "warning.png"
                 elif(tag == "tbd"):
                     label = "TBD"
-                    img = "tbd.png"
                 elif(tag == "question"):
                     label = "Question"
-                    img = "question.png"
 
-                return self.format_note(textblock, label, img)
+                return self.format_note(textblock, label)
 
         return prefix + replace + postfix
 
@@ -274,9 +288,13 @@ class template_text_t(template_t):
         return source
     
     
-    def format_textblock(self, tag):
+    def format_textblock(self, tag, prefix='', prefix_first_line=True, pad_textblock=False):
 
-        paragraphs = tag.contents
+        if(isinstance(tag, tag_t)):
+            paragraphs = tag.contents
+        else:
+            paragraphs = tag
+        
         output = '\n'
 
         for p in paragraphs:
@@ -293,15 +311,27 @@ class template_text_t(template_t):
             else:
                 output += self.format_text(text)
 
-        output += "\n"
-
         while(output.startswith("\n")):
             output = output[1:]
 
         while(output.endswith("\n")):
             output = output[0:-1]
 
-        return "\n" + output + "\n"
+        lines = output.split('\n')
+        output = ''
+        for i in range(0, len(lines)):
+            if(i == 0):
+                if(prefix_first_line):
+                    output += prefix + lines[i] + '\n'
+                else:
+                    output += lines[i] + '\n'
+            else:
+                output += prefix + lines[i] + '\n'
+
+        if(pad_textblock):
+            return "\n" + output + "\n"
+
+        return output
 
     def format_questions(self, tag):
 
@@ -321,145 +351,6 @@ class template_text_t(template_t):
 
         return output
 
-    
-    
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    ()
-    #|
-    #| DESCRIPTION:
-    #|    
-    #| 
-    #| PARAMETERS:
-    #|    
-    #| 
-    #| RETURNS:
-    #|    
-    #|
-    #+-----------------------------------------------------------------------------
-    def format_prototype(self, tag):
-        
-        template = string.Template("""
-        <div style='margin-left:30px;border:1px solid #ccc;'>
-        <div>
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Function:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${function_name}</p>
-            </div>
-        </div>
-        <div>
-            <div style="margin-left: 10px;">
-                <div style="color: #396592; font-weight: bold;">Description:</div>
-                <p style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${function_desc}</p>
-            </div>
-        </div>
-        <div style="font-size: 0.9em;">
-            <div style="margin-left: 10px; margin-top: 10px;">
-                ${function_prototype}
-                
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Params:</div>
-                    <div style="margin-left: 0px;">
-                        <table style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px; border: 0px;">
-                            ${function_params}
-                        </table>
-                    </div>
-                </div>
-                
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Returns:</div>
-                    <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${function_returns}</p>
-                </div>
-
-                ${function_example}
-                
-            </div>
-            
-        </div>
-        </div>
-        """)
-    
-        template_prototype = string.Template("""
-        <div>
-            <div style="color: #396592; font-weight: bold;">Prototype:</div>
-            <div style="font-family: courier;padding:10px;">
-                ${function_prototype}
-            </div>
-        </div>
-        """);
-
-        template_example = string.Template('''
-                <div>
-                    <div style="color: #396592; font-weight: bold;">Example:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;">
-                        The following example demonstrates the use of this method:<br><br>
-                    </div>
-                    <div style="margin-left: 15px; margin-right:15px; margin-bottom:10px; background-color:#f0f0f0; border:1px solid #ccc;">
-                        ${function_example}
-                    </div>
-                </div>
-            
-        ''');
-        
-        prototype = tag["contents"]
-        
-        file = "blah"
-        function = {}
-        function["function_name"] = prototype["function_name"]
-        function["function_example"] = ''
-        function["function_prototype"] = ''
-        function["function_desc"] = ''
-        function["function_params"] = ''
-        function["function_returns"] = ''
-
-        if(prototype.has_key("function_desc")):
-            function["function_desc"] = prototype["function_desc"]
-
-        if(prototype.has_key("function_prototype")):
-            function["function_prototype"] = template_prototype.substitute(prototype)
-
-        if(prototype.has_key("function_params")):
-            params = prototype["function_params"]
-            
-            param_template = string.Template("""
-                        <tr>
-                            <td style="border: 0px;"><b>${param_name}</b></td>
-                            <td style="font-family: courier; border: 0px;">${param_io}</td>
-                            <td style="border: 0px;">-</td>
-                            <td style="border: 0px;">${param_desc}</td>
-                        </tr>""")
-
-            output = ''
-            for param in params:
-
-                output += param_template.substitute(param)
-
-            function["function_params"] = output
-
-        if(prototype.has_key("function_returns")):
-            function["function_returns"] = prototype["function_returns"]
-
-        if(prototype.has_key("function_example")):
-
-            example = prototype["function_example"]["parsed"]
-            language = prototype["function_example"]["language"]
-
-            example = self.format_source_code(language, example)
-            function["function_example"] = example
-            function["function_example"] = template_example.substitute(function)
-
-
-        topic = topic_t({"name"   : prototype["function_name"],
-                         "file"   : file,
-                         "indent" : 3});
-        index.append(topic)
-        
-        return template.substitute(function)
-    
-    
-
-    
     def format_table(self, source, table):
 
         html = '\n'
@@ -550,61 +441,33 @@ class template_text_t(template_t):
         return html
 
     
-    def format_struct(self, source, struct):
-        
-        html = "<table class='tb'>\n"
-        
-        if("title" in struct):
-            html += "<tr><th colspan='%d' style='background-color:#444;font-weight:bold;color:white;border:1px solid black;'>%s</th></tr>\n" % (struct["max_cols"], struct["title"])
-       
-        # If the structure has an image associated with it then
-        # display it as part of the HTML describing the structure.
-        if(struct.has_key("image")):
+    def format_struct(self, tag):
 
-            name = struct["image"]["path"]
-            
-            # If inlining is turned on then we need to embed the image
-            # into the generated output HTML file.
-            if(self.m_inline == True):
-                handle = open(name, "rb")
-                name = "data:image/jpeg;base64," + base64.encodestring(handle.read())
-                handle.close()
-
-            
-            html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct["max_cols"], "Diagram")
-            html += struct["image"]["map"]
-            html += "<tr><th colspan='%d' style='border: 1px solid black;padding:10px;'><img src='%s' usemap='#diagram_%s'></img></th></tr>" % (struct["max_cols"], name, struct["image"]["path"])
+        struct = tag.contents
 
         i = 0
-
-        for field in struct["fields"]:
+        fields = ''
+        for field in struct.get_fields():
             
-            if(i == 0):
-                is_header = True
-            else:
-                is_header = False
-
-            is_reserved = field["is_reserved"]
-
-            if(is_header):
-                html += "    <tr class='header'>\n";
-            else:
-                html += "<tr>\n"
+            fields += "| %2d | %20s | %s" % (field.width, field.name, self.format_textblock(field.desc, prefix="|    |                      | ", prefix_first_line=False))
             
-            for attr in field["attrs"]:
-
-                attr = self.format_text(attr)
-
-                if(is_header):
-                    html += "      <td colspan='%d' class='header'>%s</td>\n" % (1, attr)
-                elif(is_reserved):
-                    html += "      <td colspan='%d' style='background-color:#eee; color:#999;'>%s</td>\n" % (1, attr)
-                else:
-                    html += "      <td colspan='%d'>%s</td>\n" % (1, attr)
-            
-            html += "</tr>\n"
-
             i+=1
+
+        output = string.Template('''
++-----------------------------------------------------------------------------
+| Structure: $name
+|
+${desc}|
++-----------------------------------------------------------------------------
+| Fields:
++-----------------------------------------------------------------------------
+${fields}+-----------------------------------------------------------------------------
+''').substitute({"name" : struct.get_name(),
+                 "desc" : self.format_textblock(struct.get_description(), "|  "),
+                 "fields" : fields})
+
+        return output
+
         
         if("caption" in struct):
             html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
@@ -866,8 +729,8 @@ class template_text_t(template_t):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
-        #elif(name == "struct"):
-        #    self.m_contents += self.format_struct(tag.source, tag.contents)
+        elif(name == "struct"):
+            self.m_contents += self.format_struct(tag)
         elif(name == "ul"):
             self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
@@ -876,19 +739,23 @@ class template_text_t(template_t):
             self.m_contents += self.format_questions(tag)
         elif(name == "image"):
             self.m_contents += self.format_image(tag)
+        elif(name == "define"):
+            self.m_contents += self.format_define(tag)
+        elif(name == "enum"):
+            self.m_contents += self.format_enum(tag)
 
         #elif(name == "checklist"):
         #    self.m_contents += self.format_checklist(tag)
         #elif(name == "image"):
         #    self.m_contents += self.format_image(tag["contents"])
-        #elif(name == "prototype"):
-        #    self.m_contents += self.format_prototype(tag)
+        elif(name == "prototype"):
+            self.m_contents += self.format_prototype(tag)
         elif(name in ("functionsummary", "typesummary")):
             WARNING("Unsupported tag %s" % name)
-        elif(name in ("define", "enum", "struct", "prototype")):
+        elif(name in ("struct", "prototype")):
             WARNING("Unsupported tag %s" % name)
         else:
-            print "Undefined tag: %s [%s]" % (name, tag.source); sys.exit(-1)
+            FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
 
     def get_contents(self):
@@ -1027,5 +894,5 @@ Table of Contents
         #    for image in self.m_engine.m_parser.m_images:
         #        shutil.copy(image, self.m_engine.get_output_dir() + "/" + image)
 
-        print "Generating doc"  
+        INFO("Generating text document")
 

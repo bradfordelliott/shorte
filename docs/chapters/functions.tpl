@@ -58,18 +58,18 @@ with it's own header automatically added for wiki linking. This behavior
 may be controlled by the *prototype_add_header* field in the Shorte config file.
 
 @prototype: language="c"
-- function: my_function
-- description:
+-- function: my_function
+-- description:
     This is a description of my function with some more text
     and blah blah blah. I'm sure if I put enough text here then
     it will likely wrap but I'm not absolutely sure. We'll see
     what it looks like when it is actually formatted. For kicks
     we'll link to the EPT acronym
-- prototype:
+-- prototype:
     int my_function(int val1 [], int val2 [][5]);
-- returns:
+-- returns:
     TRUE on success, FALSE on failure
-- params:
+-- params:
     -- val1 | I | 
             1 = blah blah
                 and more blah blah
@@ -82,7 +82,7 @@ may be controlled by the *prototype_add_header* field in the Shorte config file.
             *1* = blah blah
 
             *2* = blah blah blah
-- example:
+-- example:
     rc = my_function(val);
 
     if(rc != 0)
@@ -90,7 +90,7 @@ may be controlled by the *prototype_add_header* field in the Shorte config file.
         printf("Uh oh, something bad happened!\n");
     }
 
-- pseudocode:
+-- pseudocode:
 
     // Blah blah blah
     _call_sub_function()
@@ -101,7 +101,7 @@ may be controlled by the *prototype_add_header* field in the Shorte config file.
         _call_sub_function2()
     }
     
-- see also:
+-- see also:
     THis is a test
 
 
@@ -119,7 +119,7 @@ up in this table.
 @text
 Generates:
 
-@functionsummary
+#@functionsummary
 
 
 @h3 @typesummary
@@ -132,4 +132,4 @@ defined within the document or in any parsed source code.
 @text
 Generates:
 
-@typesummary
+#@typesummary

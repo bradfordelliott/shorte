@@ -36,7 +36,7 @@ try:
     from libs.cairo_access import cairo
     g_cairo_loaded = True
 except:
-    print "WARNING: Failed to load cairo_access library"
+    WARNING("Failed to load cairo_access library")
         
 from libs.records import *
 
@@ -48,7 +48,7 @@ from libs.records import *
         
 
 
-class image_t():
+class image_t:
     def __init__(self):
         self.caption = ""
         self.source = ""
@@ -58,14 +58,22 @@ class image_t():
         self.extension = ""
 
     def parse_path(self, path):
-        self.source = path
+        self.source = os.path.abspath(path)
         dirname = os.path.dirname(path) + os.path.sep
         name = path.replace(dirname, "")
-        parts = os.path.splitext(name)
+        parts = os.path.split(name)
         self.name = name
         self.dirname = dirname
+
+        parts = os.path.splitext(parts[1])
         self.basename = parts[0]
         self.extension = parts[1]
+
+    def get_name(self):
+        return self.basename + self.extension
+
+        #print "BASENAME: %s" % self.basename
+        #print "DIRNAME:  %s" % dirname
 
     def dimensions(self):
 
@@ -122,6 +130,8 @@ class image_t():
             ERROR("Can't scale images by percentage yet")
             return self.name
 
+        #print "SOURCE: %s" % self.source
+
         im = Image.open(self.source)
         scale_width  = 1.0
         scale_height = 1.0
@@ -151,11 +161,11 @@ class image_t():
         #print "Creating thumbnail"
         return self.scale(new_height=100, new_width=100)
 
-    def thumbnail(self):
+    def get_thumbnail(self):
         #print "Creating thumbnail"
         return self.basename + "_100x100" + self.extension
 
-class gallery_t():
+class gallery_t:
     def __init__(self):
         self.m_images = []
         pass
@@ -175,6 +185,8 @@ class shorte_parser_t(parser_t):
         self.m_pages = []
         
         self.m_engine = engine
+
+        self.m_uid = 0
 
         # The list of valid tags supported by the language
         self.m_valid_tags = {
@@ -201,8 +213,11 @@ class shorte_parser_t(parser_t):
             "image"           : True,
             "gallery"         : True,
             "inkscape"        : True,
+            "gnuplot"         : True,
+            "graph"           : True,
             "shell"           : True,
             "prototype"       : True,
+            "class"           : True,
             "imagemap"        : True,
 
             "java"            : True,
@@ -257,6 +272,10 @@ class shorte_parser_t(parser_t):
 
             # Form tags
             "input"           : True,
+
+            # Just for doxygen compatibility
+            "cond"            : True,
+            "endcond"         : True,
         }
 
         # The tag hierarchy is used to determine
@@ -286,7 +305,7 @@ class shorte_parser_t(parser_t):
         self.m_subtitle = None
 
         # Track WikiWords in the document
-        self.m_wiki_links = {}
+        #self.m_wiki_links = {}
 
         # Rough parser position of current
         # tag
@@ -296,10 +315,16 @@ class shorte_parser_t(parser_t):
 
         self.m_headers = []
 
+    #def get_wiki_links(self):
+    #    return self.m_wiki_links
+
+    #def add_wiki_links(self, links):
+    #    self.m_wiki_links = dict(self.m_wiki_links.items() + links.items())
+
             
     def reset(self):
         self.m_headers = []
-        self.m_wiki_links = {}
+        self.m_engine.m_wiki_links = {}
         self.m_links = []
         self.m_urls = {}
         self.m_snippets = {}
@@ -373,8 +398,7 @@ class shorte_parser_t(parser_t):
 
         tags = self._parse_tags("title", data[0:start-1], 0)
         if(tags == None):
-            print "Failed parsing header"
-            sys.exit(-1)
+            FATAL("Failed parsing header")
 
         header = {}
         header["start"] = start + 5
@@ -495,7 +519,7 @@ class shorte_parser_t(parser_t):
 
             if(state == STATE_NORMAL):
 
-                if(not self.tag_is_source_code(tag_name)):
+                if(not self.tag_is_source_code(tag_name) and tag_name != "gnuplot"):
                     
                     # parse any comments
                     if(input[i] == '#'):
@@ -570,21 +594,29 @@ class shorte_parser_t(parser_t):
 
         return (i, ''.join(tag_data), ''.join(tag_modifier))
     
+    def parse_inline_image_str(self, data):
+        tags = self.parse_modifiers(data)
+        return self.parse_inline_image_data(tags)
 
     def parse_inline_image(self, matches):
 
         name = matches.groups()[0]
 
         tags = {}
+        tags["src"] = name
         
         if(len(matches.groups()) > 1):
             tags = self.parse_modifiers(matches.groups()[3])
             if(not tags.has_key("caption")):
                 tags["caption"] = matches.groups()[1]
 
-        image = {}
+        return self.parse_inline_image_data(tags)
+
+
+    def parse_inline_image_data(self, tags):
             
-        src = os.path.abspath(name)
+        image = {}
+        src = os.path.abspath(tags["src"])
         dirname = os.path.dirname(src) + os.path.sep
 
         name = src.replace(dirname, "")
@@ -741,7 +773,7 @@ class shorte_parser_t(parser_t):
         ext = parts[1]
         dirname = os.path.dirname(basename) + os.path.sep
 
-        print "PATH: %s" % path
+        DEBUG("PATH: %s" % path)
 
         handle = open(path, "wb")
         handle.write(xml)
@@ -825,7 +857,7 @@ class shorte_parser_t(parser_t):
             events.append(event)
 
         name = table.title
-        print "Name: [%s]" % name
+        #print "Name: [%s]" % name
 
         path = pathize(name)
         parts = os.path.splitext(path)
@@ -844,13 +876,15 @@ class shorte_parser_t(parser_t):
             target_height=600,
             base_file_name=basename)
 
+        table = self.parse_table(event_html, modifiers)
+        table.widths = [8,10,10,20,52]
         image = {}
         image["src"] = sequence_img
         image["name"] = basename
         image["ext"]  = ".png"
         image["imagemap"] = image_map
         image["imagemap_name"] = basename
-        image["html"] = self.parse_table(event_html, modifiers)
+        image["html"] = table
         image["reference"] = self.m_current_file
 
         self.m_engine.m_images.append(image["src"])
@@ -900,6 +934,9 @@ class shorte_parser_t(parser_t):
         if(modifiers.has_key("width")):
             table["width"] = modifiers["width"]
             table2.width = modifiers["width"]
+
+        if(modifiers.has_key("style")):
+            table2.style = modifiers["style"]
 
 
         rows = []
@@ -1119,7 +1156,7 @@ class shorte_parser_t(parser_t):
         return input
     
     
-    def parse_define(self, source, attributes):
+    def parse_define(self, source, modifiers):
         '''The parse_define method is called to parse
 a C/C++ like define that looks like:
 
@@ -1131,17 +1168,33 @@ a C/C++ like define that looks like:
 '''
 
         define = define_t()
-        define.name = attributes["name"]
-        if(attributes.has_key("description")):
-            description = attributes["description"]
-            define.description = unescape_string(attributes["description"])
-        else:
-            define.description = unescape_string(attributes["caption"])
-            description = attributes["caption"]
-        define.value = unescape_string(attributes["value"])
+        define.name = self.get_attribute_as_string(modifiers, "name")
+        define.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        define.value = self.get_attribute_as_string(modifiers, "value")
         define.source = source
 
-        define.description = self.parse_textblock(trim_leading_indent(description))
+        define.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        define.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        define.private = self.get_attribute_as_bool(modifiers, "private")
+        define.file = self.get_attribute_as_string(modifiers, "file")
+        define.line = self.get_attribute_as_int(modifiers, "line")
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+        
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            elif(section.startswith("value:")):
+                define.value = section[6:len(section)].strip()
+            elif(section.startswith("name:")):
+                source = section[5:len(section)].strip()
+                define.name = source
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                define.description = self.parse_textblock(source)
 
         return define
 
@@ -1149,20 +1202,22 @@ a C/C++ like define that looks like:
         code = self.m_engine.m_source_code_analyzer
         language = "code"
         example = code.parse_source_code(language, source)
-        obj.example = {}
-        obj.example["language"] = language
-        obj.example["parsed"] = example 
-        obj.example["unparsed"] = source
+        obj.example = code_block_t()
+        obj.example.language = language
+        obj.example.parsed = example
+        obj.example.unparsed = source
 
     def parse_enum(self, source, modifiers):
         
         enum = enum_t()
         
-        enum.name = modifiers["name"]
-        enum.description = self.parse_textblock(modifiers["description"])
+        enum.name = self.get_attribute_as_string(modifiers, "name")
+        enum.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
         enum.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         enum.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         enum.private = self.get_attribute_as_bool(modifiers, "private")
+        enum.file = self.get_attribute_as_string(modifiers, "file")
+        enum.line = self.get_attribute_as_int(modifiers, "line")
         
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
@@ -1211,21 +1266,249 @@ a C/C++ like define that looks like:
                         word.wikiword = modifiers["wikiword"]
 
                     word.link = os.path.basename(self.m_current_file)
-                    self.m_wiki_links[word.wikiword] = word
+                    self.m_engine.m_wiki_links[word.wikiword] = word
+            elif(section.startswith("name:")):
+                source = section[5:len(section)].strip()
+                enum.name = source
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                enum.description = self.parse_textblock(source)
 
         return enum
+    
+    def parse_class(self, source, modifiers):
+        
+        cname = self.get_attribute_as_string(modifiers, "name")
+        
+        cdescription = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        cdeprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        cdeprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        cprivate = self.get_attribute_as_bool(modifiers, "private")
+        cfile = self.get_attribute_as_string(modifiers, "file")
+        cline = self.get_attribute_as_int(modifiers, "line")
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+
+        cprivfunc = None
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            elif(section.startswith("name:")):
+                source = section[5:len(section)].strip()
+                cname = source
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                cdescription = self.parse_textblock(source)
+            elif(section.startswith("private.functions:")):
+                source = section[18:].strip()
+                cprivfunc = source
+            elif(section.startswith("public.functions:")):
+                source = section[17:].strip()
+                cpubfunc = source
+
+        cls = self.m_engine.class_get(cname)
+        cls.set_name(cname)
+        cls.set_description(cdescription)
+        cls.deprecated = cdeprecated
+        cls.deprecated_msg = cdeprecated_msg
+        cls.private = cprivate
+        cls.file = cfile
+        cls.line = cline
+
+        if(cprivfunc):
+            WARNING("PRIVATE.FUNCTIONS")
+            funcs = cprivfunc.split("--")
+            for func in funcs:
+                print func
+
+        return cls
+
+    def parse_gnuplot(self, source, modifiers):
+        '''This method is called to parse a gnuplot tag
+           @param self      [I] - The shorte parser instance
+           @param source    [I] - The source code for the tag
+           @param modifiers [I] - A list of modifiers associated with the tag.
+
+           @return A dictionary defining the GNU Plot object
+        '''
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+        
+            
+        scratchdir = shorte_get_scratch_path()
+        
+        image = {}
+        image["name"] = "gnuplot_%d" % self.m_uid
+        self.m_uid += 1
+        image["data"] = ""
+        image["cmd"]  = ""
+        
+        if(modifiers.has_key("data")):
+            # Open the plot data file
+            handle = open(modifiers["data"], "rt")
+            image["data"] = handle.read()
+            handle.close()
+        
+        if(modifiers.has_key("cmd")):
+            # Open the plot data file
+            handle = open(modifiers["cmd"], "rt")
+            image["cmd"] = handle.read()
+            handle.close()
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("data:")):
+                data = section[5:len(section)]
+                image["data"] = data
+
+            elif(section.startswith("cmd:")):
+                cmd = section[4:]
+                image["cmd"] = cmd
+                    
+        image["cmd"] = image["cmd"].replace("$OUTPUT_FILE", image["name"] + ".png")
+        image["cmd"] = image["cmd"].replace("$DATA_FILE", "plot.dat")
+
+        # Create the plot data file
+        handle = open(scratchdir + "/plot.dat", "wt")
+        handle.write(image["data"])
+        handle.close()
+
+        # Create the plot command file
+        handle = open(scratchdir + "/plot.gnu", "wt")
+        handle.write(image["cmd"])
+
+        path_gnuplot = shorte_get_tool_path("gnuplot")
+
+        cmd = 'cd "%s";%s %s' % (scratchdir, path_gnuplot, "plot.gnu")
+
+        # DEBUG BRAD: Check the return here to ensure
+        #             the image was actually generated
+        output = os.popen(cmd)
+
+        image["name"] = image["name"]
+        image["ext"] = ".png"
+        image["src"] = scratchdir + "/" + image["name"] + image["ext"]
+        self.m_engine.m_images.append(image["src"])
+        DEBUG(image["src"])
+
+        return image
+    
+    
+    def parse_graph(self, source, modifiers):
+        '''This method is called to parse a graph tag
+           @param self      [I] - The shorte parser instance
+           @param source    [I] - The source code for the tag
+           @param modifiers [I] - A list of modifiers associated with the tag.
+
+           @return A dictionary defining the generated image object
+        '''
+        
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+            
+        scratchdir = shorte_get_scratch_path()
+        
+        image = {}
+        image["name"] = "graph_%d" % self.m_uid
+        self.m_uid += 1
+        image["data"] = {}
+
+        graph_type = "line"
+        height = 600
+        width = 800
+        title = ""
+        subtitle = ""
+        
+        if(modifiers.has_key("data")):
+            # Open the plot data file
+            handle = open(modifiers["data"], "rt")
+            image["data"] = handle.read()
+            handle.close()
+        if(modifiers.has_key("type")):
+            graph_type = modifiers["type"]
+        if(modifiers.has_key("height")):
+            height = int(modifiers["height"])
+        if(modifiers.has_key("width")):
+            width = int(modifiers["width"])
+        if(modifiers.has_key("title")):
+            title = modifiers["title"]
+        if(modifiers.has_key("subtitle")):
+            subtitle = modifiers["subtitle"]
+        
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            if(section.startswith("data:")):
+                data = section[5:len(section)]
+
+                #print data
+
+                tmp_macros = {}
+                eval(compile(data, "example.py", "exec"), tmp_macros, tmp_macros)
+                image["data"] = tmp_macros["data"]
+                #image["data"] = data
+                #lines = data.split('\n')
+                #
+                #for line in lines:
+                #    parts = line.split(" ")
+                #    if(len(parts) == 2):
+                #        x = float(parts[0])
+                #        y = float(parts[1])
+                #        image["data"][x] = y
+
+        if(graph_type == "line"):
+            import src.graphing.linegraph as linegraph
+            graph = linegraph.line_graph_t(width,height)
+            graph.set_title(title, subtitle)
+            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+        elif(graph_type == "bar"):
+            import src.graphing.bargraph as bargraph
+            graph = bargraph.bar_graph_t(width,height)
+            graph.set_title(title, subtitle)
+            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+        elif(graph_type == "timeline"):
+            import src.graphing.timeline as timeline
+            graph = timeline.timeline_graph_t(width,height)
+            graph.set_title(title, subtitle)
+            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+            
+        #d = {0:1, 1:3, 4:5, 6:4, 7:4, 8:3, 10:8}
+        for dataset in image["data"]:
+            graph.add_data_set(image["data"][dataset], dataset)
+
+        image["name"] = image["name"]
+        image["ext"] = ".png"
+        image["src"] = scratchdir + "/" + image["name"] + image["ext"]
+        image["caption"] = "This is a random caption"
+        
+        graph.draw_graph(image["src"])
+        self.m_engine.m_images.append(image["src"])
+
+        return image
 
     def parse_struct(self, source, modifiers):
         '''This method is called to parse an @struct tag containing a structure
            definition.
 
-           @param self [I] - The shorte parser instance
-           @param source [I] - The source code for the tag
+           @param self      [I] - The shorte parser instance
+           @param source    [I] - The source code for the tag
            @param modifiers [I] - A list of modifiers associated with the tag.
 
            @return A dictionary defining the structure
         '''
-
         struct2 = struct_t()
         struct = {}
         struct["fields"] = []
@@ -1242,7 +1525,7 @@ a C/C++ like define that looks like:
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
                 struct[modifier] = self.parse_textblock(modifiers[modifier])
-                struct2.description = self.parse_textblock(modifiers[modifier])
+                struct2.set_description(self.parse_textblock(modifiers[modifier]), textblock=True)
             else:
                 struct[modifier] = modifiers[modifier]
 
@@ -1254,6 +1537,10 @@ a C/C++ like define that looks like:
         sections = splitter.split(source)
 
         struct2.headings = {}
+        
+
+        struct2.set_name(self.get_attribute_as_string(modifiers, "name"))
+        struct_desc = self.get_attribute_as_string(modifiers, "description")
 
         for section in sections:
 
@@ -1263,6 +1550,13 @@ a C/C++ like define that looks like:
             if(section.startswith("example:")):
                 example = section[8:len(section)]
                 self.parse_object_example(example, struct2)
+
+            elif(section.startswith("name:")):
+                struct2.set_name(section[5:len(section)])
+            
+            elif(section.startswith("description:")):
+                source = section[12:len(section)].strip()
+                struct_desc = source
 
             elif(section.startswith("fields:")):
                     
@@ -1294,22 +1588,25 @@ a C/C++ like define that looks like:
                 pos_last = 0
 
                 fields = []
+                fields2 = []
                 
+                rindex = 0
                 for row in rows:
                     
+                    # Skip the first row since it is just the header. Should this really
+                    # be done here?
+                    if(rindex == 0):
+                        rindex += 1
+                        continue
+
+                    rindex += 1
+                        
+                    f2 = field_t()
                     field = {}
-                    field["attrs"] = []
-                    field["is_reserved"] = False
-                    field["is_header"] = False
-                    field["is_title"] = False
-                    field["is_subheader"] = False
-                    field["is_caption"] = False
-                    field["is_spacer"] = False
-                    field["is_array"] = False
 
                     # Mark the first row as a header
                     if(row_num == 0):
-                        field["is_header"] = True
+                        f2.is_header = True
 
                     row_num = row_num + 1
                     
@@ -1320,7 +1617,7 @@ a C/C++ like define that looks like:
                     
                     is_spaces = re.compile("^[ \t]*$", re.DOTALL)
                     if(is_spaces.match(row)):
-                        field["is_spacer"] = True
+                        f2.is_spacer = True
                     
                     row = row + "\n"
                     
@@ -1343,13 +1640,13 @@ a C/C++ like define that looks like:
                     # row. If they are &, *, or ^ then they have
                     # special significance.
                     if(row[0] == '&'):
-                        field["is_subheader"] = True
+                        f2.is_subheader = True
                         start = 1
                     elif(row[0] == '*'):
-                        field["is_header"] = True
+                        f2.is_header = True
                         start = 1
                     elif(row[0] == '^'):
-                        field["is_caption"] = True
+                        f2.is_caption = True
                         start = 1
 
                     i = start
@@ -1390,12 +1687,12 @@ a C/C++ like define that looks like:
                                 text = attr.strip()
 
                                 if(mark_reserved and self.is_reserved_text(text)):
-                                    field["is_reserved"] = True
+                                    f2.is_reserved = True
 
                                 #field["attrs"].append(attr)
                                 
                                 tmp["text"] = attr
-                                field["attrs"].append(tmp)
+                                f2.append_attr(tmp)
 
                                 col = ""
 
@@ -1406,7 +1703,7 @@ a C/C++ like define that looks like:
                             col += row[i]
 
                             if(row[i] == '}'):
-                                state = states.pop()
+                                    state = states.pop()
 
                         elif(state == STATE_ESCAPE):
                             col += row[i]
@@ -1423,42 +1720,39 @@ a C/C++ like define that looks like:
                         attr = col.strip()
 
                         if(attr == "Reserved" or attr == 'reserved' or attr == 'Rsvd' or attr == 'rsvd'):
-                            field["is_reserved"] = True
+                            f2.is_reserved = True
 
                         tmp["text"] = attr
-
-                        field["attrs"].append(tmp)
+                        f2.append_attr(tmp)
 
                     #print field
 
-                    fields.append(field)
+                    fields2.append(f2)
 
-                for field in fields:
+                for field in fields2:
                     if(not fields_are_bytes):
-                        bits = field["attrs"][0]["text"]
-
-                        if(bits.find("b") != -1):
+                        if(field.get_field_is_bits()):
                             fields_are_bits = True
 
                 type = ""
-                for field in fields:
+                for field in fields2:
 
-                    if(field["is_header"]):
+                    if(field.get_is_header()):
                         i = 0
-                        for attr in field["attrs"]:
+                        for attr in field.attrs:
                             struct2.headings[i] = attr["text"]
                             i += 1
 
                         continue
 
-                    if(field["is_spacer"]):
+                    if(field.get_is_spacer()):
                         width = 0
                         start = 0
                         end = 0
 
                     elif(fields_are_bytes):
 
-                        bytes = field["attrs"][0]["text"]
+                        bytes = field.get_type()
 
                         if((bytes[0] >= '0') and (bytes[0] <= '9')):
                             parts = bytes.split("x") 
@@ -1469,8 +1763,8 @@ a C/C++ like define that looks like:
                                 type = int(parts[0].strip())
                                 num  = int(parts[1].strip())
 
-                                field["is_array"]        = True
-                                field["array_elem_size"] = type
+                                field.is_array        = True
+                                field.array_elem_size = type
 
                                 #print("type = %d" % type)
                                 #print("num = %d" % num)
@@ -1488,7 +1782,8 @@ a C/C++ like define that looks like:
 
                     elif(fields_are_bits):
 
-                        bits = field["attrs"][0]["text"]
+                        bits = field.get_type()
+                        bits = bits.replace("'", '')
 
                         if((bits[0] >= '0') and (bits[0] <= '9')):
                             #print "BITS: %s" % bits
@@ -1501,7 +1796,7 @@ a C/C++ like define that looks like:
                             type = bits
 
                     else:
-                        bits = field["attrs"][0]["text"]
+                        bits = field.get_type()
 
                         # If it's not the header then see if we should insert
                         # a reserved field befor this one to accomodate any gaps
@@ -1532,47 +1827,30 @@ a C/C++ like define that looks like:
                                 new_end = start - 1
                                 new_width = new_end - new_start + 1
 
-                                new_field = {}
-                                new_field["width"] = new_width
-                                new_field["start"] = new_start
-                                new_field["end"] = new_end
-                                new_field["attrs"] = []
+                                new_field = field_t()
+
+                                new_field.width = new_width
+                                new_field.start = new_start
+                                new_field.end   = new_end
+                                new_field.attrs = []
 
                                 if(new_width > 1):
-                                    attr = {}
-                                    attr["text"] = "%d - %d" % (new_start, new_end)
-                                    new_field["attrs"].append(attr)
+                                    new_field.attrs.append("%d - %d" % (new_start, new_end))
                                 else:
-                                    attr = {}
-                                    attr["text"] = '%d' % (new_start)
-                                    new_field["attrs"].append(attr)
+                                    new_field.attrs.append("%d" % (new_start))
                                         
-                                new_field["attrs"].append({"text" : "Reserved"})
-                                new_field["attrs"].append({"text" : "Automatically generated"})
-                                
-                                # If the structure has alternate headings then
-                                # add the extra column so that the reserved field
-                                # spans the entire table. There is probably a better
-                                # way to do this.
-                                if(struct2.has_headings()):
-                                    num_headings = len(struct2.get_headings().keys())
-
-                                    h = 3
-                                    while(h < num_headings):
-                                        new_field["attrs"].append({"text" : ""})
-                                        h += 1
-
-                                new_field["is_reserved"] = True
-                                new_field["is_header"] = False
-                                new_field["is_title"] = False
-                                new_field["is_subheader"] =  field["is_subheader"]
-                                new_field["is_caption"] = False
-                                new_field["is_spacer"] = False
-                                new_field["is_array"] = False
-                                new_field["type"] = ""
-                                new_field["textblock"] = "Reserved"
-                                new_field["text"] = "Reserved"
-                                struct["fields"].append(new_field)
+                                new_field.attrs.append("Reserved")
+                                new_field.attrs.append("Automatically generated")
+                                new_field.set_name("Reserved")
+                                new_field.set_description("Automatically generated")
+                                new_field.set_description_unparsed("Automatically generated")
+                                new_field.is_reserved = True
+                                new_field.is_header = False
+                                new_field.is_title = False
+                                new_field.is_subheader = field.is_subheader
+                                new_field.is_spacer = False
+                                new_field.is_array = False
+                                new_field.type = ""
                                 struct2.fields.append(new_field)
 
                             pos_last = end+1
@@ -1581,61 +1859,48 @@ a C/C++ like define that looks like:
                             start = 0
                             end = 0
 
-                    field["width"] = width
-                    field["start"] = start
-                    field["end"] = end
-                    field["type"] = type
-
-                    struct["fields"].append(field)
+                    field.width = width
+                    field.start = start
+                    field.end = end
+                    field.type = type
                     struct2.fields.append(field)
-
-        #print "MAX_COLS = %d" % max_cols
 
         struct["max_cols"] = max_cols
         struct2.max_cols = max_cols
 
         index = len(self.m_engine.m_images)
         image_name = "record_%d.png" % index
-        struct["title"] = modifiers["name"]
-        struct["name"] = modifiers["name"]
-        struct2.name = modifiers["name"]
-        struct["private"] = False
-        struct["deprecated"] = False
 
-        if(modifiers.has_key("private")):
-            if(modifiers["private"] in ("True", "true", "1")):
-                struct["private"] = True
-        if(modifiers.has_key("deprecated")):
-            if(modifiers["deprecated"] in ("True", "true", "1")):
-                struct["deprecated"] = True
-        
+        struct2.set_description(struct_desc, textblock=False)
+        struct2.set_description(self.parse_textblock(struct_desc), textblock=True)
         struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         struct2.private = self.get_attribute_as_bool(modifiers, "private")
+        struct2.file = self.get_attribute_as_string(modifiers, "file")
+        struct2.line = self.get_attribute_as_int(modifiers, "line")
             
         # Generate a record describing the structure
-        desc = ''
-        if(modifiers.has_key("caption")):
-            desc = modifiers["caption"]
+        desc = struct2.get_description(textblock=False)
 
-        record = record_t(struct["title"], desc)
-            
-        for field in struct["fields"]:
+        record = record_t(struct2.get_name(), desc)
 
-            #print "FIELD_NAME = [%s] (%s)" % (field["attrs"][1], field["attrs"][0])
+        for field in struct2.fields:
 
-            if(field["is_reserved"]):
-                record.append_reserved(field["width"], field["is_array"], 8, field["type"])
-            elif(not field["is_caption"] and not field["is_spacer"]):
+            #print "FIELD = [%s]" % (field["name"]) # field["attrs"][1], field["attrs"][0])
 
-                is_array = field["is_array"]
+            if(field.get_is_reserved()):
+                record.append_reserved(field.width, field.is_array, 8, field.get_type())
+            elif(not field.is_spacer):
+
+                is_array = field.is_array
                 array_elem_size = 8
                 
-                if(field.has_key("array_elem_size")):
-                    array_elem_size = int(field["array_elem_size"])
+                if(field.array_elem_size):
+                    array_elem_size = int(field.array_elem_size)
 
-                record.append_field(field["attrs"][1]["text"], field["width"], field["attrs"][2]["text"], field["is_reserved"], is_array, array_elem_size, field["type"])
-       
+                desc = field.get_description_unparsed()
+                record.append_field(field.get_name(), field.width, desc, field.is_reserved, is_array, array_elem_size, field.get_type())
+
         # Generate an record of the structure so that images
         # or source code can be generated from it.
         if(modifiers.has_key("diagram")):
@@ -1662,17 +1927,15 @@ a C/C++ like define that looks like:
             image_map = record.draw(image_name, attributes)
 
             self.m_engine.m_images.append(image_name)
-            struct["image"] = {}
-            struct["image"]["path"] = image_name
-            struct["image"]["map"] = image_map
-            struct["image"]["reference"] = self.m_current_file
+            img = {}
+            img["path"] = image_name
+            img["map"] = image_map
+            img["reference"] = self.m_current_file
+            struct2.image = img
 
-            struct2.image = struct["image"]
-
-        struct["record"] = record
         struct2.record = record
-
-        return (struct,struct2)
+        
+        return struct2
     
     def parse_checklist(self, source, modifiers):
 
@@ -1757,35 +2020,45 @@ a C/C++ like define that looks like:
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
 
+        p2 = prototype_t()
+
         vars = {}
         vars["name"]      = ""
+        
+        p2.file = self.get_attribute_as_string(modifiers, "file")
+        p2.line = self.get_attribute_as_int(modifiers, "line")
+        
+        p2.set_name(self.get_attribute_as_string(modifiers, "name"))
         
         language = "code"
         if(modifiers.has_key("language")):
             language = modifiers["language"]
+
+        class_name = None
 
         for section in sections:
             if(section != ""):
                 
                 if(section.startswith("function:")):
                     vars["name"] = section[9:len(section)].strip()
-                
+                    p2.set_name(vars["name"])
+                elif(section.startswith("name:")):
+                    vars["name"] = section[5:len(section)].strip()
+                    p2.set_name(vars["name"])
+
                 elif(section.startswith("description:")):
                     vars["desc"] = section[12:len(section)].strip()
+                    p2.set_description(vars["desc"],False)
                     tmp = section[12:len(section)]
                     vars["desc2"] = self.parse_textblock(tmp)
+                    p2.set_description(vars["desc2"])
 
                 elif(section.startswith("prototype:")):
                     vars["prototype"] = section[10:len(section)].strip()
 
                     function_prototype = section[10:len(section)].strip()
 
-                    code = self.m_engine.m_source_code_analyzer
-                    prototype = code.parse_source_code(language, function_prototype)
-                    vars["prototype"] = {}
-                    vars["prototype"]["language"] = language
-                    vars["prototype"]["parsed"] = prototype
-                    vars["prototype"]["unparsed"] = function_prototype
+                    p2.set_prototype(function_prototype, self.m_engine.m_source_code_analyzer, language)
                 
                 elif(section.startswith("called by:")):
                     vars["called_by"] = section[10:len(section)].strip()
@@ -1832,12 +2105,18 @@ a C/C++ like define that looks like:
                             fields["desc"] = param_value
                             fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(desc))
 
-                            vars["params"].append(fields)
+                            p = param_t()
+                            p.set_name(param_name)
+                            p.set_io(param_io)
+                            p.set_description(param_value, textblock=False)
+                            p.set_description(self.parse_textblock(trim_leading_blank_lines(param_value)), textblock=True)
+                            #vars["params"].append(fields)
+                            vars["params"].append(p)
 
 
                         else:
                             #row = re.sub('\n', ' ', row).strip()
-
+#
                             if(row != ""):
                             
                                 #print "PARAM: [%s]" % row
@@ -1857,22 +2136,27 @@ a C/C++ like define that looks like:
                                     fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(trim_leading_indent(cols[2])))
                                     fields["desc2"] = self.parse_textblock(cols[2]) 
 
-                                    vars["params"].append(fields)
+                                    p = param_t()
+                                    p.set_name(cols[0].strip())
+                                    p.set_io(cols[1].strip())
+                                    p.set_description(cols[2], textblock=False)
+                                    p.set_description(self.parse_textblock(cols[2]),textblock=True)
+
+                                    #vars["params"].append(fields)
+                                    vars["params"].append(p)
+
+                    p2.set_params(vars["params"])
                 
                 elif(section.startswith("returns:")):
                     vars["returns"] = section[8:len(section)].strip()
+                    p2.set_returns(vars["returns"])
                 
                 elif(section.startswith("example:")):
                     example = section[8:len(section)]
 
                     #print "EXAMPLE: [%s]" % example
 
-                    code = self.m_engine.m_source_code_analyzer
-                    example = code.parse_source_code(language, example)
-                    vars["example"] = {}
-                    vars["example"]["language"] = language
-                    vars["example"]["parsed"] = example 
-                    vars["example"]["unparsed"] = section[8:len(section)]
+                    p2.set_example(example, self.m_engine.m_source_code_analyzer, language)
 
                 elif(section.startswith("pseudocode:")):
                     
@@ -1881,23 +2165,62 @@ a C/C++ like define that looks like:
                     # Now trim any leading lines
 
                     #print "PSEUDOCODE: [%s]" % pseudocode
+                    
+                    p2.set_pseudocode(pseudocode, self.m_engine.m_source_code_analyzer, language)
 
-                    code = self.m_engine.m_source_code_analyzer
-                    pseudocode = code.parse_source_code(language, pseudocode)
-                    vars["pseudocode"] = {}
-                    vars["pseudocode"]["language"] = language
-                    vars["pseudocode"]["parsed"] = pseudocode
-                    vars["pseudocode"]["unparsed"] = section[11:len(section)]
+                elif(section.startswith("see:")):
+                    vars["see_also"] = section[4:len(section)].strip()
 
-                elif(section.startswith("see also:")):
-                    vars["see_also"] = section[9:len(section)].strip()
+                    p2.set_see_also(vars["see_also"])
                 
                 elif(section.startswith("deprecated:")):
                     vars["deprecated"] = True
-                    vars["deprecated_msg"] = section[11:len(section)].strip()
+                    msg = self.parse_textblock(section[11:len(section)].strip())
+                    vars["deprecated_msg"] = msg
+                    p2.set_deprecated(True, msg)
 
+                elif(section.startswith("class:")):
+                    class_name = section[6:len(section)].strip()
 
-        return vars
+        if(class_name != None):
+            WARNING("Class name: %s" % class_name)
+
+            cls = self.m_engine.class_get(class_name)
+            print p2
+            cls.prototype_add(p2)
+            
+
+        # This section attempts to search the prototype of the
+        # method for the type of each argument and sets the type
+        # associated with each parameter.
+        matches = re.search("\((.*)\)", function_prototype, re.DOTALL)
+        if(matches != None):
+            args = matches.groups()[0].split(',')
+
+            arg_types = {}
+            for arg in args:
+                # Strip any brackets since we won't count
+                # that as the type
+                arg = re.sub("\[.*\]", '', arg)
+                arg = arg.strip()
+                parts = arg.split(' ')
+
+                # The last word must be the argument
+                # name.
+                arg_name = parts[-1]
+
+                # Everthing before it is the argument
+                # type.
+                arg_type = ' '.join(parts[0:-1])
+
+                arg_types[arg_name] = arg_type
+
+        if(p2.has_params()):
+            for param in p2.get_params():
+                if(not param.has_type() and arg_types.has_key(param.get_name())):
+                    param.set_type(arg_types[param.get_name()])
+
+        return (vars, p2)
 
     
 
@@ -1927,6 +2250,7 @@ a C/C++ like define that looks like:
             ext = parts[1]
             
             image["src"] = os.path.abspath(tags["src"])
+            #print "parse_image.src = %s" % image["src"]
             image["name"] = basename
             image["ext"] = ext
         
@@ -1990,6 +2314,7 @@ a C/C++ like define that looks like:
 
                         image.parse_path(row["cols"][0]["text"])
 
+                        #print "PATH: %s" % image.source
                         # Add the image to the list of managed photos
                         self.m_engine.m_images.append(image.source)
 
@@ -2180,8 +2505,7 @@ else:
             try:
                 eval(compile(to_eval, "example.py", "exec"), tmp_macros, tmp_macros)
             except:
-                print to_eval
-                sys.exit(-1)
+                FATAL(to_eval)
 
             result = tmp_macros["result"]
             #print "RESULT: %s = %s" % ("(" + define + ")", result)
@@ -2215,7 +2539,7 @@ else:
             # DEBUG BRAD: old way of dealing with headers
             #    tmp = data
             #    tmp = re.sub("\n", " ", tmp).strip()
-            #    self.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
+            #    self.m_engine.m_wiki_links[tmp] = (os.path.basename(self.m_current_file), False)
             #    self.m_headers.append(tag)
             
             # DEBUG BRAD: This is the new way of dealing with
@@ -2227,6 +2551,15 @@ else:
             # the first line as a text block
             lines = data.split('\n')
             tmp = lines[0].strip()
+            
+            # If the header is of the format [[...,...]] then
+            # treat the first part as a wikiword and the second
+            # as the title
+            matches = re.search("\[\[(.*),(.*)\]\]", tmp)
+            if(None != matches):
+                tmp = matches.groups()[1]
+                modifiers["wikiword"] = matches.groups()[0]
+
             tag.contents = tmp
             tag.source = tmp
 
@@ -2240,7 +2573,7 @@ else:
                     word.wikiword = modifiers["wikiword"]
 
                 word.link = os.path.basename(self.m_current_file)
-                self.m_wiki_links[word.wikiword] = word
+                self.m_engine.m_wiki_links[word.wikiword] = word
 
             self.m_headers.append(tag)
         
@@ -2284,7 +2617,7 @@ else:
             tag.contents = self.parse_table(data, modifiers)
 
         elif(name == "include" or name == "include_child"):
-            print "Parsing include(s) [%s]" % data
+            INFO("Parsing include(s) [%s]" % data)
             data = data.replace("\"", "")
 
             include_files = data.split("\n")
@@ -2298,23 +2631,22 @@ else:
 
         elif(name == "struct"):
             modifiers["treat_fields_as"] = "bytes"
-            (struct,struct2) = self.parse_struct(data, modifiers)
-            tag.contents = struct2
+            struct = self.parse_struct(data, modifiers)
+            tag.contents = struct
 
         elif(name == "define"):
             tag.contents = self.parse_define(data, modifiers)
         
         elif(name == "vector"):
             modifiers["treat_fields_as"] = "bits"
-            (struct,struct2) = self.parse_struct(data, modifiers)
-            tag.contents = struct2
+            struct = self.parse_struct(data, modifiers)
+            tag.contents = struct
             tag.name = "struct"
     
         elif(name == "register"):
             modifiers["treat_fields_as"] = "bits"
-            (struct,struct2) = self.parse_struct(data, modifiers)
-            tag.contents = struct2
-            tag.name = "register"
+            struct = self.parse_struct(data, modifiers)
+            tag.contents = struct
 
         elif(name in ("ol", "ul")):
             tag.contents = self.parse_list(data, modifiers)
@@ -2333,13 +2665,16 @@ else:
 
         elif(name == "input"):
             tag.contents = self.parse_input(modifiers)
+
+        elif(name in ("cond", "endcond")):
+            return
         
         elif(name == "prototype"):
 
             if(len(data) == 0):
                 ERROR("Prototype at %s:%d has no body, may cause parsing errors" % (tag.file, tag.line))
 
-            function = self.parse_prototype(data, modifiers)
+            (function,ptype) = self.parse_prototype(data, modifiers)
 
             if(prototype_add_header != None):
 
@@ -2349,16 +2684,16 @@ else:
                 header.is_header = True
                 header.is_prototype = True
                 header.name = prototype_add_header
-                header.contents = function["name"]
-                header.source = function["name"]
+                header.contents = ptype.get_name()
+                header.source = ptype.get_name()
                 header.modifiers = modifiers
-                header.file = filename
-                header.line = linenum
+                header.file = ptype.get_file()
+                header.line = ptype.get_line()
                 
                 # If a header with the same name already exists then don't
                 # bother adding a new one
                 #print "FUNC NAME: [%s]" % function["name"]
-                hdr_tag = self.get_header(function["name"])
+                hdr_tag = self.get_header(ptype.get_name())
                 if(hdr_tag == None):
                     tmp = function["name"]
                     tmp = re.sub("\n", " ", tmp).strip()
@@ -2372,13 +2707,13 @@ else:
 
                     word.link = os.path.basename(self.m_current_file)
 
-                    self.m_wiki_links[word.wikiword] = word
+                    self.m_engine.m_wiki_links[word.wikiword] = word
 
                     tags.append(header)
                 else:
                     hdr_tag.is_prototype = True
             
-            tag.contents = function
+            tag.contents = ptype
 
         elif(name == "testcase"):
             testcase = self.parse_testcase(data, modifiers)
@@ -2412,7 +2747,7 @@ else:
 
                     word.link = os.path.basename(self.m_current_file)
 
-                    self.m_wiki_links[word.wikiword] = word
+                    self.m_engine.m_wiki_links[word.wikiword] = word
 
                     tags.append(header)
                 else:
@@ -2429,6 +2764,14 @@ else:
             tag.contents = self._parse_inkscape(data, modifiers)
             tag.name = "image"
 
+        elif(name == "gnuplot"):
+            tag.contents = self.parse_gnuplot(data, modifiers)
+            tag.name = "image"
+
+        elif(name == "graph"):
+            tag.contents = self.parse_graph(data, modifiers)
+            tag.name = "image"
+
         elif(name == "pre"):
             tag.contents = data.strip()
 
@@ -2438,6 +2781,10 @@ else:
         elif(name == "enum"):
             tag.contents = self.parse_enum(data, modifiers)
             tag.name = "enum"
+
+        elif(name == "class"):
+            tag.contents = self.parse_class(data, modifiers)
+            tag.name = "class"
 
         elif(name == "acronyms"):
             tag.contents = self.parse_table(data, modifiers)
@@ -2461,7 +2808,7 @@ else:
                     word.wikiword = modifiers["wikiword"]
 
                 word.link = os.path.basename(self.m_current_file)
-                self.m_wiki_links[word.wikiword] = word
+                self.m_engine.m_wiki_links[word.wikiword] = word
             
             # If the table has no title then default it
             if(table.title == None):
@@ -2503,8 +2850,7 @@ else:
             input = source.read()
             source.close()
         except:
-            print "Failed loading source file [%s]" % source_file
-            raise
+            FATAL("Failed loading source file [%s]" % source_file)
         
         # Strip any \r characters
         input = input.replace("\r", "")
@@ -2693,7 +3039,7 @@ else:
                     
                         #print "CHARS: %s,%s" % (input[i], input[i+1])
                         if(input[i+1] == '{'):
-                            print "DO I GET HERE?"
+                            DEBUG("DO I GET HERE?")
                             pass
                         else:
                             if(tag_name != "" and tag_data != ""):
@@ -2773,8 +3119,7 @@ else:
 
             print e
 
-            print "\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line, self.m_current_file) 
-            sys.exit(-1)
+            FATAL("\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line, self.m_current_file))
 
         return None
 
@@ -2919,7 +3264,7 @@ def exists(s):
             if(tmp_macros.has_key("result")):
                 eval_result = tmp_macros["result"]
         except Exception,e:
-            print "EXCEPTION: %s" % e
+            WARNING("EXCEPTION: %s" % e)
             do_nothing=1
 
         return eval_result
@@ -3095,7 +3440,7 @@ def exists(s):
                     
                         #print "CHARS: %s,%s" % (input[i], input[i+1])
                         if(input[i+1] == '{'):
-                            print "DO I GET HERE?"
+                            DEBUG("DO I GET HERE?")
                             pass
                         else:
                             #print "Here"
@@ -3154,7 +3499,7 @@ def exists(s):
                 else:
                     
                     if(i < len(input)):
-                        print "Snippet: %s, i = %d, len = %d" % (input[i:-1], i, len(input))
+                        INFO("Snippet: %s, i = %d, len = %d" % (input[i:-1], i, len(input)))
                         saved_line = self.m_current_line
                         (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
                         tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
@@ -3189,6 +3534,5 @@ def exists(s):
 
             print e
 
-            print "\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line, self.m_current_file) 
-            sys.exit(-1)
+            FATAL("\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line, self.m_current_file))
     

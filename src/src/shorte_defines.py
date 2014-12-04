@@ -54,9 +54,61 @@ class tag_t:
         self.hierarchy = ""
         self.category = ""
         self.page = None
+        self.modifiers = None
 
         # The heading that this tag belongs to (if applicable)
         self.heading = None
+
+    def has_source(self):
+        if(self.source != None and len(self.source) > 0):
+            return True
+
+        # Text blocks shouldn't be blank
+        if(self.name in ("text")):
+            return False
+
+        # It is ok for an image to not have any source
+        if(self.name in ("image")):
+            return True
+
+        WARNING("Tag %s has no source, should it?" % self.name)
+        return True
+
+    def get_source(self):
+        return self.source
+
+    def get_contents(self):
+        return self.contents
+
+    def has_modifiers(self):
+        if(self.modifiers != None and (len(self.modifiers) > 0)):
+            return True
+        return False
+    def get_modifiers(self):
+        return self.modifiers
+    def get_modifiers_as_string(self):
+        mods = ''
+        for key in self.modifiers:
+            mods += " %s='%s'" % (key, self.modifiers[key])
+
+        return mods
+
+    def get_modifier(self, name):
+        if(self.modifiers.has_key(name)):
+            return self.modifiers[name]
+        return None
+    
+    def get_name(self):
+        return self.name
+
+    def __str__(self):
+        data = "Tag\n"
+        data += "  name %s\n" % self.name
+        data += "  file %s\n" % self.file
+        data += "  line %s\n" % self.line
+        data += "  page %s\n" % self.page
+
+        return data
 
 g_tools = tools_t()
 g_startup_path = None
@@ -72,12 +124,59 @@ def shorte_get_startup_path():
     if(startup_path == ""):
         startup_path = os.getcwd()
 
+    # If shorte.py doesn't exist then try the PATH_SHORTE
+    # environment variable
+    if(not os.path.exists(startup_path + "/shorte.py")):
+        if(not os.path.exists(startup_path + "/shorte.exe")):
+            WARNING("shorte.py not found at %s, trying PATH_SHORTE environment variable" % startup_path)
+
+            if(not os.environ.has_key("PATH_SHORTE")):
+                FATAL("Unable to determine shorte startup directory. I would recommend you "
+                      "define the PATH_SHORTE environment variable to the location of "
+                      "shorte.py")
+
+            startup_path = os.environ["PATH_SHORTE"]
+
     #print "STARTUP PATH: %s" % startup_path
     
     # Replace any Cygwin path references
     g_startup_path = startup_path.replace("/cygdrive/c/", "C:/")
 
+    sys.path.append(g_startup_path)
+
     return g_startup_path
+
+def shorte_get_scratch_path():
+    scratch_dir = shorte_get_config("shorte", "scratchdir")
+    scratch_dir = os.path.abspath(scratch_dir)
+
+    if(not os.path.exists(scratch_dir)):
+        os.mkdir(scratch_dir)
+
+    return scratch_dir
+
+
+def shorte_get_tool_path(tool):
+        
+    tool_uc = tool.upper()
+    path_tool = None
+
+    if(os.environ.has_key("PATH_%s" % tool_uc)):
+        path_tool = os.environ["PATH_%s" % tool_uc]
+    else:
+        if(sys.platform == "cygwin" or sys.platform == "win32"):
+            osname = "win32"
+        elif(sys.platform == "darwin"):
+            osname ="osx"
+        else:
+            osname ="linux"
+        path_tool = shorte_get_config("shorte", "path.%s.%s" % (tool.lower(), osname))
+
+    if(not path_tool):
+        FATAL("%s not found at %s. Try setting PATH_%s" % (tool, path_tool, tool_uc))
+
+    return path_tool
+
 
 class topic_t:
     def __init__(self, vars):
@@ -216,7 +315,7 @@ class indexer_t:
         return self.m_image_index
 
 
-class table_t():
+class table_t:
     def __init__(self):
         self.rows = []
         self.modifiers = {}
@@ -229,6 +328,9 @@ class table_t():
         # Attributes primarily for ODT
         self.table_style_name = None
         self.column_styles = None
+
+        self.style = None
+
         pass
 
     def get_title(self):
@@ -244,6 +346,13 @@ class table_t():
         if(len(self.widths) > 0):
             return True
         return False
+
+    def has_style(self):
+        if(self.style != None):
+            return True
+        return False
+    def get_style(self):
+        return self.style
 
     def get_max_cols(self):
         return self.max_cols
@@ -311,6 +420,7 @@ TAG_TYPE_MCOMMENT = 3
 TAG_TYPE_WHITESPACE = 4
 TAG_TYPE_NEWLINE = 5
 TAG_TYPE_XMLCOMMENT = 6
+TAG_TYPE_PREPROCESSOR = 7
 
 if(sys.platform == "win32"):
     PATH_INKSCAPE = "c:\\usr\\tools\\InkscapePortable\\InkscapePortable"
@@ -447,6 +557,13 @@ def trim_blank_lines(source):
 
     return output
 
+def indent_lines(source, prefix):
+    lines = source.split('\n')
+
+    output = ''
+    for line in lines:
+        output += prefix + line + '\n'
+    return output
 
 def trim_leading_indent(source, allow_second_line_indent_check=True):
     '''This method is called to trim the leading indent from a string.
@@ -609,11 +726,12 @@ STATE_MCOMMENT = 5
 STATE_MODIFIER = 6
 STATE_INLINE_STYLING = 7
 STATE_XMLCOMMENT = 8
+STATE_PREPROCESSOR = 9
 
 def zipper(dir, zip_file):
     import zipfile, os
 
-    print "%s" % zip_file
+    DEBUG("%s" % zip_file)
 
     zip = zipfile.ZipFile(zip_file, 'w', compression=zipfile.ZIP_DEFLATED)
     root_len = len(os.path.abspath(dir))
