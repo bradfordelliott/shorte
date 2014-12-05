@@ -73,7 +73,7 @@ class document_info_t:
 
     def footer_title(self):
         if(self.m_footer_title == None):
-            return "Cortina Systems, Inc. Confidential"
+            return ""
         return self.m_footer_title
 
     def set_footer_title(self, title):
