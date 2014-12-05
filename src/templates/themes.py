@@ -21,6 +21,14 @@ class theme():
         self.colors["shorte"]["heading.5"] = color(fg="#8ba327")
         self.colors["shorte"]["heading.6"] = color(fg="#8ba327")
         
+        # Table of Contents Colors
+        self.colors["shorte"]["toc.1"] = color(fg="#000000")
+        self.colors["shorte"]["toc.2"] = color(fg="#000000")
+        self.colors["shorte"]["toc.3"] = color(fg="#000000")
+        self.colors["shorte"]["toc.4"] = color(fg="#000000")
+        self.colors["shorte"]["toc.5"] = color(fg="#000000")
+        self.colors["shorte"]["toc.6"] = color(fg="#000000")
+        
         # Table Colors
         self.colors["shorte"]["table"] = {}
         self.colors["shorte"]["table"]["title"]     = color(fg="#ffffff", bg="#8ba327")

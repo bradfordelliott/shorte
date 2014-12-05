@@ -19,13 +19,13 @@ class html_styles():
 body {width: 500px;font-family:"Helvetica Neue",helvetica,arial,sans-serif;}
 /* Table of Contents */
 div.toc1 {margin-top:8px;margin-bottom:4px;"}
-div.toc1 a{margin-left:20px;font-size:1.1em;color:${heading_1_fg};}
+div.toc1 a{margin-left:20px;font-size:1.1em;color:${toc_1_fg};}
 div.toc2 {margin-top:4px;margin-bottom:2px;}
-div.toc2 a{margin-left:40px;font-size:1.0em;color:${heading_2_fg};}
+div.toc2 a{margin-left:40px;font-size:1.0em;color:${toc_2_fg};}
 div.toc3 {margin-top:4px;margin-bottom:2px;}
-div.toc3 a{margin-left:50px;font-size:0.9em;color:${heading_3_fg};}
-div.toc4 a{margin-left:70px;font-size:0.9em;color:${heading_4_fg};}
-div.toc5 a{margin-left:90px;font-size:0.9em;color:${heading_5_fg};}
+div.toc3 a{margin-left:50px;font-size:0.9em;color:${toc_3_fg};}
+div.toc4 a{margin-left:70px;font-size:0.9em;color:${toc_4_fg};}
+div.toc5 a{margin-left:90px;font-size:0.9em;color:${toc_5_fg};}
 </style>
 </head>
 <body style="background-color: white;white-space:nowrap;font-weight:bold;">
@@ -33,12 +33,12 @@ $cnts
 </body>
 </html>
 ''').substitute({"cnts"         : "$cnts",
-                 "heading_1_fg" : self.colors["heading.1"].fg,
-                 "heading_2_fg" : self.colors["heading.2"].fg,
-                 "heading_3_fg" : self.colors["heading.3"].fg,
-                 "heading_4_fg" : self.colors["heading.4"].fg,
-                 "heading_5_fg" : self.colors["heading.5"].fg,
-                 "heading_6_fg" : self.colors["heading.6"].fg})
+                 "toc_1_fg" : self.colors["toc.1"].fg,
+                 "toc_2_fg" : self.colors["toc.2"].fg,
+                 "toc_3_fg" : self.colors["toc.3"].fg,
+                 "toc_4_fg" : self.colors["toc.4"].fg,
+                 "toc_5_fg" : self.colors["toc.5"].fg,
+                 "toc_6_fg" : self.colors["toc.6"].fg})
 
     def get_print_styles(self):
         return '''
@@ -176,13 +176,13 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
   
   /* Table of Contents */
   div.toc1 {margin-top:8px;margin-bottom:4px;}
-  div.toc1 a{margin-left:20px;font-size:1.1em;color:${heading_1_fg};}
+  div.toc1 a{margin-left:20px;font-size:1.1em;color:${toc_1_fg};}
   div.toc2 {margin-top:4px;margin-bottom:2px;}
-  div.toc2 a{margin-left:40px;font-size:1.0em;color:${heading_2_fg};}
+  div.toc2 a{margin-left:40px;font-size:1.0em;color:${toc_2_fg};}
   div.toc3 {margin-top:4px;margin-bottom:2px;}
-  div.toc3 a{margin-left:50px;font-size:0.9em;color:${heading_3_fg};}
-  div.toc4 a{margin-left:70px;font-size:0.9em;color:${heading_4_fg};}
-  div.toc5 a{margin-left:90px;font-size:0.9em;color:${heading_5_fg};}
+  div.toc3 a{margin-left:50px;font-size:0.9em;color:${toc_3_fg};}
+  div.toc4 a{margin-left:70px;font-size:0.9em;color:${toc_4_fg};}
+  div.toc5 a{margin-left:90px;font-size:0.9em;color:${toc_5_fg};}
   table {
       *border-collapse: collapse; /* IE7 and lower */
       border-spacing: 0;
@@ -403,6 +403,12 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
                    "heading_4_fg"          : self.colors["heading.4"].fg,
                    "heading_5_fg"          : self.colors["heading.5"].fg,
                    "heading_6_fg"          : self.colors["heading.6"].fg,
+                   "toc_1_fg"              : self.colors["toc.1"].fg,
+                   "toc_2_fg"              : self.colors["toc.2"].fg,
+                   "toc_3_fg"              : self.colors["toc.3"].fg,
+                   "toc_4_fg"              : self.colors["toc.4"].fg,
+                   "toc_5_fg"              : self.colors["toc.5"].fg,
+                   "toc_6_fg"              : self.colors["toc.6"].fg,
                    "color_table_title_bg"  : self.colors["table"]["title"].bg,
                    "color_table_title_fg"  : self.colors["table"]["title"].fg,
                    "color_table_altrow_bg" : self.colors["table"]["alt.row"].bg,
