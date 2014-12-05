@@ -6,6 +6,11 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.70 (Dec 5, 2014)
+Minor bug fix release that allows the table of contents
+to be styled differently in HTML documents. Also removed
+missed reference to vendor name in the footer title.
+
 @h3 Version 1.0.69 (Dec 3, 2014)
 Bug fix release that addresses the following issues:
 - Issue with wikification in the @note keyword in source
