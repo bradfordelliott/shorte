@@ -269,6 +269,7 @@ class clang_parser_t(shorte_parser_t):
         return comment
 
     def query_comment_before(self, start, end):
+
         extent = self.m_tu.get_extent(self.m_source_file, (start, end))
 
         # DEBUG BRAD: This appears to be off by 1 token. It is getting a token
@@ -318,13 +319,20 @@ class clang_parser_t(shorte_parser_t):
             end_location = cursor.extent.end.offset + 1
             # DEBUG BRAD: Not sure why this is start_location-2 instead of -1
             extent = self.m_tu.get_extent(self.m_source_file, (0, start_location-2))
-            tokens = clang.cindex.TokenGroup.get_tokens(self.m_tu, extent)
+
+            try:
+                items = clang.cindex.TokenGroup.get_rtokens(self.m_tu, extent)
+            except:
+                tokens = clang.cindex.TokenGroup.get_tokens(self.m_tu, extent)
+                # DEBUG BRAD: This is painfully slow!!!
+                items = reversed(list(tokens))
 
             #print "CODE: [%s]" % self.m_file_src[start_location:end_location]
 
             # macro comment maybe in tokens. Not in cursor.raw_comment
             comment = None
-            for t in reversed(list(tokens)):
+
+            for t in items:
                 # Ignore it if is # or define
                 if(t.spelling in ('#', 'define')):
                     continue
@@ -355,7 +363,7 @@ class clang_parser_t(shorte_parser_t):
 
         # At least under cygwin there is no difference with or without
         # this defined
-        options = clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
+        options = clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
 
         # Add the list of include files
         includes = self.m_engine.get_includes()
@@ -437,6 +445,7 @@ class clang_parser_t(shorte_parser_t):
                 typename = typename.strip()
                 #print " TYPEDEF %s = %s" % (typename, typedef)
                 typedefs[typename] = typedef
+        add_header = shorte_get_config("shorte", "header_add_to_prototype")
 
         for cursor in top.get_children():
             try:
@@ -488,7 +497,7 @@ class clang_parser_t(shorte_parser_t):
                                    clang.cindex.CursorKind.CLASS_DECL,
                                    clang.cindex.CursorKind.CXX_METHOD,
                                    clang.cindex.CursorKind.CONSTRUCTOR):
-    
+
                     comment = self.query_comment(cursor)
 
                     # If the object has no comment then assume it is private
@@ -533,7 +542,6 @@ class clang_parser_t(shorte_parser_t):
                         #print "  type.sp=%s" % cursor.type.spelling
                         raise Exception("object %s already parsed" % object_name)
 
-                    add_header = shorte_get_config("shorte", "header_add_to_prototype")
                     if(add_header != "None"):
                         tag = tag_t()
                         tag.name = add_header
@@ -590,7 +598,6 @@ class clang_parser_t(shorte_parser_t):
                     elif(cursor.kind in (clang.cindex.CursorKind.FUNCTION_DECL,
                                          clang.cindex.CursorKind.CXX_METHOD,
                                          clang.cindex.CursorKind.CONSTRUCTOR)):
-
 
                         prototype = prototype_t()
                         object_data = prototype
@@ -700,7 +707,7 @@ class clang_parser_t(shorte_parser_t):
                         #tag.heading = prototype.heading
                         page["tags"].append(tag)
                         
-                        self.object_register(prototype.get_name(), prototype)
+                        #self.object_register(prototype.get_name(), prototype)
                         
                         #self.object_register(f
 

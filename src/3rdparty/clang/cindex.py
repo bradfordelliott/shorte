@@ -457,6 +457,39 @@ class TokenGroup(object):
             token._group = token_group
 
             yield token
+    
+    @staticmethod
+    def get_rtokens(tu, extent):
+        """Helper method to return all tokens in an extent.
+
+        This functionality is needed multiple places in this module. We define
+        it here because it seems like a logical place.
+        """
+        tokens_memory = POINTER(Token)()
+        tokens_count = c_uint()
+
+        conf.lib.clang_tokenize(tu, extent, byref(tokens_memory),
+                byref(tokens_count))
+
+        count = int(tokens_count.value)
+
+        # If we get no tokens, no memory was allocated. Be sure not to return
+        # anything and potentially call a destructor on nothing.
+        if count < 1:
+            return
+
+        tokens_array = cast(tokens_memory, POINTER(Token * count)).contents
+
+        token_group = TokenGroup(tu, tokens_memory, tokens_count)
+
+        for i in xrange(count-1, 0, -1):
+            token = Token()
+            token.int_data = tokens_array[i].int_data
+            token.ptr_data = tokens_array[i].ptr_data
+            token._tu = tu
+            token._group = token_group
+
+            yield token
 
 class TokenKind(object):
     """Describes a specific type of a Token."""
@@ -1475,6 +1508,9 @@ class Cursor(Structure):
         occupy the extent this cursor occupies.
         """
         return TokenGroup.get_tokens(self._tu, self.extent)
+
+    def get_rtokens(self):
+        return TokenGroup.get_rtokens(self._tu, self.extent)
 
     def is_bitfield(self):
         """
@@ -2550,6 +2586,19 @@ class TranslationUnit(ClangObject):
             extent = SourceRange(start=locations[0], end=locations[1])
 
         return TokenGroup.get_tokens(self, extent)
+
+    def get_rtokens(self, locations=None, extent=None):
+        """Obtain tokens in this translation unit.
+
+        This is a generator for Token instances. The caller specifies a range
+        of source code to obtain tokens for. The range can be specified as a
+        2-tuple of SourceLocation or as a SourceRange. If both are defined,
+        behavior is undefined.
+        """
+        if locations is not None:
+            extent = SourceRange(start=locations[0], end=locations[1])
+
+        return TokenGroup.get_tokens(self, extent) 
 
 class File(ClangObject):
     """
