@@ -252,6 +252,7 @@ class shorte_parser_t(parser_t):
             "testcasesummary" : True,
 
             "doctitle"        : True,
+            "footertitle"     : True,
             "docsubtitle"     : True,
             "docnumber"       : True,
             "docauthor"       : True,
@@ -441,10 +442,10 @@ class shorte_parser_t(parser_t):
                 header["outdir"] = tag.contents
                 self.m_engine.set_output_dir(header["outdir"])
 
-            elif(tag.name == "doc.footer.title"):
+            elif(tag.name in ("footertitle", "doc.footer.title")):
                 header["footer.title"] = tag.contents
                 self.m_engine.get_doc_info().set_footer_title(tag.contents)
-            elif(tag.name == "doc.footer.subtitle"):
+            elif(tag.name in ("footersubtitle", "doc.footer.subtitle")):
                 header["footer.subtitle"] = tag.contents
                 self.m_engine.get_doc_info().set_footer_subtitle(tag.contents)
             else:

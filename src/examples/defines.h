@@ -16,6 +16,13 @@
 #define PRIVATE_DEFINE_NO_COMMENT "This is a test"
 
 /**
+ * This define has a couple of characters
+ * like & and < that should be escaped if
+ * things work correctly.
+ */
+#define DEFINE_WITH_SPECIAL_CHARS ((1 << 23) & 0xFF)
+
+/**
  * A private define
  *
  * @private

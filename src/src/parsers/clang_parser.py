@@ -351,17 +351,22 @@ class clang_parser_t(shorte_parser_t):
         self.m_file_src = handle.read()
         handle.close()
 
-        WARNING("Loading %s" % source_file)
+        #WARNING("Loading %s" % source_file)
 
         # At least under cygwin there is no difference with or without
         # this defined
-        options = clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD | clang.cindex.TranslationUnit.PARSE_INCLUDE_BRIEF_COMMENTS_IN_CODE_COMPLETION | clang.cindex.TranslationUnit.PARSE_SKIP_FUNCTION_BODIES
+        options = clang.cindex.TranslationUnit.PARSE_DETAILED_PROCESSING_RECORD
 
         # Add the list of include files
         includes = self.m_engine.get_includes()
         args = []
-        args.append('-xc++')
-        #args.append('-xc')
+
+        # DEBUG BRAD: For some reason this currently doesn't work if I
+        #             set it to -xc++. It barfs when it encounters this construct:
+        #                 #ifdef __cplusplus
+        #                 extern "C" {
+        #args.append('-xc++')
+        args.append('-xc')
         #args.append('-nostdlib')
         #args.append('-nostdinc')
         ##args.append('--help')
@@ -414,432 +419,474 @@ class clang_parser_t(shorte_parser_t):
 
         return tu
         
-    def parse_buffer_impl(self, page, path, cursor, tu):
+    def parse_buffer_impl(self, page, path, top, tu):
 
         functions = {}
         enums = {}
-        
-        try:
-            #print 'visiting %s [%s]' % (cursor.kind, cursor.spelling)
-           
-            #raise Exception("Doing nothing for now")
-            # Skip anything like global constants that don't belong to
-            # this module. It seems like cursor.location.file might be a
-            # unicode string so need to cast to the same type to avoid
-            # a mismatch
-            if(str(cursor.location.file) != str(path)):
-                raise Exception("Doesn't belong to this file")
-                #pass
 
-            #tag = tag_t()
-            #tag.name = "h"
-            #tag.contents = "%s @%s:%d => %s" % (cursor.kind, cursor.location.file, cursor.location.line, cursor.spelling)
-            #tag.source = tag.contents
-            #tag.file = cursor.location.file
-            #tag.line = cursor.location.line
-            #tag.modifiers = {}
-            #page["tags"].append(tag)
+        #print "PARSING %s" % page
 
-            access_spec = None
+        typedefs = {}
+        for cursor in top.get_children():
+            if(cursor.kind == clang.cindex.CursorKind.TYPEDEF_DECL):
+                typedef = cursor.type.spelling
+                typename = cursor.underlying_typedef_type.spelling
 
-            # access_specifier is not available in older versions of clang (3.4 or older)
-            # so we'll wrapper it in an catch block to prevent it from bombing out.
+                typename = typename.replace('struct','')
+                typename = typename.replace('enum','')
+                typename = typename.strip()
+                #print " TYPEDEF %s = %s" % (typename, typedef)
+                typedefs[typename] = typedef
+
+        for cursor in top.get_children():
             try:
-                if(cursor.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL):
-                    access_spec = cursor.access_specifier
-                    #"access: %d" % access_spec
-            except:
-                WARNING("This version of clang is too old, can't get access specifiers")
-
-            if cursor.kind in (clang.cindex.CursorKind.ENUM_DECL,
-                               clang.cindex.CursorKind.FUNCTION_DECL,
-                               clang.cindex.CursorKind.STRUCT_DECL,
-                               clang.cindex.CursorKind.MACRO_DEFINITION,
-                               clang.cindex.CursorKind.CLASS_DECL,
-                               clang.cindex.CursorKind.CXX_METHOD,
-                               clang.cindex.CursorKind.CONSTRUCTOR):
-    
-                comment = self.query_comment(cursor)
-
-                # If the object has no comment then assume it is private
-                if(comment == None or comment.is_private()):
-                    raise Exception("Assumed private function")
-
-                file = path
-                line = cursor.location.line
-
-                object_name = cursor.spelling
-                if(object_name == None or len(object_name) == 0):
-                    object_name = cursor.displayname
-                if(object_name == None or len(object_name) == 0):
-                    object_name = cursor.type.spelling
-                        
-                #if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
-                #    object_name = cursor.displayname
-                #elif(cursor.kind == clang.cindex.CursorKind.FUNCTION_DECL):
-                #    object_name = cursor.spelling
-                #elif(cursor.kind == clang.cindex.CursorKind.ENUM_DECL):
-                #    object_name = cursor.type.spelling
-                #elif(cursor.kind == clang.cindex.CursorKind.STRUCT_DECL):
-                #    object_name = cursor.spelling
-                #elif(cursor.kind == clang.cindex.CursorKind.CLASS_DECL):
-                #    object_name = cursor.type.spelling
-
-                #print "VISITING"
-                #print "  dn     =%s" % cursor.displayname
-                #print "  sp     =%s" % cursor.spelling
-                #print "  type.sp=%s" % cursor.type.spelling
-
-                if(self.object_is_registered(object_name)):
-                    raise Exception("object %s already parsed" % object_name)
-
-                add_header = shorte_get_config("shorte", "header_add_to_prototype")
-                if(add_header != "None"):
-                    tag = tag_t()
-                    tag.name = add_header
-                    tag.contents = object_name
-                    tag.source = ""
-                    tag.file = path 
-                    tag.line = cursor.location.line
-                    tag.modifiers = {}
-                    page["tags"].append(tag)
-
-                if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
-                    define = define_t()
-                    object_data = define
-                    define.name = object_name
-                    define.desc = comment.desc
-                    define.description = comment.description
-                    define.private = comment.private
-                    define.heading = comment.heading
-                    define.line = cursor.location.line
-                    define.file = path
+                if(cursor.location.file == None):
+                    continue
+                elif('/usr/include' in str(cursor.location.file)):
+                    continue
+                elif('/usr/lib' in str(cursor.location.file)):
+                    continue
+                    
+                #print '    visiting %s [%s] at %s:%d' % (cursor.kind, cursor.spelling, cursor.location.file, cursor.location.line)
+               
+                #raise Exception("Doing nothing for now")
+                # Skip anything like global constants that don't belong to
+                # this module. It seems like cursor.location.file might be a
+                # unicode string so need to cast to the same type to avoid
+                # a mismatch
+                if(str(cursor.location.file) != str(path)):
+                    #print "      Doesn't belong to %s" % path
+                    raise Exception("Doesn't belong to this file")
+                    #pass
                 
-                    start_offset = cursor.extent.start.offset
-                    end_offset   = cursor.extent.end.offset + 1
-                    tmp = self.m_file_src[start_offset:end_offset]
-                    tmp = tmp.replace(define.name, '')
-                    define.value = tmp.strip()
+                #print '    visiting %s [%s] at %s:%d' % (cursor.kind, cursor.spelling, cursor.location.file, cursor.location.line)
 
-                    tag = tag_t()
-                    tag.name = "define"
-                    tag.contents = define
-                    tag.line = define.line
-                    tag.file = define.file
-                    tag.source = define.source
-                    tag.modifiers = {}
-                    tag.heading = define.heading
-                    page["tags"].append(tag)
-                    
+                #tag = tag_t()
+                #tag.name = "h"
+                #tag.contents = "%s @%s:%d => %s" % (cursor.kind, cursor.location.file, cursor.location.line, cursor.spelling)
+                #tag.source = tag.contents
+                #tag.file = cursor.location.file
+                #tag.line = cursor.location.line
+                #tag.modifiers = {}
+                #page["tags"].append(tag)
 
-                    #print '@define: file=%s line=%d' % (file, line)
-                    #print '--name: %s' % cursor.displayname
-                    #print '--description:'
-                    #print indent_lines(comment.desc, '    ')
-                    #print '--value:'
+                access_spec = None
 
-                    #name = cursor.displayname
+                # access_specifier is not available in older versions of clang (3.4 or older)
+                # so we'll wrapper it in an catch block to prevent it from bombing out.
+                try:
+                    if(cursor.kind == clang.cindex.CursorKind.CXX_ACCESS_SPEC_DECL):
+                        access_spec = cursor.access_specifier
+                        #"access: %d" % access_spec
+                except:
+                    WARNING("This version of clang is too old, can't get access specifiers")
 
+                if cursor.kind in (clang.cindex.CursorKind.ENUM_DECL,
+                                   clang.cindex.CursorKind.FUNCTION_DECL,
+                                   clang.cindex.CursorKind.STRUCT_DECL,
+                                   clang.cindex.CursorKind.MACRO_DEFINITION,
+                                   clang.cindex.CursorKind.CLASS_DECL,
+                                   clang.cindex.CursorKind.CXX_METHOD,
+                                   clang.cindex.CursorKind.CONSTRUCTOR):
+    
+                    comment = self.query_comment(cursor)
 
-                    #print '    %s' % content
+                    # If the object has no comment then assume it is private
+                    if(comment == None or comment.is_private()):
+                        raise Exception("Assumed private function")
 
-                    # raw_comment doesn't work with defines
-                    # because they are stripped by the preprocessor
-                    # print cursor.raw_comment
+                    file = path
+                    line = cursor.location.line
 
-                elif(cursor.kind in (clang.cindex.CursorKind.FUNCTION_DECL,
-                                     clang.cindex.CursorKind.CXX_METHOD,
-                                     clang.cindex.CursorKind.CONSTRUCTOR)):
+                    object_name = cursor.spelling
+                    if(object_name == None or len(object_name) == 0):
+                        object_name = cursor.displayname
+                    if(object_name == None or len(object_name) == 0):
+                        object_name = cursor.type.spelling
 
-
-                    prototype = prototype_t()
-                    object_data = prototype
-                    prototype.set_name(object_name)
-                    prototype.set_returns(comment.returns)
-                    prototype.set_description(comment.desc, textblock=False)
-                    prototype.set_description(comment.description, textblock=True)
-
-
-                    if(comment.has_pseudocode()):
-                        prototype.set_pseudocode(
-                            comment.get_pseudocode(),
-                            self.m_engine.m_source_code_analyzer, "c")
-
-                    prototype.set_see_also(comment.see_also)
-                    prototype.set_private(comment.private)
-                    prototype.set_deprecated(comment.deprecated, comment.deprecated_msg)
-
-                    prototype.set_line(cursor.location.line)
-                    prototype.set_file(self.m_source_file)
-
-
-                    #print '@prototype: language="c" file=%s line=%d' % (file, line)
-                    #print '--function: %s' % cursor.spelling
-                    #print "--prototype:"
-
-                    ptype = ''
-                    args = cursor.get_arguments()
-                    
-                    arg_list = []
-                    parameters = []
-                    for arg in args:
-                        arg_type = arg.type.spelling
-                        arg_name = arg.spelling
-                        arg_list.append("%s %s" % (arg_type, arg_name))
-
-                        #print "ARG.START = %d" % arg.extent.start.offset
-                        #print "CODE: [%s]" % self.m_file_src[cursor.extent.start.offset:arg.extent.start.offset]
-                        
-                        acmt = self.query_comment_before(cursor.extent.start.offset, arg.extent.start.offset)
-                        
-                        param = param_t()
-
-                        if(acmt != None):
-                            desc = acmt.desc.strip()
-                            matches = re.search('^(\[(.*?)\]\s*-\s*)', desc)
-                            if(matches != None):
-                                io = matches.groups()[1]
-                                match = matches.groups()[0]
-                                desc = desc.replace(match, '')
-                                param.set_io(io)
-
-                        param.set_name(arg_name)
-                        param.set_type(arg_type)
-
-                        if(acmt != None):
-                            param.set_description(desc, textblock=False)
-                            param.set_description(self.parse_textblock(desc), textblock=True)
-
-                        parameters.append(param)
-
-                    prototype.set_params(parameters)
-
-                    ptype = "    %s %s(" % (cursor.result_type.spelling, cursor.spelling) + ', '.join(arg_list) + ");"
-                    prototype.set_prototype(ptype,
-                            self.m_engine.m_source_code_analyzer, "c")
-
-                    for param in comment.params:
-                        data = comment.params[param]
-                        name = param
-                        io   = data.get_io()
-                        #print data
-
-                        for i in range(0, len(parameters)):
-                            p = parameters[i]
-                            if(p.name == name):
-                                p.set_description(data.get_description(False), textblock=False)
-                                p.set_description(data.get_description(True),  textblock=True)
-                                p.set_io(io)
-
-                    prototype.validate_params()
-                    
-                    if(cursor.kind in (clang.cindex.CursorKind.CXX_METHOD, clang.cindex.CursorKind.CONSTRUCTOR)):
-                        # Get the name of the class that this belongs to
-                        cname = cursor.lexical_parent.displayname
-                        cls = self.m_engine.class_get(cname)
-                        prototype.set_class(cls)
-                        
-                        # access_specifier is only available in newer versions of clang (> 3.4)
-                        # so we'll trap the error here.
-                        try:
-                            access = cursor.access_specifier
-                            prototype.set_access_spec(access)
-                        except:
-                            WARNING("This version of clang is too old, can't get access specifiers")
-
-                        cls.prototype_add(prototype)
-
-                    tag = tag_t()
-                    tag.name = "prototype"
-                    tag.contents = prototype
-                    tag.line = prototype.line
-                    tag.file = prototype.file
-                    tag.source = prototype.source
-                    tag.modifiers = {}
-                    # DEBUG BRAD: THis doesn't work
-                    #tag.heading = prototype.heading
-                    page["tags"].append(tag)
-                    
-                    self.object_register(prototype.get_name(), prototype)
-                    
-                    #self.object_register(f
-
-                elif(cursor.kind == clang.cindex.CursorKind.ENUM_DECL):
-                    
-                    #print "@enum: file=%s line=%d" % (file, line)
-                    #print "--name: ", cursor.type.spelling
-
-                    #print "--description:"
-                    #print indent_lines(comment.desc, '    ')
-                    
-                    children = cursor.get_children()
-                    rows = []
-                    # DEBUG BRAD: Need to re-write this code to be
-                    #             more like structure fields
-                    for child in children:
-                        if(child.raw_comment != None):
-                            row = {}
-                            row["cols"] = []
-                            row["is_subheader"] = False
-                            row["is_header"] = False
-                            row["is_title"] = False
-                            row["is_reserved"] = False
-                            row["is_caption"] = False
-                            row["is_spacer"] = False
+                    # If the object has a typedef then default to that instead. Eventually
+                    # we'll support aliases but that doesn't work right now.
+                    if(typedefs.has_key(object_name)):
+                        #WARNING("Renaming %s to %s" % (object_name, typedefs[object_name]))
+                        object_name = typedefs[object_name]
                             
-                            col = {}
-                            col["span"] = 1
-                            col["text"] = child.spelling
-                            row["cols"].append(col)
-                            
-                            col = {}
-                            col["span"] = 1
-                            col["text"] = "%d" % child.enum_value
-                            row["cols"].append(col)
-                            
-                            cmnt = self.parse_cpp_func_comment(child.raw_comment)
+                    #if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
+                    #    object_name = cursor.displayname
+                    #elif(cursor.kind == clang.cindex.CursorKind.FUNCTION_DECL):
+                    #    object_name = cursor.spelling
+                    #elif(cursor.kind == clang.cindex.CursorKind.ENUM_DECL):
+                    #    object_name = cursor.type.spelling
+                    #elif(cursor.kind == clang.cindex.CursorKind.STRUCT_DECL):
+                    #    object_name = cursor.spelling
+                    #elif(cursor.kind == clang.cindex.CursorKind.CLASS_DECL):
+                    #    object_name = cursor.type.spelling
 
-                            col = {}
-                            col["span"] = 1
-                            col["text"] = cmnt.desc
-                            col["textblock"] = cmnt.description
-                            row["cols"].append(col)
+                    #print "VISITING"
+                    #print "  dn     =%s" % cursor.displayname
+                    #print "  sp     =%s" % cursor.spelling
+                    #print "  type.sp=%s" % cursor.type.spelling
 
-                            rows.append(row)
+                    if(self.object_is_registered(object_name)):
+                        #print "ALREADY REGISTERED"
+                        #print "  dn     =%s" % cursor.displayname
+                        #print "  sp     =%s" % cursor.spelling
+                        #print "  type.sp=%s" % cursor.type.spelling
+                        raise Exception("object %s already parsed" % object_name)
 
-                            #print '- %s | %s |\n%s' % (child.spelling, child.enum_value, indent_lines(comment.desc, '    '))
-                        #else:
-                        #    WARNING("Enum parameter %s missing description" % child.spelling)
+                    add_header = shorte_get_config("shorte", "header_add_to_prototype")
+                    if(add_header != "None"):
+                        tag = tag_t()
+                        tag.name = add_header
+                        tag.contents = object_name
+                        tag.source = ""
+                        tag.file = path 
+                        tag.line = cursor.location.line
+                        tag.modifiers = {}
+                        page["tags"].append(tag)
 
-                    enum = enum_t()
-                    object_data = enum
-                    enum.name = object_name
-                    enum.values = rows
-                    enum.comment = comment
-                    enum.set_description(comment.desc, textblock=False)
-                    enum.set_description(comment.description, textblock=True)
-                    enum.private = comment.private
-                    enum.deprecated = comment.deprecated
-                    enum.deprecated_msg = comment.deprecated_msg
-                    enum.line = cursor.location.line
-                    enum.file = self.m_source_file
-                    enum.max_cols = 3
-
-                    tag = tag_t()
-                    tag.name = "enum"
-                    tag.contents = enum
-                    tag.source = ""
-                    tag.line = enum.line
-                    tag.file = enum.file
-                    tag.modifiers = {}
-                    tag.heading = comment.heading
-                    page["tags"].append(tag)
+                    if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
+                        define = define_t()
+                        object_data = define
+                        define.name = object_name
+                        define.desc = comment.desc
+                        define.description = comment.description
+                        define.private = comment.private
+                        define.heading = comment.heading
+                        define.line = cursor.location.line
+                        define.file = path
                     
+                        start_offset = cursor.extent.start.offset
+                        end_offset   = cursor.extent.end.offset + 1
+                        tmp = self.m_file_src[start_offset:end_offset]
+                        tmp = tmp.replace(define.name, '')
+                        define.value = tmp.strip()
 
-                elif(cursor.kind == clang.cindex.CursorKind.STRUCT_DECL):
+                        tag = tag_t()
+                        tag.name = "define"
+                        tag.contents = define
+                        tag.line = define.line
+                        tag.file = define.file
+                        tag.source = define.source
+                        tag.modifiers = {}
+                        tag.heading = define.heading
+                        page["tags"].append(tag)
+                        
 
-                    struct = struct_t()
-                    object_data = struct
+                        #print '@define: file=%s line=%d' % (file, line)
+                        #print '--name: %s' % cursor.displayname
+                        #print '--description:'
+                        #print indent_lines(comment.desc, '    ')
+                        #print '--value:'
 
-                    #print "@struct: file=%s line=%d" % (file, line)
-                    #print "--name: ", cursor.type.spelling
-                    #
-                    #print "--description:"
-                    #print indent_lines(comment.desc, '    ')
+                        #name = cursor.displayname
 
-                    children = cursor.get_children()
-                    #print '-- fields:'
-                    #print '- Type | Name | Description'
 
-                    for child in children:
-                        bits = child.type.spelling
-                        name = child.spelling  
-                        if(child.raw_comment != None):
-                            fcomment = self.parse_cpp_func_comment(child.raw_comment)
-                            #print '''- %s | %s |\n%s
+                        #print '    %s' % content
+
+                        # raw_comment doesn't work with defines
+                        # because they are stripped by the preprocessor
+                        # print cursor.raw_comment
+
+                    elif(cursor.kind in (clang.cindex.CursorKind.FUNCTION_DECL,
+                                         clang.cindex.CursorKind.CXX_METHOD,
+                                         clang.cindex.CursorKind.CONSTRUCTOR)):
+
+
+                        prototype = prototype_t()
+                        object_data = prototype
+                        prototype.set_name(object_name)
+                        prototype.set_returns(comment.returns)
+                        prototype.set_description(comment.desc, textblock=False)
+                        prototype.set_description(comment.description, textblock=True)
+
+
+                        if(comment.has_pseudocode()):
+                            prototype.set_pseudocode(
+                                comment.get_pseudocode(),
+                                self.m_engine.m_source_code_analyzer, "c")
+
+                        prototype.set_see_also(comment.see_also)
+                        prototype.set_private(comment.private)
+                        prototype.set_deprecated(comment.deprecated, comment.deprecated_msg)
+
+                        prototype.set_line(cursor.location.line)
+                        prototype.set_file(self.m_source_file)
+
+
+                        #print '@prototype: language="c" file=%s line=%d' % (file, line)
+                        #print '--function: %s' % cursor.spelling
+                        #print "--prototype:"
+
+                        ptype = ''
+                        args = cursor.get_arguments()
+                        
+                        arg_list = []
+                        parameters = []
+                        for arg in args:
+                            arg_type = arg.type.spelling
+                            arg_name = arg.spelling
+                            arg_list.append("%s %s" % (arg_type, arg_name))
+
+                            #print "ARG.START = %d" % arg.extent.start.offset
+                            #print "CODE: [%s]" % self.m_file_src[cursor.extent.start.offset:arg.extent.start.offset]
+                            
+                            acmt = self.query_comment_before(cursor.extent.start.offset, arg.extent.start.offset)
+                            
+                            param = param_t()
+
+                            if(acmt != None):
+                                desc = acmt.desc.strip()
+                                matches = re.search('^(\[(.*?)\]\s*-\s*)', desc)
+                                if(matches != None):
+                                    io = matches.groups()[1]
+                                    match = matches.groups()[0]
+                                    desc = desc.replace(match, '')
+                                    param.set_io(io)
+
+                            param.set_name(arg_name)
+                            param.set_type(arg_type)
+
+                            if(acmt != None):
+                                param.set_description(desc, textblock=False)
+                                param.set_description(self.parse_textblock(desc), textblock=True)
+
+                            parameters.append(param)
+
+                        prototype.set_params(parameters)
+
+                        ptype = "    %s %s(" % (cursor.result_type.spelling, cursor.spelling) + ', '.join(arg_list) + ");"
+                        prototype.set_prototype(ptype,
+                                self.m_engine.m_source_code_analyzer, "c")
+
+                        for param in comment.params:
+                            data = comment.params[param]
+                            name = param
+                            io   = data.get_io()
+                            #print data
+
+                            for i in range(0, len(parameters)):
+                                p = parameters[i]
+                                if(p.name == name):
+                                    p.set_description(data.get_description(False), textblock=False)
+                                    p.set_description(data.get_description(True),  textblock=True)
+                                    p.set_io(io)
+
+                        prototype.validate_params()
+                        
+                        if(cursor.kind in (clang.cindex.CursorKind.CXX_METHOD, clang.cindex.CursorKind.CONSTRUCTOR)):
+                            # Get the name of the class that this belongs to
+                            cname = cursor.lexical_parent.displayname
+                            cls = self.m_engine.class_get(cname)
+                            prototype.set_class(cls)
+                            
+                            # access_specifier is only available in newer versions of clang (> 3.4)
+                            # so we'll trap the error here.
+                            try:
+                                access = cursor.access_specifier
+                                prototype.set_access_spec(access)
+                            except:
+                                WARNING("This version of clang is too old, can't get access specifiers")
+
+                            cls.prototype_add(prototype)
+
+                        tag = tag_t()
+                        tag.name = "prototype"
+                        tag.contents = prototype
+                        tag.line = prototype.line
+                        tag.file = prototype.file
+                        tag.source = prototype.source
+                        tag.modifiers = {}
+                        # DEBUG BRAD: THis doesn't work
+                        #tag.heading = prototype.heading
+                        page["tags"].append(tag)
+                        
+                        self.object_register(prototype.get_name(), prototype)
+                        
+                        #self.object_register(f
+
+                    elif(cursor.kind == clang.cindex.CursorKind.ENUM_DECL):
+                        
+                        #print "@enum: file=%s line=%d" % (file, line)
+                        #print "--name: ", cursor.type.spelling
+
+                        #print "--description:"
+                        #print indent_lines(comment.desc, '    ')
+                        
+                        children = cursor.get_children()
+                        rows = []
+                        # DEBUG BRAD: Need to re-write this code to be
+                        #             more like structure fields
+                        for child in children:
+                            if(child.raw_comment != None):
+                                row = {}
+                                row["cols"] = []
+                                row["is_subheader"] = False
+                                row["is_header"] = False
+                                row["is_title"] = False
+                                row["is_reserved"] = False
+                                row["is_caption"] = False
+                                row["is_spacer"] = False
+                                
+                                col = {}
+                                col["span"] = 1
+                                col["text"] = child.spelling
+                                row["cols"].append(col)
+                                
+                                col = {}
+                                col["span"] = 1
+                                col["text"] = "%d" % child.enum_value
+                                row["cols"].append(col)
+                                
+                                cmnt = self.parse_cpp_func_comment(child.raw_comment)
+
+                                col = {}
+                                col["span"] = 1
+                                col["text"] = cmnt.desc
+                                col["textblock"] = cmnt.description
+                                row["cols"].append(col)
+
+                                rows.append(row)
+
+                                #print '- %s | %s |\n%s' % (child.spelling, child.enum_value, indent_lines(comment.desc, '    '))
+                            #else:
+                            #    WARNING("Enum parameter %s missing description" % child.spelling)
+
+                        enum = enum_t()
+                        object_data = enum
+                        enum.name = object_name
+                        enum.values = rows
+                        enum.comment = comment
+                        enum.set_description(comment.desc, textblock=False)
+                        enum.set_description(comment.description, textblock=True)
+                        enum.private = comment.private
+                        enum.deprecated = comment.deprecated
+                        enum.deprecated_msg = comment.deprecated_msg
+                        enum.line = cursor.location.line
+                        enum.file = self.m_source_file
+                        enum.max_cols = 3
+
+                        tag = tag_t()
+                        tag.name = "enum"
+                        tag.contents = enum
+                        tag.source = ""
+                        tag.line = enum.line
+                        tag.file = enum.file
+                        tag.modifiers = {}
+                        tag.heading = comment.heading
+                        page["tags"].append(tag)
+                        
+
+                    elif(cursor.kind == clang.cindex.CursorKind.STRUCT_DECL):
+
+                        struct = struct_t()
+                        object_data = struct
+
+                        #print "@struct: file=%s line=%d" % (file, line)
+                        #print "--name: ", object_name
+                        
+                        #print "--description:"
+                        #print indent_lines(comment.desc, '    ')
+
+                        children = cursor.get_children()
+                        #print '-- fields:'
+                        #print '- Type | Name | Description'
+
+
+                        for child in children:
+                            #print "child:", child
+                            bits = child.type.spelling
+                            name = child.spelling  
+                        
+                            #print "Parsing field %s, bits: %s" % (name,bits)
+                            if(name == None):
+                                continue
+
+                            if(child.raw_comment != None):
+                                fcomment = self.parse_cpp_func_comment(child.raw_comment)
+                                #print '''- %s | %s |\n%s
 #''' % (bits, name, indent_lines(comment.desc, '    '))
 
-                        field = field_t()
-                        field.set_name(name)
-                        field.set_description(fcomment.description)
-                        field.set_type(bits)
-                        struct.fields.append(field)
+                            field = field_t()
+                            field.set_name(name)
+                            field.set_description(fcomment.description)
+                            field.set_type(bits)
+                            struct.fields.append(field)
+
+                        struct.set_name(object_name)
+                        struct.set_description(comment.desc, textblock=False)
+                        struct.set_description(comment.description)
+                        struct.private = comment.private
+                        struct.heading = comment.heading
+                        struct.line = cursor.location.line
+                        struct.file = path
+                        struct.max_cols = 3 #len(struct.fields)
+
+                        tag = tag_t()
+                        tag.name = "struct"
+                        tag.contents = struct
+                        tag.line = struct.line
+                        tag.file = struct.file
+                        tag.source = struct.source
+                        tag.modifiers = {}
+                        tag.heading = struct.heading
+                        page["tags"].append(tag)
                         
-                    struct.set_name(object_name)
-                    struct.set_description(comment.desc, textblock=False)
-                    struct.set_description(comment.description)
-                    struct.private = comment.private
-                    struct.heading = comment.heading
-                    struct.line = cursor.location.line
-                    struct.file = path
-                    struct.max_cols = 3 #len(struct.fields)
+                    elif(cursor.kind == clang.cindex.CursorKind.CLASS_DECL):
 
-                    tag = tag_t()
-                    tag.name = "struct"
-                    tag.contents = struct
-                    tag.line = struct.line
-                    tag.file = struct.file
-                    tag.source = struct.source
-                    tag.modifiers = {}
-                    tag.heading = struct.heading
-                    page["tags"].append(tag)
-                    
-                elif(cursor.kind == clang.cindex.CursorKind.CLASS_DECL):
+                        cls = self.m_engine.class_get(object_name)
+                        cls.set_name(object_name)
+                        cls.set_description(comment.desc, textblock=False)
+                        cls.set_description(comment.description)
+                        cls.line = cursor.location.line
+                        cls.file = path
 
-                    cls = self.m_engine.class_get(object_name)
-                    cls.set_name(object_name)
-                    cls.set_description(comment.desc, textblock=False)
-                    cls.set_description(comment.description)
-                    cls.line = cursor.location.line
-                    cls.file = path
+                        print "@class: file=%s line=%d" % (file, line)
+                        print "--name: " , cursor.type.spelling
+                        print "--description:"
+                        print indent_lines(comment.desc, '    ')
 
-                    print "@class: file=%s line=%d" % (file, line)
-                    print "--name: " , cursor.type.spelling
-                    print "--description:"
-                    print indent_lines(comment.desc, '    ')
+                        tag = tag_t()
+                        tag.name = "class"
+                        tag.contents = cls
+                        tag.line = cls.line
+                        tag.file = cls.file
+                        tag.modifiers = {}
+                        page["tags"].append(tag)
 
-                    tag = tag_t()
-                    tag.name = "class"
-                    tag.contents = cls
-                    tag.line = cls.line
-                    tag.file = cls.file
-                    tag.modifiers = {}
-                    page["tags"].append(tag)
-
-                    pass
+                        pass
     
-                #print ''
-                if(comment.has_example()):
-                    object_data.set_example(
-                        comment.get_example(),
-                        self.m_engine.m_source_code_analyzer, "c")
+                    #print ''
+                    if(comment.has_example()):
+                        object_data.set_example(
+                            comment.get_example(),
+                            self.m_engine.m_source_code_analyzer, "c")
+                        
+                    self.object_register(object_name, object_data)
                     
-                self.object_register(object_name, object_data)
-                
-                # Mark this block of code as processed so that
-                # we don't process it again
-                start_offset = cursor.extent.start.offset
-                end_offset   = cursor.extent.end.offset + 1
-                self.processed.append([start_offset, end_offset])
+                    # Mark this block of code as processed so that
+                    # we don't process it again
+                    start_offset = cursor.extent.start.offset
+                    end_offset   = cursor.extent.end.offset + 1
+                    self.processed.append([start_offset, end_offset])
 
-        except Exception as e:
-            if(cursor.spelling != None):
-                object_name = cursor.spelling
-            else:
-                object_name = cursor.displayname
+            except Exception as e:
+                if(cursor.spelling != None):
+                    object_name = cursor.spelling
+                else:
+                    object_name = cursor.displayname
 
-            if(len(object_name) == 0):
-                object_name = cursor.type.spelling
+                if(len(object_name) == 0):
+                    object_name = cursor.type.spelling
 
-            #WARNING("SKIPPING %s" % object_name)
-            #traceback.print_exc()
-            #sys.exc_info()
-            #WARNING(str(e))
-            pass
+                #WARNING("SKIPPING %s" % object_name)
+                #traceback.print_exc()
+                #sys.exc_info()
+                #WARNING(str(e))
+                pass
             
         # Recurse for children of this node
-        for c in cursor.get_children():
-            self.parse_buffer_impl(page, path, c, tu)
+        #for c in cursor.get_children():
+        #    self.parse_buffer_impl(page, path, c, tu)
 
     def parse2(self, cursor):
 

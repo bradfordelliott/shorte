@@ -324,7 +324,7 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       padding-right:3px;
   
       font-family: courier new;
-      font-size: 0.9em;
+      font-size: 0.8em;
       margin-bottom: 0px;
       margin-top: 4px;
       margin-left:25px;

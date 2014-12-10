@@ -168,9 +168,8 @@ class engine_t:
         else:
             self.m_parser = shorte_parser_t(self)
             #self.m_parser.set_cpp_parser(cpp_parser_t(self))
-            # DEBUG BRAD: For some reason clang is skipping some methods
-            #             in cs4224.c. Need to debug why before I can
-            #             switch to it.
+            # DEBUG BRAD: If you don't have the proper includes then
+            #             clang may fail on types it doesn't understand. 
             self.m_parser.set_cpp_parser(clang_parser_t(self))
 
         # Read the configuration file

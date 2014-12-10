@@ -1645,8 +1645,8 @@ class template_odt_t(template_t):
         
         name   = self.format_text(define.name)
         value  = self.format_text(define.value)
-        desc   = self.format_textblock(define.description)
-                
+        desc   = define.get_description(textblock=True)
+
         style = "shorte_table.normal_cell"
 
         cols = []
@@ -1656,7 +1656,7 @@ class template_odt_t(template_t):
         table.rows.append(row)
         
         cols = []
-        cols.append({"span":2, 'textblock': define.description, "style": style, "text-style": "shorte_indent_0"})
+        cols.append({"span":2, 'textblock': desc, "style": style, "text-style": "shorte_indent_0"})
         row = self._table_row()
         row["cols"] = cols
         table.rows.append(row)
@@ -1668,7 +1668,7 @@ class template_odt_t(template_t):
         table.rows.append(row)
         
         cols = []
-        cols.append({"span":2, 'text': define.value, "style": style, "text-style": "shorte_indent_0"})
+        cols.append({"span":2, 'text': value, "style": style, "text-style": "shorte_indent_0"})
         row = self._table_row()
         row["cols"] = cols
         table.rows.append(row)
