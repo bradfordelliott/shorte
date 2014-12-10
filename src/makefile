@@ -123,15 +123,10 @@ vim:
 release_notes:
 	${python} shorte.py -f release_notes.tpl -p html_inline -t ${THEME} -v ${version} -o build-output/release_notes
 
-install:
-	cd ../build-output && cp -r shorte-${version}.tar.gz /cygdrive/m/shorte/.
-	ssh belliott@jenkins 'cd /home/belliott/modules/buildenv && cat makefile | sed -e "s/pkg_shorte:=shorte-1.0.[0-9]*/pkg_shorte:=shorte-${version}/" > makefile2;\
-	cd /home/belliott/modules/buildenv && make -f makefile2 download_shorte && make -f makefile2 build_shorte;\
-	cd /home/belliott/modules/buildenv/modulefiles/shorte && cat 1.0.10 | sed -e "s/1.0.10/${version}/" > ${version};\
-	cd /home/belliott/modules/buildenv/modulefiles/shorte && cat .version | sed -e "s/1.0.[0-9]*/${version}/" > .version.new;\
-	cd /home/belliott/modules/buildenv/modulefiles/shorte && mv .version .version.bak && mv .version.new .version;\
-	cd /home/belliott/modules/buildenv && make -f makefile2 install_module_files;\
-	cd /home/belliott/modules/buildenv && make -f makefile2 install_module_files'
+install_linux:
+	make checkout_vendor_templates
+	make clang_plugin_rh6
+	rm -rf shorte && ln -s shorte.py shorte
 
 tag:
 	git tag SHORTE_VERSION_${version_str}
@@ -234,7 +229,11 @@ test_cpp_parser:
 
 test_clang:
 #	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "html_inline+pdf"
-	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
+	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html+pdf" -o build-output/clang_c
+
+test_clang2:
+	${python} shorte.py -f "examples/cs4321_api.h examples/cs4321_api.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
+
 
 test_classes:
 	${python} shorte.py -f "examples/classes.cpp" -x clang -t "${THEME}" -o build-output/class_parser -p "shorte"
