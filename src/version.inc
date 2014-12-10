@@ -1,2 +1,2 @@
-version := 1.0.70
+version := 1.0.71
 version_str:=$(subst .,_,${version})

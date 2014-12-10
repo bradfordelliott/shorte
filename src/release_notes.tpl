@@ -6,6 +6,14 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.71 (Dec 9, 2014)
+- Fixed a bug in the formatting of defines in the open document
+  template that causes special characters like & to not be escaped
+  properly.
+- Minor cleanup of the enums example.
+- Fixed performance issues in the clang parser. It should now be
+  comparable or better than the old cpp parser.
+
 @h3 Version 1.0.70 (Dec 5, 2014)
 Minor bug fix release that allows the table of contents
 to be styled differently in HTML documents. Also removed
