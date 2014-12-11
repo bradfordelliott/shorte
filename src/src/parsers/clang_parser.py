@@ -24,6 +24,37 @@ else:
     clang_path = os.path.normpath(shorte_get_startup_path() + '/3rdparty/clang/%s' % osname)
     #WARNING("CLANG_PATH: %s" % clang_path)
     clang.cindex.Config.set_library_path(clang_path)
+    
+def get_rtokens(tu, extent):
+    """Helper method to return all tokens in an extent. This method could be
+       moved to cindex.py if it is useful to other users. It is similar to the
+       static TokenGroup.get_tokens() method but it reverses the generator in
+       order to walk backwards.
+    """
+    tokens_memory = clang.cindex.POINTER(clang.cindex.Token)()
+    tokens_count = clang.cindex.c_uint()
+
+    clang.cindex.conf.lib.clang_tokenize(tu, extent, clang.cindex.byref(tokens_memory),
+            clang.cindex.byref(tokens_count))
+
+    count = int(tokens_count.value)
+
+    # If we get no tokens, no memory was allocated. Be sure not to return
+    # anything and potentially call a destructor on nothing.
+    if count < 1:
+        return
+
+    tokens_array = clang.cindex.cast(tokens_memory, clang.cindex.POINTER(clang.cindex.Token * count)).contents
+    token_group = clang.cindex.TokenGroup(tu, tokens_memory, tokens_count)
+
+    for i in xrange(count-1, 0, -1):
+        token = clang.cindex.Token()
+        token.int_data = tokens_array[i].int_data
+        token.ptr_data = tokens_array[i].ptr_data
+        token._tu = tu
+        token._group = token_group
+
+        yield token
 
 class comment_t:
     def __init__(self):
@@ -306,9 +337,13 @@ class clang_parser_t(shorte_parser_t):
 
         return comment
 
+        
+
     def query_comment(self, cursor):
         comment = None
 
+
+        #FATAL("Was this successful?")
         if(cursor.raw_comment != None):
             comment = self.parse_cpp_func_comment(cursor.raw_comment)
             if(not cursor.raw_comment.startswith("/**")):
@@ -317,11 +352,13 @@ class clang_parser_t(shorte_parser_t):
         else:
             start_location = cursor.extent.start.offset
             end_location = cursor.extent.end.offset + 1
-            # DEBUG BRAD: Not sure why this is start_location-2 instead of -1
+            # DEBUG BRAD: Pass start_location-2 in order to get the #define
+            #             before the actual definition.
             extent = self.m_tu.get_extent(self.m_source_file, (0, start_location-2))
-
+        
+            # Get the tokens related to the #define in reverse order
             try:
-                items = clang.cindex.TokenGroup.get_rtokens(self.m_tu, extent)
+                items = get_rtokens(self.m_tu, extent)
             except:
                 tokens = clang.cindex.TokenGroup.get_tokens(self.m_tu, extent)
                 # DEBUG BRAD: This is painfully slow!!!
@@ -333,6 +370,7 @@ class clang_parser_t(shorte_parser_t):
             comment = None
 
             for t in items:
+                #print "T: %s" % t.spelling
                 # Ignore it if is # or define
                 if(t.spelling in ('#', 'define')):
                     continue
