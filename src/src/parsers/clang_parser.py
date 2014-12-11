@@ -26,11 +26,11 @@ else:
     clang.cindex.Config.set_library_path(clang_path)
     
 def get_rtokens(tu, extent):
-    """Helper method to return all tokens in an extent. This method could be
+    '''Helper method to return all tokens in an extent. This method could be
        moved to cindex.py if it is useful to other users. It is similar to the
        static TokenGroup.get_tokens() method but it reverses the generator in
        order to walk backwards.
-    """
+    '''
     tokens_memory = clang.cindex.POINTER(clang.cindex.Token)()
     tokens_count = clang.cindex.c_uint()
 
@@ -929,23 +929,7 @@ class clang_parser_t(shorte_parser_t):
                 #WARNING(str(e))
                 pass
             
-        # Recurse for children of this node
-        #for c in cursor.get_children():
-        #    self.parse_buffer_impl(page, path, c, tu)
 
-    def parse2(self, cursor):
-
-        if(cursor.kind == clang.cindex.CursorKind.FUNCTION_DECL):
-            print "Function: %s" % cursor.spelling
-        #else:
-        #    print "Other: %s" % cursor.spelling
-
-        for c in cursor.get_children():
-            if(c.kind == clang.cindex.CursorKind.FUNCTION_DECL):
-                print "Function: %s" % c.spelling
-            #else:
-            #    print "Other: %s" % c.spelling
-            #
 
     def parse_file_brief(self, text):
         shorte = shorte_parser_t(self.m_engine)
@@ -977,8 +961,6 @@ class clang_parser_t(shorte_parser_t):
         self.page["links"] = []
         self.page["file_brief"] = self.m_file_brief
         self.page["file_author"] = self.m_author
-
-        #self.parse2(tu.cursor)
 
         # Step through all the tags searching for the file brief
         for x in tu.cursor.get_tokens():
