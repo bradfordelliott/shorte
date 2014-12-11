@@ -230,6 +230,8 @@ test_cpp_parser:
 test_clang:
 #	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "html_inline+pdf"
 	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html+pdf" -o build-output/clang_c
+test_clang_quick:
+	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html" -o build-output/clang_c
 
 test_clang2:
 	${python} shorte.py -f "examples/cs4321_api.h examples/cs4321_api.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
