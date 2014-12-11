@@ -1,2 +1,0 @@
-Have to use an older version of clang on RH6 as the latest
-version won't compile under RH6 because of clang

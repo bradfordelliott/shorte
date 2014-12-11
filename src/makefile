@@ -128,6 +128,21 @@ install_linux:
 	make clang_plugin_rh6
 	rm -rf shorte && ln -s shorte.py shorte
 
+install_rh5:
+	cp 3rdparty/clang/linux/rh5/libclang.so 3rdparty/clang/linux/.
+	cp 3rdparty/clang/linux/rh5/*.py 3rdparty/clang/linux/.
+	make cairo_plugin
+	make checkout_vendor_templates
+	rm -rf shorte && ln -s shorte.py shorte
+
+install_rh6:
+	cp 3rdparty/clang/linux/rh6/libclang.so 3rdparty/clang/linux/.
+	cp 3rdparty/clang/linux/rh6/*.py 3rdparty/clang/linux/.
+	make cairo_plugin
+	make checkout_vendor_templates
+	rm -rf shorte && ln -s shorte.py shorte
+
+
 tag:
 	git tag SHORTE_VERSION_${version_str}
 	
