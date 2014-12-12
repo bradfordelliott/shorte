@@ -6,6 +6,9 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.72 (Dec xx, 2014)
+- Fixed paths to the pre-build binaries for RH6 for cairo package
+
 @h3 Version 1.0.71 (Dec 12, 2014)
 - Fixed a bug in the formatting of defines in the open document
   template that causes special characters like & to not be escaped
