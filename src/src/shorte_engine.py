@@ -5,9 +5,9 @@ from string import Template;
 from src.shorte_defines import *
 
 try:
-    import Image
+    from PIL import Image
 except:
-    WARNING("Failed to load Image library")
+    WARNING("Failed to load Image library. Try installing it using the command 'pip install Pillow'")
 
 from src.shorte_source_code import *
 from src.parsers.shorte_parser import *

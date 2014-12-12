@@ -131,14 +131,16 @@ install_linux:
 install_rh5:
 	cp 3rdparty/clang/linux/rh5/libclang.so 3rdparty/clang/linux/.
 	cp 3rdparty/clang/linux/rh5/*.py 3rdparty/clang/linux/.
-	make cairo_plugin
+	cp libs/unix/rh5/python2.7/cairo_access.py libs/.
+	cp libs/unix/rh5/python2.7/_cairo_access.so libs/.
 	make checkout_vendor_templates
 	rm -rf shorte && ln -s shorte.py shorte
 
 install_rh6:
 	cp 3rdparty/clang/linux/rh6/libclang.so 3rdparty/clang/linux/.
 	cp 3rdparty/clang/linux/rh6/*.py 3rdparty/clang/linux/.
-	make cairo_plugin
+	cp libs/unix/rh6/python2.7/cairo_access.py libs/.
+	cp libs/unix/rh6/python2.7/_cairo_access.so libs/.
 	make checkout_vendor_templates
 	rm -rf shorte && ln -s shorte.py shorte
 

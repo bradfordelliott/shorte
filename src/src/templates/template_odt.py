@@ -25,9 +25,9 @@ from src.shorte_defines import *
 import sys
 sys.path.append("libs")
 try:
-    import Image
+    from PIL import Image
 except:
-    WARNING("Failed to load Image library")
+    WARNING("Failed to load Image library. Try installing it using the command 'pip install Pillow'")
 
 from src.shorte_defines import *
 from template import *

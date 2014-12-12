@@ -21,9 +21,9 @@ from src.shorte_source_code import *
 import platform
 import time
 try:
-    import Image
+    from PIL import Image
 except:
-    WARNING("Failed to load Image library")
+    WARNING("Failed to load Image library. Try installing it using the command 'pip install Pillow'")
 from shorte_parser_base import parser_t
     
 from src.templates.template_shorte import template_shorte_t
