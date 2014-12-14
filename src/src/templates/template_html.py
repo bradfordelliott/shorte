@@ -2530,7 +2530,7 @@ $href_end
         # If the document is being inlined then need to get
         # rid of the link prefix and just use a local link
         if(self.is_inline()):
-            output = "<a href='#%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
+            output = "<a href='#%s'>%s</a>" % (wikiword.label, wikiword.label)
         else:
             if(self.m_wikiword_path_prefix):
                 output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.label, wikiword.label)
