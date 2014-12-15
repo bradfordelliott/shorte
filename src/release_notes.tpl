@@ -8,6 +8,9 @@ This document describes the release history of the Shorte language.
 
 @h3 Version 1.0.72 (Dec xx, 2014)
 - Fixed paths to the pre-build binaries for RH6 for cairo package
+- Moved log messages to an HTML file for better management 
+- Minor cleanup to some error messages
+- Fixed an issue wikiword linking in the inline HTML template.
 
 @h3 Version 1.0.71 (Dec 12, 2014)
 - Fixed a bug in the formatting of defines in the open document

@@ -758,6 +758,26 @@ def shorte_set_verbosity(enable):
     global g_verbose
     g_verbose = enable
 
+g_logfile = None
+def shorte_get_log_file():
+    global g_logfile
+    if(g_logfile == None):
+        g_logfile = open("log.html", "wt")
+        g_logfile.write('''<html>
+<head>
+  <style>
+    div.log     {width:100%;vertical-align:text-top;border-top:1px solid #ccc;clear:both;}
+    div.log div {float:left;}
+    div.fatal   {font-weight:bold;color:red;   width:100px;float:left;}
+    div.status  {font-weight:bold;color:#ccc;  width:100px;float:left;}
+    div.error   {font-weight:bold;color:red;   width:100px;float:left;}
+    div.warning {font-weight:bold;color:orange;width:100px;float:left;}
+  </style>
+</head>
+<body>
+''')
+    return g_logfile
+
 def DEBUG(message):
     '''This method is used to manage debug statements in the log file'''
     if(g_verbose):
@@ -765,6 +785,10 @@ def DEBUG(message):
         frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
         message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
         print "DEBUG: %s" % message
+    
+        message = message.replace('\n', '<br/>')
+        message = message.replace(' ', '&nbsp')
+        shorte_get_log_file().write("<div class='log'><div class='debug'>DEBUG:</div><div>%s</div></div>" % message)
 
 def STATUS(message):
     '''This method is used to manage import status messages in the log file'''
@@ -783,6 +807,10 @@ def STATUS(message):
     else:
         print "\033[90mSTATUS:\033[0m %s" % message
 
+    message = message.replace('\n', '<br/>')
+    message = message.replace(' ', '&nbsp')
+    shorte_get_log_file().write("<div class='log'><div class='status'>STATUS:</div><div>%s</div></div>" % message)
+
 def INFO(message):
     '''This method is used to manage informational messages in the log file that are more import than debug statements'''
     if(g_verbose):
@@ -800,6 +828,10 @@ def INFO(message):
             sys.stdout.flush()
         else:
             print "\033[90mINFO:\033[0m %s" % message
+    
+        message = message.replace('\n', '<br/>')
+        message = message.replace(' ', '&nbsp')
+        shorte_get_log_file().write("<div class='log'><div class='info'>INFO:</div>%s</div>" % message)
 
 def WARNING(message):
     '''This method is used to manage warning mesages messages in the log file'''
@@ -817,6 +849,10 @@ def WARNING(message):
         sys.stdout.flush()
     else:
         print "\033[93mWARNING:\033[0m %s" % message
+    
+    message = message.replace('\n', '<br/>')
+    message = message.replace(' ', '&nbsp')
+    shorte_get_log_file().write("<div class='log'><div class='warning'>WARNING:</div><div>%s</div></div>" % message)
 
 def ERROR(message):
     '''This method is used to manage error mesages messages in the log file'''
@@ -834,6 +870,10 @@ def ERROR(message):
         sys.stdout.flush()
     else:
         print "\033[91mERROR:\033[0m %s" % message
+    
+    message = message.replace('\n', '<br/>')
+    message = message.replace(' ', '&nbsp')
+    shorte_get_log_file().write("<div class='log'><div class='error'>ERROR:</div><div>%s</div></div>" % message)
 
 def FATAL(message):
     '''This method is used to manage fatal error mesages messages in the log file for which there is no recovery'''
@@ -853,5 +893,8 @@ def FATAL(message):
     else:
         print "\033[91mFATAL:\033[0m %s" % message
 
+    message = message.replace('\n', '<br/>')
+    message = message.replace(' ', '&nbsp')
+    shorte_get_log_file().write("<div class='log'><div class='fatal'>FATAL:</div>%s</div>" % message)
     sys.exit(-1)
 

@@ -445,15 +445,14 @@ class clang_parser_t(shorte_parser_t):
 
         for diag in tu.diagnostics:
             if(diag.severity >= 3):
-                print "CLANG Parser Error:"
-                print "  severity: %d" % diag.severity
-                print "  location: %s @ %d" % (diag.location.file, diag.location.line)
-                print "  message:  %s" % diag.spelling
+                msg =  "CLANG Parser Error:\n"
+                msg += "  severity: %d\n" % diag.severity
+                msg += "  location: %s @ %d\n" % (diag.location.file, diag.location.line)
+                msg += "  message:  %s\n" % diag.spelling
                 #print diag.severity
                 #print diag.location
                 #print diag.spelling
-                print diag.option
-                ERROR("Parse error parsing %s" % diag.location.file)
+                ERROR(msg)
             elif(diag.severity == 2):
                 message  = "CLANG Parser Warning\n"
                 message += "  severity: %d\n" % diag.severity

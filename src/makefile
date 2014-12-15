@@ -295,6 +295,7 @@ test_t100:
 
 test_wikiwords:
 	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html+pdf" -o build-output/wikiwords
+	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html_inline" -o build-output/wikiwords_inline
 
 test_conditionals:
 	${python} shorte.py -f examples/conditionals.tpl -t "${THEME}" -p "html+pdf" -o build-output/conditionals
