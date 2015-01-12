@@ -394,6 +394,50 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       $star
   }
 
+  div.gallery
+  {
+      margin-left:20px;
+      margin-right:20px;
+      border:1px solid #ddd;
+      padding:4px;
+      border-radius:4px;
+      background-color:#eee;
+  }
+
+  div.gallery div.pic
+  {
+      float:left;
+      padding:0px;
+      margin:4px;
+      border:0px solid #ccc;
+      border-radius:0px;
+  }
+
+  div.gallery p
+  {
+      color:#aaa;font-size:0.8em;padding:0px;margin:0px;margin-top:1px;
+  }
+  
+  div.gallery div.pic div.pic_header
+  {
+      height:30px;border:1px solid #ddd;text-align:center;background-color:white;
+      border-top-left-radius:4px;
+      border-top-right-radius:4px;
+  }
+  
+  div.gallery div.pic div.pic_body
+  {
+      border-left:1px solid #ddd;border-right:1px solid #ddd;
+  }
+  
+  div.gallery div.pic div.pic_footer
+  {
+      height:32px;background:#fff;border:1px solid #ddd;
+      text-align:center;white-space:wrap;overflow:hidden;text-overflow:ellipsis;
+      border-bottom-left-radius:4px;
+      border-bottom-right-radius:4px;
+  }
+
   $priority
   ''').substitute({"priority"              : "$priority",
                    "star"                  : "$star",

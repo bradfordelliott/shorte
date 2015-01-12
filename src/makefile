@@ -302,6 +302,8 @@ test_conditionals:
 
 test_images:
 	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
+test_images_quick:
+	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html" -o build-output/images
 
 test_images_encode:
 	${python} shorte.py -f examples/test.png -i "encode_images" 
@@ -354,6 +356,8 @@ test_revealjs_quick:
 test_sequences:
 	${python} shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
 	${python} shorte.py -f examples/sequences.tpl -p "html+pdf" --theme="${THEME}" -o build-output/sequences_pdf
+test_sequences_quick:
+	${python} shorte.py -f examples/sequences.tpl -p "html" --theme="${THEME}" -o build-output/sequences
 
 test_template_text:
 	${python} shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text

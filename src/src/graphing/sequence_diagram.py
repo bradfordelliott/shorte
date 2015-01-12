@@ -250,6 +250,8 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 text="%s" % event_count,
                 )
 
+            # Draw an arrow from the end of the event back to
+            # the start point to indicate the loop
             if(etype == "loop"):
                 points = []
                 points.append((ex+(ewidth/2),ey - 10))
@@ -259,6 +261,12 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 points.reverse()
                 #cairo.draw_curve(points=points,line_color="#0000ff",line_weight=1.5)
                 cairo.draw_lines(points=points,line_color="#0000ff",line_weight=1.5)
+
+                cairo.draw_text(
+           x=keys[source]["x"],
+           y=y-20,
+           text=source,
+           text_anchor="middle")
             
             text_position = keys[source]["x"]
     

@@ -8,7 +8,7 @@
 - Type    | Source | Sink           | Name                           | Description
 - action  | API    |                | Initialization                 | The API starts initializing the ASIC, the microsequencer is currently stalled 
 - message | API    | Microsequencer | SPARE1[0] == 1, SPARE1[4] == 1 | The API starts AN by setting SPARE1[0] == 1.
-- action  | API    |                | Wait for SPARE20 == 1          | The API waits for AN completion by polling for SPARE20 == 1
+- loop    | API    |                | Wait for SPARE20 == 1          | The API waits for AN completion by polling for SPARE20 == 1
 
 
 @sequence: title="Two Step Master" caption="Two Step Master Behavior"

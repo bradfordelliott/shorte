@@ -2419,10 +2419,32 @@ $href_end
     def format_gallery(self, tag):
 
         gallery = tag.contents
-        html = '<div>'
+        html = '<div class="gallery">'
+        tpl = string.Template('''
+<div class='pic'>
+  <div class='pic_header'>
+    <p>${name}</p>
+  </div>
+  <div class='pic_body' style='height:${height}px;'>
+    <a href='${name}'><img src='${thumbnail}'></img></a>
+  </div>
+  <div class='pic_footer' style='width:${width}px;'>
+    <p>${caption}</p>
+  </div>
+</div>''')
+    
+        #<p style='color:#aaa;font-size:0.8em;padding:2px;margin:2px;'>${caption}</p></div>
+
         for image in gallery.images():
-            html += "<a href='%s'><img style='float:left;width:100px;height:100px;margin:5px;border:10px solid #ccc;border-radius:10px;' src='%s'></img></a>" % (
-                image.get_name(), image.get_thumbnail())
+            print image
+            html += tpl.substitute({ 
+            "height" : image.get_thumb_height(),
+            "name"   : image.get_name(),
+            "thumbnail" : image.get_thumbnail(),
+            "width"     : image.get_thumb_width(),
+            "caption"   : image.get_caption()})
+
+        html += "<div style='clear:both;'></div>"
         html += "</div>"
         html += "<div style='clear:both;'></div>"
 
