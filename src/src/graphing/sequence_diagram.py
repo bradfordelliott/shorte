@@ -77,41 +77,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     
     image_map = '<map name="%s">' % base_file_name
 
-    # Create an XML header for the generated SVG file
-    xml_header = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="680" height="300" viewBox="0 0 680 300" 
-       preserveAspectRatio="xMidYMid meet" zoomAndPan="disable" 
-       xmlns="http://www.w3.org/2000/svg" 
-       xmlns:xlink="http://www.w3.org/1999/xlink">
-'''
-
-    xml_header += '''
-       <defs>
-         <marker fill="red" stroke="red" id="lineend" 
-                 viewBox="0 0 50 50" refX="0" refY="5" 
-                 markerUnits="strokeWidth" 
-                 markerWidth="50" markerHeight="50" 
-                 orient="auto">
-           <path d="M 0 0 L 10 5 L 0 10 z" />
-         </marker>
-         <marker id="End"
-                 viewBox="0 0 50 50" refX="0" refY="5" 
-                 markerUnits="strokeWidth" 
-                 markerWidth="50" markerHeight="50" 
-                 orient="auto">
-           <path d="M 0 0 L 10 5 L 0 10 z" />
-         </marker>
-         <marker id="Start" 
-                 viewBox="0 0 50 50" refX="0" refY="5" 
-                 markerUnits="strokeWidth" 
-                 markerWidth="50" markerHeight="50" 
-                 orient="auto">
-           <path d="M 10 0 L 0 5 L 10 10 Lz" />
-         </marker>
-       </defs>
-'''
-
     x = 50
     y = 40
     gap_between_actors = 150
@@ -158,8 +123,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     width = x
     
     for source in sources:
-       xml += '''<line x1="%d" y1="%d"  x2="%d" y2="%d" fill="white" stroke="red" stroke-width="1.5" stroke-dasharray="5,3,2"/>
-''' % (keys[source]["x"], y, keys[source]["x"], height)
 
        # Draw veritical lines for each source point
        cairo.draw_line(
@@ -172,13 +135,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
            line_weight=1.5,
            line_pattern=4)
        
-       xml += '''
-<text text-anchor="middle" font-family="Courier New"
-      font-size="14" font-weight="bold" x="%d" y="%d" fill="#909090">
-%s
-</text>
-''' % (keys[source]["x"], y-14, source)
-       
        # Draw the source label for each line
        cairo.draw_text(
            x=keys[source]["x"],
@@ -186,14 +142,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
            text=source,
            text_anchor="middle")
        
-       xml += '''
-<rect x="%d" y="%d" rx="2" ry="2"
-      width="12" 
-      height="10" 
-      fill="#E8DFAC" stroke="#c0c0c0"
-      stroke-width="2"/>
-''' % (keys[source]["x"] - 6, y)
-
        # Draw a litle beige rectangle at the
        # start of each source line.
        cairo.draw_rect(
@@ -209,29 +157,22 @@ def generate_diagram(events, title, description, target_width, target_height, ba
     
     y += 30
     height += 30
-    
+   
+    spacer = '''<img src='images/spacer.gif' width='10' height='1'></img>'''
+
     # Now walk through the list of fields parsed from the input XML and generate
     # the output SVG XML as well as the associated HTML table row describing
     # the fields.
     for event in events:
         etype = event["type"]
-    
-        if(etype == "action" or etype == "loop"):
+
+        if(etype in ("action", "loop")):
             name   = event["name"]
             desc   = event["desc"]
             
             tooltip = make_tooltip(event["desc"])
-
-            spacer = '''<img src='images/spacer.gif' width='10' height='1'></img>'''
-
+            
             source = event["from"]
-            xml += '''
-<rect x="%d" y="%d" rx="4" ry="4"
-      width="20"
-      height="%d"
-      fill="#f0f0f0" stroke="#a0a0a0"
-      stroke-width="3"/>
-''' % (keys[source]["x"] - 10, y - gap_between_events/2, gap_between_events - 10)
 
             ex = keys[source]["x"] - 10
             ey = y-(gap_between_events/2)
@@ -263,10 +204,19 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 cairo.draw_lines(points=points,line_color="#0000ff",line_weight=1.5)
 
                 cairo.draw_text(
-           x=keys[source]["x"],
-           y=y-20,
-           text=source,
-           text_anchor="middle")
+                    x=keys[source]["x"] + 75,
+                    y=y - 10,
+                    text=event["name"],
+                    text_anchor="middle",
+                    font_color="#a0a0a0")
+            else:
+                cairo.draw_text(
+                    x=keys[source]["x"],
+                    y=y+5,
+                    text=event["name"],
+                    text_anchor="middle",
+                    font_color="#a0a0a0")
+                
             
             text_position = keys[source]["x"]
     
@@ -317,8 +267,9 @@ def generate_diagram(events, title, description, target_width, target_height, ba
             #    text_anchor="middle")
         
             y += gap_between_events
-            continue
+            #continue
 
+        # Message
         else:
             source = event["from"]
             target = event["to"]
@@ -334,7 +285,6 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 event_table += '''
         <tr>
 '''
-            event_count+=1
            
             # Replace the new line and tab characters with their HTML
             # equivalents
@@ -437,6 +387,8 @@ def generate_diagram(events, title, description, target_width, target_height, ba
 %d
 </text>
 ''' % (text_position, (y - (gap_between_events - 34)), event_count)
+            
+            event_count+=1
 
             color = "black"
             if(event.has_key("link")):
@@ -562,28 +514,13 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                     xml += "</text>"
 
             y += gap_between_events
-#        }
-#    
-#        #$keys{$target}{"lasty"} = $y;
-#        #undef($keys{$source}{"lasty"});
-#    }
-    
     
     event_table += "</table>"
     image_map += "</map>"
-    xml += "</svg>\n"
     
-    xml_header = xml_header.replace("680", "%d" % width)
-    xml_header = xml_header.replace("300", "%d" % height)
-            
     scratch_dir = shorte_get_scratch_path()
     image_name = scratch_dir + "/" + base_file_name
 
-    #hdiagram = open(image_name + ".svg", "wb")
-    #hdiagram.write(xml_header)
-    #hdiagram.write(xml)
-    #hdiagram.close()
-    
     # Convert the result into a PNG file
     output_file = image_name + ".png"
 

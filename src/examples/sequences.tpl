@@ -5,10 +5,19 @@
 @h1 Sequence Diagram
 
 @sequence: title="Hitachi KR"
-- Type    | Source | Sink           | Name                           | Description
-- action  | API    |                | Initialization                 | The API starts initializing the ASIC, the microsequencer is currently stalled 
-- message | API    | Microsequencer | SPARE1[0] == 1, SPARE1[4] == 1 | The API starts AN by setting SPARE1[0] == 1.
-- loop    | API    |                | Wait for SPARE20 == 1          | The API waits for AN completion by polling for SPARE20 == 1
+- Type    | Source         | Sink           | Name                           | Description
+- action  | API            |                | Initialization                 | The API starts initializing the ASIC, the microsequencer is currently stalled 
+- message | API            | Microsequencer | SPARE1[0] == 1, SPARE1[4] == 1 | The API starts AN by setting SPARE1[0] == 1.
+- loop    | API            |                | Wait for SPARE20 == 1          | The API waits for AN completion by polling for SPARE20 == 1
+- message | Microsequencer | KR             | Enable AN                      | The microsequencer triggers the AN block to start sending DME pages to the
+                                                                               link partner.
+- message | KR             | Link Partner   | DME pages                      | The link partner exchanges DME pages while negotation is performed
+- message | Link Partner   | KR             | DME pages                      |
+- message | KR             | Link Partner   | Training                       | Taps are trained
+- message | Link Partner   | KR             | Training                       | Taps are trained
+- message | KR             | Microsequencer | AN Complete                    |
+- message | Microsequencer | API            | SPARE20 = 1                    | The microsequencer asserts SPARE20
+- action  | API            |                | Configure host                 | The API finishes by configuring the host interface based on the negotiated results.
 
 
 @sequence: title="Two Step Master" caption="Two Step Master Behavior"
