@@ -164,7 +164,9 @@ class cairo_t:
                     text=None,
                     line_color="#000000",
                     background_color="#ffffff",
-                    line_weight=0.6):
+                    line_weight=0.6,
+                    start_angle=0,
+                    end_angle=2.0*math.pi):
         im = self.image
         angle = 0
         text_orientation="horizontal"
@@ -176,10 +178,15 @@ class cairo_t:
         im.set_line_width(line_weight);
         
         im.save();
+        # If we not drawing the full ellipse then move to
+        # the center point. Otherwise we don't need to do this
+        # as it will leave a glitch behind for some reason.
+        if(not(start_angle == 0 and end_angle==2.0*math.pi)):
+            im.move_to(x + width/2.,y + height/2.)
         im.translate(x + width / 2.,
                      y + height / 2.);
         im.scale(1. * (width / 2.), 1. * (height / 2.));
-        im.arc(0., 0., 1., 0., 2 * 3.1457);
+        im.arc(0., 0., 1., start_angle, end_angle);
         
         im.set_source_rgb(background_color[0], background_color[1], background_color[2]);
         im.fill_preserve();

@@ -27,6 +27,17 @@ data["two"] = {
     10: 10 + 8
 }
 
+@h1 Pie Graphs
+This is an example of a pie graph
+@graph: type="pie" title="A Pie Graph" width=600 height=400 subtitle="Just a random pie graph"
+--data:
+data = {}
+data["one"] = {
+    "A": 1,
+    "B": 10,
+    "C": 50.5
+}
+
 @h1 Bar Graphs
 This is an example of a bar graph.
 @graph: type="bar" title="A Bar Graph" subtitle="Just a random graph"

@@ -20,6 +20,7 @@ import os
 from src.shorte_source_code import *
 import platform
 import time
+import random
 try:
     from PIL import Image
 except:
@@ -56,6 +57,32 @@ class image_t:
         self.width = 0
         self.name = ""
         self.extension = ""
+        self.thumb_height = 0
+        self.thumb_width = 0
+
+    def __str__(self):
+        output = string.Template('''
+image_t:
+  name:         ${name}
+  source:       ${source}
+  caption:      ${caption}
+  height:       ${height}
+  width:        ${width}
+  thumbnail:    ${thumb}
+  thumb.width:  ${thumb_width}
+  thumb.height: ${thumb_height}
+''').substitute({
+    "name" : self.name,
+    "source" : self.source,
+    "caption" : self.caption.strip(),
+    "height"  : self.height,
+    "width"   : self.width,
+    "thumb"   : self.get_thumbnail(),
+    "thumb_height" : self.thumb_height,
+    "thumb_width"  : self.thumb_width})
+        return output
+
+
 
     def parse_path(self, path):
         self.source = os.path.abspath(path)
@@ -74,6 +101,9 @@ class image_t:
 
         #print "BASENAME: %s" % self.basename
         #print "DIRNAME:  %s" % dirname
+
+    def get_caption(self):
+        return self.caption
 
     def dimensions(self):
 
@@ -100,53 +130,82 @@ class image_t:
 
         return image
     
-    def scale(self, new_height, new_width):
+    def scale(self, new_height=None, new_width=None):
         width = 0
         height = 0
 
         width_scale_percentage  = False
         height_scale_percentage = False
+        
+        im = Image.open(self.source)
+        
+        #print ("1: New height: ", new_height)
+        #print ("1: New width:  ", new_width)
+        #print ("1: im[0] (width):  ", im.size[0])
+        #print ("1: im[1] (height): ", im.size[1])
+
+        if(new_height == None):
+            new_height = (new_width / (1.0 * im.size[0])) * im.size[1]
+        if(new_width == None):
+            new_width = (new_height / (1.0 * im.size[1])) * im.size[0]
+        
+        #print ("2: old.height: %d, new.height: %d" % (im.size[1], new_height))
+        #print ("2: old.width:  %d, new.width:  %d" % (im.size[0], new_width))
+
+        new_height = int(new_height)
+        new_width = int(new_width)
+
+        if(new_height > im.size[1]):
+            new_height = im.size[1]
+            new_width  = im.size[0]
+        if(new_width > im.size[0]):
+            new_height = im.size[1]
+            new_width  = im.size[0]
 
         width = new_width
-        
-        if(not isinstance(new_width, (int,long))):
-            if("%" in new_width):
-                width_scale_percentage = True
-                width = re.sub("%", "", new_width)
-            elif("px" in new_width):
-                width = re.sub("px", "", new_width)
-            width = int(width)
-
         height = new_height
-        if(not isinstance(new_height, (int,long))):
-            if("%" in new_height):
-                height_scale_percentage = True
-                height = re.sub("%", "", height)
-            elif("px" in new_height):
-                height = re.sub("px", "", height)
-            height = int(height)
 
-        if(width_scale_percentage or height_scale_percentage):
-            ERROR("Can't scale images by percentage yet")
-            return self.name
 
-        #print "SOURCE: %s" % self.source
+        #width = new_width
+        #if(not isinstance(new_width, (int,long))):
+        #    if("%" in new_width):
+        #        width_scale_percentage = True
+        #        width = re.sub("%", "", new_width)
+        #    elif("px" in new_width):
+        #        width = re.sub("px", "", new_width)
+        #    width = int(width)
 
-        im = Image.open(self.source)
-        scale_width  = 1.0
-        scale_height = 1.0
-        if(width > 0):
-            scale_width = (width / (im.size[0] * (1.0)))
-            if(height == 0):
-                scale_height = scale_width
+        #height = new_height
+        #if(not isinstance(new_height, (int,long))):
+        #    if("%" in new_height):
+        #        height_scale_percentage = True
+        #        height = re.sub("%", "", height)
+        #    elif("px" in new_height):
+        #        height = re.sub("px", "", height)
+        #    height = int(height)
 
-        if(height > 0):
-            scale_height = (width / (im.size[1] * (1.0)))
-            if(width == 0):
-                scale_width = scale_height
+        #if(width_scale_percentage or height_scale_percentage):
+        #    ERROR("Can't scale images by percentage yet")
+        #    return self.name
 
-        width = scale_width * im.size[0]
-        height = scale_height * im.size[1]
+        ##print "SOURCE: %s" % self.source
+
+        #scale_width  = 1.0
+        #scale_height = 1.0
+        #if(width > 0):
+        #    scale_width = (width / (im.size[0] * (1.0)))
+        #    if(height == 0):
+        #        scale_height = scale_width
+
+        #if(height > 0):
+        #    scale_height = (width / (im.size[1] * (1.0)))
+        #    if(width == 0):
+        #        scale_width = scale_height
+
+        #width  = scale_width * im.size[0]
+        #height = scale_height * im.size[1]
+        
+        #print "1: WIDTH: %d, HEIGHT: %f" % (width,height) 
 
         # DEBUG BRAD: Resize the image to fit
         im = im.resize((int(width),int(height)), Image.BICUBIC)
@@ -155,15 +214,26 @@ class image_t:
         img = scratchdir + os.path.sep + name + self.extension
         im.save(img)
 
-        return img
+        return (img, int(height), int(width))
 
-    def create_thumbnail(self):
+    def create_thumbnail(self,height=200,width=200):
         #print "Creating thumbnail"
-        return self.scale(new_height=100, new_width=100)
+        (img, height, width) = self.scale(new_height=height, new_width=width)
+
+        self.thumb_height = height
+        self.thumb_width = width
+
+        return img
 
     def get_thumbnail(self):
         #print "Creating thumbnail"
-        return self.basename + "_100x100" + self.extension
+        return self.basename + "_%dx%d" % (self.thumb_width, self.thumb_height) + self.extension
+
+    def get_thumb_width(self):
+        return self.thumb_width
+
+    def get_thumb_height(self):
+        return self.thumb_height
 
 class gallery_t:
     def __init__(self):
@@ -1479,6 +1549,10 @@ a C/C++ like define that looks like:
             graph.set_title(title, subtitle)
             graph.set_xaxis("X-Axis", "red", 0, 10, 1)
             graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+        elif(graph_type == "pie"):
+            import src.graphing.piegraph as piegraph
+            graph = piegraph.pie_graph_t(width,height)
+            graph.set_title(title,subtitle)
         elif(graph_type == "timeline"):
             import src.graphing.timeline as timeline
             graph = timeline.timeline_graph_t(width,height)
@@ -2311,6 +2385,9 @@ a C/C++ like define that looks like:
                         image = image_t()
                         image.height = 0
                         image.width = 0
+
+                        height = int(row['cols'][1]['text'].strip())
+
                         image.caption = row["cols"][2]["text"]
 
                         image.parse_path(row["cols"][0]["text"])
@@ -2321,7 +2398,9 @@ a C/C++ like define that looks like:
 
                         # Create a thumbnail for the image and add it to
                         # the list of managed photos
-                        self.m_engine.m_images.append(image.create_thumbnail())
+                        #height = 200 #random.choice([100,200,300])
+                        width = None
+                        self.m_engine.m_images.append(image.create_thumbnail(height=height,width=width))
 
                         gallery.add_image(image)
 

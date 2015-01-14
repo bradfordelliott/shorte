@@ -13,6 +13,12 @@ This document describes the release history of the Shorte language.
 - Moved log messages to an HTML file for better management 
 - Minor cleanup to some error messages
 - Fixed an issue wikiword linking in the inline HTML template.
+- @graph
+    - Added support for pie graphs in the @graph tag
+    - Minor enhancements to the sequence diagram generation
+- @gallery
+    - Tidied up the @gallery tag output in HTML templates. Still
+      not really supported in ODT/PDFs.
 
 @h3 Version 1.0.71 (Dec 12, 2014)
 - Fixed a bug in the formatting of defines in the open document
