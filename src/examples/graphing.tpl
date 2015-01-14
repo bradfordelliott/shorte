@@ -120,4 +120,7 @@ data["one"] = {
 - message | AN             | Link Partner   | DME Pages                      | The AN hardware starts exchanging DME pages with the link partner
 - message | Link Partner   | AN             | DME Pages                      | DME pages are exchanged to negotiate the link protocol.
 - message | AN             | Microsequencer | AN Complete                    | The AN hardware indicates completion.
+- message | Microsequencer | API            | Assert SPARE20 == 1            | The microsequencer asserts SPARE20 == 1 to indicate AN completion
+- action  | API            |                | Host configuration             | The API proceeds to configure the host interface based
+                                                                               on the negotiated results.
 
