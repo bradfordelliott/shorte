@@ -665,6 +665,9 @@ class type_t:
     def set_private(self, priv):
         self.private = priv
 
+    def set_comment(self, comment):
+        self.comment = comment
+
 class enum_t(type_t):
     def __init__(self):
         type_t.__init__(self)

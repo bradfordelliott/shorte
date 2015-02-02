@@ -67,6 +67,7 @@ class comment_t:
         self.deprecated = False
         self.deprecated_msg = None
         self.heading = None
+        self.since = None
         
         # For types that have pseudocode associated
         # with them, primarily function prototypes
@@ -110,6 +111,13 @@ class comment_t:
         return False
     def get_heading(self):
         return self.heading
+
+    def has_since(self):
+        if(self.since != None):
+            return True
+        return False
+    def get_since(self):
+        return self.since
 
     
 class clang_parser_t(shorte_parser_t):
@@ -264,6 +272,74 @@ class clang_parser_t(shorte_parser_t):
 
             #print "name = %s (%s)" % (name, desc)
             matches = expr_param.search(text, matches.end())
+
+        exprs = {
+            "return" : 
+                {"expr"  : "[@\\\]return *([^@]*)",
+                 "format" : "text"},
+            "pseudocode" :
+                {"expr"  : "[@\\\]pseudocode *([^@]*)",
+                 "format" : ""},
+            "example" :
+                {"expr" : "[@\\\]example *([^@]*)",
+                 "format" : ""},
+            "see" :
+                {"expr" : "[@\\\]see *([^@]*)",
+                 "format" : ""},
+            "deprecated" :
+                {"expr" : "[@\\\]deprecated *([^@]*)",
+                 "format" : ""},
+            "since" :
+                {"expr" : "[@\\\]since *([^@]*)",
+                 "format" : ""}
+        }
+
+        try:
+            for expr in exprs:
+                regex = exprs[expr]["expr"]
+                field_format = exprs[expr]["format"]
+
+                regex = re.compile(regex, re.DOTALL)
+
+                matches = regex.search(text)
+                val = ''
+                if(matches != None):
+                    val = matches.groups()[0]
+                
+                    if(field_format == "text"):
+                        val = self.format_text(val)
+
+                    if(expr == "deprecated"):
+                        msg = trim_leading_blank_lines(val)
+                        msg = self.parse_textblock(msg)
+                        comment.deprecated = True
+                        comment.deprecated_msg = msg
+                    else:
+                        if(field_format == "text"):
+                            val = self.format_text(val)
+
+                        if(expr == "return"):
+                            comment.returns = val
+                        elif(expr == "example"):
+                            comment.example = val
+                        elif(expr == "pseudocode"):
+                            comment.pseudocode = val
+                        elif(expr == "see"):
+                            comment.see_also = val
+                        elif(expr == "since"):
+                            comment.since = val
+
+        except:
+            print sys.exc_info()
+            sys.exit(-1)
+
+        #print "EXAMPLE: %s" % comment.example
+
+        
+        return comment
+
+        sys.exit(-1)
+
         
         expr_return = re.compile("[@\\\]return *([^@]*)", re.DOTALL)
 
@@ -905,6 +981,8 @@ class clang_parser_t(shorte_parser_t):
                         object_data.set_example(
                             comment.get_example(),
                             self.m_engine.m_source_code_analyzer, "c")
+
+                    object_data.set_comment(comment)
                         
                     self.object_register(object_name, object_data)
                     

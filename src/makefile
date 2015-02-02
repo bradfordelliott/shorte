@@ -67,6 +67,9 @@ clang_plugin_rh6:
 	cd 3rdparty/clang && cp linux/rh6/* .
 	cd 3rdparty/clang/linux && cp rh6/* .
 
+clang_plugin_darwin:
+	cp /opt/local/libexec/llvm-3.6/lib/libclang.dylib 3rdparty/clang/osx/.
+
 checkout_vendor_templates:
 	rm -rf vendor_templates
 	mkdir vendor_templates

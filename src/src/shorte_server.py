@@ -22,6 +22,7 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 def shutdown():
     global g_server
+    print "Received shutdown message"
     g_server.quit = 1
     return 1
 
