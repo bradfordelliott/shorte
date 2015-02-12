@@ -165,6 +165,16 @@ class image_t:
         #print "Creating thumbnail"
         return self.basename + "_100x100" + self.extension
 
+    def __str__(self):
+        output =  "image_t\n"
+        output += "=======\n"
+        output += "  caption   = %s\n" % self.caption
+        output += "  name      = %s\n" % self.name
+        output += "  extension = %s\n" % self.extension
+        return output
+        
+
+
 class gallery_t:
     def __init__(self):
         self.m_images = []
@@ -229,6 +239,7 @@ class shorte_parser_t(parser_t):
             "sql"             : True,
             "perl"            : True,
             "code"            : True,
+            "batch"           : True,
             "d"               : True,
             "bash"            : True,
             "shorte"          : True,
@@ -462,7 +473,7 @@ class shorte_parser_t(parser_t):
     
     def tag_is_source_code(self, tag_name):
 
-        if(tag_name in ("python", "perl", "shell", "d", "c", "sql", "code", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml")):
+        if(tag_name in ("python", "perl", "shell", "d", "c", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml")):
            return True
 
         return False

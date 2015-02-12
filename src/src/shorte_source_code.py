@@ -265,7 +265,10 @@ class source_code_t:
  CREATE TABLE INTEGER AUTO_INCREMENT
  TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
 ''',
-            "gnuplot" : ''''''
+            "gnuplot" : '''''',
+            
+            "batch" : '''call
+'''
         }
        
         self.m_keywords = {}
@@ -413,6 +416,14 @@ class source_code_t:
                     tags.append(tag)
                     tag = {}
                     tag["data"] = '-'
+                    tag["type"] = TAG_TYPE_COMMENT
+
+                # Treat rem as a single line comment in batch files
+                elif(source_lang == "batch" and (source[i] == 'r' and source[i+1] == 'e' and source[i+2] == 'm')):
+                    states.append(STATE_COMMENT)
+                    tags.append(tag)
+                    tag = {}
+                    tag["data"] = "r"
                     tag["type"] = TAG_TYPE_COMMENT
                     
                 # Treat /* as the start of a multi-line comment
@@ -795,7 +806,8 @@ class field_t(type_t):
 
     def get_type(self):
         if(len(self.attrs) >= 2):
-            return self.attrs[0]["text"]
+            # DEBUG BRAD: I should investigate changing this back
+            return "%s" % self.type #return self.attrs[0]["text"]
         return self.type
 
     def append_attr(self, val):

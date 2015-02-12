@@ -9,6 +9,9 @@ class cairo_t:
     def __init__(self, width, height):
         self.image = cairo(5000, 5000)
 
+    def __del__(self):
+        self.image.destroy()
+
     def draw_text(self,
         x,
         y,
@@ -602,6 +605,9 @@ class graph_t:
         self.graph = cairo_t(self.width + self.width_padding, self.height + self.height_padding)
 
         self.draw_frame = False
+
+    def __del__(self):
+        del self.graph
         
 
     def add_data_set(self, dataset, name, color=None):

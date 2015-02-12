@@ -14,6 +14,9 @@ class line_graph_t(graph_t):
 
         graph_t.__init__(self,width,height)
 
+    def __del__(self):
+        graph_t.__del__(self)
+
     def draw_yaxis(self):
         
         maxX = self.get_max_xcoordiate()
