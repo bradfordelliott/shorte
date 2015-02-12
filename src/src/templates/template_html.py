@@ -2010,6 +2010,15 @@ within an HTML document.
             html_example = self.format_object_example(define)
 
         xref = self.get_xref(define.get_file(), define.get_line())
+
+        # DEBUG BRAD: Need to figure out a common way of handling
+        #             code structures like this. Don't want to repeat
+        #             it for every type.
+        html_since = ''
+        if(define.comment != None and define.comment.has_since()):
+            html_since = '''<div class='cb_title'>Since:</div>
+        <div style="margin-left:10px;margin-top:5px;margin-bottom:5px;">%s</div>
+''' % define.comment.get_since()
         
         html = string.Template('''
 <div class='bordered'>
@@ -2025,6 +2034,7 @@ within an HTML document.
         <div class='cb_title'>Description:</div>
         <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
         $example
+        $since
     </div>
 </div>
 </div><br/>''').substitute({
@@ -2032,7 +2042,8 @@ within an HTML document.
     "xref" : xref,
     "value" : self.format_textblock(define.value),
     "desc" : self.format_textblock(define.description),
-    "example" : html_example})
+    "example" : html_example,
+    "since"   : html_since})
 
         return html
 
@@ -2419,10 +2430,32 @@ $href_end
     def format_gallery(self, tag):
 
         gallery = tag.contents
-        html = '<div>'
+        html = '<div class="gallery">'
+        tpl = string.Template('''
+<div class='pic'>
+  <div class='pic_header'>
+    <p>${name}</p>
+  </div>
+  <div class='pic_body' style='height:${height}px;'>
+    <a href='${name}'><img src='${thumbnail}'></img></a>
+  </div>
+  <div class='pic_footer' style='width:${width}px;'>
+    <p>${caption}</p>
+  </div>
+</div>''')
+    
+        #<p style='color:#aaa;font-size:0.8em;padding:2px;margin:2px;'>${caption}</p></div>
+
         for image in gallery.images():
-            html += "<a href='%s'><img style='float:left;width:100px;height:100px;margin:5px;border:10px solid #ccc;border-radius:10px;' src='%s'></img></a>" % (
-                image.get_name(), image.get_thumbnail())
+            print image
+            html += tpl.substitute({ 
+            "height" : image.get_thumb_height(),
+            "name"   : image.get_name(),
+            "thumbnail" : image.get_thumbnail(),
+            "width"     : image.get_thumb_width(),
+            "caption"   : image.get_caption()})
+
+        html += "<div style='clear:both;'></div>"
         html += "</div>"
         html += "<div style='clear:both;'></div>"
 
@@ -2530,7 +2563,7 @@ $href_end
         # If the document is being inlined then need to get
         # rid of the link prefix and just use a local link
         if(self.is_inline()):
-            output = "<a href='#%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
+            output = "<a href='#%s'>%s</a>" % (wikiword.label, wikiword.label)
         else:
             if(self.m_wikiword_path_prefix):
                 output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.label, wikiword.label)

@@ -67,6 +67,9 @@ clang_plugin_rh6:
 	cd 3rdparty/clang && cp linux/rh6/* .
 	cd 3rdparty/clang/linux && cp rh6/* .
 
+clang_plugin_darwin:
+	cp /opt/local/libexec/llvm-3.6/lib/libclang.dylib 3rdparty/clang/osx/.
+
 checkout_vendor_templates:
 	rm -rf vendor_templates
 	mkdir vendor_templates
@@ -295,12 +298,15 @@ test_t100:
 
 test_wikiwords:
 	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html+pdf" -o build-output/wikiwords
+	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html_inline" -o build-output/wikiwords_inline
 
 test_conditionals:
 	${python} shorte.py -f examples/conditionals.tpl -t "${THEME}" -p "html+pdf" -o build-output/conditionals
 
 test_images:
 	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
+test_images_quick:
+	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html" -o build-output/images
 
 test_images_encode:
 	${python} shorte.py -f examples/test.png -i "encode_images" 
@@ -353,6 +359,8 @@ test_revealjs_quick:
 test_sequences:
 	${python} shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
 	${python} shorte.py -f examples/sequences.tpl -p "html+pdf" --theme="${THEME}" -o build-output/sequences_pdf
+test_sequences_quick:
+	${python} shorte.py -f examples/sequences.tpl -p "html" --theme="${THEME}" -o build-output/sequences
 
 test_template_text:
 	${python} shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text

@@ -3548,6 +3548,10 @@ ${desc}
         if(os.environ.has_key("PATH_OOWRITER")):
             path_oowriter = os.environ["PATH_OOWRITER"]
 
+        if(not os.path.exists(path_oowriter)):
+            FATAL("Cannot generate ODT files, swriter not found at %s\n"
+                  "Try seeing PATH_OOWRITER environment variable or updating path in shorte.cfg" % path_oowriter)
+
         #print "PACKAGE: %s" % package
         
         params_oowriter = "--writer --nologo --nofirststartwizard --norestore --nodefault --headless --invisible --nolockcheck"

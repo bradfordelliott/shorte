@@ -43,6 +43,9 @@ int test_dot_c_my_test(int blah, int* dummy);
  *   {
  *       printf("False value!\\n");
  *   }
+ *
+ * @since
+ *   This version was introduced in version 1.2
  */
 #define FALSE 0
 

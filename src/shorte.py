@@ -140,6 +140,9 @@ if(options.server):
     shorte_server_start("127.0.0.1", int(options.server_port))
     sys.exit(0)
 
+args = ' '.join(sys.argv)
+STATUS("Command Line:\n  %s" % args)
+
 output_dir = options.output_dir
 if(output_dir == None):
     output_dir = "build-output"

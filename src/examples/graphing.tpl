@@ -27,6 +27,17 @@ data["two"] = {
     10: 10 + 8
 }
 
+@h1 Pie Graphs
+This is an example of a pie graph
+@graph: type="pie" title="A Pie Graph" width=600 height=400 subtitle="Just a random pie graph"
+--data:
+data = {}
+data["one"] = {
+    "A": 1,
+    "B": 10,
+    "C": 50.5
+}
+
 @h1 Bar Graphs
 This is an example of a bar graph.
 @graph: type="bar" title="A Bar Graph" subtitle="Just a random graph"
@@ -109,4 +120,7 @@ data["one"] = {
 - message | AN             | Link Partner   | DME Pages                      | The AN hardware starts exchanging DME pages with the link partner
 - message | Link Partner   | AN             | DME Pages                      | DME pages are exchanged to negotiate the link protocol.
 - message | AN             | Microsequencer | AN Complete                    | The AN hardware indicates completion.
+- message | Microsequencer | API            | Assert SPARE20 == 1            | The microsequencer asserts SPARE20 == 1 to indicate AN completion
+- action  | API            |                | Host configuration             | The API proceeds to configure the host interface based
+                                                                               on the negotiated results.
 

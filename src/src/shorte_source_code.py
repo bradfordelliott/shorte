@@ -676,6 +676,9 @@ class type_t:
     def set_private(self, priv):
         self.private = priv
 
+    def set_comment(self, comment):
+        self.comment = comment
+
 class enum_t(type_t):
     def __init__(self):
         type_t.__init__(self)
@@ -1026,7 +1029,8 @@ class prototype_t(type_t):
     def validate_params(self):
         for param in self.params:
             if(not param.has_description()):
-                WARNING("Parameter %s has no description" % param.name)
+                WARNING("Parameter %s.%s has no description (%s @ line %d)" % (
+                        self.get_name(), param.name, self.get_file(), self.get_line()))
 
     def has_called_by(self):
         return False

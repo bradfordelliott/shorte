@@ -1,6 +1,8 @@
 @doctitle Shorte Examples
 @docsubtitle Images
 
+#@docbanner "examples/gallery/banner.png"
+
 @body
 @h1 Images
 
@@ -20,18 +22,20 @@
 @image: src="examples/record_0.png"
 
 @h2 Gallery
+This is some random text with a gallery
+
 @gallery:
 -- images:
--h Image                | Size  | Caption
-- examples/record_0.png | 70x70 | This is my caption
-- examples/test.png     | 70x70 | This is my caption
-- examples/record_0.png | 70x70 | This is my caption
-- examples/test.png     | 70x70 | This is my caption
-- examples/record_0.png | 70x70 | This is my caption
-- examples/test.png     | 70x70 | This is my caption
-- examples/record_0.png | 70x70 | This is my caption
-- examples/test.png     | 70x70 | This is my caption
-- examples/record_0.png | 70x70 | This is my caption
-- examples/test.png     | 70x70 | This is my caption
-- examples/record_0.png | 70x70 | This is my caption
-- examples/test.png     | 70x70 | This is my caption
+-h Image                     | Size  | Caption
+- examples/gallery/one.jpg   | 70    | This is an example caption that is really long. Not sure if it will wrap or not. Hopefully
+                                         it won't wrap and I won't have any real issues with it because I don't want to have any issues.
+- examples/gallery/two.jpg   | 70    | This is my caption
+- examples/gallery/three.jpg | 70    | This is my caption
+
+@text
+This is some other random information
+
+@gallery
+-- images:
+-h Image                     | Size  | Caption
+- examples/gallery/four.jpg  | 300   | This is my caption
