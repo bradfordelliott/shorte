@@ -267,7 +267,11 @@ class source_code_t:
 ''',
             "gnuplot" : '''''',
             
-            "batch" : '''call
+            "batch" : '''
+call cd chdir cls copy del dir echo @echo exit for if md mkdir
+move rd rmdir readline ren rename set setlocal shift start title
+CALL CD CHDIR CLS COPY DEL DIR ECHO @ECHO EXIT FOR IF MD MKDIR
+MOVE RD RMDIR READLINE REN RENAME SET SETLOCAL SHIFT START TITLE
 '''
         }
        

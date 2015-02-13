@@ -44,6 +44,7 @@ class document_info_t:
         self.m_revision_history = None
         self.m_footer_title = None
         self.m_footer_subtitle = None
+        self.m_templates = {}
 
     def version(self):
         if(self.m_docversion == None):
@@ -66,7 +67,7 @@ class document_info_t:
             self.m_docauthor = author
 
     def copyright_date(self):
-        return "2014"
+        return date.today().year + 1
 
     def customer(self):
         return ""
@@ -112,6 +113,18 @@ class document_info_t:
 
     def subtitle(self):
         return self.m_docsubtitle
+   
+    def add_template(self, key, value):
+        # DEBUG BRAD: This is a temporary way of dealing with comments
+        #             in snippets
+        if(self.m_templates.has_key(key)):
+            ERROR("Template %s already exists" % key)
+        value = value.replace("\\#", "#")
+        self.m_templates[key] = value
+
+    def get_template(self, key):
+        return self.m_templates[key]
+
 
 #+------------------------------------------------------------------------------
 #|
@@ -915,8 +928,13 @@ class engine_t:
                 if(self.tag_is_executable(tag.name)):
                     source = tag.source 
 
+                    if(tag.modifiers.has_key("template")):
+                        template = tag.modifiers["template"]
+                        template = self.get_doc_info().get_template(template)
+                        source = template.replace("$1", tag.source)
+
                     executor = code_executor_t()
-                    tag.result = executor.execute(tag.name, tag.source, tag.modifiers)
+                    tag.result = executor.execute(tag.name, source, tag.modifiers)
                 
                 #if(tag.name == "struct"):
                 #    #if(len(tag.contents["heading"])):
@@ -1010,8 +1028,13 @@ else:
                 if(self.tag_is_executable(tag.name)):
                     source = tag.source 
 
+                    if(tag.modifiers.has_key("template")):
+                        template = tag.modifiers["template"]
+                        template = self.get_doc_info().get_template(template)
+                        source = template.replace("$1", tag.source)
+
                     executor = code_executor_t()
-                    tag.result = executor.execute(tag.name, tag.source, tag.modifiers)
+                    tag.result = executor.execute(tag.name, source, tag.modifiers)
                 
         # If the version number was not specified on the command
         # line then use any @docversion one specified in one of

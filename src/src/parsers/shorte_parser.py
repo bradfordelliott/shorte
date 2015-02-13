@@ -343,6 +343,7 @@ class shorte_parser_t(parser_t):
             "docfilename"     : True,
             "outdir"          : True,
             "sourcedir"       : True,
+            "template"        : True,
 
             "doc.footer.title" : True,
             "doc.footer.subtitle" : True,
@@ -518,7 +519,10 @@ class shorte_parser_t(parser_t):
             elif(tag.name == "sourcedir"):
                 header["sourcedir"] = tag.contents
                 self.m_engine.set_working_dir(header["sourcedir"])
-
+            elif(tag.name == "template"):
+                header["template"] = tag.contents
+                name = tag.modifiers["name"]
+                self.m_engine.get_doc_info().add_template(name, tag.contents)
             elif(tag.name == "outdir"):
                 header["outdir"] = tag.contents
                 self.m_engine.set_output_dir(header["outdir"])
@@ -557,7 +561,7 @@ class shorte_parser_t(parser_t):
 
     def tag_is_executable(self, tag_name):
 
-        if(tag_name in ("python", "perl", "d", "c", "vera", "bash", "java", "verilog", "tcl")):
+        if(tag_name in ("python", "perl", "d", "c", "vera", "bash", "java", "verilog", "tcl", "batch")):
             return True
 
         return False

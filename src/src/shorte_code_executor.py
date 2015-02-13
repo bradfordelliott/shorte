@@ -37,6 +37,7 @@ class code_executor_t:
         extension["vera"] = "vr"
         extension["verilog"] = "sv"
         extension["tcl"] = "tcl"
+        extension["batch"] = "cmd"
 
         name = "tmpexample.%s" % extension[language]
 
@@ -46,7 +47,7 @@ class code_executor_t:
 
         print("Creating %s, language=%s, source=%s" % (path, language, source))
         
-        if(language in ("python", "perl", "bash", "java", "c", "vera", "verilog", "tcl")):
+        if(language in ("python", "perl", "bash", "java", "c", "vera", "verilog", "tcl", "batch")):
 
             handle = open(path, "wt")
 
@@ -95,6 +96,11 @@ class code_executor_t:
         #source_file = os.getcwd() + os.sep + self.source_file_name(language)
         source_file = self.source_file_name(language)
         print "Source file = %s" % source_file
+
+        keep_source_file = False
+        if(modifiers.has_key("save")):
+            source_file = modifiers["save"]
+            keep_source_file = True
 
         # Create the temporary source file
         self.create_source_file(language, source_file, source)
@@ -279,11 +285,24 @@ class code_executor_t:
                 print "Cannot execute vera on local machine"
                 sys.exit(-1)
 
+        elif(language == "batch"):
+            # Run the batch file using cmd /c
+            tmp = open(source_file, "w")
+            tmp.write(source)
+            tmp.close()
+
+            cmd_run = "cmd /c %s" % source_file
+
+            result = os.popen(cmd_run).read()
+
+            print "RESULT=[%s]" % result
+
 
         # Now that we're done with the file make sure we
         # remove the source file so we don't clutter up the
         # working directory
-        #os.unlink(source_file)
+        if(not keep_source_file):
+            os.unlink(source_file)
 
         #self.m_example_id += 1
         #example_name = "example_%d" % self.m_example_id

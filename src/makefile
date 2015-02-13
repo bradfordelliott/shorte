@@ -420,6 +420,12 @@ test_code_styling:
 test_string_methods:
 	${python} test_cases/string_handling.py
 
+test_batch_files:
+	${python} shorte.py -f examples/batch.tpl -p html -o build-output/test_batch_files
+
+test_snippets:
+	${python} shorte.py -f "examples/batch.tpl examples/snippets.tpl" -p html -o build-output/test_snippets
+
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python
 exe:
