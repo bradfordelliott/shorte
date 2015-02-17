@@ -307,6 +307,8 @@ test_images:
 	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
 test_images_quick:
 	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html" -o build-output/images
+test_gallery:
+	${python} shorte.py -f examples/gallery.tpl -t "${THEME}" -p "html" -o build-output/gallery
 
 test_images_encode:
 	${python} shorte.py -f examples/test.png -i "encode_images" 

@@ -136,8 +136,101 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
   table div.tblkps {margin-left:4px;margin-top:5px;margin-bottom:5px;font-size:1.0em;}
   table div.tblkp  {margin-left:4px;padding:0px;margin-top:5px;margin-bottom:5px;font-size:1.0em;}
     '''
+    
+    def get_gallery_styles(self):
+        return '''
+div.gallery
+  {
+      margin-left:20px;
+      margin-right:20px;
+      border:1px solid #ddd;
+      padding:4px;
+      border-radius:4px;
+      background-color:#eee;
+  }
+
+  div.gallery div.pic
+  {
+      float:left;
+      padding:0px;
+      margin:4px;
+      border:0px solid #ccc;
+      border-radius:0px;
+  }
+
+  div.gallery p
+  {
+      color:#aaa;font-size:0.8em;padding:0px;margin:0px;margin-top:1px;
+  }
+  
+  div.gallery div.pic div.pic_header
+  {
+      height:30px;border:1px solid #ddd;text-align:center;background-color:white;
+      border-top-left-radius:4px;
+      border-top-right-radius:4px;
+  }
+  
+  div.gallery div.pic div.pic_body
+  {
+      border-left:1px solid #ddd;border-right:1px solid #ddd;
+  }
+  
+  div.gallery div.pic div.pic_footer
+  {
+      height:32px;background:#fff;border:1px solid #ddd;
+      text-align:center;white-space:wrap;overflow:hidden;text-overflow:ellipsis;
+      border-bottom-left-radius:4px;
+      border-bottom-right-radius:4px;
+  }
+
+
+  div.gallery_modern
+  {
+      margin-left:20px;
+      margin-right:20px;
+      border:1px solid #eee;
+      padding:10px;
+      border-radius:2px;
+  }
+
+  div.gallery_modern div.pic
+  {
+      float:left;
+      padding:0px;
+      margin:2px;
+      border:0px solid #ccc;
+      border-radius:0px;
+      background-color:black;
+  }
+
+  div.gallery_modern p
+  {
+      color:#aaa;font-size:0.8em;padding:0px;margin:0px;margin-top:1px;
+  }
+  
+  div.gallery_modern div.pic div.pic_header
+  {
+      height:30px;border:0px solid #ddd;text-align:center;background-color:black;
+  }
+  
+  div.gallery_modern div.pic div.pic_body
+  {
+      border-left:1px solid #000;border-right:1px solid #000;
+  }
+  
+  div.gallery_modern div.pic div.pic_footer
+  {
+      height:32px;background:#000;border:0px solid #ddd;
+      text-align:center;white-space:wrap;overflow:hidden;text-overflow:ellipsis;
+      border-bottom-left-radius:4px;
+      border-bottom-right-radius:4px;
+  }
+'''
   
     def get_common_styles(self):
+
+        styles_gallery = self.get_gallery_styles()
+
         return string.Template('''
   a {color: ${color_hyperlink};font-weight: bold;font-size:0.9em;}
   a:hover {color: ${color_hyperlink_hover};font-weight: bold;text-decoration: underline;}
@@ -394,49 +487,8 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       $star
   }
 
-  div.gallery
-  {
-      margin-left:20px;
-      margin-right:20px;
-      border:1px solid #ddd;
-      padding:4px;
-      border-radius:4px;
-      background-color:#eee;
-  }
 
-  div.gallery div.pic
-  {
-      float:left;
-      padding:0px;
-      margin:4px;
-      border:0px solid #ccc;
-      border-radius:0px;
-  }
-
-  div.gallery p
-  {
-      color:#aaa;font-size:0.8em;padding:0px;margin:0px;margin-top:1px;
-  }
-  
-  div.gallery div.pic div.pic_header
-  {
-      height:30px;border:1px solid #ddd;text-align:center;background-color:white;
-      border-top-left-radius:4px;
-      border-top-right-radius:4px;
-  }
-  
-  div.gallery div.pic div.pic_body
-  {
-      border-left:1px solid #ddd;border-right:1px solid #ddd;
-  }
-  
-  div.gallery div.pic div.pic_footer
-  {
-      height:32px;background:#fff;border:1px solid #ddd;
-      text-align:center;white-space:wrap;overflow:hidden;text-overflow:ellipsis;
-      border-bottom-left-radius:4px;
-      border-bottom-right-radius:4px;
-  }
+  $styles_gallery
 
   $priority
   ''').substitute({"priority"              : "$priority",
@@ -462,5 +514,6 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
                    "color_table_reserved_fg" : self.colors["table"]["reserved"].fg,
                    "color_hyperlink"       : self.colors["hyperlink"].fg,
                    "color_hyperlink_hover" : self.colors["hyperlink.hover"].fg,
-                   "color_codeblock_section" : self.colors["codeblock.section"].fg})
+                   "color_codeblock_section" : self.colors["codeblock.section"].fg,
+                   "styles_gallery"          : styles_gallery})
 
