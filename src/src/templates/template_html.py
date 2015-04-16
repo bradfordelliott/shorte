@@ -1604,11 +1604,17 @@ within an HTML document.
             return ''
 
         if(isinstance(tag, tag_t)):
-            paragraphs = tag.contents
+            textblock = tag.contents
         else:
-            paragraphs = tag
+            textblock = tag
 
         html = ''
+
+        if(isinstance(textblock, textblock_t)):
+            paragraphs = textblock.paragraphs
+        else:
+            FATAL("Should be a textblock")
+            paragraphs = textblock
 
         if(is_array(paragraphs)):
             for p in paragraphs:
@@ -2506,8 +2512,8 @@ $href_end
                 $PauseOnHover: 1,                                //[Optional] Whether to pause when mouse over if a slider is auto playing, 0 no pause, 1 pause for desktop, 2 pause for touch device, 3 pause for desktop and touch device, 4 freeze for desktop, 8 freeze for touch device, 12 freeze for desktop and touch device, default value is 1
 
                 $DragOrientation: 3,                                //[Optional] Orientation to drag slide, 0 no drag, 1 horizental, 2 vertical, 3 either, default value is 1 (Note that the $DragOrientation should be the same as $PlayOrientation when $DisplayPieces is greater than 1, or parking position is not 0)
-                $ArrowKeyNavigation: true,   			            //[Optional] Allows keyboard (arrow key) navigation or not, default value is false
-                $SlideDuration: 800,                                //Specifies default duration (swipe) for slide in milliseconds
+                $ArrowKeyNavigation: true,                         //[Optional] Allows keyboard (arrow key) navigation or not, default value is false
+                $SlideDuration: 1500,                                //Specifies default duration (swipe) for slide in milliseconds
                 $FillMode: 1,
 
                 $SlideshowOptions: {                                //[Optional] Options to specify and enable slideshow or not
@@ -2908,7 +2914,7 @@ $href_end
                 # We've already converted breaks so we need to unconvert them
                 # to format the note properly.
                 replace = replace.replace("<br/>", "\n")
-                textblock = self.m_engine.m_parser.parse_textblock(replace)
+                textblock = textblock_t(replace)
 
                 if(tag == "note"):
                     label = "Note"

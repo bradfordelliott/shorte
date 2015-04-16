@@ -140,9 +140,11 @@ within an HTML document.
 '''
 
         if(isinstance(tag, tag_t)):
-            paragraphs = tag.contents
+            textblock = tag.contents
         else:
-            paragraphs = tag
+            textblock = tag
+            
+        paragraphs = textblock.paragraphs
 
         html = ''
 

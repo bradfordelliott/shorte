@@ -149,8 +149,6 @@ image_t:
         if(new_width == None):
             new_width = (new_height / (1.0 * im.size[1])) * im.size[0]
         
-        #print ("2: old.height: %d, new.height: %d" % (im.size[1], new_height))
-        #print ("2: old.width:  %d, new.width:  %d" % (im.size[0], new_width))
 
         new_height = int(new_height)
         new_width = int(new_width)
@@ -161,6 +159,9 @@ image_t:
         if(new_width > im.size[0]):
             new_height = im.size[1]
             new_width  = im.size[0]
+        
+        print ("2: old.height: %d, new.height: %d" % (im.size[1], new_height))
+        print ("2: old.width:  %d, new.width:  %d" % (im.size[0], new_width))
 
         width = new_width
         height = new_height
@@ -218,6 +219,10 @@ image_t:
 
     def create_thumbnail(self,height=200,width=200):
         #print "Creating thumbnail"
+        #if(height):
+        #    print "  height=%d" % height
+        #if(width):
+        #    print "  width=%d" % width
         (img, height, width) = self.scale(new_height=height, new_width=width)
 
         self.thumb_height = height
@@ -987,7 +992,7 @@ class shorte_parser_t(parser_t):
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
-                table[modifier] = self.parse_textblock(modifiers[modifier])
+                table[modifier] = textblock_t(modifiers[modifier])
                 table2.modifiers[modifier] = table[modifier]
             else:
                 table[modifier] = modifiers[modifier]
@@ -1160,7 +1165,7 @@ class shorte_parser_t(parser_t):
                         tmp = {}
                         tmp["span"] = colspan 
                         tmp["text"] = text
-                        tmp["textblock"] = self.parse_textblock(trim_leading_indent(text))
+                        tmp["textblock"] = textblock_t(trim_leading_indent(text))
 
                         #print "TEXT:\n%s" % text
 
@@ -1192,7 +1197,7 @@ class shorte_parser_t(parser_t):
                 tmp["span"] = 1
                 tmp["text"] = col
                 #print "TEXT\n[%s]" % col
-                tmp["textblock"] = self.parse_textblock(trim_leading_indent(col))
+                tmp["textblock"] = textblock_t(trim_leading_indent(col))
                 table_row["cols"].append(tmp)
 
             table["rows"].append(table_row)
@@ -1255,8 +1260,8 @@ a C/C++ like define that looks like:
 
         define = define_t()
         define.name = self.get_attribute_as_string(modifiers, "name")
-        define.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
-        define.value = self.get_attribute_as_string(modifiers, "value")
+        define.description = textblock_t(self.get_attribute_as_string(modifiers, "description"))
+        define.value = textblock_t(self.get_attribute_as_string(modifiers, "value"))
         define.source = source
 
         define.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
@@ -1274,13 +1279,13 @@ a C/C++ like define that looks like:
                 continue
 
             elif(section.startswith("value:")):
-                define.value = section[6:len(section)].strip()
+                define.value = textblock_t(section[6:len(section)].strip())
             elif(section.startswith("name:")):
                 source = section[5:len(section)].strip()
                 define.name = source
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
-                define.description = self.parse_textblock(source)
+                define.description = textblock_t(source)
 
         return define
 
@@ -1298,7 +1303,7 @@ a C/C++ like define that looks like:
         enum = enum_t()
         
         enum.name = self.get_attribute_as_string(modifiers, "name")
-        enum.description = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        enum.description = textblock_t(self.get_attribute_as_string(modifiers, "description"))
         enum.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         enum.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         enum.private = self.get_attribute_as_bool(modifiers, "private")
@@ -1358,7 +1363,7 @@ a C/C++ like define that looks like:
                 enum.name = source
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
-                enum.description = self.parse_textblock(source)
+                enum.description = textblock_t(source)
 
         return enum
     
@@ -1366,7 +1371,7 @@ a C/C++ like define that looks like:
         
         cname = self.get_attribute_as_string(modifiers, "name")
         
-        cdescription = self.parse_textblock(self.get_attribute_as_string(modifiers, "description"))
+        cdescription = textblock_t(self.get_attribute_as_string(modifiers, "description"))
         cdeprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         cdeprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         cprivate = self.get_attribute_as_bool(modifiers, "private")
@@ -1388,7 +1393,7 @@ a C/C++ like define that looks like:
                 cname = source
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
-                cdescription = self.parse_textblock(source)
+                cdescription = textblock_t(source)
             elif(section.startswith("private.functions:")):
                 source = section[18:].strip()
                 cprivfunc = source
@@ -1614,8 +1619,8 @@ a C/C++ like define that looks like:
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
-                struct[modifier] = self.parse_textblock(modifiers[modifier])
-                struct2.set_description(self.parse_textblock(modifiers[modifier]), textblock=True)
+                struct[modifier] = textblock_t(modifiers[modifier])
+                struct2.set_description(textblock_t(modifiers[modifier]), textblock=True)
             else:
                 struct[modifier] = modifiers[modifier]
 
@@ -1770,7 +1775,7 @@ a C/C++ like define that looks like:
 
                                 attr = col.strip()
                                 tmp = {}
-                                tmp["textblock"] = self.parse_textblock(col)
+                                tmp["textblock"] = textblock_t(col)
 
                                 # Strip any formatting characters
                                 attr = self.strip_formatting(attr)
@@ -1805,7 +1810,7 @@ a C/C++ like define that looks like:
                     if(col != ""):
                         
                         tmp = {}
-                        tmp["textblock"] = self.parse_textblock(col)
+                        tmp["textblock"] = textblock_t(col)
                                 
                         attr = col.strip()
 
@@ -1932,7 +1937,7 @@ a C/C++ like define that looks like:
                                 new_field.attrs.append("Reserved")
                                 new_field.attrs.append("Automatically generated")
                                 new_field.set_name("Reserved")
-                                new_field.set_description("Automatically generated")
+                                new_field.set_description(textblock_t("Automatically generated"))
                                 new_field.set_description_unparsed("Automatically generated")
                                 new_field.is_reserved = True
                                 new_field.is_header = False
@@ -1962,7 +1967,7 @@ a C/C++ like define that looks like:
         image_name = "record_%d.png" % index
 
         struct2.set_description(struct_desc, textblock=False)
-        struct2.set_description(self.parse_textblock(struct_desc), textblock=True)
+        struct2.set_description(textblock_t(struct_desc), textblock=True)
         struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         struct2.private = self.get_attribute_as_bool(modifiers, "private")
@@ -2093,7 +2098,7 @@ a C/C++ like define that looks like:
                     tag.contents = trim_leading_indent(section[5:len(section)])
                     #print "contents: [%s]" % tag["contents"]
                     tag.source = tag.contents
-                    tag.contents = self.parse_textblock(tag.contents)
+                    tag.contents = textblock_t(tag.contents)
 
                     vars["desc"] = tag
                 if(section.startswith("status:")):
@@ -2140,7 +2145,7 @@ a C/C++ like define that looks like:
                     vars["desc"] = section[12:len(section)].strip()
                     p2.set_description(vars["desc"],False)
                     tmp = section[12:len(section)]
-                    vars["desc2"] = self.parse_textblock(tmp)
+                    vars["desc2"] = textblock_t(tmp)
                     p2.set_description(vars["desc2"])
 
                 elif(section.startswith("prototype:")):
@@ -2193,13 +2198,13 @@ a C/C++ like define that looks like:
                             #    desc.append((name, val))
 
                             fields["desc"] = param_value
-                            fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(desc))
+                            fields["desc2"] = textblock_t(trim_leading_blank_lines(desc))
 
                             p = param_t()
                             p.set_name(param_name)
                             p.set_io(param_io)
                             p.set_description(param_value, textblock=False)
-                            p.set_description(self.parse_textblock(trim_leading_blank_lines(param_value)), textblock=True)
+                            p.set_description(textblock_t(trim_leading_blank_lines(param_value)), textblock=True)
                             #vars["params"].append(fields)
                             vars["params"].append(p)
 
@@ -2223,14 +2228,14 @@ a C/C++ like define that looks like:
                                     #print "DESC2: [%s]" % trim_leading_blank_lines(trim_leading_indent(cols[2]))
                                     desc2 = cols[2]
                                     fields["desc"] = desc
-                                    fields["desc2"] = self.parse_textblock(trim_leading_blank_lines(trim_leading_indent(cols[2])))
-                                    fields["desc2"] = self.parse_textblock(cols[2]) 
+                                    fields["desc2"] = textblock_t(trim_leading_blank_lines(trim_leading_indent(cols[2])))
+                                    fields["desc2"] = textblock_t(cols[2]) 
 
                                     p = param_t()
                                     p.set_name(cols[0].strip())
                                     p.set_io(cols[1].strip())
                                     p.set_description(cols[2], textblock=False)
-                                    p.set_description(self.parse_textblock(cols[2]),textblock=True)
+                                    p.set_description(textblock_t(cols[2]),textblock=True)
 
                                     #vars["params"].append(fields)
                                     vars["params"].append(p)
@@ -2265,7 +2270,7 @@ a C/C++ like define that looks like:
                 
                 elif(section.startswith("deprecated:")):
                     vars["deprecated"] = True
-                    msg = self.parse_textblock(section[11:len(section)].strip())
+                    msg = textblock_t(section[11:len(section)].strip())
                     vars["deprecated_msg"] = msg
                     p2.set_deprecated(True, msg)
 
@@ -2679,7 +2684,7 @@ else:
             tag = tag_t()
             tag.name = "text"
             tag.source = '\n'.join(lines)
-            tag.contents = self.parse_textblock(tag.source)
+            tag.contents = textblock_t(tag.source)
             tag.modifiers = modifiers
             tag.page_title = page_title
             tag.file = filename
@@ -2915,25 +2920,9 @@ else:
         elif(name == "questions"):
             tag.contents = self.parse_questions(data, modifiers)
 
-        elif(name == "text"):
+        elif(name in ("text", "note", "warning", "question", "tbd")):
             tag.source = tag.contents
-            tag.contents = self.parse_textblock(tag.source)
-
-        elif(name == "note"):
-            tag.source = tag.contents
-            tag.contents = self.parse_textblock(tag.source)
-
-        elif(name == "warning"):
-            tag.source = tag.contents
-            tag.contents = self.parse_textblock(tag.source)
-
-        elif(name == "question"):
-            tag.source = tag.contents
-            tag.contents = self.parse_textblock(tag.source)
-        
-        elif(name == "tbd"):
-            tag.source = tag.contents
-            tag.contents = self.parse_textblock(tag.source)
+            tag.contents = textblock_t(tag.source)
 
         tags.append(tag)
 

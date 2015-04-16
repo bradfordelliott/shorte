@@ -67,7 +67,7 @@ class document_info_t:
             self.m_docauthor = author
 
     def copyright_date(self):
-        return date.today().year + 1
+        return "%d" % datetime.date.today().year
 
     def customer(self):
         return ""

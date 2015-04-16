@@ -94,6 +94,9 @@ class template_shorte_t(template_t):
 
         txt = ''
 
+        if(isinstance(input_data, textblock_t)):
+            input_data = input_data.paragraphs
+
         if(is_array(input_data)):
             for p in input_data:
                 indent  = p["indent"]
@@ -213,7 +216,7 @@ $heading
         val = self.format_textblock(define.description)
         vars["description"] = indent_lines(trim_leading_indent(val), '    ')
             
-        val = define.value
+        val = self.format_textblock(define.value)
         val = re.sub("\|", "\\\\\\|", val)
         vars["value"] = escape_string(val)
         vars["private"] = define.private

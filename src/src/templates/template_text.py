@@ -199,7 +199,7 @@ Description:
                 # to format the note properly.
                 replace = replace.replace("<br/>", "\n")
                 replace = replace.replace(" ", "&nbsp;")
-                textblock = self.m_engine.m_parser.parse_textblock(replace)
+                textblock = textblock_t(replace)
 
                 if(tag == "note"):
                     label = "Note"
@@ -291,10 +291,15 @@ Description:
     def format_textblock(self, tag, prefix='', prefix_first_line=True, pad_textblock=False):
 
         if(isinstance(tag, tag_t)):
-            paragraphs = tag.contents
+            textblock = tag.contents
         else:
-            paragraphs = tag
-        
+            textblock = tag
+
+        if(isinstance(textblock, textblock_t)):
+            paragraphs = textblock.paragraphs
+        else:
+            paragraphs = textblock
+
         output = '\n'
 
         for p in paragraphs:

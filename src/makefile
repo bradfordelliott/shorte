@@ -63,12 +63,15 @@ cairo_plugin:
 	cp version.inc ${cairo_path}/.
 	cd ${cairo_path} && make
 
+
 clang_plugin_rh6:
 	cd 3rdparty/clang && cp linux/rh6/* .
 	cd 3rdparty/clang/linux && cp rh6/* .
 
-clang_plugin_darwin:
+clang_plugin_Darwin:
 	cp /opt/local/libexec/llvm-3.6/lib/libclang.dylib 3rdparty/clang/osx/.
+clang_plugin:
+	${MAKE} clang_plugin_${os}
 
 checkout_vendor_templates:
 	rm -rf vendor_templates
@@ -195,6 +198,9 @@ test_hello:
 test_hello2:
 	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=inphi;pdf=inphi2" -o build-output/hello_hsio
 
+test_resume:
+	${python} shorte.py -f examples/resume.tpl -p "html_inline" -t "resume" -s "html.header_numbers=0" -o build-output/resume
+
 test_hello_quick:
 	${python} shorte.py -f examples/hello.tpl -p "html" -t "${THEME}" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
@@ -208,6 +214,8 @@ test_comments:
 test_textblocks:
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html+pdf"
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock_inline -p "html_inline+pdf"
+test_textblocks_quick:
+	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html"
 
 test_inline_styling:
 	${python} shorte.py -f examples/inline_styling.tpl -t "${THEME}" -o build-output/inline_styling -p "html"

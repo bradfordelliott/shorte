@@ -1086,7 +1086,7 @@ class template_odt_t(template_t):
                 replace = replace.replace("&apos;", "'")
                 replace = replace.replace("<text:line-break/>", "\n")
                 xml = "</text:p>"
-                textblock = self.m_engine.m_parser.parse_textblock(replace)
+                textblock = textblock_t(replace)
                 
                 if(tag == "note"):
                     label = "Note"
@@ -1644,7 +1644,7 @@ class template_odt_t(template_t):
         table.widths = [40,60]
         
         name   = self.format_text(define.name)
-        value  = self.format_text(define.value)
+        value  = define.value
         desc   = define.get_description(textblock=True)
 
         style = "shorte_table.normal_cell"
@@ -1668,7 +1668,7 @@ class template_odt_t(template_t):
         table.rows.append(row)
         
         cols = []
-        cols.append({"span":2, 'text': value, "style": style, "text-style": "shorte_indent_0"})
+        cols.append({"span":2, 'textblock': value, "style": style, "text-style": "shorte_indent_0"})
         row = self._table_row()
         row["cols"] = cols
         table.rows.append(row)
@@ -2043,9 +2043,14 @@ ${desc}
             return ''
 
         if(isinstance(tag, tag_t)):
-            paragraphs = tag.contents
+            textblock = tag.contents
         else:
-            paragraphs = tag
+            textblock = tag
+
+        if(isinstance(textblock, textblock_t)):
+            paragraphs = textblock.paragraphs
+        else:
+            paragraphs = textblock
 
         xml = ''
 

@@ -81,6 +81,7 @@ class comment_t:
         self.deprecated = False
         self.deprecated_msg = ""
         self.heading = ""
+        self.since = ""
 
 def my_token(typ, data, line, pos):
     t = {}
@@ -262,7 +263,7 @@ class cpp_parser_t(shorte_parser_t):
         struct2.fields = fields
         struct2.set_name(struct_name)
         struct2.set_description(comment["desc"], textblock=False)
-        struct2.set_description(self.parse_textblock(comment["desc"]), textblock=True)
+        struct2.set_description(textblock_t(comment["desc"]), textblock=True)
         struct2.comment = comment2
         struct2.private = comment2.private
         struct2.deprecated = comment2.deprecated
@@ -428,7 +429,7 @@ class cpp_parser_t(shorte_parser_t):
             col = {}
             col["span"] = 1
             col["text"] = enum["desc"]
-            col["textblock"] = self.parse_textblock(enum["desc"])
+            col["textblock"] = textblock_t(enum["desc"])
             row["cols"].append(col)
 
             rows.append(row)
@@ -516,7 +517,7 @@ class cpp_parser_t(shorte_parser_t):
                         field = field_t()
                         field.name = parts2[1]
                         tmp = trim_leading_blank_lines(comment)
-                        field.set_description(self.parse_textblock(trim_leading_blank_lines(comment)))
+                        field.set_description(textblock_t(trim_leading_blank_lines(comment)))
                         field.set_type(parts2[0])
                         fields.append(field)
 
@@ -546,7 +547,7 @@ class cpp_parser_t(shorte_parser_t):
             field = field_t()
             field.name = parts2[1]
             tmp = trim_leading_blank_lines(comment)
-            field.set_description(self.parse_textblock(trim_leading_blank_lines(comment)))
+            field.set_description(textblock_t(trim_leading_blank_lines(comment)))
             field.set_type(parts2[0])
             fields.append(field)
 
@@ -658,7 +659,7 @@ class cpp_parser_t(shorte_parser_t):
             col["text"] = desc
             # Format the description as a textblock instead of standard text
             #print "DESC_ORIG: [%s]" % desc_original
-            col["textblock"] = self.parse_textblock(trim_leading_blank_lines(desc_original))
+            col["textblock"] = textblock_t(trim_leading_blank_lines(desc_original))
             row["cols"].append(col)
 
             row["attrs"] = row["cols"]
@@ -775,13 +776,13 @@ class cpp_parser_t(shorte_parser_t):
         if(matches != None):
             comment["desc"] = self.format_text(matches.groups()[0])
             comment2.desc = self.format_text(matches.groups()[0])
-            comment["description"] = self.parse_textblock(trim_leading_blank_lines(matches.groups()[0]))
-            comment2.description = self.parse_textblock(trim_leading_blank_lines(matches.groups()[0]))
+            comment["description"] = textblock_t(trim_leading_blank_lines(matches.groups()[0]))
+            comment2.description = textblock_t(trim_leading_blank_lines(matches.groups()[0]))
         else:
             comment["desc"] = self.format_text(text)
             comment2.desc = self.format_text(text)
-            comment["description"] = self.parse_textblock(trim_leading_blank_lines(text))
-            comment2.description = self.parse_textblock(trim_leading_blank_lines(text))
+            comment["description"] = textblock_t(trim_leading_blank_lines(text))
+            comment2.description = textblock_t(trim_leading_blank_lines(text))
 
         #print "COMMENT:"
         #print comment["desc"]
@@ -841,7 +842,7 @@ class cpp_parser_t(shorte_parser_t):
         if(matches != None):
             
             msg = trim_leading_blank_lines(matches.groups()[0])
-            msg = self.parse_textblock(msg)
+            msg = textblock_t(msg)
             comment["deprecated"] = True
             comment["deprecated_msg"] = msg #matches.groups()[0]
             comment2.deprecated = True
@@ -949,7 +950,7 @@ class cpp_parser_t(shorte_parser_t):
         enum.values = rows
         enum.comment = comment2
 
-        enum.description = self.parse_textblock(text)
+        enum.description = textblock_t(text)
         enum.private = comment2.private
         enum.deprecated = comment2.deprecated
         enum.deprecated_msg = comment2.deprecated_msg
@@ -1015,7 +1016,7 @@ class cpp_parser_t(shorte_parser_t):
             field["io"] = ""
             field["type"] = ptype
             field["desc"] = ("")
-            field["desc2"] = self.parse_textblock("")
+            field["desc2"] = textblock_t()
 
             return param
 
@@ -1114,7 +1115,7 @@ class cpp_parser_t(shorte_parser_t):
         if(val[-1] == '\n'):
             val = val[0:-1]
 
-        define.value = val
+        define.value = textblock_t(val)
         start_of_define = token["line"] + 1
         define.line = start_of_define
         define.file = self.m_current_file
@@ -1133,7 +1134,7 @@ class cpp_parser_t(shorte_parser_t):
             define.heading = comment2.heading
         except:
             define.desc = ""
-            define.description = ""
+            define.description = textblock_t()
             define.private = True
             define.heading = ""
 
@@ -1276,7 +1277,7 @@ class cpp_parser_t(shorte_parser_t):
 
         function["desc"] = func_comment2.desc
         p2.set_description(func_comment2.desc,textblock=False)
-        function["desc2"] = self.parse_textblock(func_comment2.desc)
+        function["desc2"] = textblock_t(func_comment2.desc)
         p2.set_description(function["desc2"], textblock=True)
         function["returns"] = func_comment2.returns
         p2.set_returns(function["returns"])
@@ -1368,7 +1369,7 @@ class cpp_parser_t(shorte_parser_t):
                 if(p.get_name() == param):
                     desc = func_comment2.params[param]["desc"]
                     p.set_description(desc, textblock=False)
-                    p.set_description(self.parse_textblock(trim_leading_blank_lines(desc)), textblock=True)
+                    p.set_description(textblock_t(trim_leading_blank_lines(desc)), textblock=True)
                     p.set_io(func_comment2.params[param]['io'])
 
         # Check the list of parameter definitions and generate

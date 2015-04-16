@@ -1,6 +1,7 @@
 include version.inc
 
 uname := $(shell uname)
+os    := ${uname}
 
 cairo_path := libs/unix
 echo       := echo

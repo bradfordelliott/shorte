@@ -18,6 +18,9 @@
 @h2 80%
 @image: src="examples/record_0.png" width="80%"
 
+@h2 1400px
+@image: src="examples/record_0.png" width="1400px"
+
 @h2 No Sizing
 @image: src="examples/record_0.png"
 

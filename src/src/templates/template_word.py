@@ -524,9 +524,11 @@ class template_word_t(template_t):
     def format_textblock(self, tag, wrap=True):
 
         if(isinstance(tag, tag_t)):
-            paragraphs = tag.contents
+            textblock = tag.contents
         else:
-            paragraphs = tag
+            textblock = tag
+
+        paragraphs = textblock.paragraphs
 
         xml = ''
         

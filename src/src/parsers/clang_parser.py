@@ -241,10 +241,10 @@ class clang_parser_t(shorte_parser_t):
 
         if(matches != None):
             comment.desc = self.format_text(matches.groups()[0])
-            comment.description = self.parse_textblock(trim_leading_blank_lines(matches.groups()[0]))
+            comment.description = textblock_t(trim_leading_blank_lines(matches.groups()[0]))
         else:
             comment.desc = self.format_text(text)
-            comment.description = self.parse_textblock(trim_leading_blank_lines(text))
+            comment.description = textblock_t(trim_leading_blank_lines(text))
 
         matches = re.search("[@\\\]private", text, re.DOTALL)
         if(matches != None):
@@ -265,7 +265,7 @@ class clang_parser_t(shorte_parser_t):
 
             p = param_t()
             p.set_description(desc, textblock=False)
-            p.set_description(self.parse_textblock(desc), textblock=True)
+            p.set_description(self.textblock_t(desc), textblock=True)
             p.set_io(io)
             
             comment.params[name] = p
@@ -311,7 +311,7 @@ class clang_parser_t(shorte_parser_t):
 
                     if(expr == "deprecated"):
                         msg = trim_leading_blank_lines(val)
-                        msg = self.parse_textblock(msg)
+                        msg = textblock_t(msg)
                         comment.deprecated = True
                         comment.deprecated_msg = msg
                     else:
@@ -370,7 +370,7 @@ class clang_parser_t(shorte_parser_t):
         if(matches != None):
             
             msg = trim_leading_blank_lines(matches.groups()[0])
-            msg = self.parse_textblock(msg)
+            msg = self.textblock_t(msg)
             comment.deprecated = True
             comment.deprecated_msg = msg # matches.groups()[0]
 
@@ -681,7 +681,7 @@ class clang_parser_t(shorte_parser_t):
                         end_offset   = cursor.extent.end.offset + 1
                         tmp = self.m_file_src[start_offset:end_offset]
                         tmp = tmp.replace(define.name, '')
-                        define.value = tmp.strip()
+                        define.value = textblock_t(tmp.strip())
 
                         tag = tag_t()
                         tag.name = "define"
@@ -769,7 +769,7 @@ class clang_parser_t(shorte_parser_t):
 
                             if(acmt != None):
                                 param.set_description(desc, textblock=False)
-                                param.set_description(self.parse_textblock(desc), textblock=True)
+                                param.set_description(textblock_t(desc), textblock=True)
 
                             parameters.append(param)
 
@@ -1001,8 +1001,8 @@ class clang_parser_t(shorte_parser_t):
                 if(len(object_name) == 0):
                     object_name = cursor.type.spelling
 
-                #WARNING("SKIPPING %s" % object_name)
-                #traceback.print_exc()
+                WARNING("SKIPPING %s" % object_name)
+                traceback.print_exc()
                 #sys.exc_info()
                 #WARNING(str(e))
                 pass
