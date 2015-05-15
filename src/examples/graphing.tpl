@@ -27,6 +27,35 @@ data["two"] = {
     10: 10 + 8
 }
 
+@text
+This is a randomly generated line graph
+@graph: type="line" width=800 height=600 title="A random line graph" subtitle="Randomly generated"
+--data:
+<?
+import math
+import random
+result = '''
+data={}
+data["one"] = {}
+data["two"] = {}
+'''
+
+points = random.randint(5,10)
+x = 0
+for i in range(0, points):
+    x += random.randint(2,100)
+    y = random.randint(2, 100)
+    result += 'data["one"][%d] = %f\n' % (x, y)
+
+x = 0
+for i in range(0, points):
+    x += random.randint(2,100)
+    y = random.randint(2, 100)
+    result += 'data["two"][%d] = %f\n' % (x, y)
+
+?>
+
+
 @h1 Pie Graphs
 This is an example of a pie graph
 @graph: type="pie" title="A Pie Graph" width=600 height=400 subtitle="Just a random pie graph"
