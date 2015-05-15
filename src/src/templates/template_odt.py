@@ -742,10 +742,25 @@ class template_odt_t(template_t):
     def get_title_short(self):
         title = self.m_engine.get_title()
         title = title.replace("©", "")
-        title = title.replace("®", "")
+        title = title.replace("®", "&#174;")
         title = title.replace("Cortina Systems", "")
         title = title.strip()
         return title
+
+    def get_footer_title(self):
+        title = self.m_engine.get_doc_info().footer_title()
+        title = title.replace("©", "")
+        title = title.replace("®", "&#174;")
+        title = title.strip()
+        return title
+    
+    def get_footer_subtitle(self):
+        title = self.m_engine.get_doc_info().footer_subtitle()
+        title = title.replace("©", "")
+        title = title.replace("®", "&#174;")
+        title = title.strip()
+        return title
+
     
     def append_page(self, pages, title, source_file):
 
@@ -3272,8 +3287,8 @@ ${desc}
         xml = re.sub("DOCUMENT_CUSTOMER", self.m_engine.get_doc_info().customer(), xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
         xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_info().number(), xml)
-        xml = re.sub("DOCUMENT_FOOTER_TITLE", self.m_engine.get_doc_info().footer_title(), xml)
-        xml = re.sub("DOCUMENT_FOOTER_SUBTITLE", self.m_engine.get_doc_info().footer_subtitle(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_TITLE", self.get_footer_title(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_SUBTITLE", self.get_footer_subtitle(), xml)
         xml = re.sub("DOCUMENT_COPYRIGHT_DATE", self.m_engine.get_doc_info().copyright_date(), xml)
 
         xml = re.sub("<text:p text:style-name=\"[A-Za-z0-9_]+\">DOCUMENT_REVISION_HISTORY</text:p>", self.__format_revision_history(self.m_engine.get_doc_info().revision_history()), xml)
@@ -3408,8 +3423,8 @@ ${desc}
         xml = re.sub("DOCUMENT_CUSTOMER", self.m_engine.get_doc_info().customer(), xml)
         xml = re.sub("CURRENT_DATE", self.m_engine.get_date(), xml)
         xml = re.sub("DOCUMENT_NO", self.m_engine.get_doc_info().number(), xml)
-        xml = re.sub("DOCUMENT_FOOTER_TITLE", self.m_engine.get_doc_info().footer_title(), xml)
-        xml = re.sub("DOCUMENT_FOOTER_SUBTITLE", self.m_engine.get_doc_info().footer_subtitle(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_TITLE", self.get_footer_title(), xml)
+        xml = re.sub("DOCUMENT_FOOTER_SUBTITLE", self.get_footer_subtitle(), xml)
         xml = re.sub("DOCUMENT_COPYRIGHT_DATE", self.m_engine.get_doc_info().copyright_date(), xml)
 
         xml = re.sub("<text:outline-style style:name=\"Outline\">.*?</text:outline-style>", doc_styles["outline"], xml)
