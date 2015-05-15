@@ -137,6 +137,8 @@ class pie_graph_t(graph_t):
                         text       = self.xaxis["label"])
     
     def draw_data(self):
+        '''This method draws the data that forms part of
+           the pie graph'''
 
         #maxX = self.get_max_xcoordiate()
         #maxY = self.get_max_ycoordinate();
@@ -201,13 +203,7 @@ class pie_graph_t(graph_t):
             for key in keys:
                 total += self.datasets[dataset]["data"][key]
 
-        print "TOTAL: %f" % total
-
-        colors = []
-        colors.append("#f0f0f0")
-        colors.append("#00ff00")
-        colors.append("#0000ff")
-        colors.append("#ff00ff")
+        #print "TOTAL: %f" % total
 
         angle = 0
         last_angle = angle
@@ -226,7 +222,7 @@ class pie_graph_t(graph_t):
                 px = center_x + ((ellipse_width/2)  * math.cos(angle))
                 py = center_y + ((ellipse_height/2) * math.sin(angle))
 
-                color = colors[cindex]
+                color = self.m_colors[cindex]
                 cindex += 1
 
                 graph.draw_ellipse(x, y,
@@ -237,7 +233,7 @@ class pie_graph_t(graph_t):
                     font_size=10,
                     text=None,
                     line_color="#c0c0c0",
-                    background_color=colors[cindex],
+                    background_color=color,
                     line_weight=1.6,
                     start_angle=last_angle,
                     end_angle=angle)
@@ -274,6 +270,71 @@ class pie_graph_t(graph_t):
                                 text       = "%2.2f" % value,
                                 font_size  = 10)
     
+
+    def draw_legend(self, yoffset=50, xoffset=10):
+       graph = self.graph
+       
+       top = self.top
+       right = self.right
+       y = top + yoffset
+          
+       # First draw the legend title
+       graph.draw_text(x = right + xoffset,
+                       y = y,
+                       font_color = "#000000",
+                       text       = "Legend")
+       y += 24
+    
+       cindex = 0
+       #for dataset (sort {$a cmp $b}  keys(%{$self->{DATASETS}}))
+       for dataset in self.datasets:
+
+           color = self.m_colors[cindex]
+
+           # Figure out how many points are in the set
+           points = len(self.datasets[dataset]["data"])
+       
+           # Draw the data set
+           #graph.draw_rect(
+           #    x = right + xoffset + 5,
+           #    y = y,
+           #    width = 20,
+           #    height = 20,
+           #    background_color = color,
+           #    line_color = color)
+           graph.draw_text(
+               x = right + xoffset + 5,
+               y = y+2,
+               font_size = 10,
+               font_color = color,
+               text       = dataset)
+
+           y += 20     
+
+           # Now draw each sub-block
+           for point in self.datasets[dataset]["data"]:
+               color = self.m_colors[cindex]
+               value = self.datasets[dataset]["data"][point]
+           
+               graph.draw_rect(
+                   x = right + xoffset + 15,
+                   y = y,
+                   width = 10,
+                   height = 10,
+                   background_color = color,
+                   line_color = color)
+
+               graph.draw_text(
+                   x = right + xoffset + 30,
+                   y = y+2,
+                   font_size=6,
+                   font_color = "#000000",
+                   text="%s = %s" % (point, value))
+               y += 15
+               cindex += 1
+
+           y += 10
+
     def draw_graph(self, path):
         graph_t.draw_graph(self)
         

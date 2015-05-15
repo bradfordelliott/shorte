@@ -35,8 +35,37 @@ data = {}
 data["one"] = {
     "A": 1,
     "B": 10,
-    "C": 50.5
+    "C": 50.5,
+    "D": 20.2
 }
+
+data["two"] = {
+    "E" : 20,
+    "F" : 30
+}
+
+@text
+This is a randomly generated pie graph
+
+@graph: type="pie" title="A random pie graph" width=800 height=600 subtitle="A randomly generated piegraph"
+--data:
+<?
+import math
+import random
+result = '''
+data={}
+data["one"] = {}
+data["two"] = {}
+'''
+
+points = random.randint(5,10)
+for i in range(0, points):
+    result += 'data["one"]["%d"] = %f\n' % (i, random.randint(2, 10))
+
+points = random.randint(5,10)
+for i in range(0, points):
+    result += 'data["two"]["%d"] = %f\n' % (i, random.randint(2, 10))
+?>
 
 @h1 Bar Graphs
 This is an example of a bar graph.

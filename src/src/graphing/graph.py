@@ -8,6 +8,7 @@ import math
 class cairo_t:
     def __init__(self, width, height):
         self.image = cairo(5000, 5000)
+        
 
     def __del__(self):
         self.image.destroy()
@@ -612,50 +613,50 @@ class graph_t:
         self.graph = cairo_t(self.width + self.width_padding, self.height + self.height_padding)
 
         self.draw_frame = False
+        
+        # The standard color map
+        self.m_colors = []
+        self.m_colors.append("#FF0000")
+        self.m_colors.append("#00FF00")
+        self.m_colors.append("#0000FF")
+        self.m_colors.append("#FF00FF")
+        self.m_colors.append("#FFFF00")
+        self.m_colors.append("#00FFFF")
+        self.m_colors.append("#22FF98")
+        self.m_colors.append("#008080") # teal
+        self.m_colors.append("#8B4513") # saddlebrown
+        self.m_colors.append("#800080") # purple
+        self.m_colors.append("#DBBFD8") # thistle
+        self.m_colors.append("#0000CD") # mediumblue
+        self.m_colors.append("#3CB371") # medimuseagreen
+        self.m_colors.append("#90EE90") # lightgreen
+        self.m_colors.append("#FF8C00") # darkorange
+        self.m_colors.append("#9ACD32") # yellowgreen
+        self.m_colors.append("#000000") # black
+        self.m_colors.append("#7FFF00") # chartreuse
+        self.m_colors.append("#4B0082") # indigo
+        self.m_colors.append("#DA70D6") # orchid
+        self.m_colors.append("#D5FF45")
+        self.m_colors.append("#FFB26E")
+        self.m_colors.append("#FFA4C4")
+        self.m_colors.append("#DD0070")
+        self.m_colors.append("#D80017")
+        self.m_colors.append("#3E008C")
+        self.m_colors.append("#666EFF")
+        self.m_colors.append("#88D7FF")
+        self.m_colors.append("#FF0000")
+        self.m_colors.append("#00FF00")
+        self.m_colors.append("#0000FF")
 
     def __del__(self):
         del self.graph
-        
 
     def add_data_set(self, dataset, name, color=None):
-    
-        colors = []
-        colors.append("#FF0000")
-        colors.append("#00FF00")
-        colors.append("#0000FF")
-        colors.append("#FF00FF")
-        colors.append("#FFFF00")
-        colors.append("#00FFFF")
-        colors.append("#22FF98")
-        colors.append("#008080") # teal
-        colors.append("#8B4513") # saddlebrown
-        colors.append("#800080") # purple
-        colors.append("#DBBFD8") # thistle
-        colors.append("#0000CD") # mediumblue
-        colors.append("#3CB371") # medimuseagreen
-        colors.append("#90EE90") # lightgreen
-        colors.append("#FF8C00") # darkorange
-        colors.append("#9ACD32") # yellowgreen
-        colors.append("#000000") # black
-        colors.append("#7FFF00") # chartreuse
-        colors.append("#4B0082") # indigo
-        colors.append("#DA70D6") # orchid
-        colors.append("#D5FF45")
-        colors.append("#FFB26E")
-        colors.append("#FFA4C4")
-        colors.append("#DD0070")
-        colors.append("#D80017")
-        colors.append("#3E008C")
-        colors.append("#666EFF")
-        colors.append("#88D7FF")
-        colors.append("#FF0000")
-        colors.append("#00FF00")
-        colors.append("#0000FF")
     
         cindex = self.cindex
     
         if(color == None):
-            color = colors[cindex]
+            color = self.m_colors[cindex]
             cindex+=1
             self.cindex = cindex
         
