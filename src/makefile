@@ -54,7 +54,8 @@ env:
 all:
 	make package
 
-build: checkout_vendor_templates cairo_plugin package exe
+build_full: checkout_vendor_templates clang_plugin cairo_plugin package exe
+build: cairo_plugin clang_plugin
 
 # Build the cairo plugin used for generating
 # images.

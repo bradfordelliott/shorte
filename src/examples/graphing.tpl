@@ -55,6 +55,33 @@ for i in range(0, points):
 
 ?>
 
+@text
+A few randomly generated graphs
+<?
+import random
+result = ''
+for i in range(0, 10):
+    result += '''@graph: type='line'
+--data:
+data = {}
+data["one"] = {}
+data["two"] = {}
+'''
+    yrange = random.randint(100, 1000)
+    x = 0
+    for j in range(2, 10):
+        x += random.randint(2,100)
+        y = random.randint(2, yrange)
+        result += 'data["one"][%d] = %f\n' % (x,y)
+        
+    x = 0
+    for j in range(2,20):
+        x += random.randint(2,100)
+        y = random.randint(2, yrange)
+        result += 'data["two"][%d] = %f\n' % (x,y)
+?>
+
+
 
 @h1 Pie Graphs
 This is an example of a pie graph

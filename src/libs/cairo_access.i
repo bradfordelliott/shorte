@@ -271,6 +271,12 @@
         {
             cairo_set_antialias(m_cairo_image, format);
         }
+
+        void destroy(void)
+        {
+            cairo_surface_destroy(m_cairo_surface);
+            cairo_destroy(m_cairo_image);
+        }
         
     private:
         cairo_t*         m_cairo_image;
@@ -508,6 +514,8 @@ class cairo{
         }
         
         void set_antialias(cairo_antialias_t format);
+        
+        void destroy(void);
     
     private:
         cairo_t*         m_cairo_image;

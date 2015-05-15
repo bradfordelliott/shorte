@@ -395,6 +395,7 @@ div.gallery
   {
       border:0px;
       margin-left:20px;
+      max-width:100%;
   }
   /* Question and answer blocks */
   div.question
