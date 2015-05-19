@@ -14,7 +14,7 @@ This document describes the release history of the Shorte language.
 - Minor cleanup to some error messages
 - Fixed an issue wikiword linking in the inline HTML template.
 - @graph
-    - Added support for pie graphs in the @graph tag
+    - Added support for pie graphs and memory plots in the @graph tag
     - Minor enhancements to the sequence diagram generation
 - @gallery
     - Tidied up the @gallery tag output in HTML templates. Still
