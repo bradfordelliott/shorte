@@ -147,9 +147,9 @@ class cairo_t:
             self.image.stroke()
         
         if(text != None):
-            (text_width, text_height) = self.image.text_extents("%s" % text)
+            #(text_width, text_height) = self.image.text_extents("%s" % text)
             self.draw_text(
-                    x = x + width/2 - text_width/2 + line_weight/2,
+                    x = x + (width/2) + line_weight/2,
                     y = y + height/2 - text_height/2,
                     text = text,
                     font_color = font_color,
@@ -158,6 +158,7 @@ class cairo_t:
                     #width = width,
                     #height = height,
                     text_anchor = "middle",
+                    font_family="Courier",
                     text_orientation = text_orientation)
                
 

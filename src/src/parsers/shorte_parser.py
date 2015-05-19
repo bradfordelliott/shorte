@@ -1573,6 +1573,10 @@ a C/C++ like define that looks like:
             import src.graphing.piegraph as piegraph
             graph = piegraph.pie_graph_t(width,height)
             graph.set_title(title,subtitle)
+        elif(graph_type == "memorymap"):
+            import src.graphing.memorymap as memorymap
+            graph = memorymap.memorymap_graph_t(width,height)
+            graph.set_title(title,subtitle)
         elif(graph_type == "timeline"):
             import src.graphing.timeline as timeline
             graph = timeline.timeline_graph_t(width,height)

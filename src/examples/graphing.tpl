@@ -172,6 +172,18 @@ for i in range(0, 10):
 ?>
 
 
+@h1 A Memory Map Graph
+@graph: type="memorymap" title="A memory map graph"
+--data:
+<?
+result = '''
+data = {}
+data["DRAM"] = {"start" : 0x5ffc0000, "end" : 0x5ffc7fff}
+data["IROM"] = {"start" : 0x5ffe0000, "end" : 0x5ffe1fff}
+data["IRAM"] = {"start" : 0x5fff0000, "end" : 0x5fff7fff}
+'''
+?>
+
 @h1 A Timeline
 This is an example of a timeline plot
 
