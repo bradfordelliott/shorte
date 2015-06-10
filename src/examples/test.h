@@ -23,6 +23,7 @@
  * @text
  * @endcond
  */
+/*
 class myclass
 {
 public:
@@ -30,6 +31,7 @@ public:
     {
     }
 };
+*/
 
 /** the class keeps a doubly linked list of all instances of the class that have been created
  * insertion at the tail.
@@ -57,6 +59,10 @@ typedef enum
 }test_dot_h_my_private_enum;
 
 /**
+ * @h1 This is a test
+ * This is some random info here
+ *
+ * @brief
  * This is a description of my public enum
  *
  * A second paragraph
@@ -168,7 +174,7 @@ struct handle_table_entry_tag * phead, * ptail;
  *
  * @return TRUE on success, FALSE on failure.
  */
-int func1(int blah2, bool* dummy);
+int func1(int blah2, void* dummy);
 
 /**
  * This is a private function that won't normally be extracted.

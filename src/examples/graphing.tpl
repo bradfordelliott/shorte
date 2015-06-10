@@ -191,7 +191,7 @@ This is an example of a timeline plot
 --data:
 <?
 result = '''
-base = 1977
+base = 0
 data = {}
 data["one"] = {
     1977 - base: {"val" : 5,   "label" : "Test 0",  "caption" : "Test 1"},

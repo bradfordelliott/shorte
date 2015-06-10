@@ -96,11 +96,15 @@ class timeline_graph_t(graph_t):
                         text_orientation = "vertical")
    
     def draw_xaxis(self):
-        maxX = self.get_max_xcoordiate();
-        maxY = 10
 
-        if(maxX == 0):
-            maxX = 1
+        min_x = self.get_min_xcoordinate();
+        max_x = self.get_max_xcoordiate();
+        max_x = max_x - min_x
+
+        max_y = 10
+
+        if(max_x == 0):
+            max_x = 1
         
         graph = self.graph
         
@@ -118,31 +122,31 @@ class timeline_graph_t(graph_t):
         
         #print "increment: %d" % increment
         #print "maxX: %d" % maxX
-        xAxisIncrements = int(maxX/increment)
+        x_axis_increments = int(max_x/increment)
         
         # Draw the X-Axis
-        for count in range(0, xAxisIncrements + 1):
-            horizontalPosition = left + (count * (width/xAxisIncrements));
+        for count in range(0, x_axis_increments + 1):
+            horizontal_position = left + (count * (width/x_axis_increments));
         
-            if(count != xAxisIncrements and count != 0):
-               graph.draw_line(x1 = horizontalPosition,
+            if(count != x_axis_increments and count != 0):
+               graph.draw_line(x1 = horizontal_position,
                                y1 = top,
-                               x2 = horizontalPosition,
+                               x2 = horizontal_position,
                                y2 = bottom,
                                line_color = "#909090",
                                background_color = "#FFFFFF",
                                line_pattern = 1)
                
-               graph.draw_line(x1 = horizontalPosition,
+               graph.draw_line(x1 = horizontal_position,
                                y1 = bottom - 5,
-                               x2 = horizontalPosition,
+                               x2 = horizontal_position,
                                y2 = bottom + 5,
                                line_color = "#C0C0C0")
         
             if(0):
-               label = math.ceil((count * maxX * increment)/(maxX))
+               label = math.ceil((count * max_x * increment)/(max_x))
             else:
-               label = (count * maxX * increment)/(maxX)
+               label = (count * max_x * increment)/(max_x) + min_x
 
             labels = self.xaxis["labels"]
 
@@ -150,7 +154,7 @@ class timeline_graph_t(graph_t):
                 label = labels[count]
 
             
-            graph.draw_text(x = horizontalPosition - 3, 
+            graph.draw_text(x = horizontal_position - 3, 
                             y = bottom + 15,
                             font_color = "#000000",
                             #background_color = "#FFFFFF",
@@ -160,11 +164,14 @@ class timeline_graph_t(graph_t):
                         y = bottom + 35,
                         font_color = "#000000",
                         text       = self.xaxis["label"])
-    
+
     def draw_data(self):
-        maxX = self.get_max_xcoordiate()
         maxY = 10
         graph = self.graph
+        
+        min_x = self.get_min_xcoordinate();
+        maxX = self.get_max_xcoordiate();
+        maxX = maxX - min_x
 
         yincrement = (maxY/10)
         
@@ -201,7 +208,8 @@ class timeline_graph_t(graph_t):
                 num_data_points += 1
 
 
-        pointer_offset_increment = (height/2.0)/(num_data_points-2)
+        #pointer_offset_increment = (height/2.0)/(num_data_points-2)
+        pointer_offset_increment = (height/2.5)/(num_data_points-2)
         #pointer_offset_increment = 30
         pointer_offset = pointer_offset_increment
         
@@ -219,8 +227,10 @@ class timeline_graph_t(graph_t):
             points = []
 
             #for key in (sort {$a <=> $b} keys(%{$self->{DATASETS}{$dataset}{"data"}}))
-            for key in self.datasets[dataset]["data"]:
-                xvalue = key;
+            keys = self.datasets[dataset]["data"]
+            keys = sorted(keys)
+            for key in keys:
+                xvalue = key - min_x;
                 #print "xvalue = %d" % xvalue
                 yvalue = self.datasets[dataset]["data"][key]["val"]
                 
@@ -228,7 +238,7 @@ class timeline_graph_t(graph_t):
                 # DEBUG BRAD: Currently the value, need more
                 #             information than just the y value
                 evalue = yvalue
-                elabel = self.datasets[dataset]["data"][key]["label"]
+                elabel = "%f (%s)" % (key,self.datasets[dataset]["data"][key]["label"])
 
                 # For timeline the y-value is always 5. The
                 # data argument is the size/scale of the event.
@@ -277,7 +287,7 @@ class timeline_graph_t(graph_t):
                     graph.draw_text(x = x,
                                   y = y - 10,
                                   font_color = color,
-                                  text       = "%2.2f" % yvalue,
+                                  text       = "%f: %2.2f" % (xvalue,yvalue),
                                   font_size  = 7)
                 prevx = x;
                 prevy = y;
@@ -293,15 +303,17 @@ class timeline_graph_t(graph_t):
                 
                 graph.draw_line(x1,y1,x2,y2, line_color=color, line_pattern=2)
 
+                yh = 60
+
                 # Now complete the pointer to the end of the graph area
-                graph.draw_line(x2,y2,right + 60,y2, line_color=color, line_pattern=2)
+                graph.draw_line(x2,y2,right + yh,y2, line_color=color, line_pattern=2)
         
                 #label = "%2.2f" % evalue
                 #(text_width, text_height) = graph.image.text_extents(label)
                 (text_width, text_height) = graph.image.text_extents(elabel)
 
                 # Draw some text at the end of the pointer
-                graph.draw_text(x=right + 65, y=y2 - (text_height/2), font_color=color, text=elabel, font_size=7)
+                graph.draw_text(x=right + yh + 5, y=y2 - (text_height/2), font_color=color, text=elabel, font_size=7)
                
             #graph.draw_curve(points      = points,
             #                 line_color  = color,

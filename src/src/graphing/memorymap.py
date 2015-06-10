@@ -154,6 +154,8 @@ class memorymap_graph_t(graph_t):
         end_of_last = 0
         dindex = 0
 
+        # Step through the memory map and determine the
+        # total memory span.
         for dataset in self.datasets:
             color   = self.datasets[dataset]["color"]
             dataset = self.datasets[dataset]["data"]

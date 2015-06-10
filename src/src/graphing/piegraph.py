@@ -312,7 +312,10 @@ class pie_graph_t(graph_t):
            y += 20     
 
            # Now draw each sub-block
-           for point in self.datasets[dataset]["data"]:
+           keys = self.datasets[dataset]["data"]
+           keys = sorted(keys)
+
+           for point in keys:
                color = self.m_colors[cindex]
                value = self.datasets[dataset]["data"][point]
            

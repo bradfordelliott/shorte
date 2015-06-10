@@ -147,7 +147,7 @@ class cairo_t:
             self.image.stroke()
         
         if(text != None):
-            #(text_width, text_height) = self.image.text_extents("%s" % text)
+            (text_width, text_height) = self.image.text_extents("%s" % text)
             self.draw_text(
                     x = x + (width/2) + line_weight/2,
                     y = y + height/2 - text_height/2,
@@ -667,6 +667,17 @@ class graph_t:
         
         for element in dataset:
             self.datasets[name]["data"][element] = dataset[element]
+
+    def get_min_xcoordinate(self):
+        minX = None
+        for dataset in self.datasets:
+            for key in self.datasets[dataset]["data"]:
+                if(minX == None):
+                    minX = key
+                elif(key < minX):
+                    minX = key
+        
+        return minX
 
 
     def get_max_xcoordiate(self):
