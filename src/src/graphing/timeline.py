@@ -238,7 +238,7 @@ class timeline_graph_t(graph_t):
                 # DEBUG BRAD: Currently the value, need more
                 #             information than just the y value
                 evalue = yvalue
-                elabel = "%f (%s)" % (key,self.datasets[dataset]["data"][key]["label"])
+                elabel = "%2.1f (%s)" % (key,self.datasets[dataset]["data"][key]["label"])
 
                 # For timeline the y-value is always 5. The
                 # data argument is the size/scale of the event.
@@ -303,7 +303,8 @@ class timeline_graph_t(graph_t):
                 
                 graph.draw_line(x1,y1,x2,y2, line_color=color, line_pattern=2)
 
-                yh = 60
+                #yh = 60
+                yh = 5
 
                 # Now complete the pointer to the end of the graph area
                 graph.draw_line(x2,y2,right + yh,y2, line_color=color, line_pattern=2)
