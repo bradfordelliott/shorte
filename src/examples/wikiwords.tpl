@@ -8,6 +8,15 @@
 - 1.4.4   | 06 March, 2011 | This is a really long description of the version
                              change here and what changed in the document. It doesn't
                              match the format of the document but whatever.
+
+# Inline the table of contents. Should probably
+# have a check to see if the user entered an option at
+# the command line and use that instead.
+@doc.config html.inline_toc=1
+@doc.config html.header_numbers=0
+
+@doc.version 1.5
+
 @body
 # This is an example of assigning a wikiword to a heading.
 # This is useful if you have a short heading and don't want
@@ -33,7 +42,7 @@ in the generated output.
 
 @h1 This is some more data
 
-See if TheseAreSomeWikiwords that will link up and These are some Wikiwords that won't link but [[@These are some Wikiwords, Some Wikiwords]] will
+See if TheseAreSomeWikiwords that will link up and These are some Wikiwords that won't link but [[@TheseAreSomeWikiwords, Some Wikiwords]] will
 also work as a link.
 
 Want to make sure that Test doesn't link to the Test section but if I enter

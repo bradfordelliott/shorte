@@ -198,7 +198,7 @@ if(options.settings):
             key = matches.groups()[1]
             val = matches.groups()[2]
            
-            shorte.set_config(sect, key, val)
+            shorte_set_config(sect, key, val)
 
 # Setup any macros the user specified
 #    -m "macro1=1;macro2=2"

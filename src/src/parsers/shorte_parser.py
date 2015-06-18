@@ -345,10 +345,12 @@ class shorte_parser_t(parser_t):
             "csource"         : True,
             "docrevisions"    : True,
             "docversion"      : True,
+            "doc.version"     : True,
             "docfilename"     : True,
             "outdir"          : True,
             "sourcedir"       : True,
             "template"        : True,
+            "doc.config"      : True,
 
             "doc.footer.title" : True,
             "doc.footer.subtitle" : True,
@@ -538,6 +540,12 @@ class shorte_parser_t(parser_t):
             elif(tag.name in ("footersubtitle", "doc.footer.subtitle")):
                 header["footer.subtitle"] = tag.contents
                 self.m_engine.get_doc_info().set_footer_subtitle(tag.contents)
+            elif(tag.name == "doc.config"):
+                config_string = tag.contents
+                parts = tag.contents.strip().split("=")
+                (section,key) = parts[0].split(".")
+                val = parts[1]
+                self.m_engine.set_config(section, key, val)
             else:
                 WARNING("Unknown tag %s" % tag)
 
@@ -2543,11 +2551,11 @@ a C/C++ like define that looks like:
 
         # Determine whether we should automatically add a header before
         # a function prototype
-        prototype_add_header = self.m_engine.get_config("shorte", "prototype_add_header")
+        prototype_add_header = False #self.m_engine.get_config("shorte", "prototype_add_header")
 
         # Determine whether we should automatically add a header before
         # a testcase definition
-        testcase_add_header = self.m_engine.get_config("shorte", "testcase_add_header")
+        testcase_add_header = False #self.m_engine.get_config("shorte", "testcase_add_header")
 
 
         #print "CURRENT_FILE = %s" % os.path.basename(self.m_current_file)

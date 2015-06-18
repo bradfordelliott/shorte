@@ -137,7 +137,7 @@ class document_info_t:
 #+------------------------------------------------------------------------------
 class engine_t:
     def __init__(self, output_path, config_file, parser):
-        self.m_theme = "cortina"
+        self.m_theme = "shorte"
         self.m_snippets = {}
         self.m_urls = {}
         self.m_example_id = 0
@@ -184,12 +184,6 @@ class engine_t:
             # DEBUG BRAD: If you don't have the proper includes then
             #             clang may fail on types it doesn't understand. 
             self.m_parser.set_cpp_parser(clang_parser_t(self))
-
-        # Read the configuration file
-        import ConfigParser
-        self.m_config = ConfigParser.ConfigParser()
-        self.m_config.read([config_file])
-
 
         self.m_classes = {}
 
@@ -369,12 +363,12 @@ class engine_t:
     def get_config(self, section, key):
 
         if(section == "shorte" and key == "scratchdir"):
-            dir = self.m_config.get(section, key)
+            dir = shorte_get_config(section, key)
             dir = os.path.abspath(dir)
             return dir
 
         if(section == "c"):
-            val = self.m_config.get(section, key)
+            val = shorte_get_config(section, key)
 
             if(key == "comment_style"):
                 if(val == "c"):
@@ -391,15 +385,10 @@ class engine_t:
                     return HEADER_STYLE_SHORTE
 
 
-        if(self.m_config.has_option(section, key)):
-            return self.m_config.get(section, key)
-
-        return None
+        return shorte_get_config(section, key)
 
     def set_config(self, section, key, val):
-        if(self.m_config.has_option(section, key)):
-            return self.m_config.set(section, key, val)
-
+        shorte_set_config(section, key)
 
 
     #+-----------------------------------------------------------------------------

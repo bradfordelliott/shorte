@@ -261,6 +261,8 @@ test_clang:
 	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html+pdf" -o build-output/clang_c
 test_clang_quick:
 	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html" -o build-output/clang_c
+    # This command makes use of setting the arguments to clang to ensure that it can find include files
+	${python} shorte.py -f "examples/types_test.h" -t "${THEME}" -x clang -p "html" -s "clang.args=-xc++ -I`pwd`/examples/platform" -o build-output/clang_c_types
 
 test_clang2:
 	${python} shorte.py -f "examples/cs4321_api.h examples/cs4321_api.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
@@ -307,6 +309,9 @@ test_t100:
 
 test_wikiwords:
 	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html+pdf" -o build-output/wikiwords
+	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html_inline" -s "html.inline_toc=1" -o build-output/wikiwords_inline
+
+test_wikiwords_quick:
 	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html_inline" -o build-output/wikiwords_inline
 
 test_conditionals:

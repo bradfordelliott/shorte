@@ -38,6 +38,15 @@ class wikiword_t:
         self.label = ""
         self.link = ""
 
+    def __str__(self):
+        output = '''wikiword_t
+  word:        %s
+  is_bookmark: %d
+  label:       %s
+  link:        %s
+''' % (self.wikiword, self.is_bookmark, self.label, self.link)
+        return output
+
 
 class tag_t:
     def __init__(self):
@@ -94,6 +103,11 @@ class tag_t:
 
         return mods
 
+    def has_modifier(self, name):
+        if(self.modifiers.has_key(name)):
+            return True
+        return False
+
     def get_modifier(self, name):
         if(self.modifiers.has_key(name)):
             return self.modifiers[name]
@@ -108,6 +122,9 @@ class tag_t:
         data += "  file %s\n" % self.file
         data += "  line %s\n" % self.line
         data += "  page %s\n" % self.page
+
+        if(self.has_modifiers()):
+            data += self.get_modifiers_as_string()
 
         return data
 
@@ -186,6 +203,9 @@ class topic_t:
     def get_name(self):
         return self.m_vars["name"]
 
+    #def __str__(self):
+    #    return self.m_vars.__str__()
+
 
 class identity_t:
     def __init__(self):
@@ -208,7 +228,7 @@ class indexer_t:
 
         self.m_topics = []
     
-    def level1(self, name, data, file, inc=True):
+    def level1(self, tag, data, file, inc=True):
         
         if(inc):
             self.m_index_l1 += 1
@@ -217,7 +237,8 @@ class indexer_t:
             self.m_index_l4 = 0
             self.m_index_l5 = 0
 
-        topic = topic_t({"name"   : data,
+        topic = topic_t({"tag"    : tag,
+                         "name"   : data,
                          "file"   : file,
                          "indent" : 1});
         self.m_topics.append(topic)
@@ -225,7 +246,7 @@ class indexer_t:
         return "%d" % self.m_index_l1
         
     
-    def level2(self, name, data, file, inc=True):
+    def level2(self, tag, data, file, inc=True):
        
         if(inc):
 
@@ -237,14 +258,15 @@ class indexer_t:
             self.m_index_l4 = 0
             self.m_index_l5 = 0
         
-        topic = topic_t({"name"   : data,
+        topic = topic_t({"tag"    : tag,
+                         "name"   : data,
                          "file"   : file,
                          "indent" : 2});
         self.m_topics.append(topic)
         
         return "%d.%d" % (self.m_index_l1, self.m_index_l2)
    
-    def level3(self, name, data, file, inc=True):
+    def level3(self, tag, data, file, inc=True):
 
         if(inc):
 
@@ -257,14 +279,15 @@ class indexer_t:
             self.m_index_l4 = 0
             self.m_index_l5 = 0
         
-        topic = topic_t({"name"   : data,
+        topic = topic_t({"tag"    : tag,
+                         "name"   : data,
                          "file"   : file,
                          "indent" : 3});
         self.m_topics.append(topic)
         
         return "%d.%d.%d" % (self.m_index_l1, self.m_index_l2, self.m_index_l3)
 
-    def level4(self, name, data, file, inc=True):
+    def level4(self, tag, data, file, inc=True):
 
         if(inc):
 
@@ -278,14 +301,15 @@ class indexer_t:
             self.m_index_l4 += 1
             self.m_index_l5 = 0
         
-        topic = topic_t({"name"   : data,
+        topic = topic_t({"tag"    : tag,
+                         "name"   : data,
                          "file"   : file,
                          "indent" : 4});
         self.m_topics.append(topic)
         
         return "%d.%d.%d.%d" % (self.m_index_l1, self.m_index_l2, self.m_index_l3, self.m_index_l4)
 
-    def level5(self, name, data, file, inc=True):
+    def level5(self, tag, data, file, inc=True):
 
         if(inc):
 
@@ -300,7 +324,8 @@ class indexer_t:
 
             self.m_index_l5 += 1
         
-        topic = topic_t({"name"   : data,
+        topic = topic_t({"tag"    : tag,
+                         "name"   : data,
                          "file"   : file,
                          "indent" : 5});
         self.m_topics.append(topic)

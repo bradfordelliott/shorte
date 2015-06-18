@@ -265,7 +265,7 @@ class clang_parser_t(shorte_parser_t):
 
             p = param_t()
             p.set_description(desc, textblock=False)
-            p.set_description(self.textblock_t(desc), textblock=True)
+            p.set_description(textblock_t(desc), textblock=True)
             p.set_io(io)
             
             comment.params[name] = p
@@ -370,7 +370,7 @@ class clang_parser_t(shorte_parser_t):
         if(matches != None):
             
             msg = trim_leading_blank_lines(matches.groups()[0])
-            msg = self.textblock_t(msg)
+            msg = textblock_t(msg)
             comment.deprecated = True
             comment.deprecated_msg = msg # matches.groups()[0]
 
@@ -483,24 +483,29 @@ class clang_parser_t(shorte_parser_t):
         # Add the list of include files
         includes = self.m_engine.get_includes()
         args = []
+        
+        clang_args = shorte_get_config("clang", "args")
+        if(len(clang_args) > 0):
+            args = clang_args.split(' ')
+        else:
+            # DEBUG BRAD: For some reason this currently doesn't work if I
+            #             set it to -xc++. It barfs when it encounters this construct:
+            #                 #ifdef __cplusplus
+            #                 extern "C" {
+            args.append('-xc++')
+            #args.append('-xc')
+            #args.append('-nostdlib')
+            #args.append('-nostdinc')
+            ##args.append('--help')
+            #args.append('-nostdinc++')
+            #args.append('-nobuiltininc')
+            #args.append('-mrelax-all')
 
-        # DEBUG BRAD: For some reason this currently doesn't work if I
-        #             set it to -xc++. It barfs when it encounters this construct:
-        #                 #ifdef __cplusplus
-        #                 extern "C" {
-        #args.append('-xc++')
-        args.append('-xc')
-        #args.append('-nostdlib')
-        #args.append('-nostdinc')
-        ##args.append('--help')
-        #args.append('-nostdinc++')
-        #args.append('-nobuiltininc')
-        #args.append('-mrelax-all')
+            # If we're on Linux we might need this to get things
+            # to work
+            #args.append('-I/home/belliott/projects/shorte/src/3rdparty/clang/include')
+            #args.append('-I/usr/include')
 
-        # If we're on Linux we might need this to get things
-        # to work
-        #args.append('-I/home/belliott/projects/shorte/src/3rdparty/clang/include')
-        #args.append('-I/usr/include')
         for include in includes:
             args.append("-I%s" % include)
         
@@ -515,6 +520,8 @@ class clang_parser_t(shorte_parser_t):
 
         #WARNING("ARGS")
         #print ' '.join(args)
+
+        STATUS("Parsing %s with clang: args=%s" % (source_file, " ".join(args)))
 
         #args = ['-DCS_LITTLE_ENDIAN', '-Imodules', '-Iplatform']
         tu = self.cindex.parse(source_file, args=args, options=options)
@@ -1001,8 +1008,9 @@ class clang_parser_t(shorte_parser_t):
                 if(len(object_name) == 0):
                     object_name = cursor.type.spelling
 
-                WARNING("SKIPPING %s" % object_name)
-                traceback.print_exc()
+                #WARNING("SKIPPING %s" % object_name)
+                #traceback.print_exc()
+
                 #sys.exc_info()
                 #WARNING(str(e))
                 pass

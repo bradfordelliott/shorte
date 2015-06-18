@@ -265,9 +265,12 @@ div.gallery
       background-color:yellow;
       font-weight: bold;
   }
+
+  a.nav_up {color:#eee;font-size:0.4em;position:relative;top:-10px;left:5px;}
   
   
   /* Table of Contents */
+  div.toc  {border:1px solid #ccc;border-radius:0px;padding-bottom:10px;padding-top:10px;background-color:#f0f0f0;margin-left:12px;}
   div.toc1 {margin-top:8px;margin-bottom:4px;}
   div.toc1 a{margin-left:20px;font-size:1.1em;color:${toc_1_fg};}
   div.toc2 {margin-top:4px;margin-bottom:2px;}

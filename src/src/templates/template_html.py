@@ -1335,6 +1335,7 @@ class template_html_t(template_t):
             
         topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : tag.file,
+                         "tag"    : tag,
                          "indent" : 3});
         index.append(topic)
 
@@ -2238,8 +2239,17 @@ within an HTML document.
     def _expand_links(self, matches):
 
         (source, label, external) = self._process_link(matches)
+        
+        # If the link starts with # then make sure it is not
+        # a wiki-word to avoid double expansion. We'll strip off
+        # the leading # and then check against the list of known
+        # wikiwords.
+        if(source.startswith("#")):
+            temp = source[1:]
+            if(self.m_engine.is_wiki_word(temp)):
+                return temp
 
-        return "<a href='%s'>%s</a>" % (source, label)
+        return "[[<a href='%s'>%s</a> (source=%s, label=%s)]]" % (source, label, source, label)
     
     def _expand_anchors(self, matches):
 
@@ -2821,12 +2831,12 @@ $href_end
         # If the document is being inlined then need to get
         # rid of the link prefix and just use a local link
         if(self.is_inline()):
-            output = "<a href='#%s'>%s</a>" % (wikiword.label, wikiword.label)
+            output = "<a href='#%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
         else:
             if(self.m_wikiword_path_prefix):
-                output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.label, wikiword.label)
+                output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.wikiword, wikiword.label)
             else:
-                output = "<a href='%s'>%s</a>" % (wikiword.label, wikiword.label)
+                output = "<a href='%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
 
         return output
 
@@ -3027,47 +3037,65 @@ $href_end
         return data
 
 
-    def append_header(self, tag, data, file):
+    def append_header(self, tag, file):
+
+        data = tag.contents
+        link_name = data.strip()
+
+        if(tag.has_modifiers()):
+            modifiers = tag.get_modifiers()
+            if("wikiword" in modifiers):
+                link_name = modifiers["wikiword"]
 
         data = self.format_text(data, False)
 
+        # DEBUG BRAD: Would be nice if this could chain up
+        #             the index hierarchy but need some way to
+        #             get at the parent topic.
+        nav_up = "<a href='#' class='nav_up'>&#9650;</a>"
+
         if(self.m_engine.get_config("html", "header_numbers") == "1"):
-            if(tag == "h1"):
-                self.m_contents.append("<h1>" + self.m_indexer.level1(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n")
+            if(tag.name == "h1"):
+                self.m_contents.append("<h1>" + self.m_indexer.level1(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h1>\n" % nav_up)
 
-            elif(tag == "h2"):
-                self.m_contents.append("<h2>" + self.m_indexer.level2(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h2>\n")
+            elif(tag.name == "h2"):
+                self.m_contents.append("<h2>" + self.m_indexer.level2(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h2>\n" % nav_up)
 
-            elif(tag == "h3"):
-                self.m_contents.append("<h3>" + self.m_indexer.level3(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h3>\n")
+            elif(tag.name == "h3"):
+                self.m_contents.append("<h3>" + self.m_indexer.level3(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h3>\n" % nav_up)
 
-            elif(tag == "h4"):
-                self.m_contents.append("<h4>" + self.m_indexer.level4(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h4>\n")
+            elif(tag.name == "h4"):
+                self.m_contents.append("<h4>" + self.m_indexer.level4(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h4>\n" % nav_up)
             
-            elif(tag == "h5"):
-                self.m_contents.append("<h5>" + self.m_indexer.level5(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n")
+            elif(tag.name == "h5"):
+                self.m_contents.append("<h5>" + self.m_indexer.level5(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a></h5>\n")
 
-            elif(tag == "h"):
+            elif(tag.name == "h"):
                 self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
         else:
-            if(tag == "h1"):
-                self.m_contents.append("<h1>" + data.strip() + "<a name='" + data.strip() + "'></a></h1>\n")
+            if(tag.name == "h1"):
+                self.m_indexer.level1(tag, data.strip(), file)
+                self.m_contents.append("<h1>" + data.strip() + "<a name='" + link_name + "'></a>%s</h1>\n" % nav_up)
 
-            elif(tag == "h2"):
-                self.m_contents.append("<h2>" + data.strip() + "<a name='" + data.strip() + "'></a></h2>\n")
+            elif(tag.name == "h2"):
+                self.m_indexer.level2(tag, data.strip(), file)
+                self.m_contents.append("<h2>" + data.strip() + "<a name='" + link_name + "'></a>%s</h2>\n" % nav_up)
 
-            elif(tag == "h3"):
-                self.m_contents.append("<h3>" + data.strip() + "<a name='" + data.strip() + "'></a></h3>\n")
+            elif(tag.name == "h3"):
+                self.m_indexer.level3(tag, data.strip(), file)
+                self.m_contents.append("<h3>" + data.strip() + "<a name='" + link_name + "'></a>%s</h3>\n" % nav_up)
 
-            elif(tag == "h4"):
-                self.m_contents.append("<h4>" + data.strip() + "<a name='" + data.strip() + "'></a></h4>\n")
+            elif(tag.name == "h4"):
+                self.m_indexer.level4(tag, data.strip(), file)
+                self.m_contents.append("<h4>" + data.strip() + "<a name='" + link_name + "'></a>%s</h4>\n" % nav_up)
             
-            elif(tag == "h5"):
-                self.m_contents.append("<h5>" + data.strip() + "<a name='" + data.strip() + "'></a></h5>\n")
+            elif(tag.name == "h5"):
+                self.m_indexer.level5(tag, data.strip(), file)
+                self.m_contents.append("<h5>" + data.strip() + "<a name='" + link_name + "'></a></h5>\n")
             
-            elif(tag == "h"):
+            elif(tag.name == "h"):
                 self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
-    
+
      
     def append_source_code(self, tag):
 
@@ -3374,11 +3402,20 @@ $href_end
 
     def generate_index(self, title, subtitle, theme, version, links, as_string=False):
         
-        cnts = "<h1>Table of Contents</h1>"
+        cnts =  "\n<h1>Table of Contents</h1>"
+        cnts += "\n<div class='toc'>\n"
         
         for topic in self.m_indexer.m_topics:
 
+            tag = topic.m_vars["tag"]
             name = topic.m_vars["name"]
+            target = name
+
+            #print "target: %s" % target
+
+            if(tag.has_modifier("wikiword")):
+                target = tag.get_modifier("wikiword")
+                
             indent = topic.m_vars["indent"]
             file = os.path.basename(topic.m_vars["file"])
 
@@ -3386,22 +3423,25 @@ $href_end
             # make sure that all links point back to the
             # main document.
             if(self.is_inline() == True):
-                file = "index.html"
+                file = ""
             else:
                 file = "content/" + file
             
             #print "indent = %s" % indent
 
+
             if(indent == 1):
-                cnts += "<div class='toc1'><a href='%s#%s'>%s</a></div>\n" % (file, name, name)
+                cnts += "<div class='toc1'><a href='%s#%s'>%s</a></div>\n" % (file, target, name)
             elif(indent == 2):
-                cnts += "<div class='toc2'><a href='%s#%s'>%s</a></div>\n" % (file, name, name)
+                cnts += "<div class='toc2'><a href='%s#%s'>%s</a></div>\n" % (file, target, name)
             elif(indent == 3):
-                cnts += "<div class='toc3'><a href='%s#%s'>%s</a></div>\n" % (file, name, name)
+                cnts += "<div class='toc3'><a href='%s#%s'>%s</a></div>\n" % (file, target, name)
             elif(indent == 4):
-                cnts += "<div class='toc4'><a href='%s#%s'>%s</a></div>\n" % (file, name, name)
+                cnts += "<div class='toc4'><a href='%s#%s'>%s</a></div>\n" % (file, target, name)
             elif(indent == 5):
-                cnts += "<div class='toc5'><a href='%s#%s'>%s</a></div>\n" % (file, name, name)
+                cnts += "<div class='toc5'><a href='%s#%s'>%s</a></div>\n" % (file, target, name)
+
+        cnts += "</div>\n<!-- End of TOC -->\n"
 
         # If we're inlining everything we need to store the
         # entire document in the index file
@@ -3757,7 +3797,7 @@ $href_end
                 #print "TAG: %s" % tag["name"]
 
                 if(self.m_engine.tag_is_header(tag.name)):
-                    self.append_header(tag.name, tag.contents, output_file)
+                    self.append_header(tag, output_file)
 
                 elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)

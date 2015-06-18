@@ -854,6 +854,11 @@ class template_odt_t(template_t):
 
         (source, label, external) = self._process_link(matches)
 
+        if(source.startswith("#")):
+            temp = source[1:]
+            if(self.m_engine.is_wiki_word(temp)):
+                return temp
+
         # DEBUG BRAD: This is a temporary hack to get links of the format -> to work
         source = re.sub(".*?#(.*)", "\\1", source)
         label = re.sub(".*?#(.*)", "\\1", label)
@@ -2934,7 +2939,8 @@ ${desc}
             function["pseudocode"] = xml
 
 
-        topic = topic_t({"name"   : prototype2.get_name(),
+        topic = topic_t({"tag"    : tag,
+                         "name"   : prototype2.get_name(),
                          "file"   : file,
                          "indent" : 3});
         index.append(topic)
