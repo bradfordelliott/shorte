@@ -184,6 +184,7 @@ tests:
 	make test_comments
 	make test_classes
 	make test_code_execution
+	make test_gallery
 
 THEME:=shorte
 

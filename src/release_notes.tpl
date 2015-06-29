@@ -6,19 +6,57 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.72 (Dec xx, 2014)
-- Fixed paths to the pre-build binaries for RH6 for cairo package
-- Fixed windows paths for clang
-- Updated template_odt.py to trap error if OpenOffice/LibreOffice is not found
-- Moved log messages to an HTML file for better management 
-- Minor cleanup to some error messages
-- Fixed an issue wikiword linking in the inline HTML template.
+@h3 Version 1.0.72 (June 29, 2015)
+- Clang Parser
+    - Updated to newer version of clang
+    - Minor cleanup in the comment processing
+    - Added support for parameterizing the clang arguments via
+      clang.args setting.
+    - Fixed windows paths for clang
+- Code Execution and Snippets
+    - Cleanup of the handling of snippet templates for code example
+      execution
+    - Cleaned up the code execution of snippets for c, python, bash
+      and java. Still need to work on the others. Added support for
+      checking return code and displaying errors (currently only
+      works in HTML template)
+- Logging/Error Handling
+    - Moved log messages to an HTML file for better management 
+    - Moved the log file to the output directory
+    - Updated to change return code if an error was flagged
+    - Added summary of errors and warnings on exit.
+- Shorte Parser
+    - Minor tweaks to the image handling and the creation of
+      thumbnails
+    - Added new document attributes
+    - Added batch tag.
+    - Other minor bug fixes.
+- HTML template
+    - Added primitive support for JSSOR image galleries
+    - Fixes for the table of contents in inline template
+    - Minor tweaks to the theme of the table of contents
+- Open Document template
+    - Fixed an issue with the @r registered trademark symbol
+      not working reliably.
+    - Added an error of swriter is not detected
+- Other
+    - Fixed hard-coded copyright date.
+    - Fixed snippet templates so they are global.
+    - Changed the default theme to be shorte based.
+    - Fixed paths to the pre-build binaries for RH6 for cairo package
+    - Updated template_odt.py to trap error if OpenOffice/LibreOffice is not found
+    - Minor cleanup to some error messages
+    - Fixed an issue wikiword linking in the inline HTML template.
+    - Added support for changing configuration in a documents header
+      via the doc.config parameter. This will currently override
+      what is in the shorte.cfg or command line values.
 - @graph
     - Added support for pie graphs and memory plots in the @graph tag
     - Minor enhancements to the sequence diagram generation
 - @gallery
     - Tidied up the @gallery tag output in HTML templates. Still
       not really supported in ODT/PDFs.
+    - Added support for jssor image galleries
 
 @h3 Version 1.0.71 (Dec 12, 2014)
 - Fixed a bug in the formatting of defines in the open document
