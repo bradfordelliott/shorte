@@ -9,6 +9,8 @@ This document describes the release history of the Shorte language.
 @c
 printf("Hello world!\n");
 
+@h3 Version 1.0.73 (June XXX, 2015)
+
 @h3 Version 1.0.72 (June 29, 2015)
 - Clang Parser
     - Updated to newer version of clang
