@@ -6,6 +6,9 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@c
+printf("Hello world!\n");
+
 @h3 Version 1.0.72 (June 29, 2015)
 - Clang Parser
     - Updated to newer version of clang
@@ -57,6 +60,8 @@ This document describes the release history of the Shorte language.
     - Tidied up the @gallery tag output in HTML templates. Still
       not really supported in ODT/PDFs.
     - Added support for jssor image galleries
+- Added a basic markdown template, needs significant improvements
+  to really be useful.
 
 @h3 Version 1.0.71 (Dec 12, 2014)
 - Fixed a bug in the formatting of defines in the open document

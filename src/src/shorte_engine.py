@@ -28,6 +28,7 @@ from src.templates.template_mergefile import template_mergefile_t
 from src.templates.template_sql import template_sql_t
 from src.templates.template_mediawiki import template_mediawiki_t
 from src.templates.template_revealjs import template_revealjs_t
+from src.templates.template_markdown import template_markdown_t
 
 class document_info_t:
     '''This class is used to manage the attributes associated
@@ -1243,6 +1244,8 @@ def exists(s):
                 template = template_revealjs_t(self, indexer)
                 template.m_include_link = include_link
                 template.m_include_link_type = include_link_type
+            elif(pkg == PACKAGE_TYPE_MARKDOWN):
+                template = template_markdown_t(self, indexer)
             else:
                 template = template_html_t(self, indexer)
                 template.m_inline = inline

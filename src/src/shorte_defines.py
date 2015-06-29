@@ -584,6 +584,7 @@ PACKAGE_TYPE_LABVIEW     = "labview"
 PACKAGE_TYPE_MERGEFILE   = "mergefile"
 PACKAGE_TYPE_SQL         = "sql"
 PACKAGE_TYPE_REVEALJS    = "reveal.js"
+PACKAGE_TYPE_MARKDOWN    = "markdown"
 
 TAB_REPLACEMENT = "    "
 

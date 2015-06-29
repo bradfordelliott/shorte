@@ -129,6 +129,7 @@ vim:
 
 release_notes:
 	${python} shorte.py -f release_notes.tpl -p html_inline -t ${THEME} -v ${version} -o build-output/release_notes
+	${python} shorte.py -f release_notes.tpl -p markdown -t ${THEME} -v ${version} -o build-output/release_notes
 
 install_linux:
 	make checkout_vendor_templates
