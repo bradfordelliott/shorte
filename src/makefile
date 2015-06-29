@@ -69,6 +69,8 @@ clang_plugin_rh6:
 	cd 3rdparty/clang && cp linux/rh6/* .
 	cd 3rdparty/clang/linux && cp rh6/* .
 
+clang_plugin_windows32:
+	
 clang_plugin_Darwin:
 	cp /opt/local/libexec/llvm-3.6/lib/libclang.dylib 3rdparty/clang/osx/.
 clang_plugin:

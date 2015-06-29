@@ -1,8 +1,14 @@
 #!/usr/bin/python
 import sys
 import re
-import libs.cairo_access as cairo_access
-from libs.cairo_access import *
+
+try:
+    import libs.cairo_access as cairo_access
+    from libs.cairo_access import *
+except:
+    print "\nERROR: Failed importing cairo, try running make cairo_plugin to generate it\n" 
+    sys.exit(-1)
+
 import math
 
 class cairo_t:

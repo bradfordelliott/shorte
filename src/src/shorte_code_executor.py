@@ -1,6 +1,7 @@
 import re
 import subprocess
 import string
+import shlex
 
 from shorte_defines import *
 
@@ -149,6 +150,9 @@ class code_executor_t:
                result = os.popen("%s %s 2>&1" % (g_tools.get_tcl(), source_file)).read();
         
         elif(language == "bash"):
+            
+            if("Windows" == platform.system()):
+                return (-1, "bash not currently supported under windows")
 
             if(machine != ""):
                 cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
@@ -202,7 +206,7 @@ class code_executor_t:
                     "output" : "tmpexample3",
                     "source" : source_file})
 
-                cmd_compile = cmd_compile.split(" ")
+                cmd_compile = shlex.split(cmd_compile)
 
                 phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 result = phandle.stdout.read()
