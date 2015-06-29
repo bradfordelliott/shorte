@@ -232,6 +232,11 @@ test_api_reference:
 #	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html" -s "shorte.auto_summarize=0"
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "shorte"
 
+test_api_reference_quick:
+	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html" -s "shorte.auto_summarize=0"
+#	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html" -s "shorte.auto_summarize=0"
+	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "shorte"
+
 test_code_quick:
 	${python} shorte.py --ignore_errors -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
 	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"

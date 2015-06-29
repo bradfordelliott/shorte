@@ -259,6 +259,7 @@ class code_executor_t:
                 # The compile command
                 cmd_compile = string.Template(shorte_get_config("java", "compile", expand_os=True)).substitute({
                     "source" : source_file})
+
                 # The run command
                 cmd_run = string.Template(shorte_get_config("java", "run", expand_os=True)).substitute({
                     "source" : class_file})
@@ -267,11 +268,16 @@ class code_executor_t:
                 cmd_run     = cmd_run.split(" ")
                     
                 # First compile the application
-                phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                result = phandle.stdout.read()
-                result += phandle.stderr.read()
-                phandle.wait()
-                rc = phandle.returncode
+                try:
+                    phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    result = phandle.stdout.read()
+                    result += phandle.stderr.read()
+                    phandle.wait()
+                    rc = phandle.returncode
+                    phandle.close()
+                except:
+                    result = "Failed running java compiler"
+                    rc = -1
 
                 if(0 != rc):
                     return (rc,result)

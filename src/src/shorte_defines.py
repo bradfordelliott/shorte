@@ -822,6 +822,8 @@ def shorte_get_config(section, key, expand_os=False):
     if(section == "paths" or True == expand_os):
         if(platform.system() == "Linux"):
             key += ".linux"
+        elif("CYGWIN" in platform.system()):
+            key += ".linux"
         elif(platform.system() == "Darwin"):
             key += ".osx"
         else:
