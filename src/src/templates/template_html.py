@@ -66,7 +66,21 @@ template_code_result = string.Template(
     <div class='code'>
         $result
     </div>
+    <br/>
 """)
+
+# This template is used to display errors to the user
+# when a source code block was excuted and returned
+# a failure code.
+template_code_result_error = string.Template(
+'''
+    <br/>
+    <div class='code_result'><img style='height:35px;margin-left:-20px;margin-top:0px;' src="${image}"></img>Result (Failed, rc=${rc}):</div>
+    <div class='code' style='border:3px solid red;'>
+        $result
+    </div>
+    <br/>
+''')
 
 template_code = string.Template(
 """
@@ -2147,12 +2161,12 @@ within an HTML document.
             
             html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.get_max_cols(), "Diagram")
             html += struct.image["map"]
-            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none'></img></th></td>" % (struct.max_cols, name, struct.name)
+            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none;width:96%%;'></img></th></td>" % (struct.max_cols, name, struct.name)
 
         if(struct.has_field_attributes()):
             html += '''
 <tr class='header'>
-  <td>Type</td>
+  <td>Width</td>
   <td>Name</td>
   <td>Description</td>
   <td>Attributes</td>
@@ -2160,7 +2174,7 @@ within an HTML document.
         else:
             html += '''
 <tr class='header'>
-  <td>Type</td>
+  <td>Width</td>
   <td>Name</td>
   <td>Description</td>
 </tr>'''
@@ -2249,7 +2263,8 @@ within an HTML document.
             if(self.m_engine.is_wiki_word(temp)):
                 return temp
 
-        return "[[<a href='%s'>%s</a> (source=%s, label=%s)]]" % (source, label, source, label)
+        #return "[[<a href='%s'>%s</a> (source=%s, label=%s)]]" % (source, label, source, label)
+        return "<a href='%s' title='source=%s, label=%s'>%s</a>" % (source, source, label, label)
     
     def _expand_anchors(self, matches):
 
@@ -2331,7 +2346,7 @@ within an HTML document.
 %s
 <center>
 <table style='text-align:center;'>
-    <tr><td><img src="%s" style=\"%s\" width=100 height=100/></td></tr>
+    <tr><td><img src="%s" style=\"%s\"/></td></tr>
     <tr><td><b>%s</b></td></tr>
 </table>
 </center>
@@ -2340,7 +2355,7 @@ within an HTML document.
             elif(image["align"] == "right"):
                 return """
 %s
-<table style='text-align:center;float:right;'>
+<table style='text-align:right;float:right;'>
     <tr><td><img src='%s' style=\"%s\"/></td></tr>
     <tr><td><b>%s</b></td></tr>
 </table>
@@ -2367,7 +2382,7 @@ within an HTML document.
 $map
 $href_start
 <div class='image_inline'>
-    <div style='float:left;'><img class="map" src='${name}' style=\"${style}\" $map_link/></div>
+    <div style='float:left;'><img class="map" src='${name}' style=\"${style};max-width:1000px;\" $map_link/></div>
     <div style='float:left;'><b>${caption}</b></div>
     <div style='clear:both;'></div>
 </div>
@@ -3049,26 +3064,28 @@ $href_end
 
         data = self.format_text(data, False)
 
-        # DEBUG BRAD: Would be nice if this could chain up
-        #             the index hierarchy but need some way to
-        #             get at the parent topic.
-        nav_up = "<a href='#' class='nav_up'>&#9650;</a>"
+        (level,parent) = self.m_indexer.level(tag, data.strip(), file)
+        nav_up = "<a href='#' title='#' class='nav_up'>&#9650;</a>"
+
+        if(parent != None):
+            link = '%s#%s' % (parent.file, parent.name)
+            nav_up = "<a href='%s' title='%s' class='nav_up'>&#9650;</a>" % (link, link)
 
         if(self.m_engine.get_config("html", "header_numbers") == "1"):
             if(tag.name == "h1"):
-                self.m_contents.append("<h1>" + self.m_indexer.level1(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h1>\n" % nav_up)
+                self.m_contents.append("<h1>" + level + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h1>\n" % nav_up)
 
             elif(tag.name == "h2"):
-                self.m_contents.append("<h2>" + self.m_indexer.level2(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h2>\n" % nav_up)
+                self.m_contents.append("<h2>" + level + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h2>\n" % nav_up)
 
             elif(tag.name == "h3"):
-                self.m_contents.append("<h3>" + self.m_indexer.level3(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h3>\n" % nav_up)
+                self.m_contents.append("<h3>" + level + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h3>\n" % nav_up)
 
             elif(tag.name == "h4"):
-                self.m_contents.append("<h4>" + self.m_indexer.level4(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h4>\n" % nav_up)
+                self.m_contents.append("<h4>" + level + ". " + data.strip() + "<a name='" + link_name + "'></a>%s</h4>\n" % nav_up)
             
             elif(tag.name == "h5"):
-                self.m_contents.append("<h5>" + self.m_indexer.level5(tag, data.strip(), file) + ". " + data.strip() + "<a name='" + link_name + "'></a></h5>\n")
+                self.m_contents.append("<h5>" + level + ". " + data.strip() + "<a name='" + link_name + "'></a></h5>\n")
 
             elif(tag.name == "h"):
                 self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
@@ -3095,9 +3112,15 @@ $href_end
             
             elif(tag.name == "h"):
                 self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
+        
+        #print "@template_html.py::3099"
+        #print self.m_indexer
 
      
     def append_source_code(self, tag):
+        
+        #print "SOURCE:"
+        #print indent_lines(tag.source, "    ")
 
         rc = self.format_source_code(tag.name, tag.contents)
 
@@ -3107,22 +3130,43 @@ $href_end
 
         snippet_id = self.m_snippet_id
         self.m_snippet_id += 1
+        nl2 = re.compile(r"\\n")
+        nl = re.compile("\n")
+        ws = re.compile(" ")
 
         if(result != None):
             # Convert any HTML tags in the input source
             lt = re.compile("<")
             gt = re.compile(">")
-            nl = re.compile("\n")
-            ws = re.compile(" ")
+
+            #print "Before:"
+            #print indent_lines(result, "    ")
 
             result = lt.sub("&lt;", result)
             result = gt.sub("&gt;", result)
-            result = nl.sub("<br>", result)
+            result = nl2.sub("<br/>", result)
+            result = nl.sub("<br/>", result)
             result = ws.sub("&nbsp;", result)
             
-            result = template_code_result.substitute({"result": result})
+            #print "After:"
+            #print indent_lines(result, "    ")
+            #print ""
+            
+            #parser = self.m_engine.m_source_code_analyzer
+            #tags = parser.parse_source_code(tag.name, result)
+            #result = self.format_source_code(tag.name, tags)
+            if(tag.rc == 0):
+                result = template_code_result.substitute({"result": result})
+            else:
+                img_src = self.insert_image("icon_error_50x50.png")
+                result = template_code_result_error.substitute({"result": result, "rc" : tag.rc, "image" : img_src})
+
+            #snippet_id = self.m_snippet_id
+            #self.m_snippet_id += 1
+            #result = template_source.substitute({"id": snippet_id, "source": result})
         else:
             result = ""
+
 
         if(self.m_show_code_headers["code"]):
             snippet_id = self.m_snippet_id
@@ -3130,7 +3174,12 @@ $href_end
             code_header = self.m_template_code_header.substitute(
                     {"id" : snippet_id,
                      "style" : "margin-left:30px;margin-top:10px;width:100%;"})
-            source = template_source.substitute({"id": snippet_id, "source": source})
+            
+            # Make the code snippet safe for display via javascript
+            tmp = xmlize(tag.source)
+            tmp = nl.sub("<br/>",tmp) 
+            tmp = ws.sub("&nbsp;", tmp)
+            source = template_source.substitute({"id": snippet_id, "source": tmp})
         else:
             code_header = ""
             source = ""
@@ -3148,6 +3197,7 @@ $href_end
         name = tag.name
 
         #print("Appending tag %s" % name)
+        #print tag
 
         if(name == "#"):
             return
@@ -3279,9 +3329,9 @@ $href_end
 
         right_menu = ""
         for topic in index:
-           indent = topic.m_vars["indent"]
-           if(topic.m_vars["file"] == output_file):
-              right_menu += "<div class='toc%d'><a href='#%s'>%s</a></div>" % (indent, topic.m_vars["name"], topic.m_vars["name"])
+           indent = topic.get_indent()
+           if(topic.get_file() == output_file):
+              right_menu += "<div class='toc%d'><a href='#%s'>%s</a></div>" % (indent, topic.get_name(), topic.get_name())
 
         vars = {}
 
@@ -3340,9 +3390,9 @@ $href_end
 
         for topic in self.m_indexer.m_topics:
 
-            name = topic.m_vars["name"]
-            indent = topic.m_vars["indent"]
-            file = "content/" + os.path.basename(topic.m_vars["file"])
+            name = topic.get_name()
+            indent = topic.get_indent()
+            file = "content/" + os.path.basename(topic.get_file())
 
             # If the HTML is being inlined then we need to
             # make sure that all links point back to the
@@ -3407,8 +3457,8 @@ $href_end
         
         for topic in self.m_indexer.m_topics:
 
-            tag = topic.m_vars["tag"]
-            name = topic.m_vars["name"]
+            tag = topic.get_tag()
+            name = topic.get_name()
             target = name
 
             #print "target: %s" % target
@@ -3416,8 +3466,8 @@ $href_end
             if(tag.has_modifier("wikiword")):
                 target = tag.get_modifier("wikiword")
                 
-            indent = topic.m_vars["indent"]
-            file = os.path.basename(topic.m_vars["file"])
+            indent = topic.get_indent()
+            file = os.path.basename(topic.get_file())
 
             # If the HTML is being inlined then we need to
             # make sure that all links point back to the
@@ -3596,6 +3646,7 @@ $href_end
         shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/note.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/20x20/lock.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/20x20/icon_error.png", outputdir)
+        shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/icon_error_50x50.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/warning.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/50x50/tbd.png", outputdir)
         shutil.copy(shorte_get_startup_path() + "/templates/shared/star.png", outputdir)

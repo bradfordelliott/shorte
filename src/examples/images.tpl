@@ -42,3 +42,14 @@ This is some other random information
 -- images:
 -h Image                     | Size  | Caption
 - examples/gallery/four.jpg  | 300   | This is my caption
+
+
+@h2 Image Alignment
+@h3 Right Aligned
+@image: src="examples/record_0.png" width="600px" align="right"
+
+@h3 Left Aligned
+@image: src="examples/record_0.png" width="600px" align="left"
+
+@h3 Centered
+@image: src="examples/record_0.png" width="600px" align="center"

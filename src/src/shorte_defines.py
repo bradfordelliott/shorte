@@ -2,6 +2,11 @@ import platform
 import os
 import sys
 
+# Track the number of warnings or errors
+# encountered during processing
+g_shorte_warning_count = 0
+g_shorte_error_count   = 0
+
 if(platform.system() == "Linux"):
     python = "python"
     perl   = "perl"
@@ -122,6 +127,8 @@ class tag_t:
         data += "  file %s\n" % self.file
         data += "  line %s\n" % self.line
         data += "  page %s\n" % self.page
+        data += "  source\n"
+        data += self.source
 
         if(self.has_modifiers()):
             data += self.get_modifiers_as_string()
@@ -200,8 +207,22 @@ class topic_t:
     def __init__(self, vars):
         self.m_vars = vars
 
+        self.name = vars["name"]
+        self.level = vars["indent"]
+        #self.parent = self.m_vars["parent"]
+        self.file   = vars["file"]
+        self.tag    = vars["tag"]
+
+    def get_file(self):
+        return self.file
+    def get_tag(self):
+        return self.tag
     def get_name(self):
-        return self.m_vars["name"]
+        return self.name
+    def get_indent(self):
+        return self.level
+    def get_level(self):
+        return self.level
 
     #def __str__(self):
     #    return self.m_vars.__str__()
@@ -227,6 +248,95 @@ class indexer_t:
         self.m_image_index = 0
 
         self.m_topics = []
+
+    def __str__(self):
+        output = 'Index:\n'
+        output += "==============\n"
+        
+        last_level = 1 
+
+        index = {}
+
+        for i in range(0, 6):
+            index[i] = 1
+
+        for topic in self.m_topics:
+            prefix = ' ' * topic.get_indent()
+
+            level = topic.get_level()
+            
+            last_level = level
+            lindex = index[level]
+            
+            if(level < last_level):
+                index[level] = 1
+            else:
+                index[level] += 1
+
+                for i in range(level+1,6):
+                    index[i] = 1
+            
+            l = []
+            for i in range(1, level+1):
+                l.append("%d" % (index[i] - 1))
+            l = ".".join(l)
+                
+            output += "%s%s. %s\n" % (prefix, l, topic.get_name())
+
+
+        return output
+
+    def level(self, tag, data, file, inc=True):
+
+        level = None
+        parent = None
+
+        topics = []
+        for topic in self.m_topics:
+            topics.append(topic)
+            
+        if(tag.name == "h1"):
+            if(len(topics) > 0):
+                topics.reverse()
+                for topic in topics:
+                    if(topic.level == 1):
+                        parent = topic
+                        break
+            level = self.level1(tag, data, file, inc)
+        elif(tag.name == "h2"):
+            if(len(topics) > 0):
+                topics.reverse()
+                for topic in topics:
+                    if(topic.level == 1):
+                        parent = topic
+                        break
+            level = self.level2(tag, data, file, inc)
+        elif(tag.name == "h3"):
+            if(len(topics) > 0):
+                topics.reverse()
+                for topic in topics:
+                    if(topic.level == 2):
+                        parent = topic
+                        break
+            level = self.level3(tag, data, file, inc)
+        elif(tag.name == "h4"):
+            if(len(topics) > 0):
+                topics.reverse()
+                for topic in topics:
+                    if(topic.level == 3):
+                        parent = topic
+                        break
+            level = self.level4(tag, data, file, inc)
+        elif(tag.name == "h5"):
+            if(len(topics) > 0):
+                topics.reverse()
+                for topic in topics:
+                    if(topic.level == 4):
+                        parent = topic
+                        break
+            level = self.level5(tag, data, file, inc)
+
+        return (level,parent)
     
     def level1(self, tag, data, file, inc=True):
         
@@ -240,7 +350,8 @@ class indexer_t:
         topic = topic_t({"tag"    : tag,
                          "name"   : data,
                          "file"   : file,
-                         "indent" : 1});
+                         "indent" : 1})
+
         self.m_topics.append(topic)
         
         return "%d" % self.m_index_l1
@@ -261,7 +372,8 @@ class indexer_t:
         topic = topic_t({"tag"    : tag,
                          "name"   : data,
                          "file"   : file,
-                         "indent" : 2});
+                         "indent" : 2})
+
         self.m_topics.append(topic)
         
         return "%d.%d" % (self.m_index_l1, self.m_index_l2)
@@ -694,7 +806,7 @@ def unescape_string(source):
 
 g_config = None
 
-def shorte_get_config(section, key):
+def shorte_get_config(section, key, expand_os=False):
     global g_config
     #print "GET CONFIG ", g_config
     if(g_config == None):
@@ -706,14 +818,18 @@ def shorte_get_config(section, key):
     # If searching for a path then make sure
     # to append the OS to get the correct
     # path
-    if(section == "paths"):
-        if(platform.system == "Linux"):
+    if(section == "paths" or True == expand_os):
+        if(platform.system() == "Linux"):
             key += ".linux"
+        elif(platform.system() == "Darwin"):
+            key += ".osx"
         else:
             key += ".win32"
 
-
-    val = g_config.get(section, key)
+    try:
+        val = g_config.get(section, key)
+    except:
+        val = None
 
     #print "  %s.%s = %s" % (section, key, val)
     return val
@@ -778,6 +894,24 @@ def shorte_image_resize(input_path, output_path, height, width):
     output = im.resize((width,height), Image.ANTIALIAS)
 
     output.save(output_path) 
+    
+def shorte_get_version():
+    path_version = shorte_get_startup_path() + "/version.inc"
+
+    if(not os.path.exists(path_version)):
+        FATAL("Version file version.inc not found")
+
+    handle = open(path_version, 'rt')
+    contents = handle.read()
+    contents = contents.replace("version \:= ", "")
+    matches = re.search("version := ([0-9]+\.[0-9]+\.[0-9]+)", contents)
+    version = "???"
+    if(matches != None):
+        version = matches.groups()[0]
+    else:
+        FATAL("Version not found in %s" % path_version)
+
+    return version
 
 g_verbose = False
 def shorte_set_verbosity(enable):
@@ -785,10 +919,22 @@ def shorte_set_verbosity(enable):
     g_verbose = enable
 
 g_logfile = None
+g_logfile_path = "log.html"
+
+def shorte_get_log_file_path():
+    return g_logfile_path
+def shorte_set_log_file_path(path):
+    global g_logfile_path
+    g_logfile_path = path
+
 def shorte_get_log_file():
     global g_logfile
     if(g_logfile == None):
-        g_logfile = open("log.html", "wt")
+        path = shorte_get_log_file_path()
+        dirname = os.path.dirname(path)
+        if(not os.path.exists(dirname)):
+            os.makedirs(dirname)
+        g_logfile = open(path, "wt")
         g_logfile.write('''<html>
 <head>
   <style>
@@ -803,6 +949,7 @@ def shorte_get_log_file():
 <body>
 ''')
     return g_logfile
+
 
 def DEBUG(message):
     '''This method is used to manage debug statements in the log file'''
@@ -859,9 +1006,11 @@ def INFO(message):
         message = message.replace(' ', '&nbsp')
         shorte_get_log_file().write("<div class='log'><div class='info'>INFO:</div>%s</div>" % message)
 
+
 def WARNING(message):
     '''This method is used to manage warning mesages messages in the log file'''
     import inspect
+    global g_shorte_warning_count
     frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
     message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
     if(sys.platform == "win32"):
@@ -880,9 +1029,13 @@ def WARNING(message):
     message = message.replace(' ', '&nbsp')
     shorte_get_log_file().write("<div class='log'><div class='warning'>WARNING:</div><div>%s</div></div>" % message)
 
+    g_shorte_warning_count += 1
+
 def ERROR(message):
     '''This method is used to manage error mesages messages in the log file'''
     import inspect
+    global g_shorte_error_count
+
     frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
     message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
     if(sys.platform == "win32"):
@@ -901,12 +1054,13 @@ def ERROR(message):
     message = message.replace(' ', '&nbsp')
     shorte_get_log_file().write("<div class='log'><div class='error'>ERROR:</div><div>%s</div></div>" % message)
 
+    g_shorte_error_count += 1
+
 def FATAL(message):
     '''This method is used to manage fatal error mesages messages in the log file for which there is no recovery'''
     import inspect
     import traceback
     frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
-    
 
     message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
     
@@ -928,10 +1082,13 @@ def FATAL(message):
     message = message.replace('\n', '<br/>')
     message = message.replace(' ', '&nbsp')
     
-
     shorte_get_log_file().write("<div class='log'><div class='fatal'>FATAL:</div>%s</div>" % message)
     sys.exit(-1)
 
+def shorte_get_error_count():
+    return g_shorte_error_count
+def shorte_get_warning_count():
+    return g_shorte_warning_count
 
 class list_item_t:
 

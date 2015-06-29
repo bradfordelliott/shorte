@@ -160,8 +160,8 @@ image_t:
             new_height = im.size[1]
             new_width  = im.size[0]
         
-        print ("2: old.height: %d, new.height: %d" % (im.size[1], new_height))
-        print ("2: old.width:  %d, new.width:  %d" % (im.size[0], new_width))
+        #print ("2: old.height: %d, new.height: %d" % (im.size[1], new_height))
+        #print ("2: old.width:  %d, new.width:  %d" % (im.size[0], new_width))
 
         width = new_width
         height = new_height
@@ -338,8 +338,10 @@ class shorte_parser_t(parser_t):
             "testcasesummary" : True,
 
             "doctitle"        : True,
+            "doc.title"       : True,
             "footertitle"     : True,
             "docsubtitle"     : True,
+            "doc.subtitle"    : True,
             "docnumber"       : True,
             "docauthor"       : True,
             "csource"         : True,
@@ -351,6 +353,7 @@ class shorte_parser_t(parser_t):
             "sourcedir"       : True,
             "template"        : True,
             "doc.config"      : True,
+            "doc.info"        : True,
 
             "doc.footer.title" : True,
             "doc.footer.subtitle" : True,
@@ -505,6 +508,7 @@ class shorte_parser_t(parser_t):
         header["sourcedir"] = None
         header["footer.title"] = None
         header["footer.subtitle"] = None
+        header["doc.info"] = None
 
         for tag in tags:
             if(tag.name in ("title", "doctitle", "doc.title")):
@@ -523,6 +527,8 @@ class shorte_parser_t(parser_t):
                 header["number"] = tag.contents
             elif(tag.name in ("docrevisions", "doc.revisions")):
                 header["revision_history"] = self.parse_table(tag.contents, tag.modifiers)
+            elif(tag.name in ("docinfo", "doc.info")):
+                header["doc.info"] = tag.contents
             elif(tag.name == "sourcedir"):
                 header["sourcedir"] = tag.contents
                 self.m_engine.set_working_dir(header["sourcedir"])
@@ -545,7 +551,7 @@ class shorte_parser_t(parser_t):
                 parts = tag.contents.strip().split("=")
                 (section,key) = parts[0].split(".")
                 val = parts[1]
-                self.m_engine.set_config(section, key, val)
+                shorte_set_config(section, key, val)
             else:
                 WARNING("Unknown tag %s" % tag)
 
@@ -2551,11 +2557,11 @@ a C/C++ like define that looks like:
 
         # Determine whether we should automatically add a header before
         # a function prototype
-        prototype_add_header = False #self.m_engine.get_config("shorte", "prototype_add_header")
+        prototype_add_header = self.m_engine.get_config("shorte", "prototype_add_header")
 
         # Determine whether we should automatically add a header before
         # a testcase definition
-        testcase_add_header = False #self.m_engine.get_config("shorte", "testcase_add_header")
+        testcase_add_header = self.m_engine.get_config("shorte", "testcase_add_header")
 
 
         #print "CURRENT_FILE = %s" % os.path.basename(self.m_current_file)

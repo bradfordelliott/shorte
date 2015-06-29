@@ -336,7 +336,8 @@ $desc
         
         topic = topic_t({"name"   : cls.get_name(),
                          "file"   : tag.file, 
-                         "indent" : 3})
+                         "indent" : 3,
+                         "tag"    : tag})
 
         index.append(topic)
         
@@ -451,7 +452,8 @@ $class
 
         topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : tag.file, 
-                         "indent" : 3})
+                         "indent" : 3,
+                         "tag"    : tag})
 
         index.append(topic)
         

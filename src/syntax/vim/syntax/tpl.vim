@@ -11,6 +11,7 @@ elseif exists ("b:current_syntax")
     finish
 endif
 
+syntax spell toplevel
 "syn region  StringBlock start=\z('''\|"""\)+ end="\z1" keepend
 
 "syn include @PYTHON syntax/python.vim
@@ -23,7 +24,8 @@ endif
 syn region Values start=/"/ end=/"/ contained
 syn region Keys start=/[ :][A-Za-z]*/ end=/=/ contained
 syn region Tags start=/^@\(acronyms\|\|define\|struct\|enum\|vector\|inkscape\|embed\|image\|python\|text\|perl\|code\|checklist\|c\|shell\|table\|ul\|prototype\|note\|questions\|question\|bash\|vera\|verilog\|tcl\|java\|pre\|ol\|functionsummary\|testcasesummary\|testcase\|include\|typesummary\|sequence\)/ end=/$/ contains=Keys,Values,StringBlock  keepend
-syn region Headings excludenl start=/^@\(h1\|h2\|h3\|h4\|h5\)/ end=/$/ keepend contains=Keys,Values
+syn region Headings excludenl start=/^@\(h2\|h3\|h4\|h5\)/ end=/$/ keepend contains=Keys,Values
+syn region H1 excludenl start=/^@\(h1\)/ end=/$/ keepend
 
 " Highlighting for single line tags such as @p that don't take any
 " modifiers.
@@ -73,9 +75,13 @@ syn region Prototypes start=/@prototype/ end=/^@/ contains=Tags,PrototypeSection
 "hi link inheritKeyword keyword
 "hi link declKeyword keyword
 "
+
+"term=underline cterm=underline gui=underline
+
 hi link literalSegment String
 hi link Documentation Type
 hi link Headers Type
+hi link H1 Underlined
 hi link TplTags String 
 hi link Links String
 hi link StringBlock Identifier

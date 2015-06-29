@@ -122,6 +122,12 @@ parser.add_option("--resize", "--resize_image",
 parser.add_option("--verbose", "--verbose",
                   action="store_true", dest="verbose", default=False,
                   help="Verbosity of the output log")
+parser.add_option("--ierr", "--ignore_errors",
+                 action="store_true", dest="ignore_errors", default=False,
+                 help="Ingore errors")
+parser.add_option("--werr", "--warnings_as_errors",
+                 action="store_true", dest="warnings_as_errors", default=False,
+                 help="Treat warnings as errors")
 
 #parser.add_option("-I", "--include",
 #                  action="store",type="string",dest="include",
@@ -132,6 +138,11 @@ parser.add_option("--verbose", "--verbose",
 if(options.verbose):
     shorte_set_verbosity(True)
 
+output_dir = options.output_dir
+if(output_dir == None):
+    output_dir = "build-output"
+shorte_set_log_file_path(output_dir + "/shorte_log.html")
+
 from src.shorte_server import shorte_server_start
 
 # Run shorte as an XML-RPC server process instead of a command
@@ -141,25 +152,19 @@ if(options.server):
     sys.exit(0)
 
 args = ' '.join(sys.argv)
+print ""
+print "======================================================"
+print "Shorte:"
+print "  version: %s" % shorte_get_version()
+print "======================================================"
 STATUS("Command Line:\n  %s" % args)
 
-output_dir = options.output_dir
-if(output_dir == None):
-    output_dir = "build-output"
 
 if(options.about):
-    handle = open('version.inc', 'rt')
-    contents = handle.read()
-    contents = contents.replace("version \:= ", "")
-    matches = re.search("version := ([0-9]+\.[0-9]+\.[0-9]+)", contents)
-    if(matches != None):
-        version = matches.groups()[0]
-        print "Shorte Version:"
-        print "==============="
-        print version
-    else:
-        FATAL("Version not found")
-    handle.close()
+    version = shorte_get_version()
+    print "Shorte Version:"
+    print "==============="
+    print version
     sys.exit(0)
 
 if(options.resize):
@@ -279,3 +284,24 @@ if(options.info):
 
 shorte.generate_packages(options.package, options.theme, options, options.zip)
 
+warnings = shorte_get_warning_count()
+errors   = shorte_get_error_count()
+
+print "\nShorte finishined processing"
+
+error_on_exit = False
+
+if(warnings != 0):
+    print "  - %d warnings found during processing" % warnings
+    if(True == options.warnings_as_errors):
+        error_on_exit = True
+
+if(errors != 0):
+    print "  - %d errors found during processing (set --ignore_errors to ignore)" % errors
+    if(not options.ignore_errors):
+        error_on_exit = True
+
+print "  - See %s for more detail" % shorte_get_log_file_path()
+   
+if(error_on_exit):
+    sys.exit(-1)

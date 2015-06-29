@@ -865,7 +865,8 @@ class template_word_t(template_t):
 
         topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : file,
-                         "indent" : 3});
+                         "indent" : 3,
+                         "tag"    : tag});
         index.append(topic)
 
         draw_box = 0 # int(self.m_engine.get_config("odt", "prototype_draw_box"))

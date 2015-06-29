@@ -118,9 +118,14 @@ class document_info_t:
         # DEBUG BRAD: This is a temporary way of dealing with comments
         #             in snippets
         if(self.m_templates.has_key(key)):
-            ERROR("Template %s already exists" % key)
+            FATAL("Template %s already exists" % key)
         value = value.replace("\\#", "#")
         self.m_templates[key] = value
+
+    def has_template(self, key):
+        if(self.m_templates.has_key(key)):
+            return True
+        return False
 
     def get_template(self, key):
         return self.m_templates[key]
@@ -388,7 +393,7 @@ class engine_t:
         return shorte_get_config(section, key)
 
     def set_config(self, section, key, val):
-        shorte_set_config(section, key)
+        shorte_set_config(section, key, val)
 
 
     #+-----------------------------------------------------------------------------
@@ -912,18 +917,42 @@ class engine_t:
 
             for tag in tags:
 
-                tag.result = None
+                if(tag.result != None):
+                    INFO("Skipping tag, already executed")
+                    continue
             
                 if(self.tag_is_executable(tag.name)):
                     source = tag.source 
 
                     if(tag.modifiers.has_key("template")):
                         template = tag.modifiers["template"]
+
+                        if(not self.get_doc_info().has_template(template)):
+                            FATAL("Template %s was not registered when parsing %s @ line %d" % (template, tag.file, tag.line))
+
                         template = self.get_doc_info().get_template(template)
-                        source = template.replace("$1", tag.source)
+
+                        data = tag.source
+
+                        # If the block has an indent modifier than prefix
+                        # it with spaces
+                        if(tag.has_modifier("indent")):
+                            indent = int(tag.modifiers["indent"].strip())
+                            prefix = ''
+                            for i in range(0, indent):
+                                prefix += ' '
+                            data = indent_lines(data, prefix)
+
+                        source = template.replace("$1", data)
 
                     executor = code_executor_t()
-                    tag.result = executor.execute(tag.name, source, tag.modifiers)
+                    (tag.rc, tag.result) = executor.execute(tag.name, source, tag.modifiers)
+                    if(tag.rc != 0):
+                        ERROR("Failed executing code snippet in %s @ line %d\n%s" % (tag.file, tag.line, indent_lines(source, "    ")))
+
+                    code = self.m_source_code_analyzer
+                    tag.contents = code.parse_source_code(tag.name, source)
+                    tag.source = source
                 
                 #if(tag.name == "struct"):
                 #    #if(len(tag.contents["heading"])):
@@ -1012,9 +1041,10 @@ else:
 
             for tag in tags:
 
-                tag.result = None
-            
+                # If the code block has already been
+                # executed then don't run it again
                 if(self.tag_is_executable(tag.name)):
+                    FATAL("This block of code is not updated")
                     source = tag.source 
 
                     if(tag.modifiers.has_key("template")):

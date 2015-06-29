@@ -484,6 +484,7 @@ class clang_parser_t(shorte_parser_t):
         includes = self.m_engine.get_includes()
         args = []
         
+        # Fetch the command line arguments to pass to clang
         clang_args = shorte_get_config("clang", "args")
         if(len(clang_args) > 0):
             args = clang_args.split(' ')

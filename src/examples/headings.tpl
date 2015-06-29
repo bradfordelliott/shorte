@@ -74,3 +74,4 @@ This is a top level heading which links with @h1 with
 an ampersand up front. Hyperlinking should work if I type
 in @MyHeading4.
 
+@include "examples/subheadings.tpl"

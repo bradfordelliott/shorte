@@ -1,5 +1,8 @@
 
 /**
+ * @h1 Defines
+ *
+ * @brief
  * This is some random description of a define here
  *
  * @example

@@ -305,7 +305,8 @@ ${prototype}
                 
         topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : file,
-                         "indent" : 3});
+                         "indent" : 3,
+                         "tag"    : tag});
         index.append(topic)
 
         contents = {}

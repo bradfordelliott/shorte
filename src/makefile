@@ -183,6 +183,7 @@ tests:
 	make test_registers
 	make test_comments
 	make test_classes
+	make test_code_execution
 
 THEME:=shorte
 
@@ -229,14 +230,26 @@ test_api_reference:
 #	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "html" -s "shorte.auto_summarize=0"
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "shorte"
 
+test_code_quick:
+	${python} shorte.py --ignore_errors -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
+	${python} shorte.py --ignore_errors -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "txt"
+
 test_code:
-	${python} shorte.py -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html+pdf"
-	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html+pdf"
-	${python} shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p shorte
-	${python} shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html+pdf"
-	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
+	${python} shorte.py --ignore_errors -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html+pdf"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x clang -o build-output/c_code -p "html+pdf"
+	${python} shorte.py --ignore_errors -f examples/test.h -t "${THEME}" -x clang -o build-output/c_code_header -p shorte
+	${python} shorte.py --ignore_errors -f examples/test.h -t "${THEME}" -x clang -o build-output/c_code_header -p "html+pdf"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x clang -o build-output/c_code -p "shorte"
     # DEBUG BRAD: This target is currently failing. Not sure how easy it will be to fix.
-	${python} shorte.py -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code_error -p "html+pdf"
+	${python} shorte.py --ignore_errors -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code_error -p "html+pdf"
+
+test_code_execution:
+	${python} shorte.py -f examples/test_code_execution.tpl --ignore_errors -t "${THEME}" -o build-output/test_code_execution -p "html+pdf"
+test_code_execution_quick:
+	${python} shorte.py -f examples/test_code_execution.tpl --ignore_errors -t "${THEME}" -o build-output/test_code_execution -p "html"
 
 # This is an intermediate way of preprocessing files until I can add proper
 # support to shorte.
@@ -276,12 +289,6 @@ test_classes:
 test_doxygen:
 	doxygen -s examples/doxy.cfg
 
-test_code_quick:
-	${python} shorte.py -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
-	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
-	${python} shorte.py -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html"
-	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
-	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "txt"
 
 test_c:
 	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
@@ -440,7 +447,7 @@ test_batch_files:
 	${python} shorte.py -f examples/batch.tpl -p html -o build-output/test_batch_files
 
 test_snippets:
-	${python} shorte.py -f "examples/batch.tpl examples/snippets.tpl" -p html -o build-output/test_snippets
+	${python} shorte.py -f "examples/snippets.tpl" -p html -o build-output/test_snippets
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python

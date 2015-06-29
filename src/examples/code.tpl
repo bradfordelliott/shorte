@@ -51,11 +51,13 @@ A Test of Columns
 
 
 @testcasesummary
-Blah blah blah
+
+@text
+This is a test
 
 @testcase: category="one"
--- name: Blah
--- desc:
+--name: Blah
+--desc:
 This test is used to verify the operation of the device in
 RXAUI mode with both the ingress and egress paths in retimer mode. Only
 the MAC interface is enabled in this test. This test may be run with either

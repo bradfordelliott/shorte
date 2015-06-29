@@ -1,4 +1,6 @@
 import re
+import subprocess
+import string
 
 from shorte_defines import *
 
@@ -66,13 +68,14 @@ class code_executor_t:
 
     def execute(self, language, source, modifiers):
 
+        rc = 0
+        result = ""
+
         if(not modifiers.has_key("exec")):
-            return None
+            return (rc,None)
 
         if(modifiers["exec"] == "0" or modifiers["exec"] == "no"):
-            return None
-
-        result = ""
+            return (rc,None)
 
         machine = ""
         port = "22"
@@ -90,12 +93,12 @@ class code_executor_t:
         else:
             exec_prefix = "./"
 
-        print "exec = %s" % exec_prefix
-        print platform.system()
+        #print "exec = %s" % exec_prefix
+        #print platform.system()
 
         #source_file = os.getcwd() + os.sep + self.source_file_name(language)
         source_file = self.source_file_name(language)
-        print "Source file = %s" % source_file
+        #print "Source file = %s" % source_file
 
         keep_source_file = False
         if(modifiers.has_key("save")):
@@ -107,19 +110,28 @@ class code_executor_t:
 
         if(language == "python"):
 
-           if(machine != ""):
-               cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
-               #print cmd_copy
-               os.popen(cmd_copy)
+            if(machine != ""):
+                cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
+                #print cmd_copy
+                os.popen(cmd_copy)
 
-               #result = os.popen("%s tmpexample.py 2>&1" % python).read();
-               cmd_run = "ssh -p %s %s \"%s /tmp/%s 2>&1\"" % (port, machine, g_tools.get_python(), source_file)
-               #print cmd_run
+                #result = os.popen("%s tmpexample.py 2>&1" % python).read();
+                cmd_run = "ssh -p %s %s \"%s /tmp/%s 2>&1\"" % (port, machine, g_tools.get_python(), source_file)
+                #print cmd_run
 
-               result = os.popen(cmd_run).read()
-           else:
-               result = os.popen("%s %s 2>&1" % (g_tools.get_python(), source_file)).read();
-        
+                result = os.popen(cmd_run).read()
+            else:
+                cmd_run = string.Template(shorte_get_config("python", "run", expand_os=True)).substitute({
+                    "source" : source_file})
+
+                cmd_run = cmd_run.split(' ')
+                phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
+                
+                #result = os.popen("%s %s 2>&1" % (g_tools.get_python(), source_file)).read();
         
         elif(language == "tcl"):
 
@@ -153,7 +165,16 @@ class code_executor_t:
                 os.popen("ssh -p %s %s \"rm -rf /tmp/%s\"" % (port, machine, source_file))
 
             else:
-                result = os.popen(". %s 2>&1" % (source_file)).read()
+                cmd_run = string.Template(shorte_get_config("bash", "run", expand_os=True)).substitute({
+                    "source" : source_file})
+
+                cmd_run = cmd_run.split(" ")
+
+                phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
 
         elif(language == "c"):
            
@@ -162,35 +183,54 @@ class code_executor_t:
             if(machine != ""):
                 cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
                 #print cmd_copy
-                result = os.popen(cmd_copy).read()
-                print "COPY: %s" % result
+                handle = os.popen(cmd_copy)
+                result = handle.read()
+                rc = handle.wait()
+                #print "COPY: %s" % result
 
                 cmd_compile = "ssh -p %s %s \"%s -o /tmp/tmpexample /tmp/%s 2>&1\"" % (port, machine, compiler, source_file)
-                print cmd_compile
+                #print cmd_compile
                 result += os.popen(cmd_compile).read()
-                print result
+                #print result
                 
                 cmd_run = "ssh -p %s %s \"/tmp/%s 2>&1\"" % (port, machine, "tmpexample")
                 result += os.popen(cmd_run).read()
 
             else:
-                print os.getcwd()
-                cmd_compile = "%s -o tmpexample %s 2>&1" % (compiler, source_file)
-                print "compile = [%s]" % cmd_compile
-                result = os.popen(cmd_compile).read();
-                print "compile result = [%s]" % result
+                #print os.getcwd()
+                cmd_compile = string.Template(shorte_get_config("c", "compile", expand_os=True)).substitute({
+                    "output" : "tmpexample3",
+                    "source" : source_file})
 
-                cmd_run = "%stmpexample 2>&1" % exec_prefix
-                result = os.popen(cmd_run).read();
-                print "exec result = %s" % result
+                cmd_compile = cmd_compile.split(" ")
+
+                phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
+
+                if(rc != 0):
+                    return (rc,result)
+                    
+                #phandle.close()
+                #print "Compile result = [%s]" % result
+
+                phandle = subprocess.Popen(["%stmpexample3" % exec_prefix], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
+                #print "Run result = [%s]" % result
+                #print "Run Returns = ", rc
         
         elif(language == "java"):
 
             basename = os.path.basename(source_file)
             class_name = re.sub(".java", "", basename)
 
-            print "Class = %s" % class_name
-            print "Base  = %s" % basename
+            #print "Class = %s" % class_name
+            #print "Base  = %s" % basename
            
             compiler = "javac"
             runtime = "java"
@@ -211,10 +251,45 @@ class code_executor_t:
                 os.popen("ssh -p %s %s \"rm -rf /tmp/%s\"" % (port, machine, source_file))
 
             else:
-                result = os.popen("module load jdk && %s tmpexample.java 2>&1" % compiler).read();
-                print "result = %s" % result
-                result = os.popen("%stmpexample 2>&1" % exec_prefix).read();
-                print "result = %s" % result
+                (class_file,ext) = os.path.splitext(source_file)
+                #print "JAVA"
+                #print "  source: %s" % source_file
+                #print "  class:  %s" % class_file
+
+                # The compile command
+                cmd_compile = string.Template(shorte_get_config("java", "compile", expand_os=True)).substitute({
+                    "source" : source_file})
+                # The run command
+                cmd_run = string.Template(shorte_get_config("java", "run", expand_os=True)).substitute({
+                    "source" : class_file})
+
+                cmd_compile = cmd_compile.split(" ")
+                cmd_run     = cmd_run.split(" ")
+                    
+                # First compile the application
+                phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
+
+                if(0 != rc):
+                    return (rc,result)
+                
+                # Now run the application
+                phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
+
+                if(0 != rc):
+                    return (rc,result)
+
+                #result = os.popen("%s tmpexample.java 2>&1" % compiler).read();
+                #print "result = %s" % result
+                #result = os.popen("%stmpexample 2>&1" % exec_prefix).read();
+                #print "result = %s" % result
        
         elif(language == "perl"):
 
@@ -295,7 +370,7 @@ class code_executor_t:
 
             result = os.popen(cmd_run).read()
 
-            print "RESULT=[%s]" % result
+            #print "RESULT=[%s]" % result
 
 
         # Now that we're done with the file make sure we
@@ -308,5 +383,5 @@ class code_executor_t:
         #example_name = "example_%d" % self.m_example_id
         #shutil.copy("tmpexample.py", self.m_output_directory + "/" + example_name)
 
-        return result
+        return (rc,result)
 
