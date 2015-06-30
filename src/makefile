@@ -291,8 +291,8 @@ test_clang2:
 
 
 test_classes:
-	${python} shorte.py -f "examples/classes.cpp" -x clang -t "${THEME}" -o build-output/class_parser -p "shorte"
-	${python} shorte.py -f "examples/classes.cpp" -x clang -t "${THEME}" -o build-output/class_parser -p "html"
+	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args=-xc++" -t "${THEME}" -o build-output/class_parser -p "shorte"
+	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args=-xc++" -t "${THEME}" -o build-output/class_parser -p "html"
 #	${python} shorte.py -f "examples/classes.tpl" -t "${THEME}" -o build-output/classes -p "html"
 
 test_doxygen:

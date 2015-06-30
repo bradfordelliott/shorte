@@ -1,8 +1,7 @@
 " Vim syntax file
-" Language:	RELAX NG Compact Syntax
-" Maintainer:	Hans Fugal <hans@fugal.net>
-" Last Change:	$Date: 2003/06/22 03:32:14 $
-" $Id: rnc.vim,v 1.7 2003/06/22 03:32:14 fugalh Exp $
+" Language:	Shorte Documentation Language
+" Maintainer:	Brad Elliott <brad_e@hotmail.com>
+" Last Change:	$Date: 2015/06/30 03:32:14 $
 
 
 if version < 600
