@@ -247,7 +247,15 @@ div.gallery
   p {margin-left: 20px;margin-bottom:10px;font-size: 1.0em;}
   p.caption {margin-left: 0px;text-align: center;margin-top: 5px;}
 
-  
+  /* Horizontal Rule */
+  div.hr
+  {
+      float:left;
+      width:100%;
+      border-top:1px solid #ccc;
+      height:1px;
+  }
+
   div.tb
   {
       width:80%;

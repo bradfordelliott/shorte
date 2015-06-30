@@ -3009,7 +3009,7 @@ $href_end
         data = re.sub("\\\\n", "<br/>", data)
 
         if(expand_equals_block):
-            data = re.sub("===+", "<div style='style=float:left; width:20%;border-top:1px solid #ccc;height:1px;'></div>", data)
+            data = re.sub("===+", "<div class='hr'></div>", data)
         
         ## Hilite any text between **** ****
         #hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
@@ -3019,7 +3019,7 @@ $href_end
         hiliter = re.compile("__(.*?)__", re.DOTALL)
         data = hiliter.sub("<u>\\1</u>", data)
 
-        # DEBUG BRAD: Oldy Syntax
+        # DEBUG BRAD: Old Syntax
         #     Underline anything in <<<>>> brackets
         #     hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
         #     data = hiliter.sub("<u>\\1</u>", data)
