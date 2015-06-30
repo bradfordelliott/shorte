@@ -668,6 +668,8 @@ class type_t:
 
     def has_see_also(self):
         if(None != self.see_also):
+            if(self.see_also.strip() == ""):
+                return False
             return True
         return False
     def get_see_also(self):

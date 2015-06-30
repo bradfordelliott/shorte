@@ -165,6 +165,8 @@ $description
 --values:
 - Enum Name | Enum Value | Enum Description
 $values
+$example
+$see_also
 """)
         add_heading = shorte_get_config("shorte", "header_add_to_enum")
         if(tag.heading == None and ("None" != add_heading)):
@@ -174,6 +176,9 @@ $values
         heading = ''
             
         vars = {}
+        
+        vars["example"] = self.format_object_example(enum)
+        vars["see_also"] = self.format_object_see_also(enum)
         vars["name"] = title
         vars["heading"] = heading
         vars["description"] = description
@@ -270,6 +275,7 @@ $description
 - Type | Name | Description
 $values
 $example
+$see_also
 """)
 
         vars = {}
@@ -286,6 +292,7 @@ $example
         #print "HEADING: %s" % heading
 
         vars["example"] = self.format_object_example(struct)
+        vars["see_also"] = self.format_object_see_also(struct)
 
         vars["name"] = title
         vars["parent"] = parent
@@ -298,6 +305,15 @@ $example
         vars["line"] = struct.get_line()
 
         return template.substitute(vars)
+
+    def format_object_see_also(self, obj):
+        if(not obj.has_see_also()):
+            return ''
+        else:
+            return '''
+--see:
+    %s
+''' % obj.get_see_also()
 
     def format_object_example(self, obj):
         example = ''

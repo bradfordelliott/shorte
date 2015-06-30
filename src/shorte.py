@@ -62,7 +62,7 @@ parser.add_option("-v", "--version",
                   action="store", dest="version",
                   help="The version of the document")
 parser.add_option("-t", "--theme",
-                  action="store",type="string",dest="theme",default="shorte",
+                  action="store",type="string",dest="theme",
                   help="The output theme")
 parser.add_option("-n", "--name",
                   action="store",type="string",dest="name",
@@ -186,7 +186,9 @@ if(options.replace):
     shorte.load_replace_strings(options.replace)
 
 if(options.theme):
-    shorte.set_theme(options.theme)
+    shorte_set_config("shorte", "theme", options.theme)
+
+shorte.set_theme(shorte_get_config("shorte", "theme"))
 
 # Override any global configuration options that the
 # user specified on the command line. Settings are
@@ -221,9 +223,12 @@ if(options.macros):
             val = matches.groups()[1]
            
             macros[key] = val
-
-    #for macro in macros:
-    #    print "MACRO: %s = [%s]" % (macro, macros[macro])
+        # If there was no equal sign then assume
+        # the macro has the value 1
+        else:
+            key = field.strip()
+            if(len(key) > 0):
+                macros[key] = "1"
 
     shorte.set_macros(macros)
 
@@ -239,6 +244,12 @@ if(options.define):
             val = matches.groups()[1]
            
             defines[key] = val
+        # If there was no equal sign then assume
+        # the macro has the value 1
+        else:
+            key = field.strip()
+            if(len(key) > 0):
+                defines[key] = "1"
 
     shorte.set_macros(defines)
 
@@ -282,7 +293,7 @@ if(options.info):
     print shorte.info(options)
     sys.exit(0)
 
-shorte.generate_packages(options.package, options.theme, options, options.zip)
+shorte.generate_packages(options.package, shorte_get_config("shorte", "theme"), options, options.zip)
 
 warnings = shorte_get_warning_count()
 errors   = shorte_get_error_count()

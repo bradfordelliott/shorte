@@ -866,6 +866,12 @@ class engine_t:
 
         keys = options.info
 
+        # Print the list of defines passed to the engine
+        if("defines" in keys):
+            defines = self.get_macros()
+            for define in defines:
+                print "%s = %s" % (define, defines[define])
+
         if("c2html" in keys):
             path_input = options.files
             indexer = indexer_t()

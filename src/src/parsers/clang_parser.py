@@ -557,16 +557,26 @@ class clang_parser_t(shorte_parser_t):
         #print "PARSING %s" % page
 
         typedefs = {}
+        typedefs2 = {}
         for cursor in top.get_children():
             if(cursor.kind == clang.cindex.CursorKind.TYPEDEF_DECL):
                 typedef = cursor.type.spelling
                 typename = cursor.underlying_typedef_type.spelling
 
-                typename = typename.replace('struct','')
-                typename = typename.replace('enum','')
+                if(typename.startswith('struct')):
+                    typename = typename[6:]
+                elif(typename.startswith('enum')):
+                    typename = typename[4:]
+                #typename = typename.replace('struct','')
+                #typename = typename.replace('enum','')
                 typename = typename.strip()
                 #print " TYPEDEF %s = %s" % (typename, typedef)
                 typedefs[typename] = typedef
+
+                if(not typedefs2.has_key(typename)):
+                    typedefs2[typename] = []
+                typedefs2[typename].append(typedef)
+
         add_header = shorte_get_config("shorte", "header_add_to_prototype")
 
         for cursor in top.get_children():
@@ -637,9 +647,9 @@ class clang_parser_t(shorte_parser_t):
 
                     # If the object has a typedef then default to that instead. Eventually
                     # we'll support aliases but that doesn't work right now.
-                    if(typedefs.has_key(object_name)):
-                        #WARNING("Renaming %s to %s" % (object_name, typedefs[object_name]))
-                        object_name = typedefs[object_name]
+                    #if(typedefs.has_key(object_name)):
+                    #    WARNING("Renaming %s to %s" % (object_name, typedefs[object_name]))
+                    #    object_name = typedefs[object_name]
                             
                     #if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
                     #    object_name = cursor.displayname
@@ -664,7 +674,7 @@ class clang_parser_t(shorte_parser_t):
                         #print "  type.sp=%s" % cursor.type.spelling
                         raise Exception("object %s already parsed" % object_name)
 
-                    if(add_header != "None"):
+                    if(add_header != "None" and not (cursor.kind in (clang.cindex.CursorKind.STRUCT_DECL, clang.cindex.CursorKind.ENUM_DECL))):
                         tag = tag_t()
                         tag.name = add_header
                         tag.contents = object_name
@@ -879,47 +889,95 @@ class clang_parser_t(shorte_parser_t):
                                 #print '- %s | %s |\n%s' % (child.spelling, child.enum_value, indent_lines(comment.desc, '    '))
                             #else:
                             #    WARNING("Enum parameter %s missing description" % child.spelling)
+                    
+                        # If the type has multiple typedefs/aliases
+                        # then construct the list of types here.
+                        types = []
+                        types.append(object_name)
 
-                        enum = enum_t()
-                        object_data = enum
-                        enum.name = object_name
-                        enum.values = rows
-                        enum.comment = comment
-                        enum.set_description(comment.desc, textblock=False)
-                        enum.set_description(comment.description, textblock=True)
-                        enum.private = comment.private
-                        enum.deprecated = comment.deprecated
-                        enum.deprecated_msg = comment.deprecated_msg
-                        enum.line = cursor.location.line
-                        enum.file = self.m_source_file
-                        enum.max_cols = 3
+                        if(typedefs2.has_key(object_name)):
+                            for t in typedefs2[object_name]:
+                                types.append(t)
 
-                        tag = tag_t()
-                        tag.name = "enum"
-                        tag.contents = enum
-                        tag.source = ""
-                        tag.line = enum.line
-                        tag.file = enum.file
-                        tag.modifiers = {}
-                        tag.heading = comment.heading
-                        page["tags"].append(tag)
+                        for t in types:
+                            if(self.object_is_registered(t)):
+                                #print "ALREADY REGISTERED: %s" % t
+                                #print "  dn     =%s" % cursor.displayname
+                                #print "  sp     =%s" % cursor.spelling
+                                #print "  type.sp=%s" % cursor.type.spelling
+                                continue
+
+                            if(add_header != "None"):
+                                tag = tag_t()
+                                tag.name = add_header
+                                tag.contents = t
+                                tag.source = ""
+                                tag.file = path 
+                                tag.line = cursor.location.line
+                                tag.modifiers = {}
+                                page["tags"].append(tag)
+
+                            # If the type has multiple typedefs then
+                            # record the other aliases in the see_also
+                            # field.
+                            see_also = []
+                            for t2 in types:
+                                if(t != t2):
+                                    see_also.append(t2)
+
+                            enum = enum_t()
+                            object_data = enum
+                            enum.set_name(t)
+                            enum.values = rows
+                            enum.comment = comment
+                            enum.set_description(comment.desc, textblock=False)
+                            enum.set_description(comment.description, textblock=True)
+                            enum.private = comment.private
+                            enum.deprecated = comment.deprecated
+                            enum.deprecated_msg = comment.deprecated_msg
+                            enum.line = cursor.location.line
+                            enum.file = self.m_source_file
+                            enum.max_cols = 3
+                            enum.set_see_also(', '.join(see_also))
+
+                            tag = tag_t()
+                            tag.name = "enum"
+                            tag.contents = enum
+                            tag.source = ""
+                            tag.line = enum.line
+                            tag.file = enum.file
+                            tag.modifiers = {}
+                            tag.heading = comment.heading
+                            page["tags"].append(tag)
+                            
+                            if(comment.has_example()):
+                                object_data.set_example(
+                                    comment.get_example(),
+                                    self.m_engine.m_source_code_analyzer, "c")
+
+                            object_data.set_comment(comment)
+                                
+                            self.object_register(object_name, object_data)
                         
+                        # Mark this block of code as processed so that
+                        # we don't process it again
+                        start_offset = cursor.extent.start.offset
+                        end_offset   = cursor.extent.end.offset + 1
+                        self.processed.append([start_offset, end_offset])
+
+                        continue
+
 
                     elif(cursor.kind == clang.cindex.CursorKind.STRUCT_DECL):
 
-                        struct = struct_t()
-                        object_data = struct
-
-                        #print "@struct: file=%s line=%d" % (file, line)
-                        #print "--name: ", object_name
-                        
                         #print "--description:"
                         #print indent_lines(comment.desc, '    ')
+
+                        fields = []
 
                         children = cursor.get_children()
                         #print '-- fields:'
                         #print '- Type | Name | Description'
-
 
                         for child in children:
                             #print "child:", child
@@ -939,27 +997,83 @@ class clang_parser_t(shorte_parser_t):
                             field.set_name(name)
                             field.set_description(fcomment.description)
                             field.set_type(bits)
-                            struct.fields.append(field)
+                            fields.append(field)
+                       
+                        # If the type has multiple typedefs/aliases
+                        # then construct the list of types here.
+                        types = []
+                        types.append(object_name)
+                        if(typedefs2.has_key(object_name)):
+                            for t in typedefs2[object_name]:
+                                types.append(t)
 
-                        struct.set_name(object_name)
-                        struct.set_description(comment.desc, textblock=False)
-                        struct.set_description(comment.description)
-                        struct.private = comment.private
-                        struct.heading = comment.heading
-                        struct.line = cursor.location.line
-                        struct.file = path
-                        struct.max_cols = 3 #len(struct.fields)
+                        for t in types:
+                            if(self.object_is_registered(t)):
+                                #print "ALREADY REGISTERED"
+                                #print "  dn     =%s" % cursor.displayname
+                                #print "  sp     =%s" % cursor.spelling
+                                #print "  type.sp=%s" % cursor.type.spelling
+                                continue
 
-                        tag = tag_t()
-                        tag.name = "struct"
-                        tag.contents = struct
-                        tag.line = struct.line
-                        tag.file = struct.file
-                        tag.source = struct.source
-                        tag.modifiers = {}
-                        tag.heading = struct.heading
-                        page["tags"].append(tag)
+                            if(add_header != "None"):
+                                tag = tag_t()
+                                tag.name = add_header
+                                tag.contents = t
+                                tag.source = ""
+                                tag.file = path 
+                                tag.line = cursor.location.line
+                                tag.modifiers = {}
+                                page["tags"].append(tag)
+
+                            # If the type has multiple typedefs then
+                            # record the other aliases in the see_also
+                            # field.
+                            see_also = []
+                            for t2 in types:
+                                if(t != t2):
+                                    see_also.append(t2)
+
+                            struct = struct_t()
+                            object_data = struct
+                            struct.set_name(t)
+                            struct.set_description(comment.desc, textblock=False)
+                            struct.set_description(comment.description)
+                            struct.private = comment.private
+                            struct.heading = comment.heading
+                            struct.line = cursor.location.line
+                            struct.file = path
+                            struct.max_cols = 3 #len(struct.fields)
+                            struct.fields.extend(fields)
+                            struct.set_see_also(', '.join(see_also))
+
+                            tag = tag_t()
+                            tag.name = "struct"
+                            tag.contents = struct
+                            tag.line = struct.line
+                            tag.file = struct.file
+                            tag.source = struct.source
+                            tag.modifiers = {}
+                            tag.heading = struct.heading
+                            page["tags"].append(tag)
+
+                            if(comment.has_example()):
+                                object_data.set_example(
+                                    comment.get_example(),
+                                    self.m_engine.m_source_code_analyzer, "c")
+
+                            object_data.set_comment(comment)
+                                
+                            self.object_register(object_name, object_data)
                         
+                        # Mark this block of code as processed so that
+                        # we don't process it again
+                        start_offset = cursor.extent.start.offset
+                        end_offset   = cursor.extent.end.offset + 1
+                        self.processed.append([start_offset, end_offset])
+
+                        continue
+                    
+
                     elif(cursor.kind == clang.cindex.CursorKind.CLASS_DECL):
 
                         cls = self.m_engine.class_get(object_name)

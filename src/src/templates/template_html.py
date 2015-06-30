@@ -1890,10 +1890,8 @@ within an HTML document.
         if(enum.private == True):
             img += self.insert_image("lock.png", height=20, width=20, wrap=True, float="right", title="This enum is private")
         
-        html_example = ''
-        if(enum.has_example()):
-            html_example = self.format_object_example(enum)
-        
+        html_example = self.format_object_example(enum)
+        html_see_also = self.format_object_see_also(enum)
         
         if(self.m_engine.get_config("shorte", "show_enum_values") == "1"):
             show_enum_vals = True
@@ -2007,6 +2005,7 @@ within an HTML document.
         <div class='cb_title'>Values:</div>
         <div style="margin:0px;">${values}</div>
         $example
+        $see_also
     </div>
 </div>
 </div><br/>''').substitute({
@@ -2016,6 +2015,7 @@ within an HTML document.
     "name"   :  name,
     "values" : values,
     "example": html_example,
+    "see_also": html_see_also,
     "desc"   : self.format_textblock(enum.get_description(textblock=True))})
 
         return html
@@ -2068,38 +2068,53 @@ within an HTML document.
 
         return html
 
+    def format_object_see_also(self, obj):
+        if(not obj.has_see_also()):
+            return ''
+        
+        template_see_also = string.Template('''
+            <div>
+                <div class='cb_title'>See Also:</div>
+                <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${see_also}</p>
+            </div>
+        ''')
+            
+        # DEBUG BRAD: This should probably be converted to a textblock
+        see_also  = self.format_text(obj.get_see_also())
+        
+        return template_see_also.substitute({"see_also" : see_also})
+
     def format_object_example(self, obj):
 
         if(not obj.has_example()):
             return ''
-        
+                                    
         template_example = string.Template('''
-                <div>
-                    <div class='cb_title'>Example:</div>
-                    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
-                        The following example demonstrates the use of this ${type}:<br>
-                    </div>
-                    ${example}
-                </div>
-            
-        ''');
-            
+<div>
+    <div class='cb_title'>Example:</div>
+    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
+    The following example demonstrates the use of this ${type}:<br>
+    </div>
+    ${example}
+</div>
+''');
+                                                                                                              
         example  = obj.example.get_parsed()
         language = obj.example.get_language()
-        
+
         if(self.m_show_code_headers["example"]):
             snippet_id = self.m_snippet_id
             self.m_snippet_id += 1
             code_header = self.m_template_code_header.substitute(
-                    {"id" : snippet_id,
-                     "style" : "margin-left:10px;margin-top:2px;"})
+                {"id" : snippet_id,
+                 "style" : "margin-left:10px;margin-top:2px;"})
             source = template_source.substitute({
-                "id":     snippet_id,
-                "source": self.format_source_code_no_lines(language, example)})
+                            "id":     snippet_id,
+                            "source": self.format_source_code_no_lines(language, example)})
         else:
             code_header = ""
             source = ""
-        
+                    
         example = self.format_source_code(language, example)
 
         code = template_code.substitute(
@@ -2110,7 +2125,7 @@ within an HTML document.
                     "result"   : ""})
 
         return template_example.substitute({"example" : code, "type" : obj.type})
-        
+                                                                                                                                                     
     
     # Called for format a structure for HTML output 
     def format_struct(self, tag):
@@ -2203,7 +2218,8 @@ within an HTML document.
                 if(struct.has_field_attributes()):
                     attrs = "<td>%s</td>" % field.attributes
 
-                html += "    <td>%s</td><td>%s</td><td>%s</td>%s" % (field.get_type(), field.get_name(), desc, attrs)
+                ftype = self.format_text(field.get_type())
+                html += "    <td>%s</td><td>%s</td><td>%s</td>%s" % (ftype, field.get_name(), desc, attrs)
             
             html += "</tr>\n"
 
@@ -2211,7 +2227,8 @@ within an HTML document.
         
         html += "</table><br/>"
 
-        html_example = self.format_object_example(struct)
+        html_example  = self.format_object_example(struct)
+        html_see_also = self.format_object_see_also(struct)
         
         xref = self.get_xref(struct.get_file(), struct.get_line())
 
@@ -2236,17 +2253,19 @@ within an HTML document.
         <div class='cb_title'>Fields:</div>
         <div style="margin:0px;">${values}</div>
         ${example}
+        ${see_also}
     </div>
 </div>
 </div><br/>''').substitute({
-    "style"  : style,
-    "xref"   : xref,
-    "img"    : img,
-    "label"  : label,
-    "name"   : struct.name,
-    "values" : html,
-    "example": html_example,
-    "desc"   : desc})
+    "style"    : style,
+    "xref"     : xref,
+    "img"      : img,
+    "label"    : label,
+    "name"     : struct.name,
+    "values"   : html,
+    "example"  : html_example,
+    "see_also" : html_see_also,
+    "desc"     : desc})
         
         return html
 

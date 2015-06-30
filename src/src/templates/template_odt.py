@@ -1789,7 +1789,8 @@ ${desc}
             if(field.get_is_spacer()):
                 xml += self.__format_table_cell({"span" : 3}, style, "default", "", frame_paragraph)
             else:
-                xml += self.__format_table_cell({"span" : 1}, style, "default", field.get_type(), frame_paragraph)
+                ftype = self.format_text(field.get_type())
+                xml += self.__format_table_cell({"span" : 1}, style, "default", ftype, frame_paragraph)
                 xml += self.__format_table_cell({"span" : 1}, style, "default", field.get_name(), frame_paragraph)
 
                 desc = self.format_textblock(field.get_description())

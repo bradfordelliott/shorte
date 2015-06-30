@@ -971,17 +971,19 @@ def STATUS(message):
     import inspect
     frame,filename,line_number,function_name,lines,index = inspect.stack()[1]
     message += " (%s:%s @ %d)" % (os.path.basename(filename), function_name, line_number) 
-    if(sys.platform == "win32"):
-        import console_utils as con
-        default_colors = con.get_text_attr()
-        con.set_text_attr(con.FOREGROUND_MAGENTA)
-        sys.stdout.write("STATUS: ")
-        con.set_text_attr(default_colors)
-        sys.stdout.flush()
-        sys.stdout.write("%s\n" % message)
-        sys.stdout.flush()
-    else:
-        print "\033[90mSTATUS:\033[0m %s" % message
+
+    if(g_verbose):
+        if(sys.platform == "win32"):
+            import console_utils as con
+            default_colors = con.get_text_attr()
+            con.set_text_attr(con.FOREGROUND_MAGENTA)
+            sys.stdout.write("STATUS: ")
+            con.set_text_attr(default_colors)
+            sys.stdout.flush()
+            sys.stdout.write("%s\n" % message)
+            sys.stdout.flush()
+        else:
+            print "\033[90mSTATUS:\033[0m %s" % message
 
     message = message.replace('\n', '<br/>')
     message = message.replace(' ', '&nbsp')

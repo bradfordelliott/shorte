@@ -1378,6 +1378,9 @@ a C/C++ like define that looks like:
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
                 enum.description = textblock_t(source)
+            elif(section.startswith("see:")):
+                see_also = section[4:len(section)].strip()
+                enum.set_see_also(see_also)
 
         return enum
     
@@ -1670,6 +1673,10 @@ a C/C++ like define that looks like:
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
                 struct_desc = source
+
+            elif(section.startswith("see:")):
+                see_also = section[4:len(section)].strip()
+                struct2.set_see_also(see_also)
 
             elif(section.startswith("fields:")):
                     
@@ -2283,7 +2290,6 @@ a C/C++ like define that looks like:
 
                 elif(section.startswith("see:")):
                     vars["see_also"] = section[4:len(section)].strip()
-
                     p2.set_see_also(vars["see_also"])
                 
                 elif(section.startswith("deprecated:")):

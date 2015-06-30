@@ -241,10 +241,10 @@ test_api_reference_quick:
 
 test_code_quick:
 	${python} shorte.py --ignore_errors -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html"
-	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "html"
-	${python} shorte.py --ignore_errors -f examples/test.h -t "${THEME}" -x cpp -o build-output/c_code_header -p "html"
-	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "shorte"
-	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x cpp -o build-output/c_code -p "txt"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x clang -o build-output/c_code -p "html"
+	${python} shorte.py --ignore_errors -f examples/test.h -t "${THEME}" -x clang -o build-output/c_code_header -p "html"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x clang -o build-output/c_code -p "shorte"
+	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x clang -o build-output/c_code -p "txt"
 
 test_code:
 	${python} shorte.py --ignore_errors -f examples/code.tpl -t "${THEME}" -o build-output/code.tpl -p "html+pdf"

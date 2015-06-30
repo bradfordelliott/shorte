@@ -40,7 +40,7 @@ public:
  *    tail.one = 0;
  * 
  */
-typedef struct handle_table_entry_tag
+typedef struct handle_table_entry_tag_s
 {
     /** This is a field */
     int one;
@@ -73,7 +73,7 @@ typedef enum
  *       printf("Found e_public_test");
  *   }
  */
-typedef enum
+typedef enum public_enum_s
 {
     /** This is a test */
     e_public_test = 0,
