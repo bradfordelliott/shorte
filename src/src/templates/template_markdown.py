@@ -4,12 +4,91 @@ import string
 from string import Template
 
 from src.shorte_defines import *
-from template import *
+from template_text import *
 
-class template_markdown_t(template_t):
+class template_markdown_t(template_text_t):
     def __init__(self, engine, indexer):
-        template_t.__init__(self, engine, indexer)
+        template_text_t.__init__(self, engine, indexer)
+
+        self.list_indent_per_level=2
         self.m_contents = ''
+    
+    
+    def parse_inline_styling(self, matches):
+        data = matches.groups()[0].strip()
+        #print "DATA: [%s]" % data
+        #print "data: %s" % data
+        parts = data.split(",")
+        if(len(parts) == 1):
+            tag = parts[0]
+            replace = tag
+        elif(len(parts) > 1):
+            tag = parts[0]
+            replace = ''.join(parts[1:])
+
+        replace = trim_leading_blank_lines(replace)
+        #print "TAG: %s, REPLACE: %s" % (tag,replace)
+        
+        if(-1 != tag.find("+")):
+            tags = tag.split("+")
+        else:
+            tags = [tag]
+
+        prefix = ''
+        postfix = ''
+
+        for tag in tags:
+            # Check if it's an inline styling block such as color
+            #   @{color:00ff00,my text here}
+            if(-1 != tag.find(":")):
+                parts = tag.split(":")
+                tag = parts[0].strip()
+                parts.pop(0)
+                qualifier = ":".join(parts)
+
+            if(tag in ("b", "bold")):
+                prefix = "**"
+                postfix = "**"
+            elif(tag in ("i", "italic")):
+                prefix = "*"
+                postfix = "*"
+
+                #, "pre", "u", "i", "color", "span", "cross", "strike", "hl", "hilite", "highlight", "done", "complete", "star", "starred")):
+                #pass
+            elif(tag == "strike"):
+                prefix = "~~"
+                postfix = "~~"
+
+            elif(tag == "br"):
+                postfix += "\n"
+            elif(tag in "table"):
+                table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['|','!'])
+                output = self.format_table(replace, table)
+                output = output.replace("\n", "<br/>")
+                output = output.replace(" ", "&nbsp;")
+                return output
+
+            ## Embed an inline note. This is useful when documenting
+            ## source code.
+            #elif(tag in ("note", "warning", "tbd", "question")):
+            #    # We've already converted breaks so we need to unconvert them
+            #    # to format the note properly.
+            #    replace = replace.replace("<br/>", "\n")
+            #    replace = replace.replace(" ", "&nbsp;")
+            #    textblock = textblock_t(replace)
+
+            #    if(tag == "note"):
+            #        label = "Note"
+            #    elif(tag == "warning"):
+            #        label = "Warning"
+            #    elif(tag == "tbd"):
+            #        label = "TBD"
+            #    elif(tag == "question"):
+            #        label = "Question"
+
+            #    return self.format_note(textblock, label)
+
+        return prefix + replace + postfix
     
     def format_text(self, data):
 
@@ -22,8 +101,8 @@ class template_markdown_t(template_t):
 
         # Convert any inline styling blocks
         # DEBUG BRAD: Disable inline styling for now
-        #expr = re.compile("@\{(.*?)\}", re.DOTALL)
-        #data = expr.sub(self.parse_inline_styling, data)
+        expr = re.compile("@\{(.*?)\}", re.DOTALL)
+        data = expr.sub(self.parse_inline_styling, data)
 
         # Collapse multiple spaces
         data = re.sub('\n+', "\n", data)
@@ -55,137 +134,106 @@ class template_markdown_t(template_t):
         #        output += '\n'
 
         return output
-
     
-    def format_list_child(self, elem, indent, ordered=False, start=0):
-        source = ''
+    def format_table(self, source, table):
 
-        if(ordered):
-            if(elem.children != None):
-                if(indent > 0):
-                    source += "%*s%s. %s\n" % (indent, " ", start, self.format_text(elem.text))
-                else:
-                    source += "%s. %s\n" % (start, self.format_text(elem.text))
+        html = '\n'
+        
+        #if(table.has_title()):
+        #    html += "Title: %s\n" % (table.get_title())
 
-                num_children = len(elem.children)
+        num_cols = table.get_max_cols()
+        col_widths = []
+
+        # First walk through the text and figure out the
+        # maximum width of each column
+        for i in range(0, num_cols):
+            col_widths.append(0)
+
+        max_width = 0
+        for row in table.get_rows():
+            j = 0;
+            for col in row["cols"]:
                 
-                is_num = False
-                is_char = False
+                if(len(col["text"]) > col_widths[j]):
+                    col_widths[j] = len(col["text"])
+                    max_width += col_widths[j]
+                j += 1
 
-                if(not ((indent/2) & 0x1)):
-                    start = ord("a")
-                    is_char = True
-                else:
-                    start = 1
-                    is_num = True
+        for row in table.get_rows():
 
-                for i in range(0, num_children):
-                    if(is_num):
-                        source += self.format_list_child(elem.children[i], indent+2, ordered, start)
+            is_header = row["is_header"]
+            is_subheader = row["is_subheader"]
+            is_reserved = row["is_reserved"]
+
+            if(row["is_caption"]):
+                #html += "      Caption: %s\n" % (row["cols"][0])
+                pass
+            else: 
+                col_num = 0
+
+                cells = []
+                for col in row["cols"]:
+
+                    txt = self.format_text(col["text"])
+                    txt = txt.replace("\n", " ")
+                    
+                    if(is_subheader):
+                        cells.append(("%-" + "%d" % (col_widths[col_num] + 3) + "s") % (txt))
                     else:
-                        source += self.format_list_child(elem.children[i], indent+2, ordered, chr(start))
-                    start += 1
-            else:
-                if(indent > 0):
-                    source += "%*s%s. %s\n" % (indent, " ", start, self.format_text(elem.text))
-                else:
-                    source += "%s. %s\n" % (start, self.format_text(elem.text))
-        else:
-            if(elem.children):
-                if(indent > 0):
-                    source += "%*s- %s\n" % (indent, " ", self.format_text(elem.text))
-                else:
-                    source += "- %s\n" % (self.format_text(elem.text))
+                        cells.append((" %-" + "%d" % (col_widths[col_num] + 2) + "s") % (txt))
 
-                num_children = len(elem.children)
-                for i in range(0, num_children):
-                    source += self.format_list_child(elem.children[i], indent+2)
-            else:
-                if(indent > 0):
-                    source += "%*s- %s\n" % (indent, " ", self.format_text(elem.text))
-                else:
-                    source += "- %s\n" % (self.format_text(elem.text))
+                html += " |".join(cells)
 
-        return source
-    
-    def format_list(self, list, ordered=False):
+                col_num += 1
 
-        source = "\n"
+                if(is_header):
+                    col_num = 0
+                    html += "\n"
 
-        start = 1
-        for elem in list:
-            source += self.format_list_child(elem, 0, ordered, start)
-            start += 1
+                    cells = []
+                    for col in row["cols"]:
+                        text = ""
+                        for k in range(0, col_widths[col_num] + 3):
+                            text += "-"
 
-        return source
+                        for p in range(0, col_num+1):
+                            text += "-"
 
-    def format_textblock(self, tag, prefix='', prefix_first_line=True, pad_textblock=False):
+                        col_num += 1
 
-        if(isinstance(tag, tag_t)):
-            textblock = tag.contents
-        else:
-            textblock = tag
+                        cells.append(text)
 
-        if(isinstance(textblock, textblock_t)):
-            paragraphs = textblock.paragraphs
-        else:
-            paragraphs = textblock
+                    html += "|".join(cells)
 
-        output = '\n'
 
-        for p in paragraphs:
-            text = p["text"]
-            is_code = p["code"]
-            is_list = p["list"]
+            html += "\n"
 
-            if(is_code):
-                lines = text.split("\n")
-                for line in lines:
-                    output += "    %s\n" % line
-            elif(is_list):
-                output += self.format_list(text)
-            else:
-                output += self.format_text(text)
+        #if("caption" in table):
+        #    html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
+        
+        return html
 
-        while(output.startswith("\n")):
-            output = output[1:]
-
-        while(output.endswith("\n")):
-            output = output[0:-1]
-
-        lines = output.split('\n')
-        output = ''
-        for i in range(0, len(lines)):
-            if(i == 0):
-                if(prefix_first_line):
-                    output += prefix + lines[i] + '\n'
-                else:
-                    output += lines[i] + '\n'
-            else:
-                output += prefix + lines[i] + '\n'
-
-        if(pad_textblock):
-            return "\n" + output + "\n"
-
-        return output
     def append_header(self, tag, file):
 
         data = self.format_text(tag.contents)
         tmp = ''
         (level,parent) = self.m_indexer.level(tag, data.strip(), file)
         
+        label = data.strip()
+
         if(tag.name == "h1"):
-            tmp = '''# %s\n''' % data.strip()
+            tmp = '''# %s\n''' % label
         elif(tag.name == "h2"):
-            tmp = '''## %s\n''' % data.strip()
+            tmp = '''## %s\n''' % label
         elif(tag.name == "h3"):
-            tmp = '''### %s\n''' % data.strip()
+            tmp = '''### %s\n''' % label
         elif(tag.name == "h4"):
-            tmp = '''#### %s\n''' % data.strip()
+            tmp = '''#### %s\n''' % label
         elif(tag.name == "h5"):
-            tmp = '''##### %s\n''' % data.strip()
+            tmp = '''##### %s\n''' % label
         elif(tag.name in ("h","h6")):
-            tmp = '''###### %s\n''' % data.strip()
+            tmp = '''###### %s\n''' % label
 
         self.m_contents += tmp
     
@@ -193,9 +241,11 @@ class template_markdown_t(template_t):
     def append_source_code(self, tag):
 
         self.m_contents += '''
+
 ```%s
 %s
 ```
+
 ''' % (tag.name, tag.source)
 
     
@@ -205,13 +255,15 @@ class template_markdown_t(template_t):
         if(name == "#"):
             return
         elif(name in "p"):
-            self.m_contents += self.format_text(tag.contents) + "\n"
+            self.m_contents += self.format_text(tag.contents) + "\n\n"
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
         elif(name == "ul"):
             self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
             self.m_contents += self.format_list(tag.contents, True)
+        elif(name == "table"):
+            self.m_contents += self.format_table(tag.source, tag.contents)
         else:
             WARNING("Unsupported tag %s" % name)
     
@@ -220,31 +272,38 @@ class template_markdown_t(template_t):
         return "%s.markdown.txt" % name
 
     def generate_index(self, title, theme, version):
-        cnts = '''
+        
+        cnts = ''
+
+        if("1" == shorte_get_config("markdown", "include_toc")):
+            cnts += '''
 # Table of Contents
 '''
+            for topic in self.m_indexer.m_topics:
+                name = topic.get_name()
+                indent = topic.get_indent()
+                file = os.path.basename(topic.get_file())
 
-        for topic in self.m_indexer.m_topics:
-            name = topic.get_name()
-            indent = topic.get_indent()
-            file = os.path.basename(topic.get_file())
+                if(True == self.m_inline):
+                    file = self.get_index_name()
 
-            if(True == self.m_inline):
-                file = self.get_index_name()
+                link = name.lower()
+                link = re.sub(" +", "-", link)
 
-            if(indent == 1):
-                cnts += "- %s\n" % (name)
-            elif(indent == 2):
-                cnts += "  - %s\n" % (name)
-            elif(indent == 3):
-                cnts += "    - %s\n" % (name)
-            elif(indent == 4):
-                cnts += "      - %s\n" % (name)
-            elif(indent == 5):
-                cnts += "        - %s\n" % (name)
+                if(indent == 1):
+                    cnts += "- [%s](#%s)\n" % (name,link)
+                elif(indent == 2):
+                    cnts += "  - [%s](#%s)\n" % (name,link)
+                elif(indent == 3):
+                    cnts += "    - [%s](#%s)\n" % (name,link)
+                elif(indent == 4):
+                    cnts += "      - [%s](#%s)\n" % (name,link)
+                elif(indent == 5):
+                    cnts += "        - [%s](#%s)\n" % (name,link)
 
-        if(True == self.m_inline):
-            cnts += "\n\n" + self.get_contents()
+            cnts += "\n\n"
+
+        cnts += self.get_contents()
         
         file = open(self.m_engine.m_output_directory + "/%s" % self.get_index_name(), "wt")
         file.write(cnts)

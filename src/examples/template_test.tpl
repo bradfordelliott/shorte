@@ -4,13 +4,24 @@
 
 @body
 @h1 Heading 1
+This is the first level heading
+
+A second paragraph
+
 @h2 Heading 2
+This is a second level heading
+
+Another paragraph
+
 @h3 Heading 3
+This is a third level heading
 
 @table: title="This is my title"
 - Heading 1     | Heading 2
 -s Subheading 1 | Subheading 2
 - Data 1        | Data 2
+- Data 3        | Data 4
+- Data 5        | Data 6
 
 @c
 This is a block of C code
@@ -22,7 +33,17 @@ This is a text block with a list in it
     - three
 -
 
-And this is some more text
+And this is another list with a checklist in it
+
+-[] one
+-[] two
+-    [x] three
+    - [ ] four
+    - [ ] five
+        - [x] six
+- seven
+
+This is some @{b,bold} text, some @{i,italic} text, and some @{strike,striked} text.
 
 @c
 int main(void)

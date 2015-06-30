@@ -401,6 +401,7 @@ test_template_word:
 
 test_templates:
 	${python} shorte.py -f examples/template_test.tpl -p "txt" -o build-output/template_tests/text
+	${python} shorte.py -f examples/template_test.tpl -p "markdown" -o build-output/template_tests/markdown
 	${python} shorte.py -f examples/template_test.tpl -p "word" -o build-output/template_tests/word
 	${python} shorte.py -f examples/template_test.tpl -p "odt" -o build-output/template_tests/odt
 	${python} shorte.py -f examples/template_test.tpl -p "mergefile" -o build-output/template_tests/mergefile
