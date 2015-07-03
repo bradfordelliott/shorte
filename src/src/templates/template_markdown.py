@@ -275,7 +275,7 @@ class template_markdown_t(template_text_t):
         
         cnts = ''
 
-        if("1" == shorte_get_config("markdown", "include_toc")):
+        if(True == to_boolean(shorte_get_config("markdown", "include_toc"))):
             cnts += '''
 # Table of Contents
 '''

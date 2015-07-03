@@ -125,6 +125,22 @@ Description:
         prototype = tag.contents
         return prototype.__str__()
 
+    def format_function_summary(self, tag):
+        tags = self.m_engine.get_function_summary(tag)
+
+        output =  "Function Summary\n"
+        output += "----------------\n"
+
+        for tag in tags:
+
+            function = tag.contents
+
+            output += "  %s\n" % function.get_name()
+
+        output += "\n"
+
+        return output
+
     def format_checklist(self, tag):
         
         list = tag.contents
@@ -778,7 +794,9 @@ ${fields}+----------------------------------------------------------------------
         #    self.m_contents += self.format_image(tag["contents"])
         elif(name == "prototype"):
             self.m_contents += self.format_prototype(tag)
-        elif(name in ("functionsummary", "typesummary")):
+        elif(name == "functionsummary"):
+            self.m_contents += self.format_function_summary(tag)
+        elif(name in ("typesummary")):
             WARNING("Unsupported tag %s" % name)
         elif(name in ("struct", "prototype")):
             WARNING("Unsupported tag %s" % name)
@@ -819,36 +837,38 @@ ${fields}+----------------------------------------------------------------------
         return "%s.txt" % name
 
     def generate_index(self, title, theme, version):
+
+        cnts = ''
         
-        cnts = '''
+        if(True == to_boolean(shorte_get_config("text", "include_toc"))):
+            cnts = '''
 Table of Contents
 =================
 '''
+            for topic in self.m_indexer.m_topics:
 
-        for topic in self.m_indexer.m_topics:
+                name = topic.m_vars["name"]
+                indent = topic.m_vars["indent"]
+                file = os.path.basename(topic.m_vars["file"])
 
-            name = topic.m_vars["name"]
-            indent = topic.m_vars["indent"]
-            file = os.path.basename(topic.m_vars["file"])
+                # If the HTML is being inlined then we need to
+                # make sure that all links point back to the
+                # main document.
+                if(self.m_inline == True):
+                    file = self.get_index_name()
+                
+                #print "indent = %s" % indent
 
-            # If the HTML is being inlined then we need to
-            # make sure that all links point back to the
-            # main document.
-            if(self.m_inline == True):
-                file = self.get_index_name()
-            
-            #print "indent = %s" % indent
-
-            if(indent == 1):
-                cnts += "  %s\n" % (name)
-            elif(indent == 2):
-                cnts += "    - %s\n" % (name)
-            elif(indent == 3):
-                cnts += "      - %s\n" % (name)
-            elif(indent == 4):
-                cnts += "        %s\n" % (name)
-            elif(indent == 5):
-                cnts += "          %s\n" % (name)
+                if(indent == 1):
+                    cnts += "  %s\n" % (name)
+                elif(indent == 2):
+                    cnts += "    - %s\n" % (name)
+                elif(indent == 3):
+                    cnts += "      - %s\n" % (name)
+                elif(indent == 4):
+                    cnts += "        %s\n" % (name)
+                elif(indent == 5):
+                    cnts += "          %s\n" % (name)
 
         # If we're inlining everything we need to store the
         # entire document in the index file

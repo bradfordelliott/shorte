@@ -151,13 +151,13 @@ if(options.server):
     shorte_server_start("127.0.0.1", int(options.server_port))
     sys.exit(0)
 
-args = ' '.join(sys.argv)
-print ""
-print "======================================================"
-print "Shorte:"
-print "  version: %s" % shorte_get_version()
-print "======================================================"
-STATUS("Command Line:\n  %s" % args)
+#args = ' '.join(sys.argv)
+#print ""
+#print "======================================================"
+#print "Shorte:"
+#print "  version: %s" % shorte_get_version()
+#print "======================================================"
+#STATUS("Command Line:\n  %s" % args)
 
 
 if(options.about):

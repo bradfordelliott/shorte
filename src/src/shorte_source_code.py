@@ -274,6 +274,8 @@ CALL CD CHDIR CLS COPY DEL DIR ECHO @ECHO EXIT FOR IF MD MKDIR
 MOVE RD RMDIR READLINE REN RENAME SET SETLOCAL SHIFT START TITLE
 '''
         }
+
+        keywords["cpp"] = keywords["c"]
        
         self.m_keywords = {}
 

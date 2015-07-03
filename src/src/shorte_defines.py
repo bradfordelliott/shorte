@@ -121,17 +121,18 @@ class tag_t:
     def get_name(self):
         return self.name
 
-    def __str__(self):
-        data = "Tag\n"
+    def __str__(self, short_form=False):
+        data = "Tag:\n"
         data += "  name %s\n" % self.name
         data += "  file %s\n" % self.file
         data += "  line %s\n" % self.line
         data += "  page %s\n" % self.page
-        data += "  source\n"
-        data += self.source
+        if(not short_form):
+            data += "  source\n"
+            data += self.source
 
-        if(self.has_modifiers()):
-            data += self.get_modifiers_as_string()
+            if(self.has_modifiers()):
+                data += self.get_modifiers_as_string()
 
         return data
 
@@ -293,6 +294,16 @@ class indexer_t:
 
         topics = []
         for topic in self.m_topics:
+            if(topic.name == data):
+                duplicate_headers = shorte_get_config("shorte", "duplicate_headers")
+                if(duplicate_headers == "error"):
+                    ERROR("A topic with the name '%s' already exists in %s on line %d.\n"
+                          "Change the shorte.duplicate_headers to change this behavior." % (data, tag.file, tag.line))
+                elif(duplicate_headers == "warn"):
+                    WARNING("A topic with the name '%s' already exists in %s on line %d.\n"
+                          "Change the shorte.duplicate_headers to change this behavior." % (data, tag.file, tag.line))
+
+
             topics.append(topic)
             
         if(tag.name == "h1"):
@@ -805,6 +816,27 @@ def unescape_string(source):
     source = source.replace("<br/>", '\n')
     return source
 
+def to_boolean(val):
+    if(isinstance(val, (str,unicode))):
+        val = val.lower()
+        if(val == "true"):
+            return True
+        elif(val == "false"):
+            return False
+        elif(val == "0"):
+            return False
+        elif(val == "1"):
+            return True
+        else:
+            FATAL("Unsupported values, cannot convert to boolean: %s" % val)
+    elif(isinstance(val,int)):
+        val = int(val)
+        if(val == 0):
+            return False
+        return True
+    return False
+
+
 g_config = None
 
 def shorte_get_config(section, key, expand_os=False):
@@ -935,7 +967,9 @@ def shorte_get_log_file():
     if(g_logfile == None):
         path = shorte_get_log_file_path()
         dirname = os.path.dirname(path)
-        if(not os.path.exists(dirname)):
+        if((0 != len(dirname)) and not os.path.exists(dirname)):
+            print "PATH: %s" % path
+            print "DIR:  %s" % dirname
             os.makedirs(dirname)
         g_logfile = open(path, "wt")
         g_logfile.write('''<html>

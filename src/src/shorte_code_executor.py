@@ -35,6 +35,7 @@ class code_executor_t:
         extension["python"] = "py"
         extension["java"] = "java"
         extension["c"] = "c"
+        extension["cpp"] = "cpp"
         extension["d"] = "d"
         extension["bash"] = "sh"
         extension["vera"] = "vr"
@@ -48,9 +49,9 @@ class code_executor_t:
 
     def create_source_file(self, language, path, source, prefix=""):
 
-        print("Creating %s, language=%s, source=%s" % (path, language, source))
+        #print("Creating %s, language=%s, source=%s" % (path, language, source))
         
-        if(language in ("python", "perl", "bash", "java", "c", "vera", "verilog", "tcl", "batch")):
+        if(language in ("python", "perl", "bash", "java", "c", "cpp", "vera", "verilog", "tcl", "batch")):
 
             handle = open(path, "wt")
 
@@ -109,7 +110,11 @@ class code_executor_t:
         # Create the temporary source file
         self.create_source_file(language, source_file, source)
 
-        if(language == "python"):
+        if(language in ("python", "perl", "tcl", "bash")):
+
+            if(language == "bash"):
+                if("Windows" == platform.system()):
+                    return (-1, "bash not currently supported under windows")
 
             if(machine != ""):
                 cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
@@ -122,7 +127,7 @@ class code_executor_t:
 
                 result = os.popen(cmd_run).read()
             else:
-                cmd_run = string.Template(shorte_get_config("python", "run", expand_os=True)).substitute({
+                cmd_run = string.Template(shorte_get_config(language, "run", expand_os=True)).substitute({
                     "source" : source_file})
 
                 cmd_run = cmd_run.split(' ')
@@ -134,53 +139,7 @@ class code_executor_t:
                 
                 #result = os.popen("%s %s 2>&1" % (g_tools.get_python(), source_file)).read();
         
-        elif(language == "tcl"):
-
-           if(machine != ""):
-               cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
-               #print cmd_copy
-               os.popen(cmd_copy)
-
-               #result = os.popen("%s tmpexample.py 2>&1" % python).read();
-               cmd_run = "ssh -p %s %s \"%s /tmp/%s 2>&1\"" % (port, machine, g_tools.get_tcl(), source_file)
-               #print cmd_run
-
-               result = os.popen(cmd_run).read()
-           else:
-               result = os.popen("%s %s 2>&1" % (g_tools.get_tcl(), source_file)).read();
-        
-        elif(language == "bash"):
-            
-            if("Windows" == platform.system()):
-                return (-1, "bash not currently supported under windows")
-
-            if(machine != ""):
-                cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
-                #print cmd_copy
-                os.popen(cmd_copy)
-
-                cmd_run = "ssh -p %s %s \"dos2unix /tmp/%s\"" % (port, machine, source_file)
-                result = os.popen(cmd_run).read()
-                
-                cmd_run = "ssh -p %s %s \". /tmp/%s 2>&1\"" % (port, machine, source_file)
-                result += os.popen(cmd_run).read()
-
-                # Cleanup any temporary files
-                os.popen("ssh -p %s %s \"rm -rf /tmp/%s\"" % (port, machine, source_file))
-
-            else:
-                cmd_run = string.Template(shorte_get_config("bash", "run", expand_os=True)).substitute({
-                    "source" : source_file})
-
-                cmd_run = cmd_run.split(" ")
-
-                phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                result = phandle.stdout.read()
-                result += phandle.stderr.read()
-                phandle.wait()
-                rc = phandle.returncode
-
-        elif(language == "c"):
+        elif(language in ("c", "cpp")):
            
             compiler = g_tools.get_c_compiler()
 
@@ -202,7 +161,7 @@ class code_executor_t:
 
             else:
                 #print os.getcwd()
-                cmd_compile = string.Template(shorte_get_config("c", "compile", expand_os=True)).substitute({
+                cmd_compile = string.Template(shorte_get_config(language, "compile", expand_os=True)).substitute({
                     "output" : "tmpexample3",
                     "source" : source_file})
 
@@ -278,8 +237,8 @@ class code_executor_t:
                     result += phandle.stderr.read()
                     phandle.wait()
                     rc = phandle.returncode
-                    phandle.close()
                 except:
+                    #print sys.exc_info()
                     result = "Failed running java compiler"
                     rc = -1
 
@@ -301,13 +260,6 @@ class code_executor_t:
                 #result = os.popen("%stmpexample 2>&1" % exec_prefix).read();
                 #print "result = %s" % result
        
-        elif(language == "perl"):
-
-            # Run the perl interpreter to get an answer
-            cmd_run = "%s %s 2>&1" % (g_tools.get_perl(), source_file)
-            #print cmd_run
-            result = os.popen(cmd_run).read();
-        
         elif(language == "d"):
             # Run the python interpreter to get an answer
             tmp = open("tmpexample.d", "w")

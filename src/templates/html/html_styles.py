@@ -2,6 +2,44 @@ import string
 
 import templates.themes
 
+template_code_header = string.Template(
+"""
+<div class='code_header' style='width:80%;$style;'>
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_$id');display_code(e.innerHTML);">View Source</span> |
+<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_$id').innerHTML);">Print</span>
+</div>
+""")
+
+template_source = string.Template(
+"""
+<div class='source' id="snippet_$id">
+$source
+</div>
+""")
+
+template_code_result = string.Template(
+"""
+    <br/>
+    <div class='code_result'>Result:</div>
+    <div class='code'>
+        $result
+    </div>
+    <br/>
+""")
+
+# This template is used to display errors to the user
+# when a source code block was excuted and returned
+# a failure code.
+template_code_result_error = string.Template(
+'''
+    <br/>
+    <div class='code_result'><img style='height:35px;margin-left:-20px;margin-top:0px;' src="${image}"></img>Result (Failed, rc=${rc}):</div>
+    <div class='code' style='border:3px solid red;'>
+        $result
+    </div>
+    <br/>
+''')
+
 class html_styles():
     def __init__(self, theme="shorte"):
         
@@ -266,6 +304,20 @@ div.gallery
       -moz-border-radius: 15px;
       border:4px solid #dfd3b3;
       background:#f5f4e5;
+  }
+        
+  /* The tooltip popup */
+  #dhtmltooltip
+  {
+      position: absolute;
+      width: 450px;
+      border: 3px solid #807B60; 
+      padding: 5px;
+      background-color: #E8DFAC;
+      visibility: hidden;
+      z-index: 200;
+      border-radius: 7px;
+      -moz-border-radius: 7px;
   }
   
   font.hilite

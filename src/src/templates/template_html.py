@@ -26,61 +26,7 @@ import base64
 from src.shorte_defines import *
 from template import *
 from src.shorte_source_code import *
-
-template_html_tooltips = '''
-    <style>
-        #dhtmltooltip
-        {
-         position: absolute;
-         width: 450px;
-         border: 3px solid #807B60; 
-         padding: 5px;
-         background-color: #E8DFAC;
-         visibility: hidden;
-         z-index: 200;
-         border-radius: 7px;
-         -moz-border-radius: 7px;
-        }
-    </style>
-'''
-
-template_code_header = string.Template(
-"""
-<div class='code_header' style='width:80%;$style;'>
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="e=document.getElementById('snippet_$id');display_code(e.innerHTML);">View Source</span> |
-<span style='text-decoration:none;color:#ccc;' onmouseover="this.style.color='#0000ff';" onmouseout="this.style.color='#ccc';" onclick="print_code(document.getElementById('snippet_$id').innerHTML);">Print</span>
-</div>
-""")
-
-template_source = string.Template(
-"""
-<div class='source' id="snippet_$id">
-$source
-</div>
-""")
-
-template_code_result = string.Template(
-"""
-    <br/>
-    <div class='code_result'>Result:</div>
-    <div class='code'>
-        $result
-    </div>
-    <br/>
-""")
-
-# This template is used to display errors to the user
-# when a source code block was excuted and returned
-# a failure code.
-template_code_result_error = string.Template(
-'''
-    <br/>
-    <div class='code_result'><img style='height:35px;margin-left:-20px;margin-top:0px;' src="${image}"></img>Result (Failed, rc=${rc}):</div>
-    <div class='code' style='border:3px solid red;'>
-        $result
-    </div>
-    <br/>
-''')
+import templates.html.html_styles as html_styles
 
 template_code = string.Template(
 """
@@ -341,7 +287,7 @@ class template_html_t(template_t):
 
         self.m_snippet_id = 1
 
-        self.m_template_code_header = template_code_header
+        self.m_template_code_header = html_styles.template_code_header
 
         self.m_allow_xrefs = True
         self.m_xrefs = []
@@ -744,7 +690,7 @@ class template_html_t(template_t):
             html += "<div style='clear:both;'></div>"
             html += "</div>"
         else:
-            html = "<div class='snippet' style='white-space:pre;'>" + output + "</div>"
+            html = "<div class='snippet' style='white-space:pre-wrap;'>" + output + "</div>"
         
         return html
     
@@ -1217,7 +1163,7 @@ class template_html_t(template_t):
                 code_header = self.m_template_code_header.substitute(
                         {"id" : snippet_id,
                          "style" : "margin-left:10px;margin-top:2px;background-color:transparent;"})
-                source = template_source.substitute({
+                source = html_styles.template_source.substitute({
                     "id":     snippet_id,
                     "source": self.format_source_code_no_lines(language, example)})
 
@@ -1290,7 +1236,7 @@ class template_html_t(template_t):
                 code_header = self.m_template_code_header.substitute(
                         {"id" : snippet_id,
                          "style" : "margin-left:10px;margin-top:2px;"})
-                source = template_source.substitute({"id": snippet_id, "source": self.format_source_code_no_lines(language, pseudocode)})
+                source = html_styles.template_source.substitute({"id": snippet_id, "source": self.format_source_code_no_lines(language, pseudocode)})
             else:
                 code_header = ""
                 source = ""
@@ -2108,7 +2054,7 @@ within an HTML document.
             code_header = self.m_template_code_header.substitute(
                 {"id" : snippet_id,
                  "style" : "margin-left:10px;margin-top:2px;"})
-            source = template_source.substitute({
+            source = html_styles.template_source.substitute({
                             "id":     snippet_id,
                             "source": self.format_source_code_no_lines(language, example)})
         else:
@@ -3175,14 +3121,14 @@ $href_end
             #tags = parser.parse_source_code(tag.name, result)
             #result = self.format_source_code(tag.name, tags)
             if(tag.rc == 0):
-                result = template_code_result.substitute({"result": result})
+                result = html_styles.template_code_result.substitute({"result": result})
             else:
                 img_src = self.insert_image("icon_error_50x50.png")
-                result = template_code_result_error.substitute({"result": result, "rc" : tag.rc, "image" : img_src})
+                result = html_styles.template_code_result_error.substitute({"result": result, "rc" : tag.rc, "image" : img_src})
 
             #snippet_id = self.m_snippet_id
             #self.m_snippet_id += 1
-            #result = template_source.substitute({"id": snippet_id, "source": result})
+            #result = html_styles.template_source.substitute({"id": snippet_id, "source": result})
         else:
             result = ""
 
@@ -3198,7 +3144,7 @@ $href_end
             tmp = xmlize(tag.source)
             tmp = nl.sub("<br/>",tmp) 
             tmp = ws.sub("&nbsp;", tmp)
-            source = template_source.substitute({"id": snippet_id, "source": tmp})
+            source = html_styles.template_source.substitute({"id": snippet_id, "source": tmp})
         else:
             code_header = ""
             source = ""
@@ -3379,7 +3325,7 @@ $href_end
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
-        vars["html_tooltips"] = template_html_tooltips
+        vars["html_tooltips"] = ""
 
 
         if(self.m_engine.get_config("html", "include_javascript") == "1"):
@@ -3547,7 +3493,7 @@ $href_end
              "link_index_framed" : "index_framed.html",
              "link_legal" : "content/legal.html",
              "link_revisions" : "content/revisions.html",
-             "html_tooltips" : template_html_tooltips
+             "html_tooltips" : ""
              })
         
         if(as_string):
@@ -3737,7 +3683,7 @@ $href_end
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "../legal.html"
         vars["link_revisions"] = "../revisions.html"
-        vars["html_tooltips"] = template_html_tooltips
+        vars["html_tooltips"] = ""
         vars["subtitle"] = ""
 
         html = template.substitute(vars)

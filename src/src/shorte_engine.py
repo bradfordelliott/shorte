@@ -865,12 +865,47 @@ class engine_t:
         output = []
 
         keys = options.info
+        keys = keys.split(";")
 
         # Print the list of defines passed to the engine
         if("defines" in keys):
             defines = self.get_macros()
             for define in defines:
-                print "%s = %s" % (define, defines[define])
+                output.append("%s = %s" % (define, defines[define]))
+
+        # Print the list of tags encountered by the parser
+        if("tags" in keys):
+            output.append("Tag Data")
+            output.append("----------------------")
+            pages = self.m_parser.get_pages()
+            for page in pages:
+                tags = page["tags"]
+                for tag in tags:
+                    output.append(indent_lines(tag.__str__(short_form=True), "    ")) 
+            output.append("\n\n")
+
+        # Print the list of tags as HTML
+        if("tags2html" in keys):
+            output.append('''<html>
+<head>
+  <style>
+    table{border-collapse:collapse;}
+    th{border:1px solid black;background-color:#ccc;font-weight:bold;}
+    td{border:1px solid black;}
+  </style>
+</head>
+<body>
+<table>
+  <tr><th>Tag</th><th>File</th><th>Line</th><th>Source</th></tr>
+''')
+            pages = self.m_parser.get_pages()
+            for page in pages:
+                tags = page["tags"]
+                for tag in tags:
+                    tdata = "<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td></tr>" % (tag.name, tag.file, tag.line, tag.source)
+                    output.append(tdata)
+
+            output.append("</table></body></html>")
 
         if("c2html" in keys):
             path_input = options.files
@@ -952,9 +987,13 @@ class engine_t:
 
                         source = template.replace("$1", data)
 
+                    ignore_errors = False
+                    if(tag.modifiers.has_key("ignore_errors")):
+                        ignore_errors = to_boolean(tag.modifiers["ignore_errors"])
+
                     executor = code_executor_t()
                     (tag.rc, tag.result) = executor.execute(tag.name, source, tag.modifiers)
-                    if(tag.rc != 0):
+                    if((not ignore_errors) and (tag.rc != 0)):
                         ERROR("Failed executing code snippet in %s @ line %d\n%s" % (tag.file, tag.line, indent_lines(source, "    ")))
 
                     code = self.m_source_code_analyzer
