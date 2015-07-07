@@ -211,8 +211,13 @@ test_hello_quick:
 	${python} shorte.py -f examples/hello.tpl -p "html" -t "${THEME}" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
+html_pdf=html+pdf
+ifneq ("${QUICK}","")
+    html_pdf=html
+endif
+
 test_headings:
-	${python} shorte.py -f examples/headings.tpl -t "${THEME}" -p "html+pdf" -o build-output/headings
+	${python} shorte.py -f examples/headings.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/headings
 
 test_comments:
 	${python} shorte.py -f examples/comments.tpl -t "${THEME}" -p "html+pdf" -o build-output/comments
@@ -254,6 +259,10 @@ test_code:
 	${python} shorte.py --ignore_errors -f examples/test.c -t "${THEME}" -x clang -o build-output/c_code -p "shorte"
     # DEBUG BRAD: This target is currently failing. Not sure how easy it will be to fix.
 	${python} shorte.py --ignore_errors -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code_error -p "html+pdf"
+
+test_long_prototype:
+	${python} shorte.py -f examples/long_prototype.h -xclang -t "${THEME}" -o build-output/long_prototypes -p "html+pdf"
+
 
 test_code_execution:
 	${python} shorte.py -f examples/test_code_execution.tpl --ignore_errors -t "${THEME}" -o build-output/test_code_execution -p "html+pdf"
