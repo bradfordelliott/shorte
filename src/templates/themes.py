@@ -45,6 +45,8 @@ class theme():
         # Code Bocks
         self.colors["shorte"]["codeblock.section"] = color(fg="#8ba327")
 
+        self.colors["unstyled"] = self.colors["shorte"]
+
 
         dir_templates = shorte_get_startup_path() + os.path.sep + "templates"
         templates = os.listdir(dir_templates)

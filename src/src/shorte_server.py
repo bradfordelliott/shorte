@@ -57,44 +57,49 @@ def parse(contents, package, theme, settings, zip_output):
                
                 g_shorte.set_config(sect, key, val)
 
-    g_shorte.set_output_directory(output_dir)
-    g_shorte.parse_string(contents)
-    
-    g_shorte.set_package(package)
+    try:
+        g_shorte.set_output_directory(output_dir)
+        g_shorte.parse_string(contents)
+        
+        g_shorte.set_package(package)
 
-    info = {}
+        info = {}
 
-    if(zip_output != ""):
-        g_shorte.generate_packages(package, theme, None, "test.zip")
+        if(zip_output != ""):
+            g_shorte.generate_packages(package, theme, None, "test.zip")
 
-        info["type"] = "zip"
-        content = "TBD"
-        handle = open("test.zip", "rb")
-        content = handle.read()
-        handle.close()
-        content = base64.encodestring(content)
-    else:
-        indexer = indexer_t()
-
-
-        if(package == "html_inline"):
-            info["type"] = "text"
-            g_shorte.set_theme(theme)
-            template = template_html_t(g_shorte, indexer)
-            template.m_inline = True
-            template.set_template_dir(package)
-            g_shorte.set_template(template)
-            template.m_include_pdf = False
-            content = g_shorte.generate_string(package)
-        elif(package in ("odt","pdf")):
-            info["type"] = "base64"
-            g_shorte.set_theme(theme)
-            template = template_odt_t(g_shorte, indexer)
-            g_shorte.set_template(template)
-            content = g_shorte.generate_string(package)
+            info["type"] = "zip"
+            content = "TBD"
+            handle = open("test.zip", "rb")
+            content = handle.read()
+            handle.close()
+            content = base64.encodestring(content)
         else:
-            info["type"] = "text"
-            content = "???"
+            indexer = indexer_t()
+
+            if(package == "html_inline"):
+                info["type"] = "text"
+                g_shorte.set_theme(theme)
+                template = template_html_t(g_shorte, indexer)
+                template.m_inline = True
+                template.set_template_dir(package)
+                g_shorte.set_template(template)
+                template.m_include_pdf = False
+                content = g_shorte.generate_string(package)
+            elif(package in ("odt","pdf")):
+                info["type"] = "base64"
+                g_shorte.set_theme(theme)
+                template = template_odt_t(g_shorte, indexer)
+                g_shorte.set_template(template)
+                content = g_shorte.generate_string(package)
+            else:
+                info["type"] = "text"
+                content = "???"
+
+    except Exception as e:
+        content = "Caught an exception parsing the input"
+        ERROR("Caught an exception parsing the input")
+        content = e.__str__()
 
     # Reset the engine to process the next request
     g_shorte.reset()

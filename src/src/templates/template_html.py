@@ -3030,11 +3030,14 @@ $href_end
         data = self.format_text(data, False)
 
         (level,parent) = self.m_indexer.level(tag, data.strip(), file)
-        nav_up = "<a href='#' title='#' class='nav_up'>&#9650;</a>"
+        
+        nav_up = ''
+        if(True == to_boolean(shorte_get_config("html", "show_header_nav_icons"))):
+            nav_up = "<a href='#' title='#' class='nav_up'>&#9650;</a>"
 
-        if(parent != None):
-            link = '%s#%s' % (parent.file, parent.name)
-            nav_up = "<a href='%s' title='%s' class='nav_up'>&#9650;</a>" % (link, link)
+            if(parent != None):
+                link = '%s#%s' % (parent.file, parent.name)
+                nav_up = "<a href='%s' title='%s' class='nav_up'>&#9650;</a>" % (link, link)
 
         if(self.m_engine.get_config("html", "header_numbers") == "1"):
             if(tag.name == "h1"):

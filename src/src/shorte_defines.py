@@ -968,8 +968,6 @@ def shorte_get_log_file():
         path = shorte_get_log_file_path()
         dirname = os.path.dirname(path)
         if((0 != len(dirname)) and not os.path.exists(dirname)):
-            print "PATH: %s" % path
-            print "DIR:  %s" % dirname
             os.makedirs(dirname)
         g_logfile = open(path, "wt")
         g_logfile.write('''<html>
@@ -1081,7 +1079,7 @@ def ERROR(message):
         import console_utils as con
         default_colors = con.get_text_attr()
         con.set_text_attr(con.FOREGROUND_RED)
-        sys.stdout.write("WARNING: ")
+        sys.stdout.write("ERROR: ")
         con.set_text_attr(default_colors)
         sys.stdout.flush()
         sys.stdout.write("%s\n" % message)
@@ -1107,7 +1105,7 @@ def FATAL(message):
         import console_utils as con
         default_colors = con.get_text_attr()
         con.set_text_attr(con.FOREGROUND_RED)
-        sys.stdout.write("WARNING: ")
+        sys.stdout.write("FATAL: ")
         con.set_text_attr(default_colors)
         sys.stdout.flush()
         sys.stdout.write("%s\n" % message)
@@ -1663,3 +1661,42 @@ class textblock_t:
         
         self.paragraphs = paragraphs
         return paragraphs
+
+def shorte_get_os():
+    import platform
+    osname = platform.system().lower()
+
+    if("windows" == osname):
+        return "win32"
+    elif("cygwin" in osname):
+        return "cygwin"
+    elif("darwin" in osname):
+        return "osx"
+    return "unix"
+
+def shorte_import_cairo():
+    osname = shorte_get_os()
+
+    try:
+        sys.path.append('.')
+        sys.path.append('../..')
+        sys.path.append('../../..')
+        if("win32" == osname):
+            sys.path.append("libs/win32")
+            import libs.win32.cairo_access as cairo_access
+        elif("cygwin" == osname):
+            sys.path.append("libs/cygwin")
+            import libs.cygwin.cairo_access as cairo_access
+        elif("osx" == osname):
+            sys.path.append("libs/osx")
+            import libs.osx.cairo_access as cairo_access
+        elif("unix" == osname):
+            sys.path.append("libs/unix")
+            import libs.unix.cairo_access as cairo_access
+
+    except: 
+        print sys.exc_info()
+        FATAL("ERROR: Failed importing cairo, try running make cairo_plugin to generate it")
+
+
+

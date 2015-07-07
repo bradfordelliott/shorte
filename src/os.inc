@@ -26,6 +26,14 @@ ifeq ("$(uname)", "CYGWIN_NT-6.1")
     libdir     := libs/cygwin
 endif
 
+ifeq ("$(uname)", "CYGWIN_NT-6.1-WOW")
+	cairo_path := libs/cygwin
+    echo       := echo
+	mkdir      := mkdir
+	archive    := tar -czf shorte.${version}.tar.gz *
+    libdir     := libs/cygwin
+endif
+
 ifeq ("$(uname)","CYGWIN_NT-6.3")
 	cairo_path := libs/cygwin
     echo       := echo

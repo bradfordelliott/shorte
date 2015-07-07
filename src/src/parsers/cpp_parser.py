@@ -26,11 +26,6 @@ import time
 
 from src.shorte_source_code import *
 
-try:
-    from libs.cairo_access import cairo
-except:
-    WARNING("Failed to load cairo_access library")
-    
 from libs.records import *
 
 

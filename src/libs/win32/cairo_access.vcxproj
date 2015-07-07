@@ -95,7 +95,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PreBuildEvent>
-      <Command>%PATH_SWIG% -c++ -Isrc -includeall -python ../cairo_access.i</Command>
+      <Command>%PATH_SWIG% -c++ -Isrc -includeall -python cairo_access.i</Command>
     </PreBuildEvent>
     <PostBuildEvent>
       <Command>
@@ -103,10 +103,10 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\cairo_access_wrap.cxx" />
+    <ClCompile Include="cairo_access_wrap.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\cairo_access.i" />
+    <None Include="cairo_access.i" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

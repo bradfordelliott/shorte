@@ -5,8 +5,11 @@ import shutil
 import os
 sys.path.append('.')
 sys.path.append('../..')
-import libs.cairo_access
-from libs.cairo_access import *
+
+from src.shorte_defines import *
+shorte_import_cairo()
+from cairo_access import *
+
 import math
 
 

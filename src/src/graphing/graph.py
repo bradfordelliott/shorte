@@ -1,13 +1,11 @@
 #!/usr/bin/python
 import sys
 import re
+from src.shorte_defines import *
 
-try:
-    import libs.cairo_access as cairo_access
-    from libs.cairo_access import *
-except:
-    print "\nERROR: Failed importing cairo, try running make cairo_plugin to generate it\n" 
-    sys.exit(-1)
+shorte_import_cairo()
+import cairo_access
+from cairo_access import *
 
 import math
 

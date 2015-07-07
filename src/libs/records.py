@@ -18,12 +18,10 @@ import re
 import string
 from string import Template
 
-try:
-    from cairo_access import *
-except:
-    print "WARNING: Failed to load cairo_access library"
-
 from src.shorte_defines import *
+shorte_import_cairo()
+import cairo_access
+from cairo_access import *
 
 # Field attributes
 NAME   = "name"

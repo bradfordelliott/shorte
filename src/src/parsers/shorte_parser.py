@@ -33,13 +33,6 @@ from src.templates.template_shorte import template_shorte_t
 import src.graphing.sequence_diagram as sequence_diagram
 import src.shorte_defines
 
-g_cairo_loaded = False
-try:
-    from libs.cairo_access import cairo
-    g_cairo_loaded = True
-except:
-    WARNING("Failed to load cairo_access library")
-        
 from libs.records import *
 
 #class cell_t():

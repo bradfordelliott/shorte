@@ -15,16 +15,16 @@ cairodir:= /usr/include/cairo
 extension:=.dll
 
 python:
-	$(swig) -c++ -python ../cairo_access.i 
+	cp ../cairo_access.i .
+	$(swig) -c++ -python cairo_access.i 
 	$(CXX) -o _cairo_access${extension} \
-		../cairo_access_wrap.cxx \
+		cairo_access_wrap.cxx \
         `$(pyconfig) --cflags` \
 		-DHAVE_CONFIG_H -DHAS_CAIRO \
 		-I${cairodir} \
         `$(pyconfig) --ldflags` \
 		-shared -Wall -fPIC \
 		-lstdc++ -lcairo
-	cp _cairo_access${extension} ..
 
 clean:
 	rm -rf sample

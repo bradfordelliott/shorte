@@ -3,10 +3,10 @@ import inspect
 import re
 import traceback
 
+
 from src.shorte_defines import *
 from src.shorte_source_code import *
 from src.parsers.shorte_parser import *
-
 
 import platform
 osname = platform.system().lower()
@@ -18,14 +18,17 @@ else:
     #print "OSNAME: %s" % osname
     if(osname == "darwin"):
         osname = "osx"
+    elif("cygwin" in osname):
+        osname = "cygwin"
     clang_path = os.path.normpath(shorte_get_startup_path() + '/3rdparty/clang/%s' % osname)
+
     sys.path.insert(0, clang_path)
-    import clang.cindex
     #WARNING("CLANG FILE:")
     #print clang.__file__
     #WARNING("CLANG_PATH: %s" % clang_path)
+    import clang.cindex
     clang.cindex.Config.set_library_path(clang_path)
-    
+
 def get_rtokens(tu, extent):
     '''Helper method to return all tokens in an extent. This method could be
        moved to cindex.py if it is useful to other users. It is similar to the
@@ -131,12 +134,21 @@ class clang_parser_t(shorte_parser_t):
         self.m_file_src = ""
         self.m_source_file = None
 
-        self.cindex = clang.cindex.Index.create()
+        # Newer versions of clang seem to fail if you create
+        # cindex but don't actually call parse(). To avoid
+	    # this issue we'll only create the cindex object
+        # if we're actually parsing something.
+        self.cindex = None
+        self.tu = None
 
         self.processed = []
 
         self.m_types = {}
-        pass
+
+    def __del__(self):
+        print "delete clang_parser_t"
+        del self.tu
+        #del self.cindex
 
     def object_register(self, name, object):
         self.m_types[name] = True
@@ -378,11 +390,11 @@ class clang_parser_t(shorte_parser_t):
 
     def query_comment_before(self, start, end):
 
-        extent = self.m_tu.get_extent(self.m_source_file, (start, end))
+        extent = self.tu.get_extent(self.m_source_file, (start, end))
 
         # DEBUG BRAD: This appears to be off by 1 token. It is getting a token
         #             that it shouldn't. Not sure why that is.
-        tokens = clang.cindex.TokenGroup.get_tokens(self.m_tu, extent)
+        tokens = clang.cindex.TokenGroup.get_tokens(self.tu, extent)
         
         #print "CODE: [%s]" % self.m_file_src[start_location-50:start_location]
         #for token in tokens:
@@ -431,13 +443,13 @@ class clang_parser_t(shorte_parser_t):
             end_location = cursor.extent.end.offset + 1
             # DEBUG BRAD: Pass start_location-2 in order to get the #define
             #             before the actual definition.
-            extent = self.m_tu.get_extent(self.m_source_file, (0, start_location-2))
+            extent = self.tu.get_extent(self.m_source_file, (0, start_location-2))
         
             # Get the tokens related to the #define in reverse order
             try:
-                items = get_rtokens(self.m_tu, extent)
+                items = get_rtokens(self.tu, extent)
             except:
-                tokens = clang.cindex.TokenGroup.get_tokens(self.m_tu, extent)
+                tokens = clang.cindex.TokenGroup.get_tokens(self.tu, extent)
                 # DEBUG BRAD: This is painfully slow!!!
                 items = reversed(list(tokens))
 
@@ -522,26 +534,48 @@ class clang_parser_t(shorte_parser_t):
         #WARNING("ARGS")
         #print ' '.join(args)
 
+
         STATUS("Parsing %s with clang: args=%s" % (source_file, " ".join(args)))
 
+        
         #args = ['-DCS_LITTLE_ENDIAN', '-Imodules', '-Iplatform']
+
+        if(self.cindex == None):
+            self.cindex = clang.cindex.Index.create()
+
         tu = self.cindex.parse(source_file, args=args, options=options)
+        self.tu = tu
 
         for diag in tu.diagnostics:
             if(diag.severity >= 3):
                 msg =  "CLANG Parser Error:\n"
                 msg += "  severity: %d\n" % diag.severity
-                msg += "  location: %s @ %d\n" % (diag.location.file, diag.location.line)
+                filename = diag.location.file
+                if(filename == None):
+                    filename = source_file
+                msg += "  location: %s @ %d\n" % (filename, diag.location.line)
                 msg += "  message:  %s\n" % diag.spelling
                 #print diag.severity
                 #print diag.location
                 #print diag.spelling
-                ERROR(msg)
+                parser_errors = shorte_get_config("clang", "parser_errors")
+                if("warn" == parser_errors):
+                    WARNING(msg)
+                elif("error" == parser_errors):
+                    ERROR(msg)
+                elif("fatal" == parser_errors):
+                    FATAL(msg)
+                else:
+                    FATAL("Invalid setting of clang.parser_errors in config file: [%s]" % parser_errors)
             elif(diag.severity == 2):
                 message  = "CLANG Parser Warning\n"
                 message += "  severity: %d\n" % diag.severity
-                message += "  location: %s @ %d\n" % (diag.location.file, diag.location.line)
+                filename = diag.location.file
+                if(filename == None):
+                    filename = source_file
+                message += "  location: %s @ %d\n" % (filename, diag.location.line)
                 message += "  message:  %s\n" % diag.spelling
+                message += "  source_file: %s" % source_file
                 WARNING(message)
         #tu = self.cindex.parse(source_file, args=args)
         
@@ -560,6 +594,10 @@ class clang_parser_t(shorte_parser_t):
         typedefs2 = {}
         for cursor in top.get_children():
             if(cursor.kind == clang.cindex.CursorKind.TYPEDEF_DECL):
+                #print dir(cursor)
+                #print "DISPLAYNAME: %s" % cursor.displayname
+                #print "TYPEDEF:     %s" % cursor.underlying_typedef_type.spelling
+                #print "SPELLING:    %s" % cursor.spelling
                 typedef = cursor.type.spelling
                 typename = cursor.underlying_typedef_type.spelling
 
@@ -576,7 +614,6 @@ class clang_parser_t(shorte_parser_t):
                 if(not typedefs2.has_key(typename)):
                     typedefs2[typename] = []
                 typedefs2[typename].append(typedef)
-
         add_header = shorte_get_config("shorte", "header_add_to_prototype")
 
         for cursor in top.get_children():
@@ -621,7 +658,7 @@ class clang_parser_t(shorte_parser_t):
                         #"access: %d" % access_spec
                 except:
                     WARNING("This version of clang is too old, can't get access specifiers")
-
+            
                 if cursor.kind in (clang.cindex.CursorKind.ENUM_DECL,
                                    clang.cindex.CursorKind.FUNCTION_DECL,
                                    clang.cindex.CursorKind.STRUCT_DECL,
@@ -1152,7 +1189,6 @@ class clang_parser_t(shorte_parser_t):
             FATAL("%s does not look like a C/C++ file, please specify the correct parser" % source_file)
 
         tu = self.load_source_file(source_file)
-        self.m_tu = tu
         self.m_source_file = source_file
 
         self.page = {}
@@ -1162,6 +1198,7 @@ class clang_parser_t(shorte_parser_t):
         self.page["links"] = []
         self.page["file_brief"] = self.m_file_brief
         self.page["file_author"] = self.m_author
+        
 
         # Step through all the tags searching for the file brief
         for x in tu.cursor.get_tokens():
@@ -1169,10 +1206,12 @@ class clang_parser_t(shorte_parser_t):
                 text = x.spelling
                 if("@file" in text):
                     self.parse_file_brief(text)
-
-        self.parse_buffer_impl(self.page, source_file, tu.cursor, tu)
         
 
+        self.parse_buffer_impl(self.page, source_file, tu.cursor, tu)
+
+        #tu.__del__()
+        
         auto_summary = self.m_engine.get_config("shorte", "auto_summarize")
         if("1" == auto_summary): 
             idx = 0
@@ -1210,5 +1249,4 @@ The following section describes the methods and structures exported by this modu
     def parse(self, source_file):
 
         self.parse_buffer(None, source_file)
-    
 
