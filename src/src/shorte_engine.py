@@ -873,6 +873,29 @@ class engine_t:
             for define in defines:
                 output.append("%s = %s" % (define, defines[define]))
 
+        if("gcc" in keys):
+            if("cygwin" in platform.system().lower()):
+                import subprocess
+                import re
+                phandle = subprocess.Popen(["/usr/bin/gcc", "--version"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                rc = phandle.returncode
+
+                matches = re.search("\(GCC\) ([0-9.]+)", result)
+                gcc_version = ""
+                if(matches != None):
+                    gcc_version = matches.groups()[0].strip()
+                else:
+                    FATAL("Failed finding GCC version")
+
+                gcc_includes = "/usr/lib/gcc/%s-pc-cygwin/%s/include" % (platform.machine(), gcc_version)
+                print "GCC"
+                print "  version:    %s"  % gcc_version
+                print "  includes:   %s" % gcc_includes
+                print "  clang args: -xc -I%s" % gcc_includes
+
         # Print the list of tags encountered by the parser
         if("tags" in keys):
             output.append("Tag Data")
@@ -1188,6 +1211,8 @@ def exists(s):
             handle.close()
         
         else:
+            if(files == None):
+                return
             files = files.split(" ")
             for file in files:
                 rgx = re.compile("(\.tpl|\.txt|\.ste)")
