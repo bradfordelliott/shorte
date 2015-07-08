@@ -272,6 +272,15 @@ call cd chdir cls copy del dir echo @echo exit for if md mkdir
 move rd rmdir readline ren rename set setlocal shift start title
 CALL CD CHDIR CLS COPY DEL DIR ECHO @ECHO EXIT FOR IF MD MKDIR
 MOVE RD RMDIR READLINE REN RENAME SET SETLOCAL SHIFT START TITLE
+''',
+            "swift" : '''
+case class default didSet else enum false 
+for func get if in
+let override print repeat return self
+super switch true var while willSet
+''',
+            "go" : '''
+import package func
 '''
         }
 
@@ -283,15 +292,19 @@ MOVE RD RMDIR READLINE REN RENAME SET SETLOCAL SHIFT START TITLE
 
             #print language
 
-            keyword_list = keywords[language].split(' ') #re.split(r'\n| +', keywords[language])
+            keyword_string = keywords[language]
+            keyword_string = keyword_string.replace("\n", " ")
+
+            keyword_list = keyword_string.split(' ') #re.split(r'\n| +', keywords[language])
 
             self.m_keywords[language] = {}
 
             for keyword in keyword_list:
                 word = keyword.strip()
                 if(len(word) > 0):
-                    #print "keyword: %s" % word
+                    #print "  keyword: [%s]" % word
                     self.m_keywords[language][word] = 1
+        #sys.exit(-1)
 
 
     def get_keyword_list(self, language):

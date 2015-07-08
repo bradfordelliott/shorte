@@ -79,6 +79,21 @@ printf("Hello perl!\\n");
 @tcl: exec=True
 puts "Hello TCL\\n";
 
+@h2 Swift
+@swift: exec=True
+let x=10;
+let label = "This is a test"
+let width = 94
+print("Hello world\\n");
+
+@h2 Go
+@go: exec=True
+package main
+import "fmt"
+func main() {
+    fmt.Println("Hello world!");
+}
+
 @h1 Failing Examples
 
 @h2 C

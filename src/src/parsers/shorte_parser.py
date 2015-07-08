@@ -97,6 +97,8 @@ class shorte_parser_t(parser_t):
             "bash"            : True,
             "shorte"          : True,
             "xml"             : True,
+            "swift"           : True,
+            "go"              : True,
             "include"         : True,
             "include_child"   : True,
 
@@ -344,7 +346,7 @@ class shorte_parser_t(parser_t):
     
     def tag_is_source_code(self, tag_name):
 
-        if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml")):
+        if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml", "swift", "go")):
            return True
 
         return False
@@ -358,7 +360,7 @@ class shorte_parser_t(parser_t):
 
     def tag_is_executable(self, tag_name):
 
-        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch")):
+        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go")):
             return True
 
         return False
