@@ -62,7 +62,7 @@ class tag_t:
         self.page_title = None
         self.break_before = False
         self.file = ""
-        self.line = 0
+        self.line = None
         self.is_header = False
         self.is_prototype = False
         self.result = None
@@ -485,7 +485,7 @@ class table_t:
     def get_title(self):
         return self.title
     def has_title(self):
-        if(self.title != None):
+        if(self.title != None and len(self.title) > 0):
             return True
         return False
 
@@ -1678,20 +1678,18 @@ def shorte_import_cairo():
     osname = shorte_get_os()
 
     try:
-        sys.path.append('.')
-        sys.path.append('../..')
-        sys.path.append('../../..')
+        startup_path = shorte_get_startup_path()
         if("win32" == osname):
-            sys.path.append("libs/win32")
+            sys.path.append(startup_path + "/libs/win32")
             import libs.win32.cairo_access as cairo_access
         elif("cygwin" == osname):
-            sys.path.append("libs/cygwin")
+            sys.path.append(startup_path +"/libs/cygwin")
             import libs.cygwin.cairo_access as cairo_access
         elif("osx" == osname):
-            sys.path.append("libs/osx")
+            sys.path.append(startup_path + "/libs/osx")
             import libs.osx.cairo_access as cairo_access
         elif("unix" == osname):
-            sys.path.append("libs/unix")
+            sys.path.append(startup_path + "/libs/unix")
             import libs.unix.cairo_access as cairo_access
 
     except: 
@@ -1699,4 +1697,21 @@ def shorte_import_cairo():
         FATAL("ERROR: Failed importing cairo, try running make cairo_plugin to generate it")
 
 
-
+def shorte_mkdir(newdir):
+    """works the way a good mkdir should :)
+        - already exists, silently complete
+        - regular file in the way, raise an exception
+        - parent directory(ies) does not exist, make them as well
+    """
+    if os.path.isdir(newdir):
+        pass
+    elif os.path.isfile(newdir):
+        raise OSError("a file with the same name as the desired " \
+                      "dir, '%s', already exists." % newdir)
+    else:
+        head, tail = os.path.split(newdir)
+        if head and not os.path.isdir(head):
+            shorte_mkdir(head)
+        #print "_mkdir %s" % repr(newdir)
+        if tail:
+            os.mkdir(newdir)
