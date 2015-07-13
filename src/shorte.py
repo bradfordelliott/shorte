@@ -58,6 +58,9 @@ parser.add_option("-l", "--list",
 parser.add_option("-o", "--output",
                   action="store", dest="output_dir",
                   help="The directory where output is generated")
+parser.add_option("--of", "--output_file",
+                  action="store", dest="output_file",
+                  help="The main output file to generate")
 parser.add_option("-v", "--version",
                   action="store", dest="version",
                   help="The version of the document")
@@ -181,6 +184,9 @@ else:
 
 
 shorte = engine_t(output_dir, config, options.parser)
+
+if(options.output_file):
+    shorte.set_output_file(options.output_file)
 
 if(options.replace):
     shorte.load_replace_strings(options.replace)

@@ -188,8 +188,13 @@ tests:
 	make test_classes
 	make test_code_execution
 	make test_gallery
+	make test_show_tags
 
 THEME:=shorte
+
+test_show_tags:
+	${python} shorte.py -f examples/headings.tpl -i tags2html -o build-output/test_show_tags --of=headings.html
+	${python} shorte.py -f examples/hello.tpl -i tags2html -o build-output/test_show_tags --of=hello.html
 
 test_mx:
 	${python} shorte.py -f SRSA.tpl -p "html+pdf" -t "${THEME}" -w "examples/mx" -o build-output/mx
@@ -199,7 +204,7 @@ test_hello:
 #	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
 #	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
-	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
+	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline --output_file=hello.html
 
 test_hello2:
 	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=inphi;pdf=inphi2" -o build-output/hello_hsio
@@ -347,7 +352,8 @@ test_images:
 test_images_quick:
 	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html" -o build-output/images
 test_gallery:
-	${python} shorte.py -f examples/gallery.tpl -t "${THEME}" -p "html" -o build-output/gallery
+	${python} shorte.py -f examples/gallery.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/gallery
+	${python} shorte.py -f examples/gallery.tpl -t "${THEME}" -p "html_inline" -o build-output/gallery_inline
 
 test_images_encode:
 	${python} shorte.py -f examples/test.png -i "encode_images" 
@@ -380,8 +386,8 @@ test_server:
 	${mkdir} -p build-output/server_example
 	${start} ${python} shorte.py --server --port=8400 &
 	${python} -c "import time;time.sleep(2)"
-	${python} server_test.py --package="html_inline" --theme="cortina_web" --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example.html
-	${python} server_test.py --package="html_inline+pdf" --theme="html=cortina_web;pdf=cortina_public" --zip --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example2.zip
+	${python} server_test.py --package="html_inline" --theme="inphi" --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example.html
+	${python} server_test.py --package="html_inline+pdf" --theme="html=shorte;pdf=shorte" --zip --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example2.zip
 	${python} server_test.py --shutdown --ip=127.0.0.1 --port=8400
 
 test_extract_private:
@@ -395,7 +401,7 @@ test_revealjs:
 	${python} shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation4
 
 test_revealjs_quick:
-	${python} shorte.py -f examples/presentation.tpl -p "reveal.js" --theme="reveal.js=inphi" -o build-output/presentation2
+	${python} shorte.py -f examples/presentation.tpl -p "reveal.js" --theme="reveal.js=${THEME}" -o build-output/presentation2
 
 test_sequences:
 	${python} shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences

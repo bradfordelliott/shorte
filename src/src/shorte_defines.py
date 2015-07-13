@@ -506,6 +506,8 @@ class table_t:
     def get_max_cols(self):
         return self.max_cols
 
+    def set_caption(self, caption):
+        self.caption = caption
     def get_caption(self):
         return self.caption
     def has_caption(self):

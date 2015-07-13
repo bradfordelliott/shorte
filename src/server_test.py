@@ -20,6 +20,9 @@ Blah blah blah
 This is another header
 Blah blah blah
 
+@python
+print "Hello world!"
+
 @h4 Another heading
 @table
 - One | Two

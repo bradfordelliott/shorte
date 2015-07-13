@@ -151,6 +151,7 @@ class engine_t:
         if(output_path == None):
             output_path = "build-output"
         self.m_output_directory = output_path
+        self.m_output_file = None
         
         self.m_pages = []
         self.m_images = []
@@ -274,6 +275,15 @@ class engine_t:
         self.m_output_directory = path
         if(not os.path.exists(self.m_output_directory)):
             os.makedirs(self.m_output_directory)
+    
+    def has_output_file(self):
+        if(self.m_output_file != None):
+            return True
+        return False
+    def get_output_file(self):
+        return self.m_output_file
+    def set_output_file(self, path):
+        self.m_output_file = path
 
     def set_working_dir(self, path):
         os.chdir(path)
@@ -912,12 +922,13 @@ class engine_t:
             output.append('''<html>
 <head>
   <style>
-    table{border-collapse:collapse;}
+    table{border-collapse:collapse;margin-left:20px;}
     th{border:1px solid black;background-color:#ccc;font-weight:bold;}
     td{border:1px solid black;}
   </style>
 </head>
 <body>
+<h1>List of Tags</h1>
 <table>
   <tr><th>Tag</th><th>File</th><th>Line</th><th>Source</th></tr>
 ''')
@@ -929,6 +940,19 @@ class engine_t:
                     output.append(tdata)
 
             output.append("</table></body></html>")
+            
+            shorte_mkdir(self.m_output_directory)
+
+            filename = "tags.html"
+            if(self.has_output_file()):
+                filename = self.get_output_file()
+            path_output = self.m_output_directory + os.sep + filename
+            handle = open(path_output, "wt")
+            handle.write("".join(output))
+            handle.close()
+            
+            output = ["\nTags can be found in:\n    %s\n" % path_output]
+
 
         if("c2html" in keys):
             path_input = options.files
@@ -966,7 +990,43 @@ class engine_t:
 
         return '\n'.join(output)
             
+    def _execute_code_block(self, tag):
+        source = tag.source 
 
+        if(tag.modifiers.has_key("template")):
+            template = tag.modifiers["template"]
+
+            if(not self.get_doc_info().has_template(template)):
+                FATAL("Template %s was not registered when parsing %s @ line %d" % (template, tag.file, tag.line))
+
+            template = self.get_doc_info().get_template(template)
+
+            data = tag.source
+
+            # If the block has an indent modifier than prefix
+            # it with spaces
+            if(tag.has_modifier("indent")):
+                indent = int(tag.modifiers["indent"].strip())
+                prefix = ''
+                for i in range(0, indent):
+                    prefix += ' '
+                data = indent_lines(data, prefix)
+
+            source = template.replace("$1", data)
+
+        ignore_errors = False
+        if(tag.modifiers.has_key("ignore_errors")):
+            ignore_errors = to_boolean(tag.modifiers["ignore_errors"])
+
+        executor = code_executor_t()
+        (tag.rc, tag.result) = executor.execute(tag.name, source, tag.modifiers)
+        if((not ignore_errors) and (tag.rc != 0)):
+            ERROR("Failed executing code snippet in %s @ line %d\n%s" % (tag.file, tag.line, indent_lines(source, "    ")))
+
+        code = self.m_source_code_analyzer
+        tag.contents = code.parse_source_code(tag.name, source)
+        tag.source = source
+        
     def generate(self, package):
         
 
@@ -987,41 +1047,7 @@ class engine_t:
                     continue
             
                 if(self.tag_is_executable(tag.name)):
-                    source = tag.source 
-
-                    if(tag.modifiers.has_key("template")):
-                        template = tag.modifiers["template"]
-
-                        if(not self.get_doc_info().has_template(template)):
-                            FATAL("Template %s was not registered when parsing %s @ line %d" % (template, tag.file, tag.line))
-
-                        template = self.get_doc_info().get_template(template)
-
-                        data = tag.source
-
-                        # If the block has an indent modifier than prefix
-                        # it with spaces
-                        if(tag.has_modifier("indent")):
-                            indent = int(tag.modifiers["indent"].strip())
-                            prefix = ''
-                            for i in range(0, indent):
-                                prefix += ' '
-                            data = indent_lines(data, prefix)
-
-                        source = template.replace("$1", data)
-
-                    ignore_errors = False
-                    if(tag.modifiers.has_key("ignore_errors")):
-                        ignore_errors = to_boolean(tag.modifiers["ignore_errors"])
-
-                    executor = code_executor_t()
-                    (tag.rc, tag.result) = executor.execute(tag.name, source, tag.modifiers)
-                    if((not ignore_errors) and (tag.rc != 0)):
-                        ERROR("Failed executing code snippet in %s @ line %d\n%s" % (tag.file, tag.line, indent_lines(source, "    ")))
-
-                    code = self.m_source_code_analyzer
-                    tag.contents = code.parse_source_code(tag.name, source)
-                    tag.source = source
+                    self._execute_code_block(tag)
                 
                 #if(tag.name == "struct"):
                 #    #if(len(tag.contents["heading"])):
@@ -1113,17 +1139,8 @@ else:
                 # If the code block has already been
                 # executed then don't run it again
                 if(self.tag_is_executable(tag.name)):
-                    FATAL("This block of code is not updated")
-                    source = tag.source 
+                    self._execute_code_block(tag)
 
-                    if(tag.modifiers.has_key("template")):
-                        template = tag.modifiers["template"]
-                        template = self.get_doc_info().get_template(template)
-                        source = template.replace("$1", tag.source)
-
-                    executor = code_executor_t()
-                    tag.result = executor.execute(tag.name, source, tag.modifiers)
-                
         # If the version number was not specified on the command
         # line then use any @docversion one specified in one of
         # the source files.

@@ -75,3 +75,10 @@ an ampersand up front. Hyperlinking should work if I type
 in @MyHeading4.
 
 @include "examples/subheadings.tpl"
+
+@h1 A final heading
+Blah blah blah
+
+@include "examples/subheadings.tpl"
+
+@h1 Another final heading

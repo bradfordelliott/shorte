@@ -99,6 +99,7 @@ class shorte_parser_t(parser_t):
             "xml"             : True,
             "swift"           : True,
             "go"              : True,
+            "javascript"      : True,
             "include"         : True,
             "include_child"   : True,
 
@@ -183,8 +184,10 @@ class shorte_parser_t(parser_t):
         # Rough parser position of current
         # tag
         self.m_current_file = ''
-        self.m_current_line = 0
         self.m_current_tag = ''
+        self.m_lines = {}
+
+        self.m_active_file = []
 
         self.m_headers = []
 
@@ -346,7 +349,7 @@ class shorte_parser_t(parser_t):
     
     def tag_is_source_code(self, tag_name):
 
-        if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml", "swift", "go")):
+        if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml", "swift", "go", "javascript")):
            return True
 
         return False
@@ -360,7 +363,7 @@ class shorte_parser_t(parser_t):
 
     def tag_is_executable(self, tag_name):
 
-        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go")):
+        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go", "javascript")):
             return True
 
         return False
@@ -387,13 +390,9 @@ class shorte_parser_t(parser_t):
             states.append(STATE_MODIFIER)
             i += 1
         elif(input[i] == '\n'):
-            self.m_current_line += 1
             i += 1
 
         while i < len(input):
-
-            if(input[i] == '\n'):
-                self.m_current_line += 1
 
             state = states[-1]
                 
@@ -788,6 +787,9 @@ class shorte_parser_t(parser_t):
             if(modifier in ("caption", "description")):
                 table[modifier] = textblock_t(modifiers[modifier])
                 table2.modifiers[modifier] = table[modifier]
+
+                if(modifier == "caption"):
+                    table2.set_caption(table[modifier])
             else:
                 table[modifier] = modifiers[modifier]
 
@@ -811,7 +813,8 @@ class shorte_parser_t(parser_t):
                 widths.append(int(vals[i]))
 
             if(total != 100):
-                FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, self.m_current_line))
+                #FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, self.m_current_line[self.m_current_file]))
+                FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, -1))
 
             table["widths"] = widths
             table2.widths = widths
@@ -826,6 +829,9 @@ class shorte_parser_t(parser_t):
 
         rows = []
         buffer = ""
+
+        if(source.startswith("--")):
+            FATAL("Can't parse this table yet!")
 
 
         # Split the table into individual rows. This is
@@ -2353,7 +2359,7 @@ a C/C++ like define that looks like:
         #print "CURRENT_FILE = %s" % os.path.basename(self.m_current_file)
 
         if(not self.is_valid_tag(name)):
-            FATAL("Invalid tag '%s' encountered at %s:%d" % (name, self.m_current_file, self.m_current_line))
+            FATAL("Invalid tag '%s' encountered at %s:%d" % (name, self.m_current_file, -1))
             
         # Expand any PHP style embedded snippets
         data = re.sub("<\?=(\$[0-9])\?>", self.expand_snippet, data)
@@ -2428,14 +2434,16 @@ else:
             tag.break_before = bool(modifiers["break_before"])
 
         filename = os.path.basename(self.m_current_file)
-        linenum  = self.m_current_line
+        linenum  = -1
 
         tag.file = filename
-        tag.line = linenum
+        tag.line = None
             
         if(len(data) == 0):
             if(not tag.name in ('image', 'functionsummary', 'typesummary', 'embed', 'columns', 'column', 'endcolumns', 'inkscape')):
-                WARNING("Tag '%s' at %s:%d has no body, may cause parsing errors" % (tag.name, tag.file, tag.line))
+                # DEBUG BRAD: This uses the old way of dealing with line numbers. Need to figure out
+                #             a way of fixing this.
+                WARNING("Tag '%s' at %s:%d has no body, may cause parsing errors" % (tag.name, tag.file, linenum))
 
         if(self.tag_is_header(name)):
             tag.is_header = True 
@@ -2492,7 +2500,7 @@ else:
             tag.modifiers = modifiers
             tag.page_title = page_title
             tag.file = filename
-            tag.line = linenum
+            tag.line = None
 
             tags.append(tag)
 
@@ -2811,6 +2819,14 @@ else:
         input = source.read()
         source.close()
         
+        self.parse_line_info(source_file, input)
+
+        #print "PARSE INCLUDE: %s" % source_file
+
+        self.m_active_file.append(source_file)
+        self.m_current_file = self.m_active_file[-1]
+        #print "  Setting current file to %s, stack.len = %d" % (source_file, len(self.m_active_file))
+        
         # If the include is a source file then first convert it
         # to shorte format.
         if(source_file.endswith(".c") or source_file.endswith(".h")):
@@ -2822,194 +2838,15 @@ else:
             template = template_shorte_t(self.m_engine, indexer)
             input = template.generate_buffer(page)
 
-        # DEBUG BRAD: Removed this line since it breaks
-        #             links within included files
-        #self.m_current_file = source_file
-            
-        # Replace any references to Leeds
-        input = self.__search_and_replace(input)
+        result = self.parse_string(input, source_file, is_include=True)
 
-        # Perform any preprocessing/expansion of
-        # macros
-        macros = self.m_engine.get_macros()
-        tmp_macros = {}
-        for macro in macros:
-            tmp_macros[macro] = macros[macro]
-        
-        expr = re.compile("<\?(.*?)\?>", re.DOTALL)
-        input = expr.sub(self._evaluate_macros, input)
-        
-        try:
+        if(len(self.m_active_file) > 1):
+            self.m_active_file.pop()
 
-            # Strip any \r characters
-            input = input.replace("\r", "")
+        self.m_current_file = self.m_active_file[-1]
+        #print "  Setting current file to %s" % self.m_current_file
 
-            # Replace any tabs
-            input = input.replace("\t", TAB_REPLACEMENT)
-
-            header = self.__parse_header(input)
-
-            start = header["start"]
-            page = {}
-            page["title"] = header["title"]
-            page["subtitle"] = header["subtitle"]
-            #print "INCLUDE_TITLE = %s" % page["title"]
-            page["tags"] = []
-
-            # Now parse the document body
-            contents = ""
-            
-            STATE_NORMAL     = 0
-            STATE_INTAG      = 1
-            STATE_INMTAGDATA = 2
-            STATE_INTAGDATA  = 3
-            STATE_ESCAPE     = 4
-            STATE_COMMENT    = 5
-            STATE_MCOMMENT   = 6
-            STATE_MODIFIERS  = 7
-
-            states = []
-            states.append(STATE_NORMAL)
-            
-            tag_name = ""
-            tag_data = ""
-            tag_modifiers = ""
-            
-            i = start
-            self.m_current_line = 0
-
-            # The excluded variable is used for cascading if
-            # modifiers from the parent tag to any children.
-            excluded = None
-
-            while i < len(input):
-
-                if(input[i] == '\n'):
-                    self.m_current_line += 1
-               
-                state = states[-1]
-
-                if(input[i:i+4] == '<!--'):
-                    states.append(STATE_MCOMMENT)
-                    i += 4
-                    continue
-
-                if(state == STATE_INTAG):
-
-                    if(input[i] == ' ' or input[i] == ':' or input[i] == '\t' or input[i] == '\n'):
-
-                        saved_line = self.m_current_line
-                        (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                        
-                        tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-
-                        if(tags != None):
-                            for tag in tags:
-                                tag.line = saved_line + 1
-                            
-                        excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
-
-                        tag_name = ""
-                        tag_data = ""
-
-                    else:
-                        tag_name += input[i];
-                    
-                elif(state == STATE_NORMAL):
-
-                    if(input[i] == '#'):
-                        states.append(STATE_COMMENT)
-
-                    # DEBUG BRAD: Assume it's a tag only if it starts at the beginning of a line and isn't
-                    #             followed by an {
-                    #elif(input[i] == '@'):
-                    elif((i == 0 and input[i] == '@') or (input[i] == '@' and input[i-1] == '\n')):
-                    
-                        #print "CHARS: %s,%s" % (input[i], input[i+1])
-                        if(input[i+1] == '{'):
-                            DEBUG("DO I GET HERE?")
-                            pass
-                        else:
-                            if(tag_name != "" and tag_data != ""):
-
-                                saved_line = self.m_current_line
-                                (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                                tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-
-                                if(tags != None):
-                                    for tag in tags:
-                                        tag.line = saved_line + 1
-                    
-                                excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
-
-                            tag_name = ""
-                            tag_data = ""
-                            
-                            states.append(STATE_INTAG)
-                        
-                    elif(input[i] == '\\'):
-                        #tag_data += '\\'
-                        states.append(STATE_ESCAPE)
-                
-                elif(state == STATE_ESCAPE):
-                    
-                    tag_data += input[i];
-                    states.pop()
-                
-                elif(state == STATE_MCOMMENT):
-                    if(input[i:i+3] == '-->'):
-                        states.pop()
-                        i += 2
-                    
-                elif(state == STATE_COMMENT):
-                    if(input[i] == '\n'):
-                        states.pop()
-                
-                i = i+1
-            
-            
-            if(tag_data != ""):
-                if(tag_name != ""):
-                    saved_line = self.m_current_line
-                    (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                    tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-
-                    if(tags != None):
-                        for tag in tags:
-                            tag.line = saved_line + 1
-                    
-                    excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
-                            
-                else:
-                    saved_line = self.m_current_line 
-                    (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
-                    tags = self._parse_tag(page["title"], tag_name, tag_data, tag_modifiers)
-
-                    if(tags != None):
-                        for tag in tags:
-                            tag.line = saved_line + 1
-
-                    excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
-
-            # Check to see if there were any includes found. If there are then
-            # pop them off one at a time and process them
-            while(len(self.m_include_queue) != 0):
-                path = self.m_include_queue.pop(-1)
-                self.parse(path)
-
-            return page["tags"]
-
-
-        except Exception,e:
-            import traceback
-            tb = sys.exc_info()[2]
-            traceback.print_tb(tb)
-
-            print e
-
-            FATAL("\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line, self.m_current_file))
-
-        return None
+        return result
 
     def _parse_tags(self, title, input, start):
 
@@ -3034,14 +2871,10 @@ else:
         #print "INPUT = [%s]" % input
        
         i = start
-        self.m_current_line = 0
         excluded = None
 
         while i < len(input):
 
-            if(input[i] == '\n'):
-                self.m_current_line += 1
-           
             state = states[-1]
                 
             if(input[i:i+4] == '<!--'):
@@ -3157,6 +2990,33 @@ def exists(s):
 
         return eval_result
     
+    def parse_line_info(self, source_file, source):
+
+        self.m_lines[source_file] = {}
+
+        line = 0
+        self.m_lines[source_file][line] = 0
+        for i in range(0, len(source)):
+            if(source[i] == '\n'):
+                line += 1
+                self.m_lines[source_file][line] = i+1
+
+    def get_line_at(self, source_file, pos, name):
+        line = 0
+
+        if(not self.m_lines.has_key(source_file)):
+            return -1
+
+        while(pos > self.m_lines[source_file][line]):
+            if(self.m_lines[source_file].has_key(line+1)):
+                line += 1
+            else:
+                break
+
+        #print "    LINE: %d (tag: %s, pos: %d)" % (line, name, pos)
+        return line
+        
+
     def parse(self, source_file):
 
         if(source_file == "result"):
@@ -3167,9 +3027,20 @@ def exists(s):
         input = source.read()
         source.close()
 
-        self.parse_string(input, source_file)
+        self.parse_line_info(source_file, input)
 
-    def parse_string(self, input, source_file="default.tpl"):
+        self.m_active_file.append(source_file)
+        #print "  Setting current file to %s, stack.len = %d" % (source_file, len(self.m_active_file))
+        self.m_current_file = self.m_active_file[-1]
+        result = self.parse_string(input, source_file)
+        if(len(self.m_active_file) > 1):
+            self.m_active_file.pop()
+        self.m_current_file = self.m_active_file[-1]
+        #print "  Setting current file to %s" % self.m_current_file
+
+        return result
+
+    def parse_string(self, input, source_file="default.tpl", is_include=False):
 
         # Strip any illegal characters
         input = re.sub("[’‘]", "'", input)
@@ -3188,14 +3059,9 @@ def exists(s):
         expr = re.compile("<\?(.*?)\?>", re.DOTALL)
         input = expr.sub(self._evaluate_macros, input)
 
-        source_file = self.m_engine.search_and_replace(source_file)
+        if(not is_include):
+            source_file = self.m_engine.search_and_replace(source_file)
 
-        #print "SOURCE_FILE = %s" % source_file
-
-        self.m_current_file = source_file
-
-        #print "ONE"
-        
         try:
 
             # Strip any \r characters
@@ -3217,10 +3083,6 @@ def exists(s):
             version = header["version"]
             number = header["number"]
             revision_history = header["revision_history"]
-            
-            #print "START: %d" % start
-            #print "ONE_B"
-            
             
             # If the title has not already been set
             # then use the version found in the input file
@@ -3272,22 +3134,10 @@ def exists(s):
             
             i = start
 
-            #input = input[0:start] + 'X' + input[start:]
-            #print input
-            #print "\n\n\n"
-            header_lines = input[0:start].split('\n')
-
-            self.m_current_line = len(header_lines)
-            #print "START_LINE: %d" % self.m_current_line
-
             excluded = None
 
             while i < len(input):
 
-                #if(input[i] == '\n'):
-                #    print "LINE: %d" % self.m_current_line
-                #    self.m_current_line += 1
-               
                 state = states[-1]
                 
                 if(input[i:i+4] == '<!--'):
@@ -3299,7 +3149,7 @@ def exists(s):
 
                     if(input[i] == ' ' or input[i] == ':' or input[i] == '\t' or input[i] == '\n'):
 
-                        saved_line = self.m_current_line
+                        saved_i = i
 
                         (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
 
@@ -3307,7 +3157,8 @@ def exists(s):
 
                         if(tags != None):
                             for tag in tags:
-                                tag.line = saved_line + 1
+                                if(tag.line == None):
+                                    tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
 
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3333,14 +3184,15 @@ def exists(s):
                         else:
                             #print "Here"
                             if(tag_name != "" and tag_data != ""):
-                                saved_line = self.m_current_line
+                                saved_i = i
 
                                 (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
                                 tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
 
                                 if(tags != None):
                                     for tag in tags:
-                                        tag.line = saved_line + 1
+                                        if(tag.line == None):
+                                            tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
                             
                                 excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3373,14 +3225,15 @@ def exists(s):
             if(tag_data != ""):
                 if(tag_name != ""):
 
-                    saved_line = self.m_current_line
+                    saved_i = i
 
                     (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
                     tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
 
                     if(tags != None):
                         for tag in tags:
-                            tag.line = saved_line + 1
+                            if(tag.line == None):
+                                tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
 
                     excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3388,13 +3241,14 @@ def exists(s):
                     
                     if(i < len(input)):
                         INFO("Snippet: %s, i = %d, len = %d" % (input[i:-1], i, len(input)))
-                        saved_line = self.m_current_line
+                        saved_i = i
                         (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
                         tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
 
                         if(tags != None):
                             for tag in tags:
-                                tag.line = saved_line + 1
+                                if(tag.line == None):
+                                    tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
                         
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3413,7 +3267,11 @@ def exists(s):
 
             #print "Finished parsing"
 
-            self.m_pages.append(page)
+            if(not is_include):
+                self.m_pages.append(page)
+                return None
+            else:
+                return page["tags"]
 
         except Exception,e:
             import traceback
@@ -3422,5 +3280,8 @@ def exists(s):
 
             print e
 
-            FATAL("\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line, self.m_current_file))
+            #FATAL("\n\nEncountered exception parsing '%s' tag at line %d of %s" % (self.m_current_tag, self.m_current_line[self.m_current_file], self.m_current_file))
+            FATAL("\n\nEncountered exception parsing '%s' tag" % (self.m_current_tag))
+
+        return None
     

@@ -76,7 +76,7 @@ image_t:
         image = {}
         image["name"] = self.name
         image["ext"] = self.extension
-        image["src"] = self.soure
+        image["src"] = self.source
         image["height"] = self.height
         image["width"] = self.width
         image["caption"] = self.caption

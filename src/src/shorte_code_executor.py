@@ -44,6 +44,7 @@ class code_executor_t:
         extension["batch"] = "cmd"
         extension["swift"] = "swift"
         extension["go"] = "go"
+        extension["javascript"] = "js"
 
         name = "tmpexample.%s" % extension[language]
 
@@ -53,7 +54,7 @@ class code_executor_t:
 
         #print("Creating %s, language=%s, source=%s" % (path, language, source))
         
-        if(language in ("python", "perl", "bash", "java", "c", "cpp", "vera", "verilog", "tcl", "batch", "swift", "go")):
+        if(language in ("python", "perl", "bash", "java", "c", "cpp", "vera", "verilog", "tcl", "batch", "swift", "go", "javascript")):
 
             handle = open(path, "wt")
 
@@ -112,7 +113,7 @@ class code_executor_t:
         # Create the temporary source file
         self.create_source_file(language, source_file, source)
 
-        if(language in ("python", "perl", "tcl", "bash", "swift", "go")):
+        if(language in ("python", "perl", "tcl", "bash", "swift", "go", "javascript")):
 
             if(language == "bash"):
                 if("Windows" == platform.system()):
@@ -123,6 +124,9 @@ class code_executor_t:
             elif(language == "go"):
                 if("Darwin" != platform.system()):
                     return (-1, "go not currently supported on platforms other than OSX")
+            elif(language == "javascript"):
+                if("Darwin" != platform.system()):
+                    return (-1, "javascript not currently supported on platforms other than OSX")
 
             if(machine != ""):
                 cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)

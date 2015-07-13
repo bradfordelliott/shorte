@@ -2432,6 +2432,9 @@ $href_end
         else:
             theme = "gallery"
 
+        if(self.is_inline() and theme not in ("gallery", "gallery_modern", "gallery_magazine")):
+            theme = "gallery"
+
         if(theme == "jssor_slideshow"):
             html = '''
     <!-- it works the same with all jquery version from 1.x to 2.x -->
@@ -2680,7 +2683,23 @@ $href_end
             shutil.copytree(jssor_dir, output_dir) #, ignore=shutil.ignore_patterns(*ignore_patterns))
         else:
             html = '<div class="%s">' % theme
-            tpl = string.Template('''
+            
+            
+            if(self.is_inline()):
+                tpl = string.Template('''
+<div class='pic'>
+  <div class='pic_header'>
+    <p>${name}</p>
+  </div>
+  <div class='pic_body' style='height:${height}px;'>
+    <img src='${thumbnail}' style='height:${height}px'></img>
+  </div>
+  <div class='pic_footer' style='width:${width}px;'>
+    <p>${caption}</p>
+  </div>
+</div>''')
+            else:
+                tpl = string.Template('''
 <div class='pic'>
   <div class='pic_header'>
     <p>${name}</p>
@@ -2692,14 +2711,28 @@ $href_end
     <p>${caption}</p>
   </div>
 </div>''')
+                
     
         #<p style='color:#aaa;font-size:0.8em;padding:2px;margin:2px;'>${caption}</p></div>
 
             for image in gallery.images():
+
+                thumb = image.get_thumbnail()
+                name  = image.get_name()
+                #print "thumb: %s" % thumb
+                #print "name:  %s" % name
+                if(self.is_inline()):
+                    name = self.m_engine.inline_image(image.to_dict())
+                    thumb = name
+                    #thumb = self.m_engine.inline_image(thumb)
+
+                #print "thumb: %s" % thumb
+                #print "name:  %s" % name
+
                 html += tpl.substitute({ 
-                "height" : image.get_thumb_height(),
-                "name"   : image.get_name(),
-                "thumbnail" : image.get_thumbnail(),
+                "height"    : image.get_thumb_height(),
+                "name"      : image.get_name(),
+                "thumbnail" : thumb,
                 "width"     : image.get_thumb_width(),
                 "caption"   : image.get_caption()})
 
@@ -3324,7 +3357,7 @@ $href_end
         vars["date"] = self.m_engine.get_date()
         vars["css"] = self.get_css()
         vars["pdf"] = self.include_link("../" + self.get_pdf_name(), "css/")
-        vars["link_index"] = "../index.html"
+        vars["link_index"] = "../" + self.get_index_name()
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
@@ -3350,6 +3383,9 @@ $href_end
 
     def get_index_name(self):
 
+        if(self.m_engine.has_output_file()):
+            return self.m_engine.get_output_file()
+
         return "index.html"
 
     def generate_toc_frame(self, title):
@@ -3366,7 +3402,7 @@ $href_end
             # make sure that all links point back to the
             # main document.
             if(self.is_inline() == True):
-                file = "index.html"
+                file = self.get_index_name()
             
             #print "indent = %s" % indent
 
@@ -3405,11 +3441,11 @@ $href_end
 
 <FRAMESET ROWS="1" COLS="20%%, *">
      <FRAME SRC="toc.html" NAME=TOC>
-     <FRAME SRC="index.html" NAME=main_page>
+     <FRAME SRC="%s" NAME=main_page>
 </FRAMESET>
 
 </HTML>
-''' % title
+''' % (title, self.get_index_name())
         file = open(self.m_engine.m_output_directory + "/index_framed.html", "w")
         file.write(self._cleanup_html(html))
         file.close()
@@ -3492,7 +3528,7 @@ $href_end
              "pdf" : self.include_link(self.get_pdf_name(), "content/css"),
              "javascript" : javascript,
              "links" : txt_links,
-             "link_index" : "index.html",
+             "link_index" : self.get_index_name(),
              "link_index_framed" : "index_framed.html",
              "link_legal" : "content/legal.html",
              "link_revisions" : "content/revisions.html",
@@ -3502,7 +3538,7 @@ $href_end
         if(as_string):
             return contents
 
-        file = open(self.m_engine.m_output_directory + "/index.html", "w")
+        file = open(self.m_engine.m_output_directory + "/" + self.get_index_name(), "w")
         file.write(self._cleanup_html(contents))
         file.close()
 
@@ -3682,7 +3718,7 @@ $href_end
         vars["contents"] = "<div class='code'>%s</div>" % html_src
         vars["title"] = input
         vars["javascript"] = ""
-        vars["link_index"] = "../index.html"
+        vars["link_index"] = "../" + self.get_index_name()
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "../legal.html"
         vars["link_revisions"] = "../revisions.html"
@@ -3715,8 +3751,8 @@ $href_end
         vars["css"] = self.get_css()
         vars["pdf"] = ""
         vars["links"] = ""
-        vars["title"] = "Cortina Legal Information"
-        vars["link_index"] = "../index.html"
+        vars["title"] = "Legal Information"
+        vars["link_index"] = "../" + self.get_index_name()
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
@@ -3752,7 +3788,7 @@ $href_end
         vars["javascript"] = ""
         vars["subtitle"] = "Document History"
         vars["title"] = "Revision History"
-        vars["link_index"] = "../index.html"
+        vars["link_index"] = "../" + self.get_index_name()
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"

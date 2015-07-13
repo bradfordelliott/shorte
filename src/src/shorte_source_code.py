@@ -165,7 +165,7 @@ class source_code_t:
  @doctitle @docsubtitle @docversion @docnumber @docrevisions @docfilename
  @h1 @h2 @h3 @h4 @h5 @h
  @text @p @pre
- @code @c @python @java @perl @tcl @d @vera @verilog @bash @xml
+ @code @c @python @java @perl @tcl @d @vera @verilog @bash @xml @swift @go @javascript
  @include @include_child
  @sequence
  @table
@@ -273,14 +273,79 @@ move rd rmdir readline ren rename set setlocal shift start title
 CALL CD CHDIR CLS COPY DEL DIR ECHO @ECHO EXIT FOR IF MD MKDIR
 MOVE RD RMDIR READLINE REN RENAME SET SETLOCAL SHIFT START TITLE
 ''',
+
+            # Apple's swift programming language
             "swift" : '''
-case class default didSet else enum false 
-for func get if in
-let override print repeat return self
-super switch true var while willSet
+class deinit enum extension func import init inout internal
+let operator private protocol public static struct subscript typealias var
+
+break case continue default defer do else fallthrough for guard if in repeat return switch where while
+
+as catch dynamicType false is nil rethrows super self Self throw throws true try __COLUMN__ __FILE__ __FUNCTION__ __LINE__
+
+associativity convenience dynamic didSet final get infix lazy left mutating non nonumtating optional override postfix
+precendence prefix Protocol required right set Type unowned weak willSet
 ''',
+
+            # Google's GO programming language
             "go" : '''
-import package func
+break case chan const continue
+default defer else fallthrough for
+func go goto if import
+interface map package range return
+select struct switch type var
+
+bool uint8 uint16 uint32 uint64 int8 int16 int32 int64 float32 float64
+complex64 complex128 byte run uint int uintptr
+
+true false iota nil
+
+append cap close complex copy delete imag len
+make new panic print println real recover
+''',
+            
+            # The javascript language
+            "javascript" : '''
+abstract arguments boolean break byte
+case catch char class const
+continue debugger default delete do
+double else enum eval export
+extends false final finally float
+for function goto if implements
+import in instanceof int interface
+let long native new null
+package private protected public return
+short static super switch synchronized
+this throw throws transient true
+try typeof var void volatile
+while with yield
+
+Array Date eval function hasOwnProperty
+Infinity isFinite isNaN isPrototypeOf length
+Math NaN name Number Object
+prototype String toString undefined valueOf
+
+alert all anchor anchors area
+assign blur button checkbox clearInterval
+clearTimeout clientInformation close closed confirm
+constructor crypto decodeURI decodeURIComponent defaultStatus
+document element elements embed embeds
+encodeURI encodeURIComponent escape event fileUpload
+focus form forms frame innerHeight
+innerWidth layer layers link location
+mimeTypes navigate navigator frames frameRate
+hidden history image images offscreenBuffering
+open opener option outerHeight outerWidth
+packages pageXOffset pageYOffset parent parseFloat
+parseInt password pkcs11 plugin propmt
+propertyIsEnum radio reset screenX screenY
+scroll secure select self setInterval
+setTimeout status submit taint text
+textarea top unescape untaint window
+
+onblur onclick onerror onfocus
+onkeydown onkeypress onkeyup onmouseover
+onload onmouseup onmousedown onsubmit
 '''
         }
 

@@ -94,6 +94,19 @@ func main() {
     fmt.Println("Hello world!");
 }
 
+@h2 Javascript
+@javascript: exec=True
+var parts = ["hello", " ", "world", "!"]
+var index;
+var text = "";
+
+for(index = 0; index < parts.length; index++)
+{
+    text += parts[index];
+}
+
+print(text)
+
 @h1 Failing Examples
 
 @h2 C
