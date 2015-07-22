@@ -131,6 +131,9 @@ parser.add_option("--ierr", "--ignore_errors",
 parser.add_option("--werr", "--warnings_as_errors",
                  action="store_true", dest="warnings_as_errors", default=False,
                  help="Treat warnings as errors")
+parser.add_option("--profile", "--profile",
+                  action="store", dest="profile", default=False,
+                  help="Turn on profiling")
 
 #parser.add_option("-I", "--include",
 #                  action="store",type="string",dest="include",
@@ -289,7 +292,27 @@ if(options.info):
 
         sys.exit(0)
 
+# If profiling is enabled then profile the parsing task
+if(options.profile):
+    import cProfile, pstats, StringIO
+    profiler = cProfile.Profile()
+    profiler.enable()
+
 shorte.parse_pages(options.file_list, options.files, options.macros)
+
+#sortby = 'cumulative'
+sortby = 'time'
+if(options.profile):
+    profiler.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(profiler, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    poutput = s.getvalue()
+    phandle = open(output_dir + "/" + options.profile + "_parse.txt", "wt")
+    phandle.write(poutput)
+    phandle.close()
+    profiler.clear()
+    profiler.enable()
 
 
 # Print any information that the user requested and
@@ -300,6 +323,17 @@ if(options.info):
     sys.exit(0)
 
 shorte.generate_packages(options.package, shorte_get_config("shorte", "theme"), options, options.zip)
+
+if(options.profile):
+    profiler.disable()
+    s = StringIO.StringIO()
+    ps = pstats.Stats(profiler, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    poutput = s.getvalue()
+    phandle = open(output_dir + "/" + options.profile + "_generate.txt", "wt")
+    phandle.write(poutput)
+    phandle.close()
+
 
 warnings = shorte_get_warning_count()
 errors   = shorte_get_error_count()

@@ -703,8 +703,8 @@ class template_word_t(template_t):
         
         for tag in tags:
 
-            type = tag["type"]
-            source = tag["data"]
+            type = tag.type
+            source = tag.data
         
             source = amp.sub("&amp;", source)
             source = lt.sub("&lt;", source)
@@ -936,10 +936,10 @@ $box_end
         prototype.pop(0)
         prototype.pop(0)
 
-        rt = return_type["data"]
+        rt = return_type.data
         
-        if(return_type["data"] == "const"):
-            rt += " " + prototype[0]["data"]
+        if(return_type.data == "const"):
+            rt += " " + prototype[0].data
             prototype.pop(0)
             prototype.pop(0)
 

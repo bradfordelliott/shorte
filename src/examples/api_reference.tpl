@@ -25,3 +25,5 @@ This might be an introduction to the code
 - Acronym | Definition
 - EPT     | Egress Parser Table
 - EPC     | Egress Parser CAM
+
+@include "examples/test_python.py"

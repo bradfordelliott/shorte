@@ -40,7 +40,69 @@ from libs.records import *
 #        self.span = 1
 #        self.text = ""
 #        self.textblock = ""
-        
+
+class shorte_header_t():
+    def __init__(self):
+        self.start = 0
+        self.title = ""
+        self.subtitle = ""
+        self.version = ""
+        self.toc = False
+        self.numbered = False
+        self.number = ""
+        self.revision_history = None
+        self.filename = None
+        self.sourcedir = None
+        self.outdir = None
+        self.line = 0
+        self.footer_title = None
+        self.footer_subtitle = None
+        self.doc_info = None
+        self.author = None
+        self.csource = None
+        self.template = None
+    def get_start(self):
+        return self.start
+    def get_line(self):
+        return self.line
+    def get_title(self):
+        return self.title
+    def get_subtitle(self):
+        return self.subtitle
+    def get_toc(self):
+        return self.toc
+    def get_numbered(self):
+        return self.numbered
+    def get_version(self):
+        return self.version
+    def get_number(self):
+        return self.number
+    def get_revision_history(self):
+        return self.revision_history
+    def get_author(self):
+        return self.author
+    def has_author(self):
+        if(self.author != None):
+            return True
+        return False
+    def has_filename(self):
+        if(self.filename != None):
+            return True
+        return False
+    def get_filename(self):
+        return self.filename
+
+    def has_csource(self):
+        if(self.csource != None):
+            return True
+        return False
+    def get_csource(self):
+        return self.csource
+
+    def __str__(self):
+        print "Heading"
+       
+
 class shorte_parser_t(parser_t):
     def __init__(self, engine):
 
@@ -170,6 +232,28 @@ class shorte_parser_t(parser_t):
             "least"   : 100
         }
 
+        # The list of tags that qualify as source code elements
+        self.m_source_code_tags = {
+            "python"     : True,
+            "perl"       : True,
+            "shell"      : True,
+            "c"          : True,
+            "cpp"        : True,
+            "sql"        : True,
+            "code"       : True,
+            "batch"      : True,
+            "vera"       : True,
+            "bash"       : True,
+            "java"       : True,
+            "verilog"    : True,
+            "tcl"        : True,
+            "shorte"     : True,
+            "xml"        : True,
+            "swift"      : True,
+            "go"         : True,
+            "javascript" : True,
+            }
+
         self.m_include_queue = []
         self.m_snippets = {}
         self.m_urls = {}
@@ -183,9 +267,12 @@ class shorte_parser_t(parser_t):
 
         # Rough parser position of current
         # tag
-        self.m_current_file = ''
-        self.m_current_tag = ''
+        self.m_current_file = None
+        self.m_current_tag = None
+        self.m_current_line = 0
+
         self.m_lines = {}
+        self.m_line_info = {}
 
         self.m_active_file = []
 
@@ -253,81 +340,79 @@ class shorte_parser_t(parser_t):
         #print "START = %d" % start
 
         if(start == -1 or start == 0):
-            attr = {}
+            attr = shorte_header_t()
 
             if(start == 0):
-                attr["start"] = 5
+                attr.start = 5
             else:
-                attr["start"] = 0
-            attr["title"] = ""
-            attr["subtitle"] = ""
-            attr["version"] = ""
-            attr["toc"] = False
-            attr["numbered"] = False
-            attr["number"] = ""
-            attr["revision_history"] = None
-            attr["filename"] = None
-            attr["sourcedir"] = None
-            attr["outdir"] = None
+                attr.start = 0
+            
+            attr.line = 1
 
             return attr
 
-        tags = self._parse_tags("title", data[0:start-1], 0)
+        tags = self._parse_header_tags("title", data[0:start-1], 0)
         if(tags == None):
             FATAL("Failed parsing header")
 
-        header = {}
-        header["start"] = start + 5
-        header["toc"] = False
-        header["numbered"] = False
-        header["title"] = "undefined"
-        header["subtitle"] = ""
-        header["version"] = "undefined"
-        header["number"] = ""
-        header["author"] = None
-        header["revision_history"] = None
-        header["filename"] = None
-        header["outdir"] = None
-        header["sourcedir"] = None
-        header["footer.title"] = None
-        header["footer.subtitle"] = None
-        header["doc.info"] = None
+        line = 1
+        for i in range(0, start):
+            if(data[i] == '\n'):
+                line += 1
+
+        header = shorte_header_t()
+        header.start = start + 5
+        header.line = line + 1
+        header.toc = False
+        header.numbered = False
+        header.title = "undefined"
+        header.subtitle = ""
+        header.version = "undefined"
+        header.number = ""
+        header.author = None
+        header.revision_history = None
+        header.filename = None
+        header.outdir = None
+        header.sourcedir = None
+        header.footer_title = None
+        header.footer_subtitle = None
+        header.doc_info = None
 
         for tag in tags:
             if(tag.name in ("title", "doctitle", "doc.title")):
-                header["title"] = tag.contents
+                header.title = tag.contents
             elif(tag.name in ("docfilename", "doc.filename")):
-                header["filename"] = tag.contents
+                header.filename = tag.contents
             elif(tag.name in ("docsubtitle", "doc.subtitle")):
-                header["subtitle"] = tag.contents
+                header.subtitle = tag.contents
             elif(tag.name in ("docauthor", "doc.author")):
-                header["author"] = tag.contents
+                header.author = tag.contents
             elif(tag.name == "csource"):
-                header["csource"] = tag.contents
+                header.csource = tag.contents
             elif(tag.name in ("docversion", "doc.version")):
-                header["version"] = tag.contents
+                header.version = tag.contents
             elif(tag.name in ("docnumber", "doc.number")):
-                header["number"] = tag.contents
+                header.number = tag.contents
             elif(tag.name in ("docrevisions", "doc.revisions")):
-                header["revision_history"] = self.parse_table(tag.contents, tag.modifiers)
+                header.revision_history = self.parse_table(tag.contents, tag.modifiers)
             elif(tag.name in ("docinfo", "doc.info")):
-                header["doc.info"] = tag.contents
+                header.doc_info = tag.contents
             elif(tag.name == "sourcedir"):
-                header["sourcedir"] = tag.contents
+                header.sourcedir = tag.contents
                 self.m_engine.set_working_dir(header["sourcedir"])
             elif(tag.name == "template"):
-                header["template"] = tag.contents
+                header.template = tag.contents
                 name = tag.modifiers["name"]
                 self.m_engine.get_doc_info().add_template(name, tag.contents)
             elif(tag.name == "outdir"):
-                header["outdir"] = tag.contents
+                header.outdir = tag.contents
                 self.m_engine.set_output_dir(header["outdir"])
 
             elif(tag.name in ("footertitle", "doc.footer.title")):
-                header["footer.title"] = tag.contents
+                header.footer_title = tag.contents
                 self.m_engine.get_doc_info().set_footer_title(tag.contents)
             elif(tag.name in ("footersubtitle", "doc.footer.subtitle")):
-                header["footer.subtitle"] = tag.contents
+                header.footer_subtitle = tag.contents
                 self.m_engine.get_doc_info().set_footer_subtitle(tag.contents)
             elif(tag.name == "doc.config"):
                 config_string = tag.contents
@@ -349,8 +434,11 @@ class shorte_parser_t(parser_t):
     
     def tag_is_source_code(self, tag_name):
 
-        if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml", "swift", "go", "javascript")):
-           return True
+        if(self.m_source_code_tags.has_key(tag_name)):
+            return True
+
+        #if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml", "swift", "go", "javascript")):
+        #   return True
 
         return False
     
@@ -368,7 +456,7 @@ class shorte_parser_t(parser_t):
 
         return False
     
-    def _parse_tag_data(self, tag_name, input, i):
+    def _parse_tag_data(self, tag_name, input, i, line_no):
 
         tag_data = []
         tag_modifier = []
@@ -390,11 +478,15 @@ class shorte_parser_t(parser_t):
             states.append(STATE_MODIFIER)
             i += 1
         elif(input[i] == '\n'):
+            line_no += 1
             i += 1
 
         while i < len(input):
 
             state = states[-1]
+            
+            if(input[i] == '\n'):
+                line_no += 1
                 
             if(input[i:i+4] == '<!--'):
                 states.append(STATE_MCOMMENT)
@@ -476,7 +568,7 @@ class shorte_parser_t(parser_t):
 
         #print "TAG:\n  DATA: [%s]\n  MODIFIERS: [%s]" % (tag_data, tag_modifier)
 
-        return (i, ''.join(tag_data), ''.join(tag_modifier))
+        return (i, line_no, ''.join(tag_data), ''.join(tag_modifier))
     
     def parse_inline_image_str(self, data):
         tags = self.parse_modifiers(data)
@@ -1064,14 +1156,19 @@ a C/C++ like define that looks like:
         define.value = textblock_t(self.get_attribute_as_string(modifiers, "value"))
         define.source = source
 
-        define.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
-        define.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        if(modifiers.has_key('deprecated')):
+            deprecated = self.get_attribute_as_string(modifiers, "deprecated")
+            define.set_deprecated(True, textblock_t(deprecated))
         define.private = self.get_attribute_as_bool(modifiers, "private")
         define.file = self.get_attribute_as_string(modifiers, "file")
         define.line = self.get_attribute_as_int(modifiers, "line")
         
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
+        
+        language = "code"
+        if(modifiers.has_key("language")):
+            language = modifiers["language"]
         
         for section in sections:
 
@@ -1086,13 +1183,25 @@ a C/C++ like define that looks like:
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
                 define.description = textblock_t(source)
+            elif(section.startswith("see:")):
+                see_also = section[4:len(section)].strip()
+                define.set_see_also(see_also)
+            elif(section.startswith("since:")):
+                since = section[6:len(section)].strip()
+                define.set_since(textblock_t(since))
+            elif(section.startswith("deprecated:")):
+                deprecated = section[11:len(section)].strip()
+                define.set_deprecated(True,textblock_t(deprecated))
+            elif(section.startswith("example:")):
+                example = section[8:len(section)]
+                define.set_example(example, self.m_engine.m_source_code_analyzer, language)
 
         return define
 
     def parse_object_example(self, source, obj):
         code = self.m_engine.m_source_code_analyzer
         language = "code"
-        example = code.parse_source_code(language, source)
+        example = code.parse_source_code(language, source, obj.file, obj.line)
         obj.example = code_block_t()
         obj.example.language = language
         obj.example.parsed = example
@@ -1104,8 +1213,9 @@ a C/C++ like define that looks like:
         
         enum.name = self.get_attribute_as_string(modifiers, "name")
         enum.description = textblock_t(self.get_attribute_as_string(modifiers, "description"))
-        enum.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
-        enum.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        if(enum.deprecated):
+            enum.set_deprecated(True, textblock_t(self.get_attribute_as_string(modifiers, "deprecated_msg")))
         enum.private = self.get_attribute_as_bool(modifiers, "private")
         enum.file = self.get_attribute_as_string(modifiers, "file")
         enum.line = self.get_attribute_as_int(modifiers, "line")
@@ -1157,23 +1267,38 @@ a C/C++ like define that looks like:
                         word.wikiword = modifiers["wikiword"]
 
                     word.link = os.path.basename(self.m_current_file)
-                    self.m_engine.m_wiki_links[word.wikiword] = word
-            elif(section.startswith("name:")):
-                source = section[5:len(section)].strip()
-                enum.name = source
-            elif(section.startswith("description:")):
-                source = section[12:len(section)].strip()
-                enum.description = textblock_t(source)
-            elif(section.startswith("see:")):
-                see_also = section[4:len(section)].strip()
-                enum.set_see_also(see_also)
+                    word.source_file = self.m_current_file
+                    self.m_engine.add_wikiword(word)
+            #elif(section.startswith("name:")):
+            #    source = section[5:len(section)].strip()
+            #    enum.name = source
+            #elif(section.startswith("description:")):
+            #    source = section[12:len(section)].strip()
+            #    enum.description = textblock_t(source)
+            #elif(section.startswith("see:")):
+            #    see_also = section[4:len(section)].strip()
+            #    enum.set_see_also(see_also)
+            #elif(section.startswith("since:")):
+            #    since = section[6:len(section)].strip()
+            #    enum.set_since(textblock_t(since))
+            #elif(section.startswith("deprecated:")):
+            #    deprecated = section[11:len(section)].strip()
+            #    enum.set_deprecated(True,textblock_t(deprecated))
+            #elif(section.startswith("example:")):
+            #    example = section[8:len(section)]
+            #    enum.set_example(example, self.m_engine.m_source_code_analyzer, "code")
+
+        for section in sections:
+            if(section != ''):
+                self.parse_object_section(enum, 'enum', section)
+                
 
         return enum
     
     def parse_class(self, source, modifiers):
         
         cname = self.get_attribute_as_string(modifiers, "name")
-        
+
         cdescription = textblock_t(self.get_attribute_as_string(modifiers, "description"))
         cdeprecated = self.get_attribute_as_bool(modifiers, "deprecated")
         cdeprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
@@ -1184,7 +1309,11 @@ a C/C++ like define that looks like:
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
 
-        cprivfunc = None
+        cprivfunc = ''
+        cpubfunc  = ''
+        cprivmembers = ''
+        cpubmembers  = ''
+        cproperties = ''
 
         for section in sections:
 
@@ -1197,12 +1326,22 @@ a C/C++ like define that looks like:
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
                 cdescription = textblock_t(source)
-            elif(section.startswith("private.functions:")):
-                source = section[18:].strip()
-                cprivfunc = source
             elif(section.startswith("public.functions:")):
                 source = section[17:].strip()
                 cpubfunc = source
+            elif(section.startswith('public.members:')):
+                source = section[15:].strip()
+                cpubmembers = source
+            elif(section.startswith("private.functions:")):
+                source = section[18:].strip()
+                cprivfunc = source
+            elif(section.startswith('private.members:')):
+                source = section[16:].strip()
+                cprivmembers = source
+            elif(section.startswith('properties:')):
+                source = section[11:].strip()
+                cproperties = source
+                
 
         cls = self.m_engine.class_get(cname)
         cls.set_name(cname)
@@ -1213,11 +1352,26 @@ a C/C++ like define that looks like:
         cls.file = cfile
         cls.line = cline
 
-        if(cprivfunc):
-            WARNING("PRIVATE.FUNCTIONS")
-            funcs = cprivfunc.split("--")
-            for func in funcs:
-                print func
+        if(len(cpubmembers) > 0):
+            types = cpubmembers.split("--")
+            for t in types:
+                t = t.strip()
+                if(len(t) > 0):
+                    cls.member_add(t, 'public')
+        
+        if(len(cprivmembers) > 0):
+            types = cprivmembers.split("--")
+            for t in types:
+                t = t.strip()
+                if(len(t) > 0):
+                    cls.member_add(t, 'private')
+        
+        if(len(cproperties) > 0):
+            types = cproperties.split("--")
+            for t in types:
+                t = t.strip()
+                if(len(t) > 0):
+                    cls.member_add(t, 'property')
 
         return cls
 
@@ -1463,6 +1617,14 @@ a C/C++ like define that looks like:
             elif(section.startswith("see:")):
                 see_also = section[4:len(section)].strip()
                 struct2.set_see_also(see_also)
+            
+            elif(section.startswith("deprecated:")):
+                deprecated = section[11:len(section)].strip()
+                struct2.set_deprecated(True,textblock_t(deprecated))
+            
+            elif(section.startswith("since:")):
+                since = section[6:len(section)].strip()
+                struct2.set_since(textblock_t(since))
 
             elif(section.startswith("fields:")):
                     
@@ -1779,8 +1941,8 @@ a C/C++ like define that looks like:
 
         struct2.set_description(struct_desc, textblock=False)
         struct2.set_description(textblock_t(struct_desc), textblock=True)
-        struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
-        struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        #struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        #struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
         struct2.private = self.get_attribute_as_bool(modifiers, "private")
         struct2.file = self.get_attribute_as_string(modifiers, "file")
         struct2.line = self.get_attribute_as_int(modifiers, "line")
@@ -1920,6 +2082,35 @@ a C/C++ like define that looks like:
 
         return vars
 
+    def parse_object_section(self, obj, objtype, section):
+        
+        if(section.startswith("class:")):
+            class_name = section[6:len(section)].strip()
+            cls = self.m_engine.class_get(class_name)
+
+            if(objtype == 'prototype'):
+                cls.prototype_add(obj)
+
+        elif(section.startswith("deprecated:")):
+            msg = textblock_t(section[11:len(section)].strip())
+            obj.set_deprecated(True, msg)
+                
+        elif(section.startswith("example:")):
+            example = section[8:len(section)]
+            obj.set_example(example, self.m_engine.m_source_code_analyzer, 'code')
+        elif(section.startswith("see:")):
+            see_also = section[4:len(section)].strip()
+            obj.set_see_also(see_also)
+        elif(section.startswith("since:")):
+            since = section[6:len(section)].strip()
+            obj.set_since(textblock_t(since))
+        elif(section.startswith("name:")):
+            name = section[5:len(section)].strip()
+            obj.set_name(name)
+        elif(section.startswith("description:")):
+            source = section[12:len(section)].strip()
+            obj.description = textblock_t(source)
+
     
     def parse_prototype(self, source, modifiers):
         
@@ -1934,6 +2125,8 @@ a C/C++ like define that looks like:
         p2.file = self.get_attribute_as_string(modifiers, "file")
         p2.line = self.get_attribute_as_int(modifiers, "line")
         
+        p2.private = self.get_attribute_as_bool(modifiers, "private")
+        
         p2.set_name(self.get_attribute_as_string(modifiers, "name"))
         
         language = "code"
@@ -1944,13 +2137,13 @@ a C/C++ like define that looks like:
 
         for section in sections:
             if(section != ""):
-                
+
                 if(section.startswith("function:")):
                     vars["name"] = section[9:len(section)].strip()
                     p2.set_name(vars["name"])
-                elif(section.startswith("name:")):
-                    vars["name"] = section[5:len(section)].strip()
-                    p2.set_name(vars["name"])
+                #elif(section.startswith("name:")):
+                #    vars["name"] = section[5:len(section)].strip()
+                #    p2.set_name(vars["name"])
 
                 elif(section.startswith("description:")):
                     vars["desc"] = section[12:len(section)].strip()
@@ -2057,12 +2250,9 @@ a C/C++ like define that looks like:
                     vars["returns"] = section[8:len(section)].strip()
                     p2.set_returns(vars["returns"])
                 
-                elif(section.startswith("example:")):
-                    example = section[8:len(section)]
-
-                    #print "EXAMPLE: [%s]" % example
-
-                    p2.set_example(example, self.m_engine.m_source_code_analyzer, language)
+                #elif(section.startswith("example:")):
+                #    example = section[8:len(section)]
+                #    p2.set_example(example, self.m_engine.m_source_code_analyzer, language)
 
                 elif(section.startswith("pseudocode:")):
                     
@@ -2074,26 +2264,24 @@ a C/C++ like define that looks like:
                     
                     p2.set_pseudocode(pseudocode, self.m_engine.m_source_code_analyzer, language)
 
-                elif(section.startswith("see:")):
-                    vars["see_also"] = section[4:len(section)].strip()
-                    p2.set_see_also(vars["see_also"])
-                
-                elif(section.startswith("deprecated:")):
-                    vars["deprecated"] = True
-                    msg = textblock_t(section[11:len(section)].strip())
-                    vars["deprecated_msg"] = msg
-                    p2.set_deprecated(True, msg)
-
-                elif(section.startswith("class:")):
-                    class_name = section[6:len(section)].strip()
-
-        if(class_name != None):
-            WARNING("Class name: %s" % class_name)
-
-            cls = self.m_engine.class_get(class_name)
-            print p2
-            cls.prototype_add(p2)
+                #elif(section.startswith("see:")):
+                #    vars["see_also"] = section[4:len(section)].strip()
+                #    p2.set_see_also(vars["see_also"])
             
+                elif(section.startswith("since:")):
+                    since = section[6:len(section)].strip()
+                    p2.set_since(textblock_t(since))
+                
+                #elif(section.startswith("deprecated:")):
+                #    vars["deprecated"] = True
+                #    msg = textblock_t(section[11:len(section)].strip())
+                #    vars["deprecated_msg"] = msg
+                #    p2.set_deprecated(True, msg)
+
+
+        for section in sections:
+            if(section != ""):
+                self.parse_object_section(p2, 'prototype', section)
 
         # This section attempts to search the prototype of the
         # method for the type of each argument and sets the type
@@ -2311,7 +2499,7 @@ a C/C++ like define that looks like:
 
         return "SNIPPET %s NOT FOUND" % name
 
-    def _parse_tag(self, page_title, name, data, modifiers):
+    def _parse_tag(self, page_title, name, data, modifiers, line_no):
         '''This method is used to parse the tag itself and expand
            or modify it as necessary.
            
@@ -2331,6 +2519,7 @@ a C/C++ like define that looks like:
 
         name = name.strip()
         self.m_current_tag = name
+        self.m_current_line = line_no
 
         data = data.rstrip("\n")
         modifiers = modifiers.rstrip("\n")
@@ -2359,7 +2548,7 @@ a C/C++ like define that looks like:
         #print "CURRENT_FILE = %s" % os.path.basename(self.m_current_file)
 
         if(not self.is_valid_tag(name)):
-            FATAL("Invalid tag '%s' encountered at %s:%d" % (name, self.m_current_file, -1))
+            FATAL("Invalid tag '%s' encountered at %s:%d" % (name, self.m_current_file, self.m_current_line))
             
         # Expand any PHP style embedded snippets
         data = re.sub("<\?=(\$[0-9])\?>", self.expand_snippet, data)
@@ -2434,16 +2623,15 @@ else:
             tag.break_before = bool(modifiers["break_before"])
 
         filename = os.path.basename(self.m_current_file)
-        linenum  = -1
 
         tag.file = filename
-        tag.line = None
+        tag.line = line_no
             
         if(len(data) == 0):
             if(not tag.name in ('image', 'functionsummary', 'typesummary', 'embed', 'columns', 'column', 'endcolumns', 'inkscape')):
                 # DEBUG BRAD: This uses the old way of dealing with line numbers. Need to figure out
                 #             a way of fixing this.
-                WARNING("Tag '%s' at %s:%d has no body, may cause parsing errors" % (tag.name, tag.file, linenum))
+                WARNING("Tag '%s' at %s:%d has no body, may cause parsing errors" % (tag.name, tag.file, tag.line))
 
         if(self.tag_is_header(name)):
             tag.is_header = True 
@@ -2476,6 +2664,7 @@ else:
             tag.source = tmp
 
             if(name != "h"):
+                #print "Adding wikiword %s" % tmp
                 word = wikiword_t()
                 word.wikiword = tmp
                 word.label = tmp
@@ -2485,7 +2674,8 @@ else:
                     word.wikiword = modifiers["wikiword"]
 
                 word.link = os.path.basename(self.m_current_file)
-                self.m_engine.m_wiki_links[word.wikiword] = word
+                word.source_file = self.m_current_file
+                self.m_engine.add_wikiword(word)
 
             self.m_headers.append(tag)
         
@@ -2500,7 +2690,7 @@ else:
             tag.modifiers = modifiers
             tag.page_title = page_title
             tag.file = filename
-            tag.line = None
+            tag.line = line_no
 
             tags.append(tag)
 
@@ -2523,7 +2713,7 @@ else:
             code = self.m_engine.m_source_code_analyzer
         
             tag.source = data
-            tag.contents = code.parse_source_code(name, data)
+            tag.contents = code.parse_source_code(name, data, tag.file, tag.line)
 
         elif(name == "table"):
             tag.contents = self.parse_table(data, modifiers)
@@ -2617,9 +2807,11 @@ else:
                     if(modifiers.has_key("wikiword")):
                         word.wikiword = modifiers["wikiword"]
 
+                    word.source_file = self.m_current_file
                     word.link = os.path.basename(self.m_current_file)
+                    word.source_file = self.m_current_file
 
-                    self.m_engine.m_wiki_links[word.wikiword] = word
+                    self.m_engine.add_wikiword(word)
 
                     tags.append(header)
                 else:
@@ -2640,7 +2832,7 @@ else:
                 header.source = testcase["name"]
                 header.modifiers = modifiers
                 header.file = filename
-                header.line = linenum
+                header.line = line_no
                 
                 # If a header with the same name already exists then don't
                 # bother adding a new one
@@ -2658,8 +2850,10 @@ else:
                         word.wikiword = modifiers["wikiword"]
 
                     word.link = os.path.basename(self.m_current_file)
+                    
+                    word.source_file = self.m_current_file
 
-                    self.m_engine.m_wiki_links[word.wikiword] = word
+                    self.m_engine.add_wikiword(word)
 
                     tags.append(header)
                 else:
@@ -2720,7 +2914,8 @@ else:
                     word.wikiword = modifiers["wikiword"]
 
                 word.link = os.path.basename(self.m_current_file)
-                self.m_engine.m_wiki_links[word.wikiword] = word
+                word.source_file = self.m_current_file
+                self.m_engine.add_wikiword(word)
             
             # If the table has no title then default it
             if(table.title == None):
@@ -2819,9 +3014,9 @@ else:
         input = source.read()
         source.close()
         
-        self.parse_line_info(source_file, input)
+        #self.parse_line_info(source_file, input)
 
-        #print "PARSE INCLUDE: %s" % source_file
+        parent_file = self.m_active_file[-1]
 
         self.m_active_file.append(source_file)
         self.m_current_file = self.m_active_file[-1]
@@ -2832,13 +3027,20 @@ else:
         if(source_file.endswith(".c") or source_file.endswith(".h")):
 
             indexer = indexer_t()
-
-            #print "Parsing buffer"
             page = self.m_cpp_parser.parse_buffer(input, source_file)
             template = template_shorte_t(self.m_engine, indexer)
             input = template.generate_buffer(page)
 
-        result = self.parse_string(input, source_file, is_include=True)
+        elif(source_file.endswith('.py')):
+            indexer = indexer_t()
+            pyparse = src.parsers.python_parser.python_parser_t(self.m_engine)
+            page = pyparse.parse_buffer(None, source_file)
+            template = template_shorte_t(self.m_engine, indexer)
+            input = template.generate_buffer(page)
+
+        #result = self.parse_string(input, source_file, is_include=True)
+        self.m_current_file = None
+        result = self.parse_string(input, parent_file, is_include=True)
 
         if(len(self.m_active_file) > 1):
             self.m_active_file.pop()
@@ -2848,7 +3050,7 @@ else:
 
         return result
 
-    def _parse_tags(self, title, input, start):
+    def _parse_header_tags(self, title, input, start):
 
         STATE_NORMAL     = 0
         STATE_INTAG      = 1
@@ -2868,6 +3070,8 @@ else:
 
         tag_list = []
 
+        line_no = 0
+
         #print "INPUT = [%s]" % input
        
         i = start
@@ -2886,9 +3090,9 @@ else:
 
                 if(input[i] == ' ' or input[i] == ':' or input[i] == '\t' or input[i] == '\n'):
 
-                    (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
+                    (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i, line_no)
 
-                    tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                    tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, line_no)
                         
                     excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, tag_list)
                     
@@ -2909,8 +3113,8 @@ else:
                 
                     #print "Here"
                     if(tag_name != "" and tag_data != ""):
-                        (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                        tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                        (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i, line_no)
+                        tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, line_no)
                     
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, tag_list)
                     
@@ -2943,16 +3147,16 @@ else:
         if(tag_data != ""):
             if(tag_name != ""):
 
-                (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i, line_no)
+                tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, line_no)
                         
                 excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, tag_list)
                         
 
             else:
                 
-                (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
-                tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i, line_no)
+                tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, line_no)
 
                 excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, tag_list)
                 
@@ -3027,7 +3231,7 @@ def exists(s):
         input = source.read()
         source.close()
 
-        self.parse_line_info(source_file, input)
+        #self.parse_line_info(source_file, input)
 
         self.m_active_file.append(source_file)
         #print "  Setting current file to %s, stack.len = %d" % (source_file, len(self.m_active_file))
@@ -3041,6 +3245,9 @@ def exists(s):
         return result
 
     def parse_string(self, input, source_file="default.tpl", is_include=False):
+
+        if(None == self.m_current_file):
+            self.m_current_file = source_file
 
         # Strip any illegal characters
         input = re.sub("[’‘]", "'", input)
@@ -3075,14 +3282,17 @@ def exists(s):
             start = 0
             header = self.__parse_header(input)
 
-            start = header["start"]
-            title = header["title"]
-            subtitle = header["subtitle"]
-            toc   = header["toc"]
-            numbered = header["numbered"]
-            version = header["version"]
-            number = header["number"]
-            revision_history = header["revision_history"]
+            start = header.get_start()
+            title = header.get_title()
+            subtitle = header.get_subtitle()
+            toc   = header.get_toc()
+            numbered = header.get_numbered()
+            version = header.get_version()
+            number = header.get_number()
+            revision_history = header.get_revision_history()
+            line_no = header.get_line() - 1
+
+            #print "FILE %s starts at line %d" % (source_file, header.get_line())
             
             # If the title has not already been set
             # then use the version found in the input file
@@ -3093,14 +3303,14 @@ def exists(s):
 
             self.m_engine.get_doc_info().set_version(version)
             self.m_engine.get_doc_info().set_number(number)
-            if(header.has_key("author")):
-                self.m_engine.get_doc_info().set_author(header["author"])
+            if(header.has_author()):
+                self.m_engine.get_doc_info().set_author(header.get_author())
 
             self.m_engine.get_doc_info().set_revision_history(revision_history)
 
             if(self.m_engine.m_output_filename == None):
-                if(header.has_key("filename")):
-                    self.m_engine.m_output_filename = header["filename"]
+                if(header.has_filename()):
+                    self.m_engine.m_output_filename = header.get_filename()
 
 
             page = {}
@@ -3150,15 +3360,16 @@ def exists(s):
                     if(input[i] == ' ' or input[i] == ':' or input[i] == '\t' or input[i] == '\n'):
 
                         saved_i = i
+                        saved_line = line_no
 
-                        (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
+                        (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i, line_no)
 
-                        tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                        tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, saved_line)
 
-                        if(tags != None):
-                            for tag in tags:
-                                if(tag.line == None):
-                                    tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
+                        #if(tags != None):
+                        #    for tag in tags:
+                        #        if(tag.line2 == None):
+                        #            tag.line2 = self.get_line_at(self.m_current_file, saved_i, tag.name)
 
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3185,14 +3396,15 @@ def exists(s):
                             #print "Here"
                             if(tag_name != "" and tag_data != ""):
                                 saved_i = i
+                                saved_line = line_no
 
-                                (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                                tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                                (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i, line_no)
+                                tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, saved_line)
 
-                                if(tags != None):
-                                    for tag in tags:
-                                        if(tag.line == None):
-                                            tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
+                                #if(tags != None):
+                                #    for tag in tags:
+                                #        if(tag.line2 == None):
+                                #            tag.line2 = self.get_line_at(self.m_current_file, saved_i, tag.name)
                             
                                 excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3204,6 +3416,9 @@ def exists(s):
                     elif(input[i] == '\\'):
                         #tag_data += input[i]
                         states.append(STATE_ESCAPE)
+                    
+                    elif(input[i] == '\n'):
+                        line_no += 1
                 
                 elif(state == STATE_ESCAPE):
                     
@@ -3214,8 +3429,12 @@ def exists(s):
                     if(input[i:i+3] == '-->'):
                         states.pop()
                         i += 2
+                    elif(input[i] == '\n'):
+                        line_no += 1
+
                 elif(state == STATE_COMMENT):
                     if(input[i] == '\n'):
+                        line_no += 1
                         states.pop()
                 
                 i = i+1
@@ -3226,14 +3445,15 @@ def exists(s):
                 if(tag_name != ""):
 
                     saved_i = i
+                    saved_line = line_no
 
-                    (i, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i)
-                    tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                    (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data(tag_name, input, i, line_no)
+                    tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, saved_line)
 
-                    if(tags != None):
-                        for tag in tags:
-                            if(tag.line == None):
-                                tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
+                    #if(tags != None):
+                    #    for tag in tags:
+                    #        if(tag.line2 == None):
+                    #            tag.line2 = self.get_line_at(self.m_current_file, saved_i, tag.name)
 
                     excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 
@@ -3242,13 +3462,14 @@ def exists(s):
                     if(i < len(input)):
                         INFO("Snippet: %s, i = %d, len = %d" % (input[i:-1], i, len(input)))
                         saved_i = i
-                        (i, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i)
-                        tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers)
+                        saved_line = line_no
+                        (i, line_no, tag_data, tag_modifiers) = self._parse_tag_data("p", input, i, line_no)
+                        tags = self._parse_tag(title, tag_name, tag_data, tag_modifiers, saved_line)
 
-                        if(tags != None):
-                            for tag in tags:
-                                if(tag.line == None):
-                                    tag.line = self.get_line_at(self.m_current_file, saved_i, tag.name)
+                        #if(tags != None):
+                        #    for tag in tags:
+                        #        if(tag.line2 == None):
+                        #            tag.line2 = self.get_line_at(self.m_current_file, saved_i, tag.name)
                         
                         excluded = self.__append_tags_if_not_excluded(tags, excluded, tag_name, page["tags"])
 

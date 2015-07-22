@@ -24,9 +24,18 @@ c.compile.win32=
 #include <stdlib.h>
 #include <stdio.h>
 
+/**
+ * The main routine
+ *
+ * @return
+ *   Always returns EXIT_SUCCESS.
+ */
 int main(void)
 {
-    printf("Hello world!\n");
+    printf("Hello   world!\n");
+    printf("This is a C example with a really long line in it "
+           "that should wrap in the code output. I'm not sure what "
+           "it will do to the output box");
     return EXIT_SUCCESS;
 }
 
@@ -37,8 +46,10 @@ int main(void)
 #include <cstdlib>
 using namespace std;
 
+// The main routine
 int main(void)
 {
+    /* Hello world! */
     cout << "Hello world\n";
     return EXIT_SUCCESS;
 }
@@ -72,19 +83,19 @@ class HelloWorldApp {
 @h2 Perl
 
 @perl: exec=True
-printf("Hello perl!\\n");
+printf("Hello perl!\n");
 
 @h2 TCL
 
 @tcl: exec=True
-puts "Hello TCL\\n";
+puts "Hello TCL\n";
 
 @h2 Swift
 @swift: exec=True
 let x=10;
 let label = "This is a test"
 let width = 94
-print("Hello world\\n");
+print("Hello world\n");
 
 @h2 Go
 @go: exec=True
@@ -107,6 +118,17 @@ for(index = 0; index < parts.length; index++)
 
 print(text)
 
+@h2 Batch
+@batch: exec=True
+rem This is a test
+echo Hello world!
+
+@h2 XML
+@xml
+<!-- This is a comment -->
+<one>
+</one>
+
 @h1 Failing Examples
 
 @h2 C
@@ -126,6 +148,7 @@ Trap runtime failures by checking the return code of non-zero.
 @c: exec=True ignore_errors=True
 #include <stdio.h>
 #include <stdlib.h>
+/* The main routine */
 int main(void)
 {
     printf("Hello world!\n");

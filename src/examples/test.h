@@ -72,6 +72,9 @@ typedef enum
  *   {
  *       printf("Found e_public_test");
  *   }
+ *
+ * @since
+ *   version 1.0.2
  */
 typedef enum public_enum_s
 {
@@ -290,5 +293,38 @@ int my_diags_show_status(
 #define my_test4 0 /* This one shouldn't show up either because it has no header */
 
 
+/**
+ * This structure has been deprecated. Don't
+ * use it anymore
+ *
+ * @deprecated
+ *   I deprecated this because it doesn't do
+ *   anything
+ *
+ * @since
+ *   This was introduced in version 1.0
+ *   @{note, This is an inline note}
+ */
+typedef struct
+{
+    /** The first parameter */
+    int tmp1;
+}deprecated_struct;
 
 
+/**
+ * This enum is deprecated
+ * 
+ * @deprecated
+ * This enum is not useful.
+ * @{note, An embedded note}
+ *
+ * @example
+ *   int x = (int)dep_one;
+ *   int y = (int)dep_two;
+ */
+typedef enum
+{
+    dep_one = 1,
+    dep_two = 2
+}deprecated_enum;

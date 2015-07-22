@@ -60,67 +60,6 @@ def get_rtokens(tu, extent):
 
         yield token
 
-class comment_t:
-    def __init__(self):
-        self.params = {}
-        self.returns = None
-        self.example = None
-        self.private = False
-        self.see_also = None
-        self.deprecated = False
-        self.deprecated_msg = None
-        self.heading = None
-        self.since = None
-        
-        # For types that have pseudocode associated
-        # with them, primarily function prototypes
-        self.pseudocode = None
-
-    def is_private(self):
-        return self.private
-
-    def has_example(self):
-        if(self.example != None):
-            return True
-        return False
-
-    def get_example(self):
-        return self.example
-
-    def has_returns(self):
-        if(self.returns != None):
-            return True
-        return False
-    def get_returns(self):
-        return self.returns
-
-    def has_pseudocode(self):
-        if(self.pseudocode != None):
-            return True
-        return False
-    def get_pseudocode(self):
-        return self.pseudocode
-
-    def has_see_also(self):
-        if(self.see_also != None):
-            return True
-        return False
-    def get_see_also(self):
-        return self.see_also
-
-    def has_heading(self):
-        if(self.heading != None):
-            return True
-        return False
-    def get_heading(self):
-        return self.heading
-
-    def has_since(self):
-        if(self.since != None):
-            return True
-        return False
-    def get_since(self):
-        return self.since
 
     
 class clang_parser_t(shorte_parser_t):
@@ -136,7 +75,7 @@ class clang_parser_t(shorte_parser_t):
 
         # Newer versions of clang seem to fail if you create
         # cindex but don't actually call parse(). To avoid
-	    # this issue we'll only create the cindex object
+        # this issue we'll only create the cindex object
         # if we're actually parsing something.
         self.cindex = None
         self.tu = None
@@ -213,10 +152,7 @@ class clang_parser_t(shorte_parser_t):
             prefix = parts[0]
             shorte = shorte_parser_t(self.m_engine)
             
-            # In order to support wikiwords we need to pass the source
-            # file name with a .html extension. Then we need to append
-            # any wiki words from the source file to the global list
-            shorte.parse_string(prefix, self.m_source_file + ".html")
+            shorte.parse_string(prefix, self.m_source_file)
             tags = shorte.m_pages[0]["tags"]
             #links = shorte.get_wiki_links()
             #self.add_wiki_links(links)
@@ -614,6 +550,7 @@ class clang_parser_t(shorte_parser_t):
                 if(not typedefs2.has_key(typename)):
                     typedefs2[typename] = []
                 typedefs2[typename].append(typedef)
+
         add_header = shorte_get_config("shorte", "header_add_to_prototype")
 
         for cursor in top.get_children():
@@ -720,6 +657,13 @@ class clang_parser_t(shorte_parser_t):
                         tag.line = cursor.location.line
                         tag.modifiers = {}
                         page["tags"].append(tag)
+                
+                        word = wikiword_t()
+                        word.wikiword = object_name
+                        word.label = object_name
+                        word.is_bookmark = False
+                        word.link = os.path.basename(tag.file)
+                        self.m_engine.add_wikiword(word)
 
                     if(cursor.kind == clang.cindex.CursorKind.MACRO_DEFINITION):
                         define = define_t()
@@ -737,6 +681,9 @@ class clang_parser_t(shorte_parser_t):
                         tmp = self.m_file_src[start_offset:end_offset]
                         tmp = tmp.replace(define.name, '')
                         define.value = textblock_t(tmp.strip())
+                        
+                        if(comment.has_since()):
+                            define.set_since(textblock_t(comment.since))
 
                         tag = tag_t()
                         tag.name = "define"
@@ -782,6 +729,10 @@ class clang_parser_t(shorte_parser_t):
                                 self.m_engine.m_source_code_analyzer, "c")
 
                         prototype.set_see_also(comment.see_also)
+                            
+                        if(comment.has_since()):
+                            prototype.set_since(textblock_t(comment.since))
+
                         prototype.set_private(comment.private)
                         prototype.set_deprecated(comment.deprecated, comment.deprecated_msg)
 
@@ -953,6 +904,13 @@ class clang_parser_t(shorte_parser_t):
                                 tag.line = cursor.location.line
                                 tag.modifiers = {}
                                 page["tags"].append(tag)
+                        
+                                word = wikiword_t()
+                                word.wikiword = t
+                                word.label = t
+                                word.is_bookmark = False
+                                word.link = os.path.basename(tag.file)
+                                self.m_engine.add_wikiword(word)
 
                             # If the type has multiple typedefs then
                             # record the other aliases in the see_also
@@ -976,6 +934,9 @@ class clang_parser_t(shorte_parser_t):
                             enum.file = self.m_source_file
                             enum.max_cols = 3
                             enum.set_see_also(', '.join(see_also))
+                            
+                            if(comment.has_since()):
+                                enum.set_since(textblock_t(comment.since))
 
                             tag = tag_t()
                             tag.name = "enum"
@@ -1061,6 +1022,13 @@ class clang_parser_t(shorte_parser_t):
                                 tag.line = cursor.location.line
                                 tag.modifiers = {}
                                 page["tags"].append(tag)
+                                
+                                word = wikiword_t()
+                                word.wikiword = t
+                                word.label = t
+                                word.is_bookmark = False
+                                word.link = os.path.basename(tag.file)
+                                self.m_engine.add_wikiword(word)
 
                             # If the type has multiple typedefs then
                             # record the other aliases in the see_also
@@ -1082,6 +1050,13 @@ class clang_parser_t(shorte_parser_t):
                             struct.max_cols = 3 #len(struct.fields)
                             struct.fields.extend(fields)
                             struct.set_see_also(', '.join(see_also))
+                        
+                            if(comment.has_since()):
+                                struct.set_since(textblock_t(comment.since))
+                            #if(comment.has_deprecated()):
+                            #    struct.set_deprecated(True, comment.deprecated_msg)
+                            struct.deprecated = comment.deprecated
+                            struct.deprecated_msg = comment.deprecated_msg
 
                             tag = tag_t()
                             tag.name = "struct"
@@ -1119,6 +1094,8 @@ class clang_parser_t(shorte_parser_t):
                         cls.set_description(comment.description)
                         cls.line = cursor.location.line
                         cls.file = path
+                        if(comment.has_since()):
+                            cls.set_since(textblock_t(comment.since))
 
                         print "@class: file=%s line=%d" % (file, line)
                         print "--name: " , cursor.type.spelling
@@ -1175,7 +1152,7 @@ class clang_parser_t(shorte_parser_t):
         parts = text.split('@brief')
         text = parts[1]
         #print text
-        shorte.parse_string(text, self.m_source_file + ".html")
+        shorte.parse_string(text, self.m_source_file)
         tags = shorte.m_pages[0]["tags"]
         self.page["tags"].extend(tags)
 

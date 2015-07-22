@@ -49,8 +49,8 @@ class template_text_t(template_t):
         i = 0
         for tag in tags:
 
-            type   = tag["type"]
-            source = tag["data"]
+            type   = tag.type
+            source = tag.data
         
             if(type == TAG_TYPE_CODE):
                 if(source != ""):

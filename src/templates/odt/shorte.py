@@ -12,6 +12,7 @@ class custom_styles(styles):
         #self.list_bullet_indent  = 0.2
         #self.list_bullet_base    = 2.5
         self.standard_indent = 0
+        self.standard_indented = 0.25
         
         self.colors = templates.themes.theme().get_colors("shorte")
 
@@ -76,6 +77,10 @@ class custom_styles(styles):
       <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm" fo:margin-left="${standard_indent}cm"/>
       <style:text-properties fo:color="#000000"/>
     </style:style>
+    <style:style style:name="shorte_standard_indented" style:family="paragraph" style:parent-style-name="Standard">
+      <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm" fo:margin-left="${standard_indented}cm"/>
+      <style:text-properties fo:color="#000000"/>
+    </style:style>
 
     ${common_styles}
     
@@ -92,12 +97,13 @@ class custom_styles(styles):
     $source_code_styles
 
     ''').substitute({
-         "heading_styles"     : heading_styles,
-         "list_styles"        : list_styles,
-         "table_styles"       : table_styles,
-         "prototype_styles"   : prototype_styles,
-         "standard_indent"    : self.standard_indent,
-         "common_styles"      : common_styles,
-         "source_code_styles" : source_code_styles})
+         "heading_styles"       : heading_styles,
+         "list_styles"          : list_styles,
+         "table_styles"         : table_styles,
+         "prototype_styles"     : prototype_styles,
+         "standard_indent"      : self.standard_indent,
+         "standard_indented"    : self.standard_indented,
+         "common_styles"        : common_styles,
+         "source_code_styles"   : source_code_styles})
     
         return custom_styles

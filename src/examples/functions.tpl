@@ -4,11 +4,18 @@
 
 @body
 
+@h1 API Summary
 @h2 Function Summary
-@functionsummary
+@functionsummary: filters="!deprecated"
 
 @h2 Type Summary
-@typesummary
+@typesummary: filters="!deprecated"
+
+@h2 Deprecated Functions and Types
+@functionsummary: filters="deprecated"
+@typesummary:     filters="deprecated"
+
+@h1 API Cross Reference
 
 @h3 my_function
 @prototype: language="c"
@@ -81,6 +88,14 @@
 -- see:
     THis is a test
 
+-- since:
+    This feature has some random since description.
+    and a table:
+    @{table,
+    - ONe | Two
+    - Three | Four
+    }
+
 @h3 my_function2
 @prototype
 -- function: my_function2
@@ -114,6 +129,11 @@
     void my_function3(void)
 -- returns:
     None
+-- deprecated:
+    This was a useless function so it was deprecated
+    in version 1.0.
+
+    @{note, This is a note here}
 
 
 @h3 function4
@@ -140,9 +160,11 @@
         - One   ! Two
         - Three ! Four
         }
-    -- arg2 | I | Argument 2
-    -- arg3 | O | Argument 3
-    -- arg4 | I | Argument 4
+    -- arg2 | Input  | Argument 2
+    -- arg3 | Output | Argument 3
+    -- arg4 | In/Out | Argument 4
 -- returns:
     Always 0
 
+
+@include "examples/test.h"

@@ -16,6 +16,9 @@ class styles():
 
         # This is the common indent for the entire document
         self.standard_indent = 0
+
+        # This is the indent for code blocks
+        self.code_indent = 0.255
         
         self.colors = templates.themes.theme().get_colors("shorte")
 
@@ -317,7 +320,7 @@ class styles():
         return string.Template('''
     <!-- Source code styling -->
     <style:style style:name="shorte_code3" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
-        <style:paragraph-properties fo:margin-left="0.155cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-indent="0cm" style:auto-text-indent="false" style:page-number="auto" fo:background-color="#f2f2f2" fo:keep-with-next="auto">
+        <style:paragraph-properties fo:margin-left="${code_indent}cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-indent="0cm" style:auto-text-indent="false" style:page-number="auto" fo:background-color="#f2f2f2" fo:keep-with-next="auto">
             <style:background-image/>
         </style:paragraph-properties>
         <style:text-properties style:font-name="Courier New" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
@@ -330,16 +333,23 @@ class styles():
         <style:text-properties fo:color="#c0c0c0" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
     </style:style>
     <style:style style:name="code_string" style:display-name="code_string" style:family="text">
-        <style:text-properties fo:color="#ff00ff" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
+        <style:text-properties fo:color="#9933CC" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
     </style:style>
     <style:style style:name="code_comment" style:display-name="code_comment" style:family="text">
-        <style:text-properties fo:color="#54c571" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
+        <style:text-properties fo:color="#009900" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
+    </style:style>
+    <style:style style:name="code_comment_tag" style:display-name="code_comment" style:family="text">
+        <style:text-properties fo:color="#00dd00" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
+    </style:style>
+    <style:style style:name="code_preprocessor" style:display-name="code_preprocessor" style:family="text">
+        <style:text-properties fo:color="#660000" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
     </style:style>
     <style:style style:name="code_keyword" style:display-name="code_keyword" style:family="text">
         <style:text-properties fo:color="#0000ff" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
     </style:style>
     ''').substitute({"font_family" : "Courier New",
-                     "font_size" : "9pt"})
+                     "font_size"   : "8.5pt",
+                     "code_indent" : self.code_indent})
         
 
     def get_prototype_styles(self):
@@ -360,15 +370,16 @@ class styles():
 
     <!-- The column widths for the prototype table. -->
     <style:style style:name="shorte_tablePrototype.A" style:family="table-column">
-      <style:table-column-properties style:column-width="0.503cm"/>
+      <style:table-column-properties style:column-width="0.303cm"/>
     </style:style>
 
     <style:style style:name="shorte_tablePrototype.B" style:family="table-column">
-      <style:table-column-properties style:column-width="0.699cm"/>
+      <style:table-column-properties style:column-width="0.499cm"/>
     </style:style>
 
+    <!-- This is currently the column style for the parameter I/O definitions -->
     <style:style style:name="shorte_tablePrototype.C" style:family="table-column">
-      <style:table-column-properties style:column-width="0.982cm"/>
+      <style:table-column-properties style:column-width="1.782cm"/>
     </style:style>
     <style:style style:name="shorte_tablePrototype.D" style:family="table-column">
       <style:table-column-properties style:column-width="14.009cm"/>

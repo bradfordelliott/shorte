@@ -159,6 +159,8 @@ class template_odt_t(template_t):
         self.m_styles["span"]["code_keyword"] = "code_keyword"
         self.m_styles["span"]["code_line_numbers"] = "code_line_numbers"
         self.m_styles["span"]["code_comment"] = "code_comment"
+        self.m_styles["span"]["code_comment_tag"] = "code_comment_tag"
+        self.m_styles["span"]["code_preprocessor"] = "code_preprocessor"
         self.m_styles["span"]["code_string"] = "code_string"
         
         self.m_styles["list"] = {}
@@ -906,6 +908,63 @@ class template_odt_t(template_t):
        
         return data
     
+    def format_object_construct(self, obj, construct, format_as_table_row=False):
+        xml = ''
+        title = construct.title()
+
+        if(construct == "example"):
+            if(obj.example != None):
+                language = obj.example.get_language()
+                example  = obj.example.get_parsed()
+                example  = self.format_source_code(language, example)
+
+                xml = string.Template('''
+            <text:p text:style-name="${param_style}">The following example demonstrates the usage of this method:</text:p>
+            <text:p text:style-name="${param_style}"></text:p>
+            ${example}
+            <text:p text:style-name="${param_style}"></text:p>
+''').substitute({
+    "example" : example,
+    "param_style" : "ShorteNormalText"
+    })
+        elif(construct == "since"):
+            if(obj.has_since()):
+                xml = self.format_textblock(obj.get_since())
+
+        elif(construct == 'see'):
+            if(obj.has_see_also()):
+                style = self.m_styles["para"]["prototype"]["param"]
+                xml = '<text:p text:style-name="%s">%s</text:p>' % (style, self.format_text(obj.get_see_also()))
+
+        if(format_as_table_row):
+            xml = string.Template('''
+        <table:table-row table:style-name="${row_style}">
+          <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
+            <text:p text:style-name="${section_style}">${title}:</text:p>
+          </table:table-cell>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+        </table:table-row>
+        <table:table-row table:style-name="${row_style}">
+          <table:table-cell table:style-name="${cell_style2}" table:number-columns-spanned="4" office:value-type="string">
+            ${xml}
+          </table:table-cell>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+        </table:table-row>
+''').substitute({
+    "xml"           : xml,
+    "title"         : title,
+    "row_style"     : self.m_styles["table"]["row"]["prototype_section"],
+    "cell_style"    : self.m_styles["table"]["cell"]["prototype_section"],
+    "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
+    "cell_style2"   : self.m_styles["table"]["cell"]["prototype"],
+    "param_style"   : self.m_styles["para"]["prototype"]["param"]
+    })
+
+        return xml
 
     def format_image(self, image):
         
@@ -973,7 +1032,7 @@ class template_odt_t(template_t):
 
         data = """
 %s
-<text:p text:style-name="Standard">
+<text:p text:style-name="shorte_standard_indented">
 <draw:frame draw:style-name="fr_inline" draw:name="graphics%d" text:anchor-type="character" %s %s draw:z-index="0">
     <draw:image xlink:href="Pictures/%s" xlink:type="simple" xlink:show="embed" xlink:actuate="onLoad"/>
 </draw:frame>
@@ -1519,7 +1578,7 @@ class template_odt_t(template_t):
         return xml
 
 
-    def __format_table(self, source, table, format_text=True, table_style_name="default"):    
+    def __format_table(self, source, table, format_text=True, table_style_name="default", extra_rows=''):    
         '''This method is called to format the contents of a table and
            generate the XML output necessary for inserting into the ODT
            document'''
@@ -1641,6 +1700,8 @@ class template_odt_t(template_t):
 
             xml += "</table:table-row>\n"
 
+        xml += extra_rows
+
         xml += "</table:table>"
         
         # If the table has a caption then output the caption
@@ -1692,8 +1753,17 @@ class template_odt_t(template_t):
         row = self._table_row()
         row["cols"] = cols
         table.rows.append(row)
+        
+        extra_rows = ''
+        
+        obj_see_also = self.format_object_construct(define, 'see', True)
+        if(len(obj_see_also) > 0):
+            extra_rows += obj_see_also
+        obj_since = self.format_object_construct(define, 'since', True)
+        if(len(obj_since) > 0):
+            extra_rows += obj_since
 
-        return self.__format_table("", table, True)
+        return self.__format_table("", table, True, table_style_name='shorte_table_prototype', extra_rows=extra_rows)
 
         
 
@@ -1830,23 +1900,7 @@ ${desc}
             xml += "</table:table-row>\n"
         xml += "</table:table>"
         
-        
-        if(struct.example != None):
-
-            language = struct.example.get_language()
-            example = struct.example.get_parsed()
-
-            example = self.format_source_code(language, example)
-
-            xml += string.Template('''
-            <text:p text:style-name="${param_style}">The following example demonstrates the usage of this method:</text:p>
-            <text:p text:style-name="${param_style}"></text:p>
-            ${example}
-            <text:p text:style-name="${param_style}"></text:p>
-''').substitute({
-    "example" : example,
-    "param_style" : "ShorteNormalText"
-    })
+        xml += self.format_object_construct(struct, "example") 
 
         return xml
 
@@ -2271,20 +2325,24 @@ ${desc}
         
         for tag in tags:
 
-            type = tag["type"]
-            source = tag["data"]
+            type = tag.type
+            source = tag.data
         
             source = amp.sub("&amp;", source)
             source = lt.sub("&lt;", source)
             source = gt.sub("&gt;", source)
+            source = re.sub("( +)", self.__replace_whitespace, source)
 
             if(type == TAG_TYPE_CODE):
                 source = self.format_keywords(language, source, exclude_wikiwords)
                 output += '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["span"]["code"], source)
             elif(type in (TAG_TYPE_COMMENT, TAG_TYPE_MCOMMENT, TAG_TYPE_XMLCOMMENT)):
-                source = re.sub("(^ +)", self.__replace_whitespace, source)
+                #print "tag: [%s]" % source
+                source = re.sub("(@[^ \t\n]+)", """</text:span><text:span text:style-name="%s">\\1</text:span><text:span text:style-name="%s">""" % (self.m_styles['span']['code_comment_tag'], self.m_styles['span']['code_comment']), source)
                 #source.replace(" ", "<text:s text:c=\"1\"/>")
                 output += '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["span"]["code_comment"], source)
+            elif(type == TAG_TYPE_PREPROCESSOR):
+                output += '<text:span text:style-name="%s">%s</text:span>' % (self.m_styles["span"]["code_preprocessor"], source)
             elif(type == TAG_TYPE_WHITESPACE):
                 output += '<text:s text:c="1"/>'
             elif(type == TAG_TYPE_STRING):
@@ -2416,10 +2474,10 @@ ${desc}
         prototype.pop(0)
         prototype.pop(0)
 
-        rt = return_type["data"]
+        rt = return_type.data
         
-        if(return_type["data"] == "const"):
-            rt += " " + prototype[0]["data"]
+        if(return_type.data == "const"):
+            rt += " " + prototype[0].data
             prototype.pop(0)
             prototype.pop(0)
 
@@ -2829,7 +2887,7 @@ ${desc}
     "param_style" : self.m_styles["para"]["prototype"]["param"]
     })
 
-            function["see_also"] = xml
+            function["see_also"] = self.format_object_construct(prototype2, 'see', True)
         
         
         if(prototype2.get_deprecated()):
@@ -3018,21 +3076,43 @@ ${desc}
         output = ''
 
         output += self.format_source_code(tag.name, tag.contents)
+        output += self.format_pre('')
+
         result = tag.result
 
         if(result != None):
+            
+            output_is_blank = False
+            if(0 == len(result.strip())):
+                output_is_blank = True
+
             # Convert any HTML tags in the input source
             lt = re.compile("<")
             gt = re.compile(">")
             ws = re.compile(" ")
             nl = re.compile("\\\\n")
-
+            
             result = lt.sub("&lt;", result)
             result = gt.sub("&gt;", result)
             result = nl.sub("__NEWLINE__", result)
         
             output += self.format_bold("Result:")
-            output += self.format_pre(result)
+
+            if(not output_is_blank):
+                output += self.format_pre(result)
+        
+        if(tag.result_image != None):
+            image = {}
+            image["src"] = tag.result_image
+
+            iname = os.path.basename(tag.result_image)
+            (iname,iext) = os.path.splitext(iname)
+            image['ext']  = iext
+            image['name'] = iname
+
+            output += self.format_image(image)
+                
+        output += self.format_pre('')
         
         self.m_sections[0]["Headings"][self.m_header_id]["Content"] += output
 

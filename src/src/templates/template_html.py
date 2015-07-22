@@ -36,6 +36,7 @@ $contents
 </div>
 $source
 $result
+<br/>
 """)
 
 note_template = string.Template(
@@ -43,7 +44,7 @@ note_template = string.Template(
 <div style='margin-left: 20px; margin-top:10px; margin-bottom:0px; margin-right:30px;border:1px solid #ccc;background:#f8f7cf;border-radius:6px;-moz-border-radius:6px;-webkit-border-radius:6px;'>
   <table>
     <tr valign="top">
-        <td>
+        <td style='border:0px;'>
             <div style='font-weight:bold;color:black;text-decoration:underline;'><img style='height:35px;margin-left:-10px;margin-top:-10px;' src="$image"></img>$title:</div>
             <div style="margin-left:10px;margin-top:5px;">$contents</div>
         </td>
@@ -266,7 +267,6 @@ class template_html_t(template_t):
         self.m_contents = []
         self.m_engine = engine
         self.m_indexer = indexer
-        self.m_theme = ""
         self.m_template_dir = shorte_get_startup_path() + "/templates/"
         self.m_inline = False
         self.m_include_link = False
@@ -370,15 +370,17 @@ class template_html_t(template_t):
     #|    The block of python source code formatted as HTML.
     #|
     #+-----------------------------------------------------------------------------
-    def format_pycairo(self, file, input_source):
+    def format_pycairo(self, tag):
         output = ""
         start = 0
+
+        input_source = tag.source
         
         # Run the python interpreter to get an answer
         tmp = open("tmpexample.py", "w")
         tmp.write(input_source)
         tmp.close()
-        python_result = os.popen("%s tmpexample.py 2>&1" % python).read();
+        python_result = os.popen("python tmpexample.py 2>&1").read();
         
         # Convert any HTML tags in the input source
         lt = re.compile("<")
@@ -501,7 +503,7 @@ class template_html_t(template_t):
             output += "</span>"
         
         id = self.m_indexer.image()
-        
+
         if(os.path.exists("cairo.png")):
             image_name = "example_%d.png" % id
             shutil.move("cairo.png", image_name)
@@ -620,8 +622,8 @@ class template_html_t(template_t):
         
         for tag in tags:
 
-            type = tag["type"]
-            source = tag["data"]
+            type = tag.type
+            source = tag.data
             
             if(type in (TAG_TYPE_COMMENT, TAG_TYPE_MCOMMENT)):
                 source = source.replace("->", "#")
@@ -707,8 +709,8 @@ class template_html_t(template_t):
 
         for tag in tags:
 
-            type = tag["type"]
-            source = tag["data"]
+            type = tag.type
+            source = tag.data
         
             source = amp.sub("&amp;", source)
             source = lt.sub("&lt;", source)
@@ -874,10 +876,10 @@ class template_html_t(template_t):
         prototype.pop(0)
         prototype.pop(0)
 
-        rt = return_type["data"]
+        rt = return_type.data
         
-        if(return_type["data"] == "const"):
-            rt += "&nbsp;" + prototype[0]["data"]
+        if(return_type.data == "const"):
+            rt += "&nbsp;" + prototype[0].data
             prototype.pop(0)
             prototype.pop(0)
 
@@ -886,15 +888,18 @@ class template_html_t(template_t):
    
 
     def format_function_summary(self, tag):
-
+        
+        filters = []
         if(tag.modifiers):
             if(tag.modifiers.has_key("src")):
                 src_file = tag.modifiers["src"]
                 tag.page_title = src_file
+            elif(tag.modifiers.has_key("filters")):
+                filters = tag.modifiers['filters'].split(';')
 
-        tags = self.m_engine.get_function_summary(tag)
+        tags = self.m_engine.get_function_summary(tag, filters=filters)
 
-        html = '<table style="border-collapse:collapse;border:0px;margin-left:30px;background-color:#fafafa;">'
+        html = '<table style="border-collapse:collapse;border:0px;margin-left:30px;background-color:#fafafa;width:90%;text-align:left;">'
 
         hierarchy = ''
     
@@ -920,8 +925,8 @@ class template_html_t(template_t):
 
             html += string.Template('''
 <tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">$return </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>$prototype</td>
+    <td style="width:15%;border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">$return </td>
+    <td style='width:85%;border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>$prototype</td>
 </tr>
 <tr valign=top>
     <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
@@ -936,28 +941,43 @@ class template_html_t(template_t):
 
     def format_types_summary(self, tag):
 
-        tags = self.m_engine.get_types_summary(tag)
+        filters = []
 
-        html = '<table style="border-collapse:collapse;border:0px;margin-left:30px;background-color:#fafafa;">'
+        if(tag.modifiers):
+            if(tag.modifiers.has_key("filters")):
+                filters = tag.modifiers['filters'].split(';')
+
+        tags = self.m_engine.get_types_summary(tag, filters=filters)
+
+        html = '<table style="border-collapse:collapse;border:0px;margin-left:30px;background-color:#fafafa;width:90%;text-align:left;">'
+
+        hierarchy = ''
     
         for tag in tags:
 
-            struct = tag.contents
+            obj = tag.contents
 
             desc = ''
             name = ''
 
             if(tag.name == "enum"):
-                desc = self.format_textblock(struct.description)
-                name = struct.name
+                desc = self.format_textblock(obj.description)
+                name = obj.name
             else:
-                desc = self.format_textblock(struct.description)
-                name = struct.name
+                desc = self.format_textblock(obj.description)
+                name = obj.name
+            
+            if(tag.hierarchy != hierarchy):
+                hierarchy = tag.hierarchy
+                html += '''
+<tr valign=top>
+    <td colspan=2 style="border-top:1px solid #ccc;border-bottom:1px solid #ccc;background-color:#eee;padding:2px;font-weight:bold;">%s</td>
+</tr>''' % (hierarchy)
 
             html += string.Template('''
 <tr valign=top>
-    <td style="border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">$type </td>
-    <td style='border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>$name</td>
+    <td style="width:15%;border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;">$type </td>
+    <td style='width:85%;border-top:1px solid #ccc;border-bottom:1px solid #eee;font-family: Courier New;font-size:0.8em;padding:2px;'>$name</td>
 </tr>
 <tr valign=top>
     <td style="border-bottom:1px solid #ccc;padding:2px;">&nbsp;</td>
@@ -1056,6 +1076,7 @@ class template_html_t(template_t):
                     ${calls}
                     ${pseudocode}
                     ${see_also}
+                    ${since}
                     ${deprecated}
                 </div>
             </div>
@@ -1220,11 +1241,6 @@ class template_html_t(template_t):
         if(prototype.has_returns()):
             function["returns"] = template_returns.substitute({"returns" : prototype.get_returns()})
 
-        if(prototype.has_example()):
-
-            html_example = self.format_object_example(prototype)
-            function["example"] = html_example
-        
         if(prototype.has_pseudocode()):
 
             pseudocode = prototype.get_pseudocode().get_parsed()
@@ -1253,20 +1269,13 @@ class template_html_t(template_t):
             function["pseudocode"] = code
             function["pseudocode"] = template_pseudocode.substitute(function)
 
-        if(prototype.has_see_also()):
-            params = {}
-            params["see_also"] = self.format_text(prototype.get_see_also())
-            function["see_also"] = template_see_also.substitute(params)
-        
+        function['example'] = self.format_object_construct(prototype, 'example')
+        function['since'] = self.format_object_construct(prototype, 'since')
+        function['see_also'] = self.format_object_construct(prototype, 'see')
+
         is_deprecated = False
-        #if(prototype.has_key("deprecated") and prototype["deprecated"] != False):
         if(prototype.get_deprecated()):
-            #print "prototype.deprecated = %s" % prototype["deprecated"]
-            #print "         .msg        = %s" % prototype["deprecated_msg"]
-            params = {}
-            #params["deprecated"] = self.format_textblock(prototype["deprecated_msg"])
-            params["deprecated"] = self.format_textblock(prototype.get_deprecated_msg())
-            function["deprecated"] = template_deprecated.substitute(params)
+            function["deprecated"] = self.format_object_construct(prototype, 'deprecated')
             is_deprecated = True
 
         is_private = False
@@ -1323,36 +1332,82 @@ class template_html_t(template_t):
                 <div class='cb_title'>Description:</div>
                 <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
             </div>
-            <div style="margin-left: 10px;">
-                <div class='cb_title'>Public Functions:</div>
-                $public_prototypes
-            </div>
-            <div style="margin-left: 10px;">
-                <div class='cb_title'>Public Types:</div>
-                $public_types
-            </div>
+            $members
+            $prototypes
         </div>
         """)
     
         obj = tag.contents
 
-        prototypes = '<ul>'
+        public_prototypes = []
+        private_prototypes = []
         for p in obj.m_prototypes:
             try:
-                prototypes += "<li>%s</li>" % obj.m_prototypes[p].get_prototype().get_unparsed()
+                pname = obj.m_prototypes[p].get_prototype().get_unparsed()
             except:
-                prototypes += "<li>%s</li>" % p
+                pname = p
 
-        prototypes += '</ul>'
+            pname = '<li>%s</li>' % self.format_text(pname)
+
+            if(obj.m_prototypes[p].is_private()):
+                private_prototypes.append(pname)
+            else:
+                public_prototypes.append(pname)
+
+        public_members = []
+        for m in obj.members_get('public'):
+            member = '<li>%s</li>' % self.format_text(m)
+            public_members.append(member)
+        
+        private_members = []
+        for m in obj.members_get('private'):
+            member = '<li>%s</li>' % self.format_text(m)
+            private_members.append(member)
+
+        properties = []
+        for m in obj.members_get('property'):
+            member = '<li>%s</li>' % self.format_text(m)
+            properties.append(member)
+
+        prototypes = ''
+
+
+        members = ''
+        if(len(properties) > 0):
+            members += '''<div style="margin-left: 10px;">
+                <div class='cb_title'>Properties:</div>
+                <ul>%s</ul>
+            </div>''' % ('\n'.join(properties))
+        
+        if(len(public_prototypes) > 0):
+            prototypes += '''<div style="margin-left: 10px;">
+                <div class='cb_title'>Public Functions:</div>
+                <ul>%s</ul>
+            </div>''' % ('\n'.join(public_prototypes))
+        if(len(private_prototypes) > 0):
+            prototypes += '''<div style="margin-left: 10px;">
+                <div class='cb_title'>Private Functions:</div>
+                <ul>%s</ul>
+            </div>''' % ('\n'.join(private_prototypes))
+            
+        if(len(public_members) > 0):
+            members += '''<div style="margin-left: 10px;">
+                <div class='cb_title'>Public Members:</div>
+                <ul>%s</ul>
+            </div>''' % ('\n'.join(public_members))
+        if(len(private_members) > 0):
+            members += '''<div style="margin-left: 10px;">
+                <div class='cb_title'>Private Members:</div>
+                <ul>%s</ul>
+            </div>''' % ('\n'.join(private_members))
 
         return template.substitute({
             "background" : "",
             "xref"       : "",
             "name" : obj.get_name(),
             "private" : "",
-            "public_prototypes" : prototypes,
-            "public_types" : "",
-            "private_prototypes" : prototypes,
+            "prototypes" : prototypes,
+            "members"    : members,
             "desc" : self.format_textblock(obj.get_description())})
     
     def format_testcase(self, tag):
@@ -1728,6 +1783,25 @@ within an HTML document.
         return html
     
     
+    def insert_background(self, img_src):
+        if(self.is_inline() == True):
+            handle = open(shorte_get_startup_path() + "/templates/shared/%s" % (img_src), "rb")
+            img_src = "data:image/jpeg;base64," + base64.encodestring(handle.read())
+            img_src = re.sub("\n", "", img_src)
+            return "background: url('%s') center;" % img_src
+        else:
+            return "background: url('css/images/%s') center;" % img_src
+
+    def insert_image_from_src(self, img_src):
+        if(self.is_inline() == True):
+            handle = open(img_src, 'rb')
+            img = "data:image/jpeg;base64," + base64.encodestring(handle.read())
+            img = re.sub("\n", "", img)
+            handle.close()
+        else:
+            img = os.path.basename(img_src)
+        return img
+
     def insert_image(self, img_src, height=50, width=50, wrap=False, float="", title=""):
 
         if(self.is_inline() == True):
@@ -1822,11 +1896,12 @@ within an HTML document.
         enum = tag.contents
 
         # The name of the enumeration
-        name = enum.name
+        enum_name = enum.name
         
         style = ''
         if(enum.deprecated):
-            style = "style=\"background: url('css/images/deprecated.png') center;\"";
+            style = "style=\"%s\"" % self.insert_background("deprecated.png")
+            #style = "style=\"background: url('css/images/deprecated.png') center;\"";
 
         img = ''
         
@@ -1836,8 +1911,10 @@ within an HTML document.
         if(enum.private == True):
             img += self.insert_image("lock.png", height=20, width=20, wrap=True, float="right", title="This enum is private")
         
-        html_example = self.format_object_example(enum)
-        html_see_also = self.format_object_see_also(enum)
+        html_example    = self.format_object_construct(enum, 'example')
+        html_see_also   = self.format_object_construct(enum, 'see')
+        html_since      = self.format_object_construct(enum, 'since')
+        html_deprecated = self.format_object_construct(enum, 'deprecated')
         
         if(self.m_engine.get_config("shorte", "show_enum_values") == "1"):
             show_enum_vals = True
@@ -1934,6 +2011,8 @@ within an HTML document.
 
         values += "</table>"
         
+        if(enum.has_deprecated()):
+            enum_name += ' (THIS ENUM IS DEPRECATED)'
 
         xref = self.get_xref(enum.get_file(), enum.get_line())
         
@@ -1952,17 +2031,21 @@ within an HTML document.
         <div style="margin:0px;">${values}</div>
         $example
         $see_also
+        $since
+        $deprecated
     </div>
 </div>
 </div><br/>''').substitute({
-    "style"  : style,
-    "xref"   : xref,
-    "img"    : img,
-    "name"   :  name,
-    "values" : values,
-    "example": html_example,
-    "see_also": html_see_also,
-    "desc"   : self.format_textblock(enum.get_description(textblock=True))})
+    "style"      : style,
+    "xref"       : xref,
+    "img"        : img,
+    "name"       : enum_name,
+    "values"     : values,
+    "example"    : html_example,
+    "see_also"   : html_see_also,
+    "since"      : html_since,
+    'deprecated' : html_deprecated,
+    "desc"       : self.format_textblock(enum.get_description(textblock=True))})
 
         return html
 
@@ -1972,21 +2055,13 @@ within an HTML document.
 
         define = tag.contents
         
-        html_example = ''
-        if(define.has_example()):
-            html_example = self.format_object_example(define)
 
         xref = self.get_xref(define.get_file(), define.get_line())
 
-        # DEBUG BRAD: Need to figure out a common way of handling
-        #             code structures like this. Don't want to repeat
-        #             it for every type.
-        html_since = ''
-        if(define.comment != None and define.comment.has_since()):
-            html_since = '''<div class='cb_title'>Since:</div>
-        <div style="margin-left:10px;margin-top:5px;margin-bottom:5px;">%s</div>
-''' % define.comment.get_since()
-        
+        html_example = self.format_object_construct(define, 'example')
+        html_since = self.format_object_construct(define, 'since')
+        html_see_also = self.format_object_construct(define, 'see')
+
         html = string.Template('''
 <div class='bordered'>
 <div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}${xref}</div>
@@ -2001,6 +2076,7 @@ within an HTML document.
         <div class='cb_title'>Description:</div>
         <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
         $example
+        $seealso
         $since
     </div>
 </div>
@@ -2010,32 +2086,40 @@ within an HTML document.
     "value" : self.format_textblock(define.value),
     "desc" : self.format_textblock(define.description),
     "example" : html_example,
+    "seealso" : html_see_also,
     "since"   : html_since})
 
         return html
 
-    def format_object_see_also(self, obj):
-        if(not obj.has_see_also()):
-            return ''
-        
-        template_see_also = string.Template('''
-            <div>
-                <div class='cb_title'>See Also:</div>
-                <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${see_also}</p>
-            </div>
-        ''')
+    def format_object_construct(self, obj, construct):
+
+        if(construct == "since"):
+            if(not obj.has_since()):
+                return ''
+
+            title = "Introduced In:"
+            paragraph = self.format_textblock(obj.get_since())
+
+        elif(construct == 'deprecated'):
+            if(not obj.has_deprecated()):
+                return ''
+
+            title = 'Deprecated:'
+            #print "[%s]" % obj.get_deprecated_msg()
+            paragraph = self.format_textblock(obj.get_deprecated_msg())
+
+        elif(construct == 'see'):
+            if(not obj.has_see_also()):
+                return ''
             
-        # DEBUG BRAD: This should probably be converted to a textblock
-        see_also  = self.format_text(obj.get_see_also())
-        
-        return template_see_also.substitute({"see_also" : see_also})
+            title = "See Also:"
+            paragraph = self.format_text(obj.get_see_also())
 
-    def format_object_example(self, obj):
+        elif(construct == 'example'):
+            if(not obj.has_example()):
+                return ''
 
-        if(not obj.has_example()):
-            return ''
-                                    
-        template_example = string.Template('''
+            template_example = string.Template('''
 <div>
     <div class='cb_title'>Example:</div>
     <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
@@ -2044,34 +2128,43 @@ within an HTML document.
     ${example}
 </div>
 ''');
-                                                                                                              
-        example  = obj.example.get_parsed()
-        language = obj.example.get_language()
+            example  = obj.example.get_parsed()
+            language = obj.example.get_language()
 
-        if(self.m_show_code_headers["example"]):
-            snippet_id = self.m_snippet_id
-            self.m_snippet_id += 1
-            code_header = self.m_template_code_header.substitute(
-                {"id" : snippet_id,
-                 "style" : "margin-left:10px;margin-top:2px;"})
-            source = html_styles.template_source.substitute({
-                            "id":     snippet_id,
-                            "source": self.format_source_code_no_lines(language, example)})
-        else:
-            code_header = ""
-            source = ""
-                    
-        example = self.format_source_code(language, example)
+            if(self.m_show_code_headers["example"]):
+                snippet_id = self.m_snippet_id
+                self.m_snippet_id += 1
+                code_header = self.m_template_code_header.substitute(
+                    {"id" : snippet_id,
+                     "style" : "margin-left:10px;margin-top:2px;"})
+                source = html_styles.template_source.substitute({
+                                "id":     snippet_id,
+                                "source": self.format_source_code_no_lines(language, example)})
+            else:
+                code_header = ""
+                source = ""
+                        
+            example = self.format_source_code(language, example)
 
-        code = template_code.substitute(
-                   {"contents" : example,
-                    "source"   : source,
-                    "code_header" : code_header,
-                    "template" : "code2",
-                    "result"   : ""})
+            code = template_code.substitute(
+                       {"contents" : example,
+                        "source"   : source,
+                        "code_header" : code_header,
+                        "template" : "code2",
+                        "result"   : ""})
 
-        return template_example.substitute({"example" : code, "type" : obj.type})
-                                                                                                                                                     
+            return template_example.substitute({"example" : code, "type" : obj.type})
+
+
+        template_section = string.Template('''
+            <div>
+                <div class='cb_title'>${title}</div>
+                <p style="margin-left: 10px; margin-top: 5px; margin-bottom: 5px;">${paragraph}</p>
+            </div>
+        ''')
+
+        return template_section.substitute({"title" : title, "paragraph" : paragraph})
+            
     
     # Called for format a structure for HTML output 
     def format_struct(self, tag):
@@ -2122,7 +2215,7 @@ within an HTML document.
             
             html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.get_max_cols(), "Diagram")
             html += struct.image["map"]
-            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none;width:96%%;'></img></th></td>" % (struct.max_cols, name, struct.name)
+            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><div style='width:96%%'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none;'></img></div></th></td>" % (struct.max_cols, name, struct.name)
 
         if(struct.has_field_attributes()):
             html += '''
@@ -2173,8 +2266,16 @@ within an HTML document.
         
         html += "</table><br/>"
 
-        html_example  = self.format_object_example(struct)
-        html_see_also = self.format_object_see_also(struct)
+        html_example  = self.format_object_construct(struct, 'example')
+        html_see_also = self.format_object_construct(struct, 'see')
+        html_since    = self.format_object_construct(struct, 'since')
+        html_deprecated = self.format_object_construct(struct, 'deprecated')
+
+        struct_name = struct.name
+        style = []
+        if(len(html_deprecated) > 0):
+            struct_name += " (THIS STRUCTURE IS DEPRECATED)"
+            style.append("background: url('css/images/deprecated.png') center")
         
         xref = self.get_xref(struct.get_file(), struct.get_line())
 
@@ -2183,10 +2284,11 @@ within an HTML document.
             desc = ""
         else:
             desc = self.format_textblock(desc)
-        
-        style = ''
+
+        style = ';'.join(style)
+
         html = string.Template('''
-<div class='bordered' $style>
+<div class='bordered' style="$style">
 <div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img$xref</div>
 <div>
     <div style="margin-left: 10px;margin-top:10px;">
@@ -2200,6 +2302,8 @@ within an HTML document.
         <div style="margin:0px;">${values}</div>
         ${example}
         ${see_also}
+        ${since}
+        ${deprecated}
     </div>
 </div>
 </div><br/>''').substitute({
@@ -2207,10 +2311,12 @@ within an HTML document.
     "xref"     : xref,
     "img"      : img,
     "label"    : label,
-    "name"     : struct.name,
+    "name"     : struct_name,
     "values"   : html,
     "example"  : html_example,
     "see_also" : html_see_also,
+    "since"    : html_since,
+    "deprecated" : html_deprecated,
     "desc"     : desc})
         
         return html
@@ -3136,6 +3242,11 @@ $href_end
         ws = re.compile(" ")
 
         if(result != None):
+
+            output_is_blank = False
+            if(0 == len(result.strip())):
+                output_is_blank = True
+
             # Convert any HTML tags in the input source
             lt = re.compile("<")
             gt = re.compile(">")
@@ -3157,7 +3268,10 @@ $href_end
             #tags = parser.parse_source_code(tag.name, result)
             #result = self.format_source_code(tag.name, tags)
             if(tag.rc == 0):
-                result = html_styles.template_code_result.substitute({"result": result})
+                if(output_is_blank):
+                    result = html_styles.template_code_result_no_output.substitute({"result": result})
+                else:
+                    result = html_styles.template_code_result.substitute({"result": result})
             else:
                 img_src = self.insert_image("icon_error_50x50.png")
                 result = html_styles.template_code_result_error.substitute({"result": result, "rc" : tag.rc, "image" : img_src})
@@ -3168,7 +3282,9 @@ $href_end
         else:
             result = ""
 
-
+        if(tag.result_image != None):
+            result += "<img style='margin-left:25px;' src='%s'/>" % self.insert_image_from_src(tag.result_image)
+            
         if(self.m_show_code_headers["code"]):
             snippet_id = self.m_snippet_id
             self.m_snippet_id += 1
@@ -3273,9 +3389,6 @@ $href_end
         else:
             FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
-
-        #elif(tag == "pycairo"):
-        #    self.m_contents += self.format_pycairo(file, data)
         #elif(tag == "pre"):
         #    self.m_contents += "<pre style='margin-left:40px;'>%s</pre>" % data
         #else:
@@ -3288,7 +3401,6 @@ $href_end
         
     def get_css(self, basepath=""):
         
-        css = '''<link rel="stylesheet" type="text/css" media="all" href="%scss/%s.css" title="Default" />''' % (basepath, self.m_theme)
 
         if(self.is_inline()):
             package = "html_inline"
@@ -3296,6 +3408,8 @@ $href_end
             package = "html"
 
         theme = self.m_engine.get_theme(package)
+        
+        css = '''<link rel="stylesheet" type="text/css" media="all" href="%scss/%s.css" title="Default" />''' % (basepath,theme) 
 
         # Inline the CSS if necessary
         if(self.is_inline() == True):
@@ -3315,9 +3429,9 @@ $href_end
     def _load_template(self, template_name):
         
         if(self.is_inline() == True):
-            handle = open(shorte_get_startup_path() + "/templates/html_inline/%s/%s" % (self.m_engine.get_theme("html_inline"), template_name), "r")
+            handle = open(shorte_get_startup_path() + "/templates/html_inline/%s/%s" % (self.m_engine.get_theme('html_inline'), template_name), "r")
         else:
-            handle = open(shorte_get_startup_path() + "/templates/html/%s/%s" % (self.m_engine.get_theme("html"), template_name), "r")
+            handle = open(shorte_get_startup_path() + "/templates/html/%s/%s" % (self.m_engine.get_theme('html'), template_name), "r")
 
         contents = handle.read()
         handle.close()
@@ -3336,8 +3450,6 @@ $href_end
 
         vars = {}
 
-        self.m_theme = self.m_engine.get_theme()
-
         vars["title"]    = page["title"]
         vars["subtitle"] = ""
         if(page.has_key("subtitle")):
@@ -3349,11 +3461,14 @@ $href_end
         # the index page.
         if(self.is_inline() != True):
             self.m_contents = []
+            pkg = 'html_inline'
+        else:
+            pkg = 'html'
 
         vars["rightmenu"] = "" #right_menu
         vars["src"] = "<a href='%s'>%s</a>" % (os.path.basename(source_file), os.path.basename(source_file))
         vars["version"] = self.m_engine.get_doc_info().version();
-        vars["theme"] = self.m_engine.get_theme();
+        vars["theme"] = self.m_engine.get_theme(pkg);
         vars["date"] = self.m_engine.get_date()
         vars["css"] = self.get_css()
         vars["pdf"] = self.include_link("../" + self.get_pdf_name(), "css/")
@@ -3397,6 +3512,12 @@ $href_end
             name = topic.get_name()
             indent = topic.get_indent()
             file = "content/" + os.path.basename(topic.get_file())
+        
+            link_name = name
+            if(topic.tag.has_modifiers()):
+                modifiers = topic.tag.get_modifiers()
+                if("wikiword" in modifiers):
+                    link_name = modifiers["wikiword"]
 
             # If the HTML is being inlined then we need to
             # make sure that all links point back to the
@@ -3407,22 +3528,28 @@ $href_end
             #print "indent = %s" % indent
 
             if(indent == 1):
-                cnts += "<div class='toc1'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, name, name)
+                cnts += "<div class='toc1'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, link_name, name)
             elif(indent == 2):
-                cnts += "<div class='toc2'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, name, name)
+                cnts += "<div class='toc2'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, link_name, name)
             elif(indent == 3):
-                cnts += "<div class='toc3'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, name, name)
+                cnts += "<div class='toc3'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, link_name, name)
             elif(indent == 4):
-                cnts += "<div class='toc4'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, name, name)
+                cnts += "<div class='toc4'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, link_name, name)
             elif(indent == 5):
-                cnts += "<div class='toc5'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, name, name)
+                cnts += "<div class='toc5'><a href='%s#%s' target='main_page'>%s</a></div>" % (file, link_name, name)
 
         module = shorte_get_startup_path() + "/templates/html/html_styles.py"
         basename = os.path.basename(module)
         module = os.path.splitext(basename)[0]
         import_str = "from templates.html.%s import *" % module
         exec(import_str)
-        html_styles = html_styles(self.m_engine.m_theme)
+            
+        if(self.is_inline() == True):
+            pkg = 'html_inline'
+        else:
+            pkg = 'html'
+
+        html_styles = html_styles(self.m_engine.get_theme(pkg))
         toc_styles = html_styles.get_toc_frame_styles()
 
         toc = string.Template(toc_styles).substitute({"css": self.get_css("content/"), "cnts" : cnts})
@@ -3589,16 +3716,18 @@ $href_end
 
         if(self.is_inline()):
             image_star = "background: no-repeat url(data:object/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAARCAYAAADQWvz5AAAAB3RJTUUH3gEcBA8VLgNGkAAAAAlwSFlzAAAewQAAHsEBw2lUUwAAAARnQU1BAACxjwv8YQUAAAKNSURBVHjaY2AgAJKDNUSTg1UkCKljIaRAT/mxMyPDP1YgczEFBjEzWBmyhv7+zQpU9xto0B+cKpnwGeNmycErL81gJyH628rRmIsXn1q8Bnnbcdtycn4Q4eT4KOJgwmBJtkEWBpzBjMxAD7L+ZzDV5fDHG0ZNOeJmksJf1f/+Y/j19y/L73//Wf8xMPz//vMX1285yXeeQA7Df6B1ynI//KZVCx//9+/Xf0YgYGL684+R8S8TIwMT89PXfLcY3ay4ubLCBPJsjN60s3P8YvjPCHHk//+MDIxMfxj+AV30BxjGjEDMxsoIlvsHsurvf4Yf3zkZjpwXrpy+6sMURpjTimO5DeL9/yySlPipywSMbCZgPIG8BfL8f5AqoEH//gLj7ieQ/5uB4dlzntPzNzAkTVn55QokfoEApO7Ypd8vDp/+P1dbiV9QTOCPGQPTP4hhbEAMNOwf0KAfX4AGfWP/c/w8Z3tqw/foXSd+vmREDyxGuAgzw4ouuYyPJ5n/vz/P8P/9RSC+xPD/9WmG/8/3M/xf3aOWD7EaRqLF2v//MIm/DMJCPCIsrH/BXgG54tcXiBzIhWJCDHoMDKwQPbiiHyShry7AqKH4PvI30JCfX4Fe+Sr248dn4Q//f0FUy4h/9vKxF+UhmI7CPbhM+Xnfa/34xsDw6YPs7QWbhO065rEaPH8hepwRGFvc3G8l7I3+2TEQAvvmck94d4T5/56ZEgvdLEXgNmsqcjBtmczX++og0//dM/jwZmAGexMWzttb5c8saFFLhuVnYIpDighGhqlVQiHX1stc8LQREkDWy4zMifEV1/z6Q+hKQvWt5aCEAzLg/3+YERCw7fD3azrqoveFBLjZ95969xymFwD5XuKCCC2f/AAAAABJRU5ErkJggg==);"
+            pkg = 'html_inline'
         else:
             image_star = "background: no-repeat url(star_small.png);"
+            pkg = 'html'
         
-        #module = shorte_get_startup_path() + "/templates/html/%s.py" % (self.m_engine.m_theme)
+        #module = shorte_get_startup_path() + "/templates/html/%s.py" % (self.m_engine.get_theme())
         module = shorte_get_startup_path() + "/templates/html/html_styles.py"
         basename = os.path.basename(module)
         module = os.path.splitext(basename)[0]
         import_str = "from templates.html.%s import *" % module
         exec(import_str)
-        html_styles = html_styles(self.m_engine.m_theme)
+        html_styles = html_styles(self.m_engine.get_theme(pkg))
         common = html_styles.get_common_styles()
         self.toc_styles = html_styles.get_toc_frame_styles()
         styles_print = html_styles.get_print_styles()
@@ -3626,19 +3755,24 @@ $href_end
 
         #os.makedirs(outputdir)
 
-        #print "Theme: [%s]" % self.m_theme
+        #print "Theme: [%s]" % self.m_engine.get_theme()
         #print "Template dir: [%s]" % self.m_template_dir
-        #print("Copying %s" % (self.m_template_dir + self.m_theme + "/" + self.m_theme))
+        #print("Copying %s" % (self.m_template_dir + self.m_engine.get_theme() + "/" + self.m_engine.get_theme()))
+
+        if(self.is_inline()):
+            theme = self.m_engine.get_theme('html_inline')
+        else:
+            theme = self.m_engine.get_theme('html')
 
         ignore_patterns=('*.html', '*.swp')
-        shutil.copytree(self.m_template_dir + self.m_theme, outputdir + "/css", ignore=shutil.ignore_patterns(*ignore_patterns))
+        shutil.copytree(self.m_template_dir + theme, outputdir + "/css", ignore=shutil.ignore_patterns(*ignore_patterns))
 
         # Update the CSS file to process any common definitions
-        handle = open("%s/css/%s.css" % (outputdir, self.m_theme), "rt")
+        handle = open("%s/css/%s.css" % (outputdir, theme), 'rt')
         contents = handle.read()
         handle.close()
         css = self._fix_css(contents)
-        handle = open("%s/css/%s.css" % (outputdir, self.m_theme), "wt")
+        handle = open("%s/css/%s.css" % (outputdir, theme), 'wt')
         handle.write(css)
         handle.close()
 
@@ -3674,7 +3808,8 @@ $href_end
         #sys.exit(-1)
             
         # Strip off the extension
-        output_file = re.sub(".tpl", ".html", path)
+        output_file = re.sub("\.(tpl)", "", path)
+        output_file += ".html"
 
         return output_file
 
@@ -3694,9 +3829,10 @@ $href_end
             language = "python"
         elif(input.endswith(".tpl")):
             language = "shorte"
-
+        
         parser = self.m_engine.m_source_code_analyzer
-        tags = parser.parse_source_code(language, contents)
+        tags = parser.parse_source_code(language, contents, input, 1)
+
 
         html_src = self.format_source_code(
                         language,
@@ -3705,11 +3841,17 @@ $href_end
                         tag_line_numbers=True)
 
         template = string.Template(self._load_template("index.html"))
+
+        if(self.is_inline()):
+            theme = self.m_engine.get_theme('html_inline')
+        else:
+            theme = self.m_engine.get_theme('html')
+
         vars = {}
         vars["rightmenu"] = ""
         vars["src"] = ""
         vars["version"] = ""
-        vars["theme"] = self.m_engine.get_theme()
+        vars["theme"] = theme
         vars["date"] = datetime.date.today()
         css = self.get_css(basepath="./")
         vars["css"] = css
@@ -3740,13 +3882,18 @@ $href_end
 
         
     def generate_legal_page(self, output):
+
+        if(self.is_inline()):
+            theme = self.m_engine.get_theme('html_inline')
+        else:
+            theme = self.m_engine.get_theme('html')
         
         template = string.Template(self._load_template("legal.html"))
         vars = {}
         vars["rightmenu"] = ""
         vars["src"] = ""
         vars["version"] = self.m_engine.get_doc_info().version();
-        vars["theme"] = self.m_engine.get_theme()
+        vars["theme"] = theme
         vars["date"] = datetime.date.today()
         vars["css"] = self.get_css()
         vars["pdf"] = ""
@@ -3773,12 +3920,17 @@ $href_end
         else:
             history = ""
 
+        if(self.is_inline()):
+            theme = self.m_engine.get_theme('html_inline')
+        else:
+            theme = self.m_engine.get_theme('html')
+
         template = string.Template(self._load_template("index.html"))
         vars = {}
         vars["rightmenu"] = ""
         vars["src"] = ""
         vars["version"] = self.m_engine.get_doc_info().version();
-        vars["theme"] = self.m_engine.get_theme()
+        vars["theme"] = theme
         vars["date"] = datetime.date.today()
         vars["css"] = self.get_css()
         vars["pdf"] = ""
@@ -3869,9 +4021,9 @@ $href_end
             
         # Now generate the document index
         if(as_string):
-            return self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(), version=version, links=links, as_string=True)
+            return self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(package), version=version, links=links, as_string=True)
         else:
-            self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(), version=version, links=links)
+            self.generate_index(title=self.m_engine.get_title(), subtitle=self.m_engine.get_subtitle(), theme=self.m_engine.get_theme(package), version=version, links=links)
         
         # Generate the frameset index and TOC page
         if(self.is_inline() != True):
