@@ -79,8 +79,10 @@ clang_plugin:
 checkout_vendor_templates:
 	rm -rf vendor_templates
 	mkdir vendor_templates
-	cd vendor_templates && cvs export -r HEAD -d templates design/sw/drivers/HSIO/shorte/templates
-	cp -rf vendor_templates/templates/* templates/.
+	cd vendor_templates && wget -O 3rdparty.zip http://sw.inphi-corp.local/gitblit/zip/?r=3rdparty.git&p=shorte/templates&h=master&format=zip
+extract_vendor_templates:
+	cd vendor_templates && unzip 3rdparty.zip 'shorte/*'
+	cp -rf vendor_templates/shorte/templates/* templates/.
 
 # This target is used to package up shorte into a tarball
 # for distribution
@@ -294,10 +296,7 @@ test_cpp_parser:
 
 test_clang:
 #	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "html_inline+pdf"
-	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html+pdf" -o build-output/clang_c
-test_clang_quick:
-	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "html" -o build-output/clang_c
-    # This command makes use of setting the arguments to clang to ensure that it can find include files
+	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "${html_pdf}" -o build-output/clang_c
 	${python} shorte.py -f "examples/types_test.h" -t "${THEME}" -x clang -p "html" -s "clang.args=-xc++ -I`pwd`/examples/platform" -o build-output/clang_c_types
 
 test_clang2:
