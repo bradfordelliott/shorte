@@ -1,7 +1,8 @@
 " Vim syntax file
-" Language:	Shorte Documentation Language
-" Maintainer:	Brad Elliott <brad_e@hotmail.com>
-" Last Change:	$Date: 2015/06/30 03:32:14 $
+" Language:	RELAX NG Compact Syntax
+" Maintainer:	Hans Fugal <hans@fugal.net>
+" Last Change:	$Date: 2003/06/22 03:32:14 $
+" $Id: rnc.vim,v 1.7 2003/06/22 03:32:14 fugalh Exp $
 
 
 if version < 600
@@ -46,8 +47,20 @@ syn region EmbeddedStyles start=/@{/ end=/}/ keepend
 syn region Links start=/\[\[/ end=/\]\]/ keepend
 
 " Prototype blocks
-syn match  PrototypeSections /^-- \(function:\|description:\|prototype:\|returns:\|params:\|example:\|pseudocode:\|see also:\)/
+syn match  PrototypeSections /^-- *\(deprecated:\|description:\|example:\|function:\|name:\|params:\|prototype:\|pseudocode:\|returns:\|see also:\|see:\|since:\)/
 syn region Prototypes start=/@prototype/ end=/^@/ contains=Tags,PrototypeSections contained
+
+syn match  DefineSections /^-- *\(deprecated:\|description:\|example:\|name:\|see also:\|see:\|since:\|value:\)/
+syn region Defines start=/@define/ end=/^@/ contains=Tags,DefineSections contained
+
+syn match  EnumSections /^-- *\(deprecated:\|description:\|examples:\|name:\|see:\|see also:\|since:\|values:\)/
+syn region Enums start=/@enum/ end=/^@/ contains=Tags,EnumSections contained
+
+syn match  StructSections /^-- *\(deprecated:\|description:\|examples:\|fields:\|name:\|see:\|see also:\|since:\)/
+syn region Structs start=/@struct/ end=/^@/ contains=Tags,StructSections contained
+
+syn match  ClassSections /^-- *\(deprecated:\|description:\|examples:\|extends:\|name:\|public.functions:\|public.members:\|see:\|see also:\|since:\)/
+syn region Classes start=/@class/ end=/^@/ contains=Tags,ClassSections contained
 
 
 " Literals
@@ -90,6 +103,10 @@ hi link TagSections Operator
 hi link EmbeddedStyles Operator
 hi link DocHeader Special
 hi link PrototypeSections Operator
+hi link StructSections Operator
+hi link EnumSections Operator
+hi link DefineSections Operator
+hi link ClassSections Operator
 
 hi link Keys Type
 hi link Values Special

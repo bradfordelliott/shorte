@@ -127,6 +127,53 @@ class template_shorte_t(template_t):
 
         return txt
 
+    def format_object_section(self, obj, section):
+        
+        if(section == 'since'):
+            if(not obj.has_since()):
+                return ''
+            return '''
+--since:
+%s
+''' % self.format_textblock(obj.get_since())
+        
+        elif(section == 'deprecated'):
+            if(not obj.has_deprecated()):
+                return ''
+
+            return '''
+--deprecated:
+%s
+''' % self.format_textblock(obj.get_deprecated())
+
+        elif(section == 'description'):
+            if(not obj.has_description()):
+                return ''
+            return '''
+--description:
+%s
+''' % self.format_textblock(obj.description)
+
+        elif(section == 'see'):
+            if(not obj.has_see_also()):
+                return ''
+            return '''
+--see:
+    %s
+''' % obj.get_see_also()
+
+        elif(section == 'example'):
+            if(not obj.has_example()):
+                return ''
+            return '''
+--example:
+%s
+''' % self.format_source_code(obj.example.get_unparsed())
+            
+
+        return ''
+            
+
     def format_enum(self, tag):
 
         self.m_num_enums += 1
@@ -159,14 +206,17 @@ class template_shorte_t(template_t):
 
         template = string.Template("""
 $heading
-@enum: name="$name" private="$private" deprecated="$deprecated" deprecated_msg="$deprecated_msg" file="$file" line="$line" description='''
+@enum: private="$private" file="$file" line="$line"
+--name:
+$name
 $description
-'''
 --values:
 - Enum Name | Enum Value | Enum Description
 $values
 $example
 $see_also
+$since
+$deprecated
 """)
         add_heading = shorte_get_config("shorte", "header_add_to_enum")
         if(tag.heading == None and ("None" != add_heading)):
@@ -176,16 +226,17 @@ $see_also
         heading = ''
             
         vars = {}
-        
-        vars["example"] = self.format_object_example(enum)
-        vars["see_also"] = self.format_object_see_also(enum)
+
+        vars['deprecated']  = self.format_object_section(enum, 'deprecated')
+        vars['since']       = self.format_object_section(enum, 'since')
+        vars["example"]     = self.format_object_section(enum, 'example')
+        vars["see_also"]    = self.format_object_section(enum, 'see')
+        vars["description"] = self.format_object_section(enum, 'description')
+
         vars["name"] = title
         vars["heading"] = heading
-        vars["description"] = description
         vars["values"] = values
         vars["private"] = enum.private
-        vars["deprecated"] = enum.deprecated
-        vars["deprecated_msg"] = enum.deprecated_msg
         vars["file"] = enum.get_file()
         vars["line"] = enum.get_line()
 
@@ -200,8 +251,11 @@ $heading
     $name
 --value:
     $value
---description:
-    $description
+$description
+$example
+$see_also
+$since
+$deprecated
 """)
 
         vars = {}
@@ -218,14 +272,17 @@ $heading
 
         vars["name"] = define.name
         vars["heading"] = heading
-        val = self.format_textblock(define.description)
-        vars["description"] = indent_lines(trim_leading_indent(val), '    ')
+        
+        vars['deprecated']  = self.format_object_section(define, 'deprecated')
+        vars['since']       = self.format_object_section(define, 'since')
+        vars["example"]     = self.format_object_section(define, 'example')
+        vars["see_also"]    = self.format_object_section(define, 'see')
+        vars["description"] = self.format_object_section(define, 'description')
             
         val = self.format_textblock(define.value)
         val = re.sub("\|", "\\\\\\|", val)
         vars["value"] = escape_string(val)
         vars["private"] = define.private
-        vars["deprecated"] = define.deprecated
         vars["file"] = define.get_file()
         vars["line"] = define.get_line()
 
@@ -242,11 +299,7 @@ $heading
         title = struct.get_name()
         title = re.sub("[ \n]+", " ", title).strip()
 
-
-        caption = self.format_textblock(struct.get_description())
-
         values = ''
-
 
         # DEBUG BRAD: Need to figure out how to deal with this
         fields = "rows"
@@ -266,16 +319,17 @@ $heading
 
         template = string.Template("""
 $heading
-@struct: private="$private" deprecated="$deprecated" file="$file" line="$line"
+@struct: private="$private" file="$file" line="$line"
 --name:
 $name
---description:
 $description
 --fields:
 - Type | Name | Description
 $values
 $example
 $see_also
+$since
+$deprecated
 """)
 
         vars = {}
@@ -291,40 +345,21 @@ $see_also
 
         #print "HEADING: %s" % heading
 
-        vars["example"] = self.format_object_example(struct)
-        vars["see_also"] = self.format_object_see_also(struct)
+        vars["example"]     = self.format_object_section(struct, 'example')
+        vars["see_also"]    = self.format_object_section(struct, 'see')
+        vars["deprecated"]  = self.format_object_section(struct, 'deprecated')
+        vars["since"]       = self.format_object_section(struct, 'since')
+        vars["description"] = self.format_object_section(struct, 'description')
 
         vars["name"] = title
         vars["parent"] = parent
         vars["heading"] = heading
-        vars["description"] = indent_lines(caption, '    ')
         vars["values"] = values
-        vars["deprecated"] = "False"
         vars["private"] = "False"
         vars["file"] = struct.get_file()
         vars["line"] = struct.get_line()
 
         return template.substitute(vars)
-
-    def format_object_see_also(self, obj):
-        if(not obj.has_see_also()):
-            return ''
-        else:
-            return '''
---see:
-    %s
-''' % obj.get_see_also()
-
-    def format_object_example(self, obj):
-        example = ''
-
-        if(obj.example != None):
-            example = '''
---example:
-%s
-''' % self.format_source_code(obj.example.get_unparsed())
-
-        return example
 
     def format_class(self, tag):
         cls = tag.contents
@@ -332,8 +367,9 @@ $see_also
         template = string.Template('''$title
 @class: file="${file}" line="${line}"
 --name: $name
---description:
 $desc
+$public_functions
+$public_members
 ''')
         
         add_heading = shorte_get_config("shorte", "header_add_to_prototype")
@@ -346,10 +382,17 @@ $desc
         vars = {}
         vars["title"] = title
         vars["name"] = cls.get_name()
-        vars["desc"] = trim_blank_lines(cls.get_description(textblock=False))
+        vars["desc"] = self.format_object_section(cls, 'description')
         vars["file"] = cls.get_file()
         vars["line"] = cls.get_line()
-        
+
+        members = cls.members_get('public')
+        pub_members = ''
+        for m in members:
+            pub_members += '  -- %s\n' % m
+        vars['public_members'] = pub_members
+        vars['public_functions'] = ''
+
         topic = topic_t({"name"   : cls.get_name(),
                          "file"   : tag.file, 
                          "indent" : 3,
@@ -380,6 +423,7 @@ $params
 $example
 $pseudocode
 $seealso
+$since
 $deprecated
 $heading
 $class
@@ -396,7 +440,6 @@ $class
         function["name"] = prototype.get_name()
         function["example"] = ''
         function["prototype"] = ''
-        function["desc"] = trim_blank_lines(prototype.get_description(textblock=False))
         function["params"] = ''
         function["returns"] = prototype.get_returns()
         function["pseudocode"] = ''
@@ -426,11 +469,11 @@ $class
 ''' % output
 
 
-        if(prototype.has_example()):
-            import src.shorte_source_code
-            func = src.shorte_source_code.prototype_t()
-            func.example = prototype.get_example()
-            function["example"] = self.format_object_example(func)
+        #if(prototype.has_example()):
+        #    import src.shorte_source_code
+        #    func = src.shorte_source_code.prototype_t()
+        #    func.example = prototype.get_example()
+        #    function["example"] = self.format_object_example(func)
         
         if(prototype.has_pseudocode()):
             function["pseudocode"] = '''
@@ -438,21 +481,11 @@ $class
 %s
 ''' % self.format_source_code(prototype.get_pseudocode().get_unparsed())
 
-        if(prototype.has_see_also()):
-            function["seealso"] = '''
---see:
-%s
-''' % (prototype.get_see_also())
-        else:
-            function["seealso"] = ''
-        
-        if(prototype.get_deprecated()):
-            function["deprecated"] = '''
---deprecated:
-%s
-''' % (self.format_textblock(prototype.get_deprecated_msg()))
-        else:
-            function["deprecated"] = ''
+        function["seealso"]    = self.format_object_section(prototype, 'see')
+        function["deprecated"] = self.format_object_section(prototype, 'deprecated')
+        function["desc"]       = self.format_object_section(prototype, 'description')
+        function['since']      = self.format_object_section(prototype, 'since')
+        function['example']    = self.format_object_section(prototype, 'example')
 
         if(prototype.has_class()):
             function['class'] = prototype.get_class().get_name()

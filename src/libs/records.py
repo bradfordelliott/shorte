@@ -34,11 +34,11 @@ BIG_ENDIAN=0
 LITTLE_ENDIAN=1
 
 types = {}
-types["uint"]  = "cs_uint"
-types["uint8"] = "cs_uint8"
-types["uint16"] = "cs_uint16"
-types["uint32"] = "cs_uint32"
-types["uint64"] = "cs_uint64"
+types["uint"]   = "uint_t"
+types["uint8"]  = "uint8_t"
+types["uint16"] = "uint16_t"
+types["uint32"] = "uint32_t"
+types["uint64"] = "uint64_t"
 
 
 
@@ -1348,7 +1348,7 @@ task ${struct_name}::display(string prefix)
     def draw(self, output_file, attributes={}):
         
         #draw_width  = 640
-        draw_width  = 1000
+        draw_width  = 960
         draw_height = 1500
 
         bit_order = attributes["bitorder"]
@@ -1364,12 +1364,14 @@ task ${struct_name}::display(string prefix)
 
         c.set_antialias(CAIRO_ANTIALIAS_NONE);
 
-        if(sys.platform == "win32"):
-            font_size = 14.0
-            c.select_font_face("Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
-        else:
-            font_size = 14.0
-            c.select_font_face("Lucida Grande", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
+        #if(sys.platform == "win32"):
+        #    font_size = 14.0
+        #    c.select_font_face("Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
+        #else:
+        #    font_size = 13.0
+        #    c.select_font_face("Lucida Grande", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
+        font_size = 14.0
+        #c.select_font_face("Arial", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL)
         c.set_font_size(font_size)
         
         image_map = "<map name=\"diagram_" + self.m_name + "\">"
@@ -1445,18 +1447,28 @@ task ${struct_name}::display(string prefix)
                                 y_offset, 
                                 tmp * self.m_width_of_bit - 4,
                                 height_row);
+
+                    offset = 224
+
+                    x1 = self._xoffset(bit_position)
+                    y1 = y_offset
+                    x2 = self._xoffset(bit_position) + (tmp * self.m_width_of_bit) - 4
+                    y2 = y_offset + height_row
+
+
                     
                     image_map += "<area border=1 shape=\"rectangle\" "\
                                     "coords=\"%d,%d,%d,%d\" "\
                                     "href=\"#%s_%s\" "\
                                     "onMouseover=\"ddrivetip('%s');\" "\
                                     "onMouseout=\"hideddrivetip()\" >\n" %\
-                                    (self._xoffset(bit_position), \
-                                     y_offset,
-                                     self._xoffset(bit_position) + self._xoffset(224 - bit_position),
-                                     y_offset + height_row,
+                                    (x1, y1, x2, y2,
                                      self.m_name, field[NAME], tooltip)
                     
+                                    #(self._xoffset(bit_position),
+                                    # y_offset,
+                                    # self._xoffset(bit_position) + self._xoffset(offset - bit_position),
+                                    # y_offset + height_row,
                     c.fill_preserve();
                     c.set_source_rgb(0, 0, 0);
                     c.stroke();

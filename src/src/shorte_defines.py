@@ -42,6 +42,7 @@ class wikiword_t:
         self.is_bookmark = False
         self.label = ""
         self.link = ""
+        self.source_file = None
 
     def __str__(self):
         output = '''wikiword_t
@@ -49,7 +50,8 @@ class wikiword_t:
   is_bookmark: %d
   label:       %s
   link:        %s
-''' % (self.wikiword, self.is_bookmark, self.label, self.link)
+  source:      %s
+''' % (self.wikiword, self.is_bookmark, self.label, self.link, self.source_file)
         return output
 
 
@@ -63,9 +65,11 @@ class tag_t:
         self.break_before = False
         self.file = ""
         self.line = None
+        self.line2 = None
         self.is_header = False
         self.is_prototype = False
         self.result = None
+        self.result_image = None
         self.hierarchy = ""
         self.category = ""
         self.page = None
@@ -225,6 +229,13 @@ class topic_t:
     def get_level(self):
         return self.level
 
+    def __str__(self):
+        output =  'Topic:\n'
+        output += '------------\n'
+        output += '  name: %s\n' % self.name
+        output += '  file: %s\n' % self.file
+
+        return output
     #def __str__(self):
     #    return self.m_vars.__str__()
 

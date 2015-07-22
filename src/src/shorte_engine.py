@@ -1,6 +1,7 @@
 import os
 import datetime
 import string
+import shutil
 from string import Template;
 from src.shorte_defines import *
 
@@ -13,6 +14,7 @@ from src.shorte_source_code import *
 from src.parsers.shorte_parser import *
 from src.parsers.cpp_parser import *
 from src.parsers.clang_parser import *
+from src.parsers.python_parser import *
 from src.shorte_code_executor import *
 from src.templates.template_html import template_html_t
 from src.templates.template_odt  import template_odt_t
@@ -147,6 +149,7 @@ class engine_t:
         self.m_snippets = {}
         self.m_urls = {}
         self.m_example_id = 0
+        self.m_image_id = 0
 
         if(output_path == None):
             output_path = "build-output"
@@ -185,6 +188,8 @@ class engine_t:
             self.m_parser = cpp_parser_t(self)
         elif(parser == "clang"):
             self.m_parser = clang_parser_t(self)
+        elif(parser == "python"):
+            self.m_parser = python_parser_t(self)
         else:
             self.m_parser = shorte_parser_t(self)
             #self.m_parser.set_cpp_parser(cpp_parser_t(self))
@@ -226,15 +231,15 @@ class engine_t:
 
     def get_theme(self, package=None):
 
-        #if("=" in self.m_theme):
-        #    themes = self.m_theme.split(";")
-        #    for theme in themes:
-        #        parts = theme.split("=")
-        #        pkg  = parts[0]
-        #        name = parts[1]
+        if("=" in self.m_theme):
+            themes = self.m_theme.split(";")
+            for theme in themes:
+                parts = theme.split("=")
+                pkg  = parts[0]
+                name = parts[1]
 
-        #        if(package == pkg):
-        #            return name
+                if(package == pkg):
+                    return name
 
         return self.m_theme
 
@@ -432,6 +437,11 @@ class engine_t:
 
     def parse_string(self, contents):
         self.m_parser.parse_string(contents)
+
+    def add_wikiword(self, word):
+        if(self.m_wiki_links.has_key(word)):
+            FATAL("Wikiword %s already exists" % word)
+        self.m_wiki_links[word.wikiword] = word
 
     def is_wiki_word(self, phrase):
         '''Returns the target link if the phrase is a wikiword
@@ -644,7 +654,18 @@ class engine_t:
     def get_includes(self):
         return self.m_includes
 
-    def get_function_summary(self, tag=None):
+    def get_function_summary(self, tag=None, filters=None):
+        '''This method attempts to create a summary of all the
+           available functions scanned by the parser
+
+           @param tag     [I] - The original @functionsummary tag parsed
+                                from the sources with it's modifiers
+           @param filters [I] - An array of filters that is used to
+                                include or exclude certain methods
+                                like deprecated functions
+
+           @return The list of functions in the function summary.
+        '''
 
         functions = []
 
@@ -672,20 +693,31 @@ class engine_t:
                 
                 if(tag.name == "prototype"):
                     
-                    if(page_title == "" or (not tag.page_title)):
+                    obj = tag.contents
+
+                    if(filters != None):
+                        if("deprecated" in filters):
+                            if(not obj.has_deprecated()):
+                                continue
+                        elif('!deprecated' in filters):
+                            if(obj.has_deprecated()):
+                                continue
+                      
+                    if(1): #page_title == "" or (not tag.page_title)):
                         #print "DO I GET HERE? page_title = %s" % (page_title)
                         #print tag
                         #sys.exit(-1)
-                        hierarchy = os.path.basename(page["source_file"])
-                        hierarchy = hierarchy.replace("leeds_", "")
-                        hierarchy = hierarchy.replace(".c", "")
-                        hierarchy = hierarchy.replace(".h", "")
-                        hierarchy = hierarchy.replace(".tpl", "")
-                        hierarchy = hierarchy.replace("leeds", "cs4321")
+                        hierarchy = obj.file
+                        if(len(hierarchy) == 0):
+                            hierarchy = page['source_file']
 
-                        if(tag.modifiers):
-                            if(isinstance(tag.modifiers, DictType) and tag.modifiers.has_key("hierarchy")):
-                                hierarchy = tag.modifiers["hierarchy"]
+                        hierarchy = os.path.basename(hierarchy)
+                        #hierarchy = hierarchy.replace(".c", "")
+                        #hierarchy = hierarchy.replace(".h", "")
+                        hierarchy = hierarchy.replace(".tpl", "")
+
+                        #if(tag.modifiers.has_key("hierarchy")):
+                        #    hierarchy = tag.modifiers["hierarchy"]
 
                         tag.hierarchy = hierarchy
                         tag.page = page["source_file"]
@@ -713,7 +745,7 @@ class engine_t:
 
         return functions
 
-    def get_types_summary(self, tag=None):
+    def get_types_summary(self, tag=None, filters=None):
 
         types = []
 
@@ -736,19 +768,28 @@ class engine_t:
 
                 #print tag
                 
-                if(tag.name == "struct" or tag.name == "vector" or tag.name == "enum"):
-                    
-                    if(page_title == "" or (not tag.page_title)):
-                        hierarchy = os.path.basename(page["source_file"])
-                        hierarchy = hierarchy.replace("leeds_", "")
-                        hierarchy = hierarchy.replace(".c", "")
-                        hierarchy = hierarchy.replace(".h", "")
-                        hierarchy = hierarchy.replace(".tpl", "")
-                        hierarchy = hierarchy.replace("leeds", "cs4321")
+                if(tag.name in ("struct", "enum")):
 
-                        if(tag.modifiers):
-                            if(isinstance(tag.modifiers, DictType) and tag.modifiers.has_key("hierarchy")):
-                                hierarchy = tag.modifiers["hierarchy"]
+                    obj = tag.contents
+
+                    if(filters != None):
+                        if("deprecated" in filters):
+                            if(not obj.has_deprecated()):
+                                continue
+                        elif('!deprecated' in filters):
+                            if(obj.has_deprecated()):
+                                continue
+                    
+                    if(1): #page_title == "" or (not tag.page_title)):
+                        hierarchy = obj.file
+                        if(len(hierarchy) == 0):
+                            hierarchy = page['source_file']
+
+                        hierarchy = os.path.basename(hierarchy)
+                        #hierarchy = hierarchy.replace("leeds_", "")
+                        #hierarchy = hierarchy.replace(".c", "")
+                        #hierarchy = hierarchy.replace(".h", "")
+                        hierarchy = hierarchy.replace(".tpl", "")
 
                         tag.hierarchy = hierarchy
                         tag.page = page["source_file"]
@@ -970,9 +1011,11 @@ class engine_t:
             links = self.m_wiki_links
             for link in links:
                 output.append('''  %-24s
-    - wikiword: %s,
-    - label:    %s,
-    - bookmark: %s''' % (link, links[link].wikiword, links[link].label, links[link].is_bookmark))
+    - wikiword: %s
+    - label:    %s
+    - bookmark: %s
+    - link:     %s
+    - source:   %s''' % (link, links[link].wikiword, links[link].label, links[link].is_bookmark, links[link].link, links[link].source_file))
 
         elif("deprecated" in keys):
             pages = self.m_parser.get_pages()
@@ -1019,12 +1062,20 @@ class engine_t:
             ignore_errors = to_boolean(tag.modifiers["ignore_errors"])
 
         executor = code_executor_t()
-        (tag.rc, tag.result) = executor.execute(tag.name, source, tag.modifiers)
+        (tag.rc, tag.result, tag.result_image) = executor.execute(tag.name, source, tag.modifiers)
         if((not ignore_errors) and (tag.rc != 0)):
             ERROR("Failed executing code snippet in %s @ line %d\n%s" % (tag.file, tag.line, indent_lines(source, "    ")))
 
+        if(tag.result_image):
+            self.m_image_id += 1 
+            if(os.path.exists(tag.result_image)):
+                image = '%s/example_%d.png' % (shorte_get_scratch_path(), self.m_image_id)
+                shutil.move(tag.result_image, image)
+                tag.result_image = image
+                self.m_images.append(tag.result_image)
+
         code = self.m_source_code_analyzer
-        tag.contents = code.parse_source_code(tag.name, source)
+        tag.contents = code.parse_source_code(tag.name, source, tag.file, tag.line)
         tag.source = source
         
     def generate(self, package):

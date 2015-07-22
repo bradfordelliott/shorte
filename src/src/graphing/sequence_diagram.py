@@ -151,7 +151,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
            height=10,
            background_color="#E8DFAC",
            line_color="#c0c0c0",
-           line_weight=2)
+           line_width=2)
     
     event_count = 0
     
@@ -187,7 +187,7 @@ def generate_diagram(events, title, description, target_width, target_height, ba
                 background_color="#e8dfac",
                 line_color="#c0c0c0",
                 rounding=5,
-                line_weight=3,
+                line_width=3,
                 text="%s" % event_count,
                 )
 

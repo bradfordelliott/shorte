@@ -63,8 +63,8 @@ class template_c_t(template_t):
 
         for tag in tags:
 
-            type = tag["type"]
-            source = tag["data"]
+            type = tag.type
+            source = tag.data
         
             if(type == TAG_TYPE_WHITESPACE):
                 output += ' '
@@ -615,8 +615,8 @@ $fields
             # function definitions
             if(page.has_key("header")):
                 header = page["header"]
-                if(header.has_key("csource")):
-                    self.load_source(header["csource"])
+                if(header.has_csource()):
+                    self.load_source(header.get_csource())
 
 
             # Strip off the extension

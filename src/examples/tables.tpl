@@ -93,3 +93,11 @@ This is a test of the table captions
 -& Basic Parameters
 - \-mode | <cs_mx00_cfg_mode_e>        | Configuration Classification
 
+
+# DEBUG BRAD: Haven't updated the parser to support this format yet
+#@h3 A table with no header
+#@table
+#-- rows:
+#-x One | Two | Three
+#- One | Two | Three
+#- One | Two | Three

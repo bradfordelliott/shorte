@@ -60,12 +60,14 @@ Another paragraph
 - VLT_SUPPLY_2p5V      | 0xf   |  2.5V supply 
 - VLT_SUPPLY_TP_P      | 0x9   |  Test point P 
 - VLT_SUPPLY_TP_N      | 0x8   |  Test point N 
+-- since:
+Version 1.0
 
 @h4 e_loopback
 
-@enum: name="e_loopback" description='''
+@enum: name="e_loopback"
+-- description:
 The loopback interface point
-'''
 -- values:
 - Enum Name                | Enum Value | Enum Description
 - LOOPBK_DUPLEX_NEAR_DATA  | 0x1        | Duplex Near data loopback
@@ -74,14 +76,39 @@ The loopback interface point
         
 @h4 e_loopback_interface
 
-@enum: name="e_loopback_interface" description='''
-The loopback interface
-'''
+@enum
+-- name:
+e_loopback_interface
+
+-- description:
+The loopback interface with a note
+@{note, This is a random note}
+
+It also includes a warning:
+@{warning, This is an important warning}
+
 -- values:
 - Enum Name   | Enum Value | Enum Description
 - LOOPBK_HOST | 0x1        | Loopback on the host interface
 - LOOPBK_LINE | 0x3        | Loopback on the line interface
 
+-- deprecated:
+This enumation is deprecated and should not be used
+anymore.
+
+@{note, This is a note that is part of the enum}
+
+--see:
+For more information you can also refer to loopback_state_t
+
+--since:
+This was introduced in version 1.2
+
+--example:
+e_loopback_intf intf = LOOPBK_HOST;
+
+--example:
+e_loopback_intf intf = LOOPBK_LINE;
         
 @h4 loopback_state_t
 

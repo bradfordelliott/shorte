@@ -24,8 +24,14 @@ template_code_result = string.Template(
     <div class='code'>
         $result
     </div>
-    <br/>
 """)
+
+template_code_result_no_output = string.Template(
+"""
+    <br/>
+    <div class='code_result'>Result:</div>
+""")
+
 
 # This template is used to display errors to the user
 # when a source code block was excuted and returned
@@ -124,10 +130,10 @@ object
 div.snippet span.operator {color: purple;}
 div.snippet span.kw {font-weight:bold;color: blue;} /* keyword */
 div.snippet span.str {color: #9933CC;}
-div.snippet span.def {color:red;}
+div.snippet span.def {color:#660000;}
 div.snippet span.mstring {color: #9933CC;}
 div.snippet span.cmt {color: #009900;}
-div.snippet span.cmttg {color: #00cc00;}
+div.snippet span.cmttg {color: #00dd00;}
 div.snippet span.ln {color: #C0C0C0;}
 
 /* Styling of text blocks */
@@ -144,7 +150,7 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
       margin-bottom:0px;
       margin-top:10px;
       margin-left: 30px;
-      background-color: white;
+      /*background-color: white;*/
       border: 0px;
       width:100%;
       color:#ccc;
@@ -161,10 +167,10 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
   div.snippet span.keyword {color: blue;}
   div.snippet span.kw {color: blue;}
   div.snippet span.str {color: #9933CC;}
-  div.snippet span.def {color:red;}
+  div.snippet span.def {color:#660000;}
   div.snippet span.mstring {color: #9933CC;}
   div.snippet span.cmt {color: #009900;}
-  div.snippet span.cmttg {color: #00cc00;}
+  div.snippet span.cmttg {color: #00dd00;}
   div.snippet span.ln {color: #C0C0C0;}
 
   /* Styling of text blocks */
@@ -181,6 +187,7 @@ div.gallery
   {
       margin-left:20px;
       margin-right:20px;
+      margin-bottom:20px;
       border:1px solid #ddd;
       padding:4px;
       border-radius:4px;
@@ -226,6 +233,7 @@ div.gallery
   {
       margin-left:20px;
       margin-right:20px;
+      margin-bottom:20px;
       border:1px solid #eee;
       padding:10px;
       border-radius:2px;
@@ -260,6 +268,51 @@ div.gallery
   {
       height:32px;background:#000;border:0px solid #ddd;
       text-align:center;white-space:wrap;overflow:hidden;text-overflow:ellipsis;
+      border-bottom-left-radius:4px;
+      border-bottom-right-radius:4px;
+  }
+  
+  
+  div.gallery_magazine
+  {
+      margin-left:20px;
+      margin-right:20px;
+      border:0px solid #eee;
+      padding:10px;
+      border-radius:2px;
+      text-align:left;
+      align:left;
+  }
+
+  div.gallery_magazine div.pic
+  {
+      float:left;
+      padding:10px;
+      margin:2px;
+      border:0px solid #ccc;
+      border-radius:0px;
+      background-color:white;
+  }
+
+  div.gallery_magazine p
+  {
+      color:#aaa;font-size:0.8em;padding:0px;margin:0px;margin-top:1px;
+  }
+  
+  div.gallery_magazine div.pic div.pic_header
+  {
+      height:30px;border:0px solid #ddd;text-align:center;background-color:white;
+  }
+  
+  div.gallery_magazine div.pic div.pic_body
+  {
+      border-left:0px solid #000;border-right:0px solid #000;
+  }
+  
+  div.gallery_magazine div.pic div.pic_footer
+  {
+      background:white;border:0px solid #ddd;
+      text-align:center;white-space:wrap;
       border-bottom-left-radius:4px;
       border-bottom-right-radius:4px;
   }
@@ -489,6 +542,7 @@ div.gallery
       margin-bottom:10px;
       background-color:#f0f0f0;
       border:3px solid #ccc;
+      overflow:auto;
   }
   div.code2
   {

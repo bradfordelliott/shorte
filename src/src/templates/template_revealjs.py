@@ -191,8 +191,19 @@ class template_revealjs_t(template_html_t):
         #    self.m_contents += "<pre style='margin-left:40px;'>%s</pre>" % data
         #else:
         #    print "Undefined tag: %s [%s]" % (tag, data); sys.exit(-1);
+        #
+    def _fix_css(self, css):
+        css = string.Template(css)
+
+        css = css.substitute({"h1_color" : "#CC020C",
+                              "h2_color" : "#CC020C",
+                              "h3_color" : "#CC020C"}) 
+
+        return css
     
     def install_support_files(self, outputdir):
+        
+        theme = self.m_engine.get_theme()
         
         if(os.path.exists(outputdir + "/css")):
             shutil.rmtree(outputdir + "/css")
@@ -200,12 +211,22 @@ class template_revealjs_t(template_html_t):
         if(os.path.exists(outputdir + "/reveal.js")):
             shutil.rmtree(outputdir + "/reveal.js")
        
-        if(os.path.exists(outputdir + "/%s.css" % self.m_engine.get_theme())):
-            os.remove(outputdir + "/%s.css" % self.m_engine.get_theme())
-
+        if(os.path.exists(outputdir + "/%s.css" % theme)):
+            os.remove(outputdir + "/%s.css" % theme) 
+        
         ignore_patterns=('*.swp')
-        shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (self.m_engine.get_theme(), self.m_engine.get_theme()), self.m_engine.m_output_directory)
-        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/%s/css" % self.m_engine.get_theme(), self.m_engine.m_output_directory + "/css") # , ignore=shutil.ignore_patterns(*ignore_patterns))
+        #shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (self.m_engine.get_theme(), self.m_engine.get_theme()), self.m_engine.m_output_directory)
+        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/%s/css" % theme, self.m_engine.m_output_directory + "/css") # , ignore=shutil.ignore_patterns(*ignore_patterns))
+        
+        handle = open(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (theme,theme), "rt")
+        contents = handle.read()
+        handle.close()
+        css = self._fix_css(contents)
+        handle = open("%s/%s.css" % (outputdir, theme), "wt")
+        handle.write(css)
+        handle.close()
+
+        #shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (theme, theme), self.m_engine.m_output_directory)
         shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/reveal.js", self.m_engine.m_output_directory + "/reveal.js") # , ignore=shutil.ignore_patterns(*ignore_patterns))
 
     def generate_string(self, theme, version, package):

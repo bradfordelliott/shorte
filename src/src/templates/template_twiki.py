@@ -136,8 +136,8 @@ class template_twiki_t(template_html.template_html_t):
         
         for tag in tags:
 
-            type = tag["type"]
-            source = tag["data"]
+            type = tag.type
+            source = tag.data
         
             source = amp.sub("&amp;", source)
             source = lt.sub("&lt;", source)

@@ -16,6 +16,23 @@ import re
 
 from shorte_defines import *
 
+class shorte_source_code_tag_t(object):
+    __slots__ = ['data', 'type', 'start']
+    def __init__(self, type, data):
+        self.data = data
+        self.type = type
+        self.start = None
+
+    #def __init__(self, type, data):
+    #    self.__dict__.update(locals())
+    #    del self.self
+
+    def is_empty(self):
+        if((len(self.data) == 0) and (self.type == 0)):
+            return True
+        return False
+        
+
 class source_code_t:
     def __init__(self):
 
@@ -350,6 +367,7 @@ onload onmouseup onmousedown onsubmit
         }
 
         keywords["cpp"] = keywords["c"]
+        keywords["pycairo"] = keywords["python"]
        
         self.m_keywords = {}
 
@@ -380,29 +398,34 @@ onload onmouseup onmousedown onsubmit
         return self.m_keywords[language]
 
 
-    def create_tag(self, type, data):
-
-        tag = {}
-        tag["data"] = data
-        tag["type"] = type
-
-        return tag
-    
-    def parse_source_code(self, type, source):
+    def parse_source_code(self, type, source, source_file, source_line):
         
         tags = []
         #print "BEFORE\n======\n%s" % source
 
         source_lang = type
 
-        source = trim_blank_lines(source)
+        tmp = shorte_get_config('shorte', 'validate_line_length')
+        if(tmp):
+            parts = tmp.split('@')
+            check  = parts[0]
+            length = int(parts[1])
 
-        #print "AFTER 1\n======\n%s" % source
+            if(check in ('warn', 'error')):
+                lines = source.split('\n')
+                i = 0
+                for line in lines:
+                    i += 1
+                    if(len(line) > length):
+                        if(check == 'warn'):
+                            WARNING("Source line %d is too long (%d chars) in %s.%d\n  [%s]" % (i, len(line), source_file, source_line, line))
+                        else:
+                            ERROR("Source line %d is too long (%d chars) in %s.%d\n  [%s]" % (i, len(line), source_file, source_line, line))
+
+        source = trim_blank_lines(source)
 
         source = source.rstrip()
         source = trim_leading_indent(source, allow_second_line_indent_check=False)
-        
-        #print "AFTER 2\n======\n%s" % source
 
         # Now parse the source code into
         # a list of tags
@@ -410,261 +433,293 @@ onload onmouseup onmousedown onsubmit
         
         i = 0
         end = len(source)
-        tag = self.create_tag(TAG_TYPE_CODE, '')
+        tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
 
         line = 1
         states = []
         states.append(state)
 
+        is_sql = False
+        is_batch = False
+        if(source_lang == 'sql'):
+            is_sql = True
+        elif(source_lang == 'batch'):
+            is_batch = True
+
         while i < end:
+
+            #print "SOURCE:"
+            #print source[0:i+1]
 
             state = states[-1]
             #print "STATE: %d" % state
 
             # If we hit an escape sequence then skip it
             # and move to the next character.
-            if(source[i] == '\\' and source[i+1] != '\\'):
-                i+=1
-                continue
+            #if(source[i] == '\\' and source[i+1] != '\\'):
+            #    i+=1
+            #    continue
 
             if(not (state in (STATE_MCOMMENT, STATE_COMMENT, STATE_PREPROCESSOR, STATE_INLINE_STYLING, STATE_STRING)) and (source[i] in (' ', '(', ')', ','))):
-                type = tag["type"]
+                type = tag.type
                 tags.append(tag)
 
                 if(source[i] == ' '):
-                    tag = self.create_tag(TAG_TYPE_WHITESPACE, ' ')
+                    tag = shorte_source_code_tag_t(TAG_TYPE_WHITESPACE, ' ')
                 elif(source[i] in ('(', ')')):
-                    tag = self.create_tag(TAG_TYPE_CODE, source[i])
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, source[i])
                 elif(source[i] in (',')):
-                    tag = self.create_tag(TAG_TYPE_CODE, source[i])
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, source[i])
 
                 tags.append(tag)
 
-                tag = self.create_tag(type, '')
+                tag = shorte_source_code_tag_t(type, '')
                 i += 1
                 continue
 
             if(source[i] == '\n'):
-                type = tag["type"]
+                type = tag.type
 
-                #tag["data"] += source[i]
-                tags.append(tag)
+                if(state == STATE_STRING):
+                    tstart = tag.start
 
-                tag = self.create_tag(TAG_TYPE_NEWLINE, '\n')
+                #tag["d"] += source[i]
+
+                if(not tag.is_empty()):
+                    tags.append(tag)
+
+                tag = shorte_source_code_tag_t(TAG_TYPE_NEWLINE, '\n')
                 tags.append(tag)
 
                 if(state in [STATE_COMMENT, STATE_PREPROCESSOR]):
+                #if(state == STATE_COMMENT or state == STATE_PREPROCESSOR):
                     states.pop()
-                    tag = self.create_tag(TAG_TYPE_CODE, '')
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
+                elif(state == STATE_STRING):
+                    tag = shorte_source_code_tag_t(type, '')
+                    tag.start = tstart
                 else:
-                    tag = self.create_tag(type, '')
+                    tag = shorte_source_code_tag_t(type, '')
                 
                 i += 1
 
                 continue
 
-    
             if(state == STATE_NORMAL):
                 # Treat # as either a single line comment or
                 # a pre-processor statement
                 if(source[i] == '#'):
 
-                    if(source_lang != 'c'):
+                    if(not (source_lang in ('c', 'cpp'))):
                         states.append(STATE_COMMENT)
-                        tags.append(tag)
 
-                        tag = {}
-                        tag["data"] = "#"
-                        tag["type"] = TAG_TYPE_COMMENT
+                        if(not tag.is_empty()):
+                            tags.append(tag)
+
+                        tag = shorte_source_code_tag_t(TAG_TYPE_COMMENT, "#") 
                     else:
                         states.append(STATE_PREPROCESSOR)
-                        tags.append(tag)
 
-                        tag = {}
-                        tag["data"] = "#"
-                        tag["type"] = TAG_TYPE_PREPROCESSOR
-                        
+                        if(not tag.is_empty()):
+                            tags.append(tag)
+
+                        tag = shorte_source_code_tag_t(TAG_TYPE_PREPROCESSOR, "#")
 
                 # Treat // as a single line comment
                 elif(source[i] == '/' and source[i+1] == '/'):
                     states.append(STATE_COMMENT)
-                    tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = '/'
-                    tag["type"] = TAG_TYPE_COMMENT
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+
+                    tag = shorte_source_code_tag_t(TAG_TYPE_COMMENT, '/')
 
                 # Treat -- as a single line comment in SQL blocks
-                elif(source_lang == "sql" and (source[i] == '-' and source[i+1] == '-')):
+                elif(is_sql and (source[i] == '-' and source[i+1] == '-')):
                     states.append(STATE_COMMENT)
-                    tags.append(tag)
-                    tag = {}
-                    tag["data"] = '-'
-                    tag["type"] = TAG_TYPE_COMMENT
+
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+
+                    tag = shorte_source_code_tag_t(TAG_TYPE_COMMENT, '-')
 
                 # Treat rem as a single line comment in batch files
-                elif(source_lang == "batch" and (source[i] == 'r' and source[i+1] == 'e' and source[i+2] == 'm')):
+                elif(is_batch and (source[i:i+3] == 'rem')):
                     states.append(STATE_COMMENT)
-                    tags.append(tag)
-                    tag = {}
-                    tag["data"] = "r"
-                    tag["type"] = TAG_TYPE_COMMENT
+
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+
+                    tag = shorte_source_code_tag_t(TAG_TYPE_COMMENT, 'r')
                     
                 # Treat /* as the start of a multi-line comment
                 elif(source[i] == '/' and source[i+1] == '*'):
                     states.append(STATE_MCOMMENT)
-                    tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = '/'
-                    tag["type"] = TAG_TYPE_MCOMMENT
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+
+                    tag = shorte_source_code_tag_t(TAG_TYPE_MCOMMENT, '/')
 
 
                 # If this is an XML based document then treat
                 # <!-- as a multi-line comment
                 elif(source[i:i+4] == '<!--'):
                     states.append(STATE_XMLCOMMENT)
-                    tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = '<'
-                    tag["type"] = TAG_TYPE_XMLCOMMENT
+                    if(not tag.is_empty()):
+                        tags.append(tag)
 
-                # Treat " or ''' as the start of a string
-                elif(source[i] == '"'): # or source[i] == "'"):
-                    states.append(STATE_STRING)
-                    tags.append(tag)
+                    tag = shorte_source_code_tag_t(TAG_TYPE_XMLCOMMENT, '<')
 
-                    tag = {}
-                    tag["data"] = '"'
-                    tag["type"] = TAG_TYPE_STRING
 
                 # Check for python style strings
                 elif(source[i:i+3] == "'''" or source[i:i+3] == '"""'):
                     states.append(STATE_STRING)
-                    i += 2
-                    tags.append(tag)
+                    if(not tag.is_empty()):
+                        tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = "'''"
-                    tag["type"] = TAG_TYPE_STRING
+                    tag = shorte_source_code_tag_t(TAG_TYPE_STRING, source[i:i+3])
+                    tag.start = source[i:i+3]
+                    i += 2
+                
+                # Treat " or ''' as the start of a string
+                elif(source[i] in ('"', "'")): # or source[i] == "'"):
+                    states.append(STATE_STRING)
+
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+
+                    tag = shorte_source_code_tag_t(TAG_TYPE_STRING, source[i])
+                    tag.start = source[i]
 
                 #elif(source_lang == "python" and (source[i:i+3] == "'''")):
                 #    states.append(STATE_STRING)
                 #    tags.append(tag)
                 #    tag = {}
-                #    tag["data"] = "'"
-                #    tag["type"] == TAG_TYPE_STRING
+                #    tag["d"] = "'"
+                #    tag["t"] == TAG_TYPE_STRING
 
                 # Treat @{ as inline styling
                 elif(source[i] == '@' and source[i+1] == '{'):
                     states.append(STATE_INLINE_STYLING)
-                    tags.append(tag)
+                    if(not tags.is_empty()):
+                        tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = '@'
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '@')
 
                 else:
-                    tag["data"] += source[i] 
+                    tag.data += source[i] 
 
             elif(state in (STATE_COMMENT, STATE_PREPROCESSOR)):
 
                 if(source[i] == '\n'):
-                    tag["data"] += source[i]
+                    tag.data += source[i]
                     tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = ""
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, "")
 
                     states.pop()
                 else:
-                    tag["data"] += source[i]
+                    tag.data += source[i]
 
             elif(state == STATE_MCOMMENT):
-                if(source[i-1] == '*' and source[i] == '/'):
-                    tag["data"] += source[i]
+                #if(source[i-1] == '*' and source[i] == '/'):
+                if(source[i-1:i+1] == '*/'):
+                    tag.data += source[i]
                     tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = ""
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, "")
                     states.pop()
                 else:
-                    tag["data"] += source[i]
+                    tag.data += source[i]
 
             elif(state == STATE_XMLCOMMENT):
-                if(source[i-2] == '-' and source[i-1] == '-' and source[i] == '>'):
-                    tag["data"] += source[i]
+                #if(source[i-2] == '-' and source[i-1] == '-' and source[i] == '>'):
+                if(source[i-2:i+1] == '-->'):
+                    tag.data += source[i]
                     tags.append(tag)
 
-                    tag = {}
-                    tag["data"] = ""
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, "")
                     states.pop()
                 else:
-                    tag["data"] += source[i]
+                    tag.data += source[i]
 
             elif(state == STATE_INLINE_STYLING):
                 if(source[i] == '}'):
-                    tag["data"] += source[i]
+                    tag.data += source[i]
                     tags.append(tag)
                     
-                    tag = {}
-                    tag["data"] = ''
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
                     states.pop()
 
                 else:
-                    tag["data"] += source[i]
+                    tag.data += source[i]
 
             elif(state == STATE_STRING):
+                #if((tag.data.startswith("'''") and source[i:i+3] == "'''") or
+                #   (tag.data.startswith('"""') and source[i:i+3] == '"""')):
+                if((tag.start == '\'\'\'') and (source[i:i+3] == "'''")):
 
-                if((tag["data"].startswith("'''") and source[i:i+3] == "'''") or
-                   (tag["data"].startswith('"""') and source[i:i+3] == '"""')):
-
-                    tag["data"] += source[i:i+3]
+                    tag.data += source[i:i+3]
                     tags.append(tag)
                     i += 2 
                     
-                    tag = {}
-                    tag["data"] = ''
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
+                    states.pop()
+                elif((tag.start == '"""') and (source[i:i+3] == '"""')):
+                    tag.data += source[i:i+3]
+                    tags.append(tag)
+                    i += 2 
+                    
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
                     states.pop()
 
-                elif(source[i] == '"'):
-                    tag["data"] += source[i]
+                elif(tag.start == '"' and source[i] == '"'):
+                    tag.data += source[i]
                     tags.append(tag)
                     
-                    tag = {}
-                    tag["data"] = ''
-                    tag["type"] = TAG_TYPE_CODE
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
+                    states.pop()
+
+                elif(tag.start == "'" and source[i] == "'"):
+                    tag.data += source[i]
+                    tags.append(tag)
+                    
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
                     states.pop()
 
                 #elif(source_lang == "python" and (started_with ==  "'") and (source[i:i+3] == "'''")):
-                #    tags["data"] += source[i:i+3]
+                #    tags["d"] += source[i:i+3]
                 #    i += 2
                 #    tags.append(tag)
 
                 #    tag = {}
-                #    tag["data"] = ''
-                #    tag["type"] = TAG_TYPE_CODE
+                #    tag["d"] = ''
+                #    tag["t"] = TAG_TYPE_CODE
                 #    states.pop()
 
                 else:
-                    tag["data"] += source[i]
+                    tag.data += source[i]
 
             i += 1
         
-        tags.append(tag)
+        if(not tag.is_empty()):
+            tags.append(tag)
+
+        return tags
 
         tags_output = []
         for tag in tags:
-            if(tag["data"] == "" and tag["type"] == 0):
-                do_nothing = 1 
+            #if(tag.data == "" and tag.type == 0):
+            if(tag.is_empty()):
+                pass
             else:
-                #print "TAG: [%s](%d)" % (tag["data"], tag["type"])
+                #print "TAG: [%s](%d)" % (tag["d"], tag["t"])
+                #tmp = {}
+                #tmp["d"] = tag.data
+                #tmp["t"] = tag.type
+                #tags_output.append(tmp)
                 tags_output.append(tag)
 
         return tags_output
@@ -685,6 +740,7 @@ class type_t:
         self.line = None
         self.type = ""
         self.see_also = None
+        self.since = None
 
     def get_name(self):
         return self.name
@@ -731,13 +787,17 @@ class type_t:
     def get_example(self):
         return self.example
     def set_example(self, example, analyzer=None, language=None):
-        tmp = analyzer.parse_source_code(language, example)
+        tmp = analyzer.parse_source_code(language, example, self.file, self.line)
         cb = code_block_t()
         cb.set_language(language)
         cb.set_parsed(tmp)
         cb.set_unparsed(example)
         self.example = cb
 
+    def has_deprecated(self):
+        if(self.deprecated in (None, False)):
+            return False
+        return True
     def get_deprecated(self):
         return self.deprecated
     def get_deprecated_msg(self):
@@ -759,8 +819,19 @@ class type_t:
 
     def get_private(self):
         return self.private
+    def is_private(self):
+        return self.private
     def set_private(self, priv):
         self.private = priv
+
+    def has_since(self):
+        if(None == self.since):
+            return False
+        return True
+    def get_since(self):
+        return self.since
+    def set_since(self, since):
+        self.since = since
 
     def set_comment(self, comment):
         self.comment = comment
@@ -841,7 +912,7 @@ class field_t(type_t):
             self.width = field["width"]
             self.start = field["start"]
             self.end   = field["end"]
-        #    self.type  = field["type"]
+        #    self.type  = field["t"]
         #else:
         #    self.type = self.attrs[0]["text"]
         #else:
@@ -1070,7 +1141,7 @@ class prototype_t(type_t):
         return self.prototype
     
     def set_prototype(self, prototype, analyzer=None, language=None):
-        tmp = analyzer.parse_source_code(language, prototype)
+        tmp = analyzer.parse_source_code(language, prototype, self.file, self.line)
         cb = code_block_t()
         cb.set_language(language)
         cb.set_parsed(tmp)
@@ -1096,7 +1167,7 @@ class prototype_t(type_t):
     def get_pseudocode(self):
         return self.pseudocode
     def set_pseudocode(self, pseudocode, analyzer=None, language=None):
-        tmp = analyzer.parse_source_code(language, pseudocode)
+        tmp = analyzer.parse_source_code(language, pseudocode, self.file, self.line)
         cb = code_block_t()
         cb.set_language(language)
         cb.set_parsed(tmp)
@@ -1188,12 +1259,30 @@ class class_t(type_t):
         class_uid += 1
         self.m_types = {}
 
+        self.m_members = {}
+        self.m_members['public'] = {}
+        self.m_members['private'] = {}
+        self.m_members['property'] = {}
+
+        self.m_methods = {}
+        self.m_methods['public'] = {}
+        self.m_methods['private'] = {}
+
     def prototype_add(self, ptype):
         print "Adding prototype %s" % ptype.get_name()
         self.m_prototypes[ptype.get_prototype().get_unparsed()] = ptype
 
-    def types_add(self, t):
-        self.m_types[t] = t
+    def method_add(self, method, access='public'):
+        self.m_methods[access][method] = method
+
+    def methods_get(self, access='public'):
+        return self.m_methods[access]
+
+    def member_add(self, member, access='public'):
+        self.m_members[access][member] = member
+
+    def members_get(self, access='public'):
+        return self.m_members[access]
 
     #def prototype_add(self, category, pt):
     #    self.m_prototypes[category][pt] = pt
@@ -1229,4 +1318,80 @@ class define_t(type_t):
         return output
 
 
+class comment_t:
+    def __init__(self):
+        self.params = {}
+        self.returns = None
+        self.example = None
+        self.private = False
+        self.see_also = None
+        self.deprecated = False
+        self.deprecated_msg = None
+        self.heading = None
+        self.since = None
+        
+        # For types that have pseudocode associated
+        # with them, primarily function prototypes
+        self.pseudocode = None
 
+        self.description = None
+
+    def is_private(self):
+        return self.private
+
+    def has_description(self):
+        if(self.description != None):
+            return True
+        return False
+    def get_description(self):
+        return self.description
+
+    def has_example(self):
+        if(self.example != None):
+            return True
+        return False
+
+    def get_example(self):
+        return self.example
+
+    def has_returns(self):
+        if(self.returns != None):
+            return True
+        return False
+    def get_returns(self):
+        return self.returns
+
+    def has_pseudocode(self):
+        if(self.pseudocode != None):
+            return True
+        return False
+    def get_pseudocode(self):
+        return self.pseudocode
+
+    def has_see_also(self):
+        if(self.see_also != None):
+            return True
+        return False
+    def get_see_also(self):
+        return self.see_also
+
+    def has_heading(self):
+        if(self.heading != None):
+            return True
+        return False
+    def get_heading(self):
+        return self.heading
+
+    def has_since(self):
+        if(self.since != None):
+            return True
+        return False
+    def get_since(self):
+        return self.since
+
+    def has_deprecated(self):
+        if(self.deprecated_msg != None):
+            return True
+        return False
+    def get_deprecated(self):
+        return self.deprecated_msg

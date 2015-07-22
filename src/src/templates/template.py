@@ -36,6 +36,10 @@ class template_t:
         self.m_end_characters.remove('_')
         self.m_end_characters.remove('@')
 
+        self.m_end_characters_dict = {}
+        for i in self.m_end_characters:
+            self.m_end_characters_dict[i] = True
+
     def allow_wikify_comments(self):
         return self.m_wikify_comments
     
@@ -153,6 +157,12 @@ class template_t:
         if(not self.m_wikify):
             return data
 
+        excluded = {}
+        check_excluded = False
+        for e in exclude:
+            excluded[e] = True
+            check_excluded = True
+
         words = []
         word = ''
 
@@ -160,11 +170,15 @@ class template_t:
         
         # Figure out the list of punctuation characters that are used to
         # split up wikiwords.
-        end_characters = self.m_end_characters
+        # DEBUG BRAD: Switched to a dictionary for speedup
+        #end_characters = self.m_end_characters
+        end_characters = self.m_end_characters_dict
 
         for i in data:
 
-            if(i in end_characters):
+            # DEBUG BRAD: Switched to a dictionary for speedup
+            #if(i in end_characters):
+            if(end_characters.has_key(i)):
 
                 words.append(word)
                 words.append(i)
@@ -178,22 +192,30 @@ class template_t:
             words.append(word)
 
         output = ''
+
         for word in words:
             
             if(debug):
                 print "    Checking [%s]" % word
 
-            if(word in end_characters):
+            # DEBUG BRAD: Switched to a dictionary for performance
+            #if(word in end_characters):
+            if(end_characters.has_key(word)):
                 output += word 
             else:
 
                 link = None
 
                 exclude_word = False
-                for tmp in exclude:
-                    if(tmp == word):
-                        exclude_word = True
-                        break
+
+                # DEBUG BRAD: Switched to a dictionary for performace
+                #for tmp in exclude:
+                #    if(tmp == word):
+                #        exclude_word = True
+                #        break
+                if(check_excluded):
+                    if(excluded.has_key(word)):
+                        excluded_word = True
 
                 is_bookmark = False
 

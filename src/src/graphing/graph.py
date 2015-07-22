@@ -82,10 +82,10 @@ class cairo_t:
                   text=None,
                   background_color="white",
                   line_color="black",
-                  line_weight=1,
+                  line_width=1,
                   rounding=0):
 
-        self.image.set_line_width(line_weight);
+        self.image.set_line_width(line_width);
 
         background_color = self.translate_color(background_color)
         line_color = self.translate_color(line_color)
@@ -153,7 +153,7 @@ class cairo_t:
         if(text != None):
             (text_width, text_height) = self.image.text_extents("%s" % text)
             self.draw_text(
-                    x = x + (width/2) + line_weight/2,
+                    x = x + (width/2) + line_width/2,
                     y = y + height/2 - text_height/2,
                     text = text,
                     font_color = font_color,
@@ -590,7 +590,8 @@ class cairo_t:
         
         return color_array
 
-
+    def write_to_png(self, path, width, height):
+        self.image.write_to_png(path, width, height)
 
 
 class graph_t:

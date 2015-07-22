@@ -77,10 +77,10 @@ class code_executor_t:
         result = ""
 
         if(not modifiers.has_key("exec")):
-            return (rc,None)
+            return (rc,None,None)
 
         if(modifiers["exec"] == "0" or modifiers["exec"] == "no"):
-            return (rc,None)
+            return (rc,None,None)
 
         machine = ""
         port = "22"
@@ -110,23 +110,33 @@ class code_executor_t:
             source_file = modifiers["save"]
             keep_source_file = True
 
+        image_file = None
+        if(modifiers.has_key('save_image')):
+            image_file = modifiers['save_image']
+            
+        if(language == "python"):
+            if(modifiers.has_key('path_add_shorte')):
+                prefix_path = shorte_get_startup_path()
+                source = '''import sys\nsys.path.append("%s")\n\n%s''' % (prefix_path, source)
+
+
         # Create the temporary source file
         self.create_source_file(language, source_file, source)
 
-        if(language in ("python", "perl", "tcl", "bash", "swift", "go", "javascript")):
+        if(language in ('python', 'perl', 'tcl', 'bash', 'swift', 'go', 'javascript')):
 
             if(language == "bash"):
                 if("Windows" == platform.system()):
-                    return (-1, "bash not currently supported under windows")
+                    return (-1, "bash not currently supported under windows",None)
             elif(language == "swift"):
                 if("Darwin" != platform.system()):
-                    return (-1, "swift not currently supported on platforms other than OSX")
+                    return (-1, "swift not currently supported on platforms other than OSX",None)
             elif(language == "go"):
                 if("Darwin" != platform.system()):
-                    return (-1, "go not currently supported on platforms other than OSX")
+                    return (-1, "go not currently supported on platforms other than OSX",None)
             elif(language == "javascript"):
                 if("Darwin" != platform.system()):
-                    return (-1, "javascript not currently supported on platforms other than OSX")
+                    return (-1, "javascript not currently supported on platforms other than OSX",None)
 
             if(machine != ""):
                 cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
@@ -186,7 +196,7 @@ class code_executor_t:
                 rc = phandle.returncode
 
                 if(rc != 0):
-                    return (rc,result)
+                    return (rc,result,None)
                     
                 #phandle.close()
                 #print "Compile result = [%s]" % result
@@ -255,7 +265,7 @@ class code_executor_t:
                     rc = -1
 
                 if(0 != rc):
-                    return (rc,result)
+                    return (rc,result,None)
                 
                 # Now run the application
                 phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -265,7 +275,7 @@ class code_executor_t:
                 rc = phandle.returncode
 
                 if(0 != rc):
-                    return (rc,result)
+                    return (rc,result,None)
 
                 #result = os.popen("%s tmpexample.java 2>&1" % compiler).read();
                 #print "result = %s" % result
@@ -335,6 +345,10 @@ class code_executor_t:
                 sys.exit(-1)
 
         elif(language == "batch"):
+            
+            if("windows" != platform.system()):
+                return (-1, "batch not currently supported on platforms other than Windows",None)
+
             # Run the batch file using cmd /c
             tmp = open(source_file, "w")
             tmp.write(source)
@@ -357,5 +371,5 @@ class code_executor_t:
         #example_name = "example_%d" % self.m_example_id
         #shutil.copy("tmpexample.py", self.m_output_directory + "/" + example_name)
 
-        return (rc,result)
+        return (rc,result,image_file)
 
