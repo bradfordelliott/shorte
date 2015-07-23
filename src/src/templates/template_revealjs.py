@@ -265,7 +265,7 @@ class template_revealjs_t(template_html_t):
         handle.close()
 
         #shutil.copy(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (theme, theme), self.m_engine.m_output_directory)
-        shutil.copytree(shorte_get_startup_path() + "/templates/reveal.js/reveal.js", self.m_engine.m_output_directory + "/reveal.js") # , ignore=shutil.ignore_patterns(*ignore_patterns))
+        shutil.copytree(shorte_get_startup_path() + "/3rdparty/reveal.js", self.m_engine.m_output_directory + "/reveal.js") # , ignore=shutil.ignore_patterns(*ignore_patterns))
 
     def generate_string(self, theme, version, package):
         
