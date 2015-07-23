@@ -27,9 +27,21 @@ from src.shorte_defines import *
 from template import *
 from template_html import *
 from src.shorte_source_code import *
+import templates.html.html_styles as html_styles
 
     
 class template_revealjs_t(template_html_t):
+
+    def __init__(self, engine, indexer):
+        
+        template_html_t.__init__(self, engine, indexer)
+
+        # DEBUG BRAD: These features currently don't work in
+        #             the reveal.js template. They need to be
+        #             eventually fixed.
+        self.m_wikify = False
+        self.m_allow_xrefs = False
+        self.m_inline = True
     
     def _load_template(self, template_name):
         
@@ -39,6 +51,29 @@ class template_revealjs_t(template_html_t):
         handle.close()
 
         return contents
+    
+    def format_list(self, list, ordered=False, indent=0):
+
+        if(indent != 0):
+            style = " style='margin-left:%dpx;' " % (40 + indent*10)
+        else:
+            style = " style='margin-left:40px'"
+
+        if(not ordered):
+            start_tag = "<ul%s>" % style
+            end_tag = "</ul>"
+        else:
+            start_tag = "<ol%s>" % style
+            end_tag = "</ol>"
+
+        source = start_tag
+
+        for elem in list:
+            source += self.format_list_child(elem, start_tag, end_tag)
+
+        source += end_tag
+
+        return source
     
     def append_header(self, tag, data, file):
 
@@ -67,50 +102,50 @@ class template_revealjs_t(template_html_t):
             self.m_contents.append("<h6>" + data.strip() + "</h6>\n")
     
      
-    def append_source_code(self, tag):
+    #def append_source_code(self, tag):
 
-        rc = self.format_source_code(tag.name, tag.contents)
+    #    rc = self.format_source_code(tag.name, tag.contents)
 
-        source = self.format_source_code_no_lines(tag.name, tag.contents)
+    #    source = self.format_source_code_no_lines(tag.name, tag.contents)
 
-        result = tag.result
+    #    result = tag.result
 
-        snippet_id = self.m_snippet_id
-        self.m_snippet_id += 1
+    #    snippet_id = self.m_snippet_id
+    #    self.m_snippet_id += 1
 
-        if(result != None):
-            # Convert any HTML tags in the input source
-            lt = re.compile("<")
-            gt = re.compile(">")
-            nl = re.compile("\n")
-            ws = re.compile(" ")
+    #    if(result != None):
+    #        # Convert any HTML tags in the input source
+    #        lt = re.compile("<")
+    #        gt = re.compile(">")
+    #        nl = re.compile("\n")
+    #        ws = re.compile(" ")
 
-            result = lt.sub("&lt;", result)
-            result = gt.sub("&gt;", result)
-            result = nl.sub("<br>", result)
-            result = ws.sub("&nbsp;", result)
-            
-            result = template_code_result.substitute({"result": result})
-        else:
-            result = ""
+    #        result = lt.sub("&lt;", result)
+    #        result = gt.sub("&gt;", result)
+    #        result = nl.sub("<br>", result)
+    #        result = ws.sub("&nbsp;", result)
+    #        
+    #        result = html_styles.template_code_result.substitute({"result": result})
+    #    else:
+    #        result = ""
 
-        if(self.m_show_code_headers["code"]):
-            snippet_id = self.m_snippet_id
-            self.m_snippet_id += 1
-            code_header = template_code_header.substitute(
-                    {"id" : snippet_id,
-                     "style" : "margin-left:30px;margin-top:10px;width:100%;"})
-            source = template_source.substitute({"id": snippet_id, "source": source})
-        else:
-            code_header = ""
-            source = ""
+    #    if(self.m_show_code_headers["code"]):
+    #        snippet_id = self.m_snippet_id
+    #        self.m_snippet_id += 1
+    #        code_header = template_code_header.substitute(
+    #                {"id" : snippet_id,
+    #                 "style" : "margin-left:30px;margin-top:10px;width:100%;"})
+    #        source = template_source.substitute({"id": snippet_id, "source": source})
+    #    else:
+    #        code_header = ""
+    #        source = ""
 
-        self.m_contents.append(template_code.substitute(
-                {"contents"    : rc,
-                 "source"      : source,
-                 "code_header" : code_header,
-                 "template"    : "code",
-                 "result"      : result}))
+    #    self.m_contents.append(template_code.substitute(
+    #            {"contents"    : rc,
+    #             "source"      : source,
+    #             "code_header" : code_header,
+    #             "template"    : "code",
+    #             "result"      : result}))
 
     
     def append(self, tag):
@@ -181,6 +216,8 @@ class template_revealjs_t(template_html_t):
             pass
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
+        elif(name in ('class')):
+            WARNING("This tag [%s] is not supported yet" % name)
         else:
             FATAL("Undefined tag: %s [%s]" % (name, tag.source))
         
@@ -192,14 +229,14 @@ class template_revealjs_t(template_html_t):
         #else:
         #    print "Undefined tag: %s [%s]" % (tag, data); sys.exit(-1);
         #
-    def _fix_css(self, css):
-        css = string.Template(css)
+    #def _fix_css(self, css):
+    #    css = string.Template(css)
 
-        css = css.substitute({"h1_color" : "#CC020C",
-                              "h2_color" : "#CC020C",
-                              "h3_color" : "#CC020C"}) 
+    #    css = css.substitute({"h1_color" : "#CC020C",
+    #                          "h2_color" : "#CC020C",
+    #                          "h3_color" : "#CC020C"}) 
 
-        return css
+    #    return css
     
     def install_support_files(self, outputdir):
         
@@ -221,7 +258,8 @@ class template_revealjs_t(template_html_t):
         handle = open(shorte_get_startup_path() + "/templates/reveal.js/%s/%s.css" % (theme,theme), "rt")
         contents = handle.read()
         handle.close()
-        css = self._fix_css(contents)
+        css = self._fix_css(contents, 'revealjs')
+        #css = css.replace(".bordered", ".reveal .bordered")
         handle = open("%s/%s.css" % (outputdir, theme), "wt")
         handle.write(css)
         handle.close()

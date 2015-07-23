@@ -318,22 +318,48 @@ div.gallery
   }
 '''
   
-    def get_common_styles(self):
+    def get_common_styles(self, template='html'):
 
         styles_gallery = self.get_gallery_styles()
 
-        return string.Template('''
-  a {color: ${color_hyperlink};font-weight: bold;font-size:0.9em;}
-  a:hover {color: ${color_hyperlink_hover};font-weight: bold;text-decoration: underline;}
-  a img {border: none;}
-  a.name {color: black;}
-  
+        if(template == 'html'):
+            prefix = ''
+            headings = string.Template('''
   h1{font-size: 1.3em;padding: 0px;padding-bottom: 3px;margin: 0px;margin-top:10px;margin-left: 5px;color:${heading_1_fg};}
   h2{font-size: 1.2em;padding: 0px;padding-top:12px;padding-bottom: 3px;font-weight: bold;color: ${heading_2_fg};margin: 0px;margin-left: 5px;}
   h3{font-size: 1.1em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_3_fg};}
   h4{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_4_fg};}
   h5{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_5_fg};}
   h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_6_fg};text-decoration:underline;}
+''').substitute({"heading_1_fg"          : self.colors["heading.1"].fg,
+                 "heading_2_fg"          : self.colors["heading.2"].fg,
+                 "heading_3_fg"          : self.colors["heading.3"].fg,
+                 "heading_4_fg"          : self.colors["heading.4"].fg,
+                 "heading_5_fg"          : self.colors["heading.5"].fg,
+                 "heading_6_fg"          : self.colors["heading.6"].fg})
+        elif(template == 'revealjs'):
+            prefix = '.reveal '
+            headings = string.Template('''
+  .reveal h1{font-size: 1.9em;padding: 0px;padding-bottom: 3px;margin: 0px;margin-top:10px;margin-left: 5px;color:${heading_1_fg};font-variant:small-caps;font-weight:bold;}
+  .reveal h2{font-size: 1.6em;padding: 0px;padding-top:12px;padding-bottom: 3px;font-weight: bold;color: ${heading_2_fg};margin: 0px;margin-left: 5px;}
+  .reveal h3{font-size: 1.4em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_3_fg};}
+  .reveal h4{font-size: 1.3em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_4_fg};}
+  .reveal h5{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_5_fg};}
+  .reveal h6{font-size: 1.0em;padding: 0px;padding-top:12px;padding-bottom: 3px;margin: 0px;margin-left: 5px;color: ${heading_6_fg};text-decoration:underline;}
+''').substitute({"heading_1_fg"          : self.colors["heading.1"].fg,
+                 "heading_2_fg"          : self.colors["heading.2"].fg,
+                 "heading_3_fg"          : self.colors["heading.3"].fg,
+                 "heading_4_fg"          : self.colors["heading.4"].fg,
+                 "heading_5_fg"          : self.colors["heading.5"].fg,
+                 "heading_6_fg"          : self.colors["heading.6"].fg})
+
+        return string.Template('''
+  a {color: ${color_hyperlink};font-weight: bold;font-size:0.9em;}
+  a:hover {color: ${color_hyperlink_hover};font-weight: bold;text-decoration: underline;}
+  a img {border: none;}
+  a.name {color: black;}
+ 
+  ${headings}
   
   p {margin-left: 20px;margin-bottom:10px;font-size: 1.0em;}
   p.caption {margin-left: 0px;text-align: center;margin-top: 5px;}
@@ -397,7 +423,7 @@ div.gallery
       border-spacing: 0;
   }
   
-  .bordered {
+  ${prefix}.bordered {
       margin:10px;
       margin-left:20px;
       background-color:white;
@@ -408,91 +434,91 @@ div.gallery
       /*overflow-x:auto;*/
   }
   
-  .bordered td, .bordered th {
+  ${prefix}.bordered td, .bordered th {
       border-left: 1px solid #ccc;
       border-top: 1px solid #ccc;
       padding: 4px;
       text-align: left;    
   }
   
-  .bordered th {
+  ${prefix}.bordered th {
       background-color:${color_table_title_bg};
       color:${color_table_title_fg};
       border-top: none;
   }
   
-  .bordered tr.alternaterow {
-      background-color:#{color_table_altrow_bg};
+  ${prefix}.bordered tr.alternaterow {
+      background-color:${color_table_altrow_bg};
   }
-  .bordered tr.caption {
+  ${prefix}.bordered tr.caption {
       background-color:#8C9CB8;
       color:white;
   }
   
-  .bordered tr.header td {
+  ${prefix}.bordered tr.header td {
       font-weight:bold;
       background-color:${color_table_header_bg};
       border-top:0px solid #ccc;
       border-bottom:2px solid #ccc;
   }
-  .bordered tr td.header {
+  ${prefix}.bordered tr td.header {
       font-weight:bold;
       background-color:${color_table_header_bg};
       border-top:0px solid #ccc;
       border-bottom:2px solid #ccc;
   }
-  .bordered tr td.subheader {
+  ${prefix}.bordered tr td.subheader {
       background-color:${color_table_subheader_bg};
       border-top:1px solid #ccc;
       border-bottom:0px solid #ccc;
   }
-  .bordered tr.reserved {
+  ${prefix}.bordered tr.reserved {
       background-color:${color_table_reserved_bg};
       border-top:1px solid #ccc;
       border-bottom:0px solid #ccc;
       color:${color_table_reserved_fg};
   }
-  .bordered tr.spacer {
+  ${prefix}.bordered tr.spacer {
       border-top:1px solid #ccc;
       border-bottom:1px solid #ccc;
       color:${color_table_reserved_fg};
   }
-  .bordered tr td.reserved {
+  ${prefix}.bordered tr td.reserved {
       background-color:${color_table_reserved_bg};
       border-top:1px solid #ccc;
       border-bottom:0px solid #ccc;
       color:${color_table_reserved_fg};
   }
   
-  .bordered td:first-child, .bordered th:first-child {
+  ${prefix}.bordered td:first-child, .bordered th:first-child {
       border-left: none;
   }
   
-  .bordered th:first-child {
+  ${prefix}.bordered th:first-child {
       -moz-border-radius: 3px 0 0 0;
       -webkit-border-radius: 3px 0 0 0;
       border-radius: 3px 0 0 0;
   }
   
-  .bordered th:last-child {
+  ${prefix}.bordered th:last-child {
       -moz-border-radius: 0 3px 0 0;
       -webkit-border-radius: 0 3px 0 0;
       border-radius: 0 3px 0 0;
   }
   
-  .bordered th:only-child{
+  ${prefix}.bordered th:only-child{
       -moz-border-radius: 3px 3px 0 0;
       -webkit-border-radius: 3px 3px 0 0;
       border-radius: 3px 3px 0 0;
   }
   
-  .bordered tr:last-child td:first-child {
+  ${prefix}.bordered tr:last-child td:first-child {
       -moz-border-radius: 0 0 0 3px;
       -webkit-border-radius: 0 0 0 3px;
       border-radius: 0 0 0 3px;
   }
   
-  .bordered tr:last-child td:last-child {
+  ${prefix}.bordered tr:last-child td:last-child {
       -moz-border-radius: 0 0 3px 0;
       -webkit-border-radius: 0 0 3px 0;
       border-radius: 0 0 3px 0;
@@ -524,7 +550,7 @@ div.gallery
       padding:10px;
   }
   
-  div.code
+  ${prefix} div.code
   {
       border-radius: 8px;
       -moz-border-radius: 8px;
@@ -544,7 +570,7 @@ div.gallery
       border:3px solid #ccc;
       overflow:auto;
   }
-  div.code2
+  ${prefix} div.code2
   {
       font-family: courier new;
       font-size: 0.9em;
@@ -555,13 +581,13 @@ div.gallery
       background-color:#f0f0f0;
       border:1px solid #ccc;
   }
-  div.code3
+  ${prefix} div.code3
   {
       font-family: courier new;
       font-size: 0.9em;
   }
 
-  div.cb_title
+  ${prefix} div.cb_title
   {
       color:${color_codeblock_section};
       font-weight:bold;
@@ -611,6 +637,8 @@ div.gallery
   $priority
   ''').substitute({"priority"              : "$priority",
                    "star"                  : "$star",
+                   "headings"              : headings,
+                   "prefix"                : prefix,
                    "heading_1_fg"          : self.colors["heading.1"].fg,
                    "heading_2_fg"          : self.colors["heading.2"].fg,
                    "heading_3_fg"          : self.colors["heading.3"].fg,

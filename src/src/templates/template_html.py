@@ -3676,7 +3676,7 @@ $href_end
         self.m_template_dir = shorte_get_startup_path() + "/templates/%s/" % template_dir
     
 
-    def _fix_css(self, contents):
+    def _fix_css(self, contents, template='html'):
 
         css = string.Template(contents)
       
@@ -3728,7 +3728,7 @@ $href_end
         import_str = "from templates.html.%s import *" % module
         exec(import_str)
         html_styles = html_styles(self.m_engine.get_theme(pkg))
-        common = html_styles.get_common_styles()
+        common = html_styles.get_common_styles(template)
         self.toc_styles = html_styles.get_toc_frame_styles()
         styles_print = html_styles.get_print_styles()
         styles_screen = html_styles.get_screen_styles()

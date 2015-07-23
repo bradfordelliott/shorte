@@ -72,7 +72,7 @@ pwd
 @h2 Java
 # Use the save parameter to get around the class name restriction
 # of java where the public class has to match the file name.
-@java: save=HelloWorldApp.java exec=True
+@java: name=HelloWorldApp.java exec=True
 class HelloWorldApp {
     public static void main(String[] args) {
         System.out.println("Hello world.");
@@ -197,7 +197,7 @@ exit -1
 Testing Java execution
 
 @h3 Syntax Errors
-@java: save=HelloWorldApp.java exec=True ignore_errors=True
+@java: name=HelloWorldApp.java exec=True ignore_errors=True
 public static void main(String[] args) {
     System.out.println("Hello world.");
     System.out.println("I am java!");
@@ -218,7 +218,7 @@ class HelloWorldApp {
 The following block of code demonstrates the detection
 of a runtime error in a block of java code.
 
-@java: save=HelloWorldApp.java exec=True ignore_errors=True
+@java: name=HelloWorldApp.java exec=True ignore_errors=True
 class HelloWorldApp {
     public static void main(String[] args) {
         System.out.println("Hello world.");
@@ -230,7 +230,7 @@ class HelloWorldApp {
 @text
 This example demonstrates a thrown exception
 
-@java: save=HelloWorldApp.java exec=True ignore_errors=True
+@java: name=HelloWorldApp.java exec=True ignore_errors=True
 class HelloWorldApp {
     public static void main(String[] args) throws Exception
     {
