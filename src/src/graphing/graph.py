@@ -10,12 +10,20 @@ from cairo_access import *
 import math
 
 class cairo_t:
-    def __init__(self, width, height):
+    def __init__(self, width, height, bg_color=None, line_color=None):
         self.image = cairo(5000, 5000)
+
+        if(bg_color != None):
+            if(line_color == None):
+                line_color = 'white'
+            self.draw_rect(0, 0, 5000, 5000, background_color=bg_color, line_color=line_color)
         
 
     def __del__(self):
         self.image.destroy()
+    
+    def text_extents(self, text):
+        return self.image.text_extents(text)
 
     def draw_text(self,
         x,
@@ -217,8 +225,8 @@ class cairo_t:
                #height = height,
                text_anchor = "middle",
                text_orientation = text_orientation)
-    
-    def draw_curve(self, points, line_color="black", line_weight=1):
+
+    def draw_curve(self, points, line_color="black", line_weight=1, start_point=None, end_point=None, fill=None):
         im = self.image
         
         line_color = self.translate_color(line_color);
@@ -227,6 +235,8 @@ class cairo_t:
         im.set_line_width(line_weight);
 
         graph_data = points
+
+        #im.save()
 
         prepared_data = [];
 
@@ -262,10 +272,17 @@ class cairo_t:
         for i in range(0, len(prepared_data)-1):
             #print "i = $i\n";
             (x, y)     = (prepared_data[i][0], prepared_data[i][1])
+
             (cx1, cy1) = (prepared_data[i][4], prepared_data[i][5])
             (cx2, cy2) = (prepared_data[i + 1][2], prepared_data[i + 1][3])
             (x2, y2) = (prepared_data[i + 1][0], prepared_data[i + 1][1])
-            im.move_to(x, y)
+
+            if(fill and i == 0):
+                im.move_to(start_point[0], start_point[1])
+                im.line_to(x,y)
+            
+            #im.move_to(x, y)
+
             #print "cx1=$cx1,cy1=$cy1,cx2=$cx2,cy2=$cy2,x2=$x2,y2=$y2\n";
 
             # This would draw straight lines between each point
@@ -273,7 +290,17 @@ class cairo_t:
             # This draws a curve to each point
             im.curve_to(cx1, cy1, cx2, cy2, x2, y2)
 
-        im.stroke()
+        if(fill and None != end_point):
+            im.line_to(end_point[0],   end_point[1])
+            im.line_to(start_point[0], start_point[1])
+
+        
+        if(fill):
+            im.close_path()
+            im.stroke_preserve()
+            im.fill()
+        else:
+            im.stroke()
     
     def draw_lines(self, points, line_color="black", line_weight=1):
         im = self.image
@@ -596,18 +623,32 @@ class cairo_t:
 
 class graph_t:
 
-    def __init__(self, width, height):
-        self.width_padding = 200
-        self.height_padding  = 110
+    def __init__(self, width, height, bg_color=None, line_color=None):
 
-        self.width  = width - self.width_padding
-        self.height = height - self.height_padding
+        self.orig_width = width
+        self.orig_height = height
 
-        
+        width_padding   = 200
+        height_padding  = 110
+
+        self.width  = width - width_padding
+        self.height = height - height_padding
+        #self.width = width
+        #self.height = height
+
         self.left = 100
         self.right = self.width + self.left
         self.top = 50
         self.bottom = self.top + self.height
+        
+        #print "Initial"
+        #print "  width:  %d" % self.width
+        #print "  height  %d" % self.height
+        #print "  left:   %d" % self.left
+        #print "  right:  %d" % self.right
+        #print "  top:    %d" % self.top
+        #print "  bottom: %d" % self.bottom
+
         self.title = ""
         self.subtitle    = ""
         self.cindex  = 0
@@ -616,9 +657,10 @@ class graph_t:
         self.xaxis = {}
         self.yaxis = {}
 
-        self.graph = cairo_t(self.width + self.width_padding, self.height + self.height_padding)
+        self.graph = cairo_t(self.width + width_padding, self.height + height_padding, bg_color, line_color)
 
         self.draw_frame = False
+        self.frame_pad = 0
         
         # The standard color map
         self.m_colors = []
@@ -654,8 +696,18 @@ class graph_t:
         self.m_colors.append("#00FF00")
         self.m_colors.append("#0000FF")
 
+        self.m_legend_title = "Legend:"
+
+        self.filled = False
+
     def __del__(self):
         del self.graph
+
+    def show_frame(self, show):
+        self.draw_frame = show
+
+    def set_filled(self, filled):
+        self.filled = filled
 
     def add_data_set(self, dataset, name, color=None):
     
@@ -681,11 +733,14 @@ class graph_t:
                     minX = key
                 elif(key < minX):
                     minX = key
+
+        if(minX > 0):
+            minX = 0
         
         return minX
 
 
-    def get_max_xcoordiate(self):
+    def get_max_xcoordinate(self):
         maxX = 0
         
         for dataset in self.datasets:
@@ -728,12 +783,27 @@ class graph_t:
         elif(maxY < 10):
             pass
         else:
-            maxY = (math.ceil(maxY/ 10.0))*11
+            maxY = (math.ceil(maxY/ 10.0))*10
     
         if(maxY < self.yaxis["max"]):
             maxY = self.yaxis["max"]
         
         return maxY
+    
+    def get_min_ycoordinate(self):
+        minY = None
+        for dataset in self.datasets:
+            for key in self.datasets[dataset]["data"]:
+                val = self.datasets[dataset]['data'][key]
+                if(minY == None):
+                    minY = val
+                elif(val < minY):
+                    minY = val
+
+        if(minY > 0):
+            return 0
+        
+        return minY
 
 
     def set_xaxis(self, label, color, min=None, max=None, increment=1, labels=None):
@@ -765,11 +835,17 @@ class graph_t:
        top = self.top
        right = self.right
        y = top + yoffset
-          
+
+       #graph.draw_rect(x = right,
+       #                y = top,
+       #                width = self.legend_width(),
+       #                height = self.bottom - self.top,
+       #                background_color="#ff00ff")
+
        graph.draw_text(x = right + xoffset,
                        y = y,
                        font_color = "#000000",
-                       text       = "Legend")
+                       text       = self.m_legend_title)
        y += 24
      
        #for dataset (sort {$a cmp $b}  keys(%{$self->{DATASETS}}))
@@ -823,6 +899,68 @@ class graph_t:
     def draw_values(self):
         return 0
 
+    def calculate_dimensions(self):
+        lwidth = self.legend_width() 
+
+        lpad = 100 + self.frame_pad
+        rpad = lwidth + self.frame_pad
+
+        tpad = 50 + self.frame_pad
+        bpad = 50 + self.frame_pad
+
+        #print "orig.width  = %d" % self.orig_width
+        #print "orig.height = %d" % self.orig_height
+
+        self.width  = self.orig_width  - lpad - rpad
+        self.height = self.orig_height - tpad - bpad
+
+        #print "new.width = %d" % self.width
+        #print "new.height = %d" % self.height
+        #self.width = width
+        #self.height = height
+
+        self.left = lpad
+        self.right = self.left + self.width 
+        self.top = tpad
+        self.bottom = self.top + self.height
+
+        #print "Recalculated:"
+        #print "  width:  %d" % self.width
+        #print "  height: %d" % self.height
+        #print "  left:   %d" % self.left
+        #print "  right:  %d" % self.right
+        #print "  top:    %d" % self.top
+        #print "  bottom: %d" % self.bottom
+
+    def legend_width(self):
+        '''This method is called to calculate the width of the
+           plot legend. This is used in order to determine the
+           dimensions of the plot area itself
+
+           @return The width of the legend in pixels
+        '''
+        
+        self.graph.image.save()
+        self.graph.image.set_font_size(10)
+
+        # The minimum width is the legend title
+        (width, height) = self.graph.text_extents(self.m_legend_title)
+        width += 10
+        
+        self.graph.image.set_font_size(8)
+
+        legend_pad = 40 + 20
+
+        for dataset in self.datasets:
+            (text_width, text_height) = self.graph.text_extents(dataset)
+            text_width += legend_pad
+
+            if(text_width > width):
+                width = text_width
+        
+        self.graph.image.restore()
+
+        return width
 
     def draw_graph(self):
        graph = self.graph
@@ -837,14 +975,14 @@ class graph_t:
        #print "width: %d" % width
        #print "height: %d" % height
 
-       padding=10
+       padding = self.frame_pad
        
        if(self.draw_frame):
            graph.draw_rounded_rect(
                x = padding,
                y = padding,
-               width = width + self.width_padding - (2*padding),
-               height = height + self.height_padding - (2*padding),
+               width  = self.orig_width  - (2*padding),
+               height = self.orig_height - (2*padding),
                radius = 0,
                background_color = "#f0f0f0",
                line_color = "#e0e0e0",
@@ -854,8 +992,8 @@ class graph_t:
            graph.draw_rounded_rect(
                x = padding,
                y = padding,
-               width = width + self.width_padding - (2*padding),
-               height = height + self.height_padding - (2*padding),
+               width = self.orig_width   - (2*padding),
+               height = self.orig_height - (2*padding),
                radius = 0,
                background_color = "#f0f0f0",
                line_color = "#C0C0C0")

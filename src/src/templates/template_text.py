@@ -71,6 +71,8 @@ class template_text_t(template_t):
 
             i += 1
 
+        output += '\n'
+
         return output
 
 
@@ -111,19 +113,106 @@ Description:
 %s
 ''' % (define.name, define.value, self.format_textblock(define.description, prefix='    '))
 
+    def format_object(self, obj, title):
+        output = "="*60 + "\n"
+        output += "%s: %s\n" % (title, obj.get_name())
+        output += "="*60 + "\n"
+        output += " Description:\n"
+        output += self.format_textblock(obj.get_description(), prefix="  ")
+
+        if(obj.has_fields()):
+            output += " Fields:\n"
+            fields = obj.get_fields()
+            width = 0
+            for field in fields:
+                len_fname = len(field.name)
+                if(len_fname > width):
+                    width = len_fname
+                
+            for field in obj.get_fields():
+                output += "   %-*s - %s" % (width, field.name, self.format_textblock(field.desc, prefix=" "*(width+6), prefix_first_line=False))
+
+        elif(obj.has_params()):
+            output += " Parameters:\n"
+            params = obj.get_params()
+            width = 0
+            for param in params:
+                len_pname = len(param.name)
+                if(len_pname > width):
+                    width = len_pname
+                
+            for param in params:
+                output += "   %-*s - %s" % (width, param.name, self.format_textblock(param.get_description(), prefix=" "*(width+6), prefix_first_line=False))
+
+        elif(obj.has_values()):
+            output += " Values:\n"
+            values = obj.values2
+            width = 0
+
+            for val in values:
+                len_vname = len(val.name)
+                if(len_vname > width):
+                    width = len_vname
+
+            for val in values:
+                output += "   %-*s - %s" % (width, val.name, self.format_textblock(val.get_description(), prefix=" "*(width+6), prefix_first_line=False))
+        
+        if(obj.has_returns()):
+            output += " Returns:\n"
+            output += "  " + self.format_text(obj.get_returns()) + "\n"
+
+        if(obj.has_see_also()):
+            output += " See:\n"
+            output += "  " + self.format_text(obj.get_see_also()) + "\n"
+
+        return output + "\n"
+
     def format_enum(self, tag):
         enum = tag.contents
-
-        return '''Enum: %s
-Values:
-    %s
-Description:
-%s
-''' % (enum.name, "TBD", self.format_textblock(enum.description, prefix='    '))
+        return self.format_object(enum, "Enumeration")
 
     def format_prototype(self, tag):
         prototype = tag.contents
-        return prototype.__str__()
+        return self.format_object(prototype, "Prototype")
+    
+    def format_struct(self, tag):
+
+        struct = tag.contents
+        return self.format_object(struct, "Structure")
+
+        i = 0
+        fields = ''
+        for field in struct.get_fields():
+            
+            fields += "| %2d | %20s | %s" % (field.width, field.name, self.format_textblock(field.desc, prefix="|    |                      | ", prefix_first_line=False))
+            
+            i+=1
+
+        output = string.Template('''
++-----------------------------------------------------------------------------
+| Structure: $name
+|
+${desc}|
++-----------------------------------------------------------------------------
+| Fields:
++-----------------------------------------------------------------------------
+${fields}+-----------------------------------------------------------------------------
+''').substitute({"name" : struct.get_name(),
+                 "desc" : self.format_textblock(struct.get_description(), "|  "),
+                 "fields" : fields})
+
+        return output
+
+        
+        if("caption" in struct):
+            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
+
+        html += "</table><br/>"
+
+
+
+
+        return html
 
     def format_function_summary(self, tag):
         tags = self.m_engine.get_function_summary(tag)
@@ -303,14 +392,12 @@ Description:
     
     def format_list(self, list, ordered=False):
 
-        source = "\n"
+        source = ""
 
         start = 1
         for elem in list:
             source += self.format_list_child(elem, 0, ordered, start)
             start += 1
-
-        source += "\n"
 
         return source
     
@@ -397,7 +484,7 @@ Description:
 
     def format_table(self, source, table):
 
-        html = '\n'
+        html = ''
         
         if(table.has_title()):
 
@@ -415,19 +502,17 @@ Description:
         for row in table.get_rows():
 
             j = 0;
+            
+            is_header = row["is_header"]
+            is_subheader = row["is_subheader"]
+            is_reserved = row["is_reserved"]
+
             for col in row["cols"]:
-                
                 if(len(col["text"]) > col_widths[j]):
                     col_widths[j] = len(col["text"])
-                    max_width += col_widths[j]
                 j += 1
 
-        # Add a table header
-        html += "+"
-        for i in range(0, max_width+1):
-            html += "-"
-        html += "+\n"
-
+        rows = []
 
         for row in table.get_rows():
 
@@ -435,10 +520,12 @@ Description:
             is_subheader = row["is_subheader"]
             is_reserved = row["is_reserved"]
 
-            html += '|'
+            cols = []
+
+            rtext = ''
 
             if(row["is_caption"]):
-                html += "      Caption: %s\n" % (row["cols"][0])
+                rtext += "      Caption: %s\n" % (row["cols"][0])
             else: 
                 col_num = 0
                 for col in row["cols"]:
@@ -446,82 +533,51 @@ Description:
                     txt = self.format_text(col["text"])
                     txt = txt.replace("\n", " ")
                     
-                    if(is_subheader):
-                        html += ("%-" + "%d" % (col_widths[col_num] + 3) + "s | ") % (txt)
-                    else:
-                        html += (" %-" + "%d" % (col_widths[col_num] + 2) + "s | ") % (txt)
+                    cols.append(("%-" + "%d" % (col_widths[col_num]) + "s") % (txt))
+                    col_num += 1
+
+            if(is_header):
+                col_num = 0
+                 
+                for col in row["cols"]:
+
+                    for k in range(0, col_widths[col_num] + 3):
+                        txt += "-"
+
+                    for p in range(0, col_num+1):
+                        txt += "-"
 
                     col_num += 1
 
-                if(is_header):
-                    col_num = 0
-                    html += "\n"
-                    for col in row["cols"]:
+            rows.append(" | ".join(cols))
 
-                        html += "+"
+        max_len = 0
+        for row in rows:
+            rtext = "| " + row
+            if(len(rtext) > max_len):
+                max_len = len(rtext)
+            
+        i = 0
+        for row in rows:
+            rext = " | " + row
 
-                        for k in range(0, col_widths[col_num] + 3):
-                            html += "-"
+            if(i < 2):
+                html += " +" + '='*(max_len) + "+\n"
+            else:
+                html += " +" + '-'*(max_len) + "+\n"
 
-                        for p in range(0, col_num+1):
-                            html += "-"
-
-                        col_num += 1
-
-                    html += "+"
-
-
-            html += "\n"
+            html += rext + " |\n"
+            i += 1
+            
+        # Add the table footer
+        html += " +" + '='*(max_len) + "+\n\n"
 
         #if("caption" in table):
         #    html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
         
-        # Add a table footer
-        html += "+"
-        for i in range(0, max_width+1):
-            html += "-"
-        html += "+\n"
-
         return html
 
     
-    def format_struct(self, tag):
-
-        struct = tag.contents
-
-        i = 0
-        fields = ''
-        for field in struct.get_fields():
-            
-            fields += "| %2d | %20s | %s" % (field.width, field.name, self.format_textblock(field.desc, prefix="|    |                      | ", prefix_first_line=False))
-            
-            i+=1
-
-        output = string.Template('''
-+-----------------------------------------------------------------------------
-| Structure: $name
-|
-${desc}|
-+-----------------------------------------------------------------------------
-| Fields:
-+-----------------------------------------------------------------------------
-${fields}+-----------------------------------------------------------------------------
-''').substitute({"name" : struct.get_name(),
-                 "desc" : self.format_textblock(struct.get_description(), "|  "),
-                 "fields" : fields})
-
-        return output
-
-        
-        if("caption" in struct):
-            html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (struct["max_cols"], struct["caption"])
-
-        html += "</table><br/>"
-
-
-
-
-        return html
 
     def _expand_links(self, matches):
 
@@ -883,6 +939,7 @@ Table of Contents
         #     "date" : datetime.date.today(),
         #     "version" : version,
         #     "css" : self.get_css()})
+        #
         
         file = open(self.m_engine.m_output_directory + "/%s" % self.get_index_name(), "wt")
         file.write(cnts)

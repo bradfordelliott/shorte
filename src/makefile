@@ -209,8 +209,8 @@ test_mx:
 
 test_hello:
 #	${python} shorte.py -f examples/hello.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/hello
-#	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
-#	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
+#	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=inphi;pdf=shorte" -o build-output/hello
+#	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=shorte;pdf=inphi" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "${THEME}" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline --profile=hello_profile --output_file=hello.html
 
@@ -230,9 +230,11 @@ test_hello_quick:
 
 html_pdf=html+pdf
 html_inline_pdf=html_inline+pdf
+revealjs_pdf=reveal.js+pdf
 ifneq ("${QUICK}","")
     html_pdf=html
     html_inline_pdf=html_inline
+    revealjs_pdf=reveal.js
 endif
 
 test_headings:
@@ -391,10 +393,10 @@ test_extract_private:
 	${python} shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
 
 test_revealjs:
-	${python} shorte.py -f examples/presentation.tpl -p "reveal.js+pdf" --theme="reveal.js=shorte;pdf=shorte" -o build-output/presentation
+	${python} shorte.py -f examples/presentation.tpl -p "${revealjs_pdf}" --theme="reveal.js=shorte;pdf=shorte" -o build-output/presentation
 	${python} shorte.py -f examples/presentation.tpl -p "reveal.js+txt" --theme="reveal.js=shorte" -o build-output/presentation2
 	${python} shorte.py -f examples/headings.tpl -p "reveal.js" --theme=shorte -o build-output/presentation3
-	${python} shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=cortina -o build-output/presentation4
+	${python} shorte.py -f examples/bullets.tpl -p "reveal.js" --theme=inphi -o build-output/presentation4
 
 test_revealjs_quick:
 	${python} shorte.py -f examples/presentation.tpl -p "reveal.js" --theme="reveal.js=${THEME}" -o build-output/presentation2
@@ -540,12 +542,8 @@ release: release_notes
 	-rm -rf ../build-output/templates/swig
 	-rm -rf ../build-output/templates/vera
 	-rm -rf ../build-output/templates/word
-	-rm -rf ../build-output/templates/odt/cortina
-	-rm -rf ../build-output/templates/odt/cortina_public
 	-rm -rf ../build-output/templates/odt/images
 	-rm -rf ../build-output/templates/odt/convert_to_pdf_stripped.odt
-	-rm -rf ../build-output/templates/odt/cortina.backup.odt
-	-rm -rf ../build-output/templates/odt/cortina_public.backup.odt
 	-rm -rf ../build-output/templates/odt/page_header_logo.png
 	cp -r examples ../build-output/.
 	-rm ../build-output/examples/*.swf
@@ -610,12 +608,8 @@ release_win32:
 	-rm -rf ../build-output/templates/swig
 	-rm -rf ../build-output/templates/vera
 	-rm -rf ../build-output/templates/word
-	-rm -rf ../build-output/templates/odt/cortina
-	-rm -rf ../build-output/templates/odt/cortina_public
 	-rm -rf ../build-output/templates/odt/images
 	-rm -rf ../build-output/templates/odt/convert_to_pdf_stripped.odt
-	-rm -rf ../build-output/templates/odt/cortina.backup.odt
-	-rm -rf ../build-output/templates/odt/cortina_public.backup.odt
 	-rm -rf ../build-output/templates/odt/page_header_logo.png
 	cp -r examples ../build-output/.
 	-rm ../build-output/examples/.*.swp

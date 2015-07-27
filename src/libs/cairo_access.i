@@ -60,6 +60,7 @@
     void cairo_surface_flush(cairo_surface_t* s){}
     void cairo_surface_write_to_png(cairo_surface_t* s, const char* file){}
     void cairo_stroke(cairo_t* c){}
+    void cairo_stroke_preserve(cairo_t* c){}
     void cairo_save(cairo_t* c){}
     void cairo_restore(cairo_t* c){}
     void cairo_scale(cairo_t* c, double width, double height){}
@@ -75,6 +76,7 @@
     void cairo_set_dash(cairo_t* c, double dashes[], int num, double offset){}
     void cairo_move_to(cairo_t* c, double x, double y){}
     void cairo_curve_to(cairo_t* c, double x1, double y1, double x2, double y2, double x3, double y3){}
+    void cairo_rel_curve_to(cairo_t* c, double x1, double y1, double x2, double y2, double x3, double y3){}
     void cairo_new_path(cairo_t* c){}
     void cairo_close_path(cairo_t* c){}
     void cairo_set_antialias(cairo_t* c, cairo_antialias_t f){}
@@ -159,6 +161,10 @@
         {
             cairo_stroke(m_cairo_image);
         }
+        void stroke_preserve(void)
+        {
+            cairo_stroke_preserve(m_cairo_image);
+        }
         
         void fill(void)
         {
@@ -233,6 +239,11 @@
         {
             cairo_line_to(m_cairo_image, x, y);
         }
+
+        void rel_line_to(double x, double y)
+        {
+            cairo_rel_line_to(m_cairo_image, x, y);
+        }
         
         void set_line_width(double width)
         {
@@ -255,6 +266,11 @@
                       double y2, double x3, double y3)
         {
             cairo_curve_to(m_cairo_image, x1, y1, x2, y2, x3, y3);
+        }
+        void rel_curve_to(double x1, double y1, double x2,
+                      double y2, double x3, double y3)
+        {
+            cairo_rel_curve_to(m_cairo_image, x1, y1, x2, y2, x3, y3);
         }
         
         void new_path(void)
@@ -405,6 +421,10 @@ class cairo{
         {
             cairo_stroke(m_cairo_image);
         }
+        void stroke_preserve(void)
+        {
+            cairo_stroke_preserve(m_cairo_image);
+        }
         
         void fill(void)
         {
@@ -479,6 +499,10 @@ class cairo{
         {
             cairo_line_to(m_cairo_image, x, y);
         }
+        void rel_line_to(double x, double y)
+        {
+            cairo_rel_line_to(m_cairo_image, x, y);
+        }
         
         void set_line_width(double width)
         {
@@ -501,6 +525,11 @@ class cairo{
                       double y2, double x3, double y3)
         {
             cairo_curve_to(m_cairo_image, x1, y1, x2, y2, x3, y3);
+        }
+        void rel_curve_to(double x1, double y1, double x2,
+                      double y2, double x3, double y3)
+        {
+            cairo_rel_curve_to(m_cairo_image, x1, y1, x2, y2, x3, y3);
         }
         
         void new_path(void)

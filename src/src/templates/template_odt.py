@@ -907,6 +907,23 @@ class template_odt_t(template_t):
         data = expr.sub(self._expand_links, data)
        
         return data
+       
+    def format_object_section_title(self, title):
+        xml = string.Template('''
+        <table:table-row table:style-name="${row_style}">
+          <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
+            <text:p text:style-name="${section_style}">${title}:</text:p>
+          </table:table-cell>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+          <table:covered-table-cell/>
+        </table:table-row>
+        ''').substitute({"row_style"     : self.m_styles["table"]["row"]["prototype_section"],
+                         "cell_style"    : self.m_styles["table"]["cell"]["prototype_section"],
+                         "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
+                         "title"         : title})
+
+        return xml
     
     def format_object_construct(self, obj, construct, format_as_table_row=False):
         xml = ''
@@ -936,7 +953,11 @@ class template_odt_t(template_t):
                 style = self.m_styles["para"]["prototype"]["param"]
                 xml = '<text:p text:style-name="%s">%s</text:p>' % (style, self.format_text(obj.get_see_also()))
 
-        if(format_as_table_row):
+        elif(construct == 'description'):
+            if(obj.has_description()):
+                xml = self.format_textblock(obj.get_description())
+                
+        if(len(xml) > 0 and format_as_table_row):
             xml = string.Template('''
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
@@ -1813,19 +1834,11 @@ ${desc}
         
         xml = ''
 
-        desc = struct.get_description()
-        if(desc == None):
-            desc = ''
-        else:
-            desc = self.format_textblock(desc) 
-        
-        xml += desc
-        
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
         table = table_t()
-        table.title = struct.get_name()
+        table.title = "Structure: %s" % struct.get_name()
         table.max_cols = struct.get_max_cols()
 
         title = self.__table_format_title(table, style)
@@ -1844,11 +1857,15 @@ ${desc}
 
         self.m_table_id += 1
             
+        xml += self.format_object_construct(struct, "description", True) 
+        xml += self.format_object_section_title("Fields")
+
         xml += '''<table:table-row>'''
         xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Field Type")
         xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Field Name")
         xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
         xml += "</table:table-row>\n"
+        
 
         for field in struct.get_fields():
             
@@ -1898,9 +1915,13 @@ ${desc}
 
 
             xml += "</table:table-row>\n"
+        
+        xml += self.format_object_construct(struct, "example", True) 
+        xml += self.format_object_construct(struct, "see", True) 
+        xml += self.format_object_construct(struct, "since", True) 
+
         xml += "</table:table>"
         
-        xml += self.format_object_construct(struct, "example") 
 
         return xml
 

@@ -4071,7 +4071,11 @@ $href_end
 
                 parts = os.path.split(image)
                 #print "IMAGE: [%s]" % image
-                shutil.copy(image, self.get_content_dir() + "/" + parts[1])
+                try:
+                    shutil.copy(image, self.get_content_dir() + "/" + parts[1])
+                except:
+                    ERROR("Failed copying image %s to the output directory" % image)
+
                 pictures_copied[image] = True
 
         INFO("Generating doc") 

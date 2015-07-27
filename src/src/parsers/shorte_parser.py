@@ -944,10 +944,12 @@ class shorte_parser_t(parser_t):
         row_num = 0
         
         for row in rows:
-            
+
             if(row == ""):
                 continue
             
+            row = row.strip()
+
             table_row = {}
             table_row["cols"] = []
             table_row["is_subheader"] = False
@@ -1084,7 +1086,7 @@ class shorte_parser_t(parser_t):
 
             if(col != ""):
 
-                #col = col.strip()
+                col = col.strip()
                 tmp = {}
                 tmp["span"] = 1
                 tmp["text"] = col
@@ -1231,6 +1233,8 @@ a C/C++ like define that looks like:
             elif(section.startswith("values:")):
                 source = section[7:len(section)].strip()
 
+                values = []
+
                 table = self.parse_table(source, modifiers)
                 enum.values = table.rows
                 enum.max_cols = table.max_cols
@@ -1269,6 +1273,22 @@ a C/C++ like define that looks like:
                     word.link = os.path.basename(self.m_current_file)
                     word.source_file = self.m_current_file
                     self.m_engine.add_wikiword(word)
+
+                for i in range(0, num_rows):
+                    cols = table.rows[i]['cols']
+
+                    ename  = cols[0]['text']
+                    evalue = cols[1]['text']
+                    edesc  = cols[2]['text']
+
+                    e = enum_value_t()
+                    e.set_name(ename)
+                    e.set_value(evalue)
+                    e.set_description(textblock_t(edesc))
+                    values.append(e)
+
+                enum.values2 = values
+
             #elif(section.startswith("name:")):
             #    source = section[5:len(section)].strip()
             #    enum.name = source
@@ -1474,6 +1494,11 @@ a C/C++ like define that looks like:
         width = 800
         title = ""
         subtitle = ""
+        max_x = 10
+        max_y = 10
+        bg_color = None
+        frame = False
+        filled = False
         
         if(modifiers.has_key("data")):
             # Open the plot data file
@@ -1490,6 +1515,16 @@ a C/C++ like define that looks like:
             title = modifiers["title"]
         if(modifiers.has_key("subtitle")):
             subtitle = modifiers["subtitle"]
+        if(modifiers.has_key("max_x")):
+            max_x = int(modifiers["max_x"])
+        if(modifiers.has_key("max_y")):
+            max_y = int(modifiers["max_y"])
+        if(modifiers.has_key("bgcolor")):
+            bg_color = modifiers["bgcolor"]
+        if(modifiers.has_key("frame")):
+            frame = to_boolean(modifiers["frame"]) 
+        if(modifiers.has_key("filled")):
+            filled = to_boolean(modifiers["filled"])
         
         for section in sections:
 
@@ -1516,23 +1551,24 @@ a C/C++ like define that looks like:
 
         if(graph_type == "line"):
             import src.graphing.linegraph as linegraph
-            graph = linegraph.line_graph_t(width,height)
+            graph = linegraph.line_graph_t(width,height,bg_color,bg_color)
             graph.set_title(title, subtitle)
-            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
-            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+            graph.set_xaxis("X-Axis", "red", 0, max_x, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, max_y, 1)
+            graph.set_filled(filled)
         elif(graph_type == "bar"):
             import src.graphing.bargraph as bargraph
-            graph = bargraph.bar_graph_t(width,height)
+            graph = bargraph.bar_graph_t(width,height,bg_color,bg_color)
             graph.set_title(title, subtitle)
-            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
-            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+            graph.set_xaxis("X-Axis", "red", 0, max_x, 1)
+            graph.set_yaxis("Y-Axis", "red", 0, max_y, 1)
         elif(graph_type == "pie"):
             import src.graphing.piegraph as piegraph
-            graph = piegraph.pie_graph_t(width,height)
+            graph = piegraph.pie_graph_t(width,height,bg_color,bg_color)
             graph.set_title(title,subtitle)
         elif(graph_type == "memorymap"):
             import src.graphing.memorymap as memorymap
-            graph = memorymap.memorymap_graph_t(width,height)
+            graph = memorymap.memorymap_graph_t(width,height,bg_color,bg_color)
             graph.set_title(title,subtitle)
         elif(graph_type == "timeline"):
             import src.graphing.timeline as timeline
@@ -1540,6 +1576,8 @@ a C/C++ like define that looks like:
             graph.set_title(title, subtitle)
             graph.set_xaxis("X-Axis", "red", 0, 10, 1)
             graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+
+        graph.show_frame(frame)
             
         #d = {0:1, 1:3, 4:5, 6:4, 7:4, 8:3, 10:8}
         for dataset in image["data"]:
@@ -2622,6 +2660,10 @@ else:
         if(modifiers.has_key("break_before")):
             tag.break_before = bool(modifiers["break_before"])
 
+        visible = True
+        if(modifiers.has_key("visible")):
+            visible = to_boolean(modifiers["visible"])
+
         filename = os.path.basename(self.m_current_file)
 
         tag.file = filename
@@ -2931,7 +2973,8 @@ else:
             tag.source = tag.contents
             tag.contents = textblock_t(tag.source)
 
-        tags.append(tag)
+        if(visible):
+            tags.append(tag)
 
         return tags
     

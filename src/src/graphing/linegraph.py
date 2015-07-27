@@ -8,31 +8,48 @@ from graph import graph_t
 
 class line_graph_t(graph_t):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, bg_color=None, line_color=None):
 
-        graph_t.__init__(self,width,height)
+        graph_t.__init__(self,width,height, bg_color, line_color)
 
     def __del__(self):
         graph_t.__del__(self)
 
     def draw_yaxis(self):
         
-        maxX = self.get_max_xcoordiate()
-        maxY = self.get_max_ycoordinate()
+        max_x = self.get_max_xcoordinate()
+        max_y = self.get_max_ycoordinate()
+        min_y = self.get_min_ycoordinate()
+        min_x = self.get_min_xcoordinate()
 
         graph = self.graph
        
-        if(maxY == 0):
-            maxY = 1
+        if(max_y == 0):
+            max_y = 1
+
+        yrange = max_y - min_y
     
-        increment = maxY/10.0
-        y_axis_increments = int(maxY/increment)
+        increment = yrange/10.0
+        y_axis_increments = int(yrange/increment)
         height = self.height
         width = self.width
         top = self.top
         left = self.left
         right = self.right
         bottom = self.bottom
+        
+        # Figure out the zero crossing
+        if(min_y < 0):
+            yvalue = abs(min_y)
+            y = bottom - ((((yvalue)/(increment))/y_axis_increments) * height);
+            graph.draw_line(x1 = left,
+                            y1 = y,
+                            x2 = right,
+                            y2 = y,
+                            line_color = "#ff0000",
+                            background_color = "#FFFFFF",
+                            line_weight = 1,
+                            line_pattern = 1)
         
         # Draw the Y-Axis
         for count in range(0, y_axis_increments + 1):
@@ -59,9 +76,9 @@ class line_graph_t(graph_t):
                                 line_weight = 1)
     
             if(count == y_axis_increments):
-                label = 0
+                label = min_y 
             else:
-                label = maxY - ((count * maxY * increment)/(maxY))
+                label = max_y - ((count * yrange * increment)/(yrange))
             
             graph.draw_text(x = left - 40,
                             y = vertical_position + 4,
@@ -76,14 +93,11 @@ class line_graph_t(graph_t):
                         text_orientation = "vertical")
    
     def draw_xaxis(self):
-        maxX = self.get_max_xcoordiate();
-        maxY = self.get_max_ycoordinate();
+        max_x = self.get_max_xcoordinate();
+        min_x = self.get_min_xcoordinate();
 
-        # DEBUG BRAD: This is a temporary hack
-        #maxX = 10
-
-        if(maxX == 0):
-            maxX = 1
+        if(max_x == 0):
+            max_x = 1
         
         graph = self.graph
         
@@ -93,44 +107,56 @@ class line_graph_t(graph_t):
         left = self.left
         right = self.right
         bottom = self.bottom
+        x_range = max_x - min_x
         
-        increment = maxX/10.0;
+        increment = x_range/10.0;
         
-        if(1 == self.xaxis["autoscale"]):
-            increment = math.ceil(maxX/10)
+        x_axis_increments = int(math.ceil(x_range/increment))
         
-        xAxisIncrements = int(maxX/increment)
-        
+        # Figure out the zero crossing
+        if(min_x < 0):
+            xvalue = abs(min_x)
+            x = left + ((((xvalue)/(increment))/(x_range/increment)) * width);
+            graph.draw_line(x1 = x,
+                            y1 = top,
+                            x2 = x,
+                            y2 = bottom,
+                            line_color = "#ff0000",
+                            background_color = "#FFFFFF",
+                            line_weight = 1,
+                            line_pattern = 1)
+
         # Draw the X-Axis
-        for count in range(0, xAxisIncrements + 1):
-            horizontalPosition = left + (count * (width/xAxisIncrements));
+        for count in range(0, x_axis_increments + 1):
+            horizontal_position = left + (count * (width/(x_range/increment)));
         
-            if(count != xAxisIncrements and count != 0):
-               graph.draw_line(x1 = horizontalPosition,
+            if(count != x_axis_increments and count != 0):
+               graph.draw_line(x1 = horizontal_position,
                                y1 = top,
-                               x2 = horizontalPosition,
+                               x2 = horizontal_position,
                                y2 = bottom,
                                line_color = "#909090",
                                background_color = "#FFFFFF",
                                line_pattern = 1)
                
-               graph.draw_line(x1 = horizontalPosition,
+               graph.draw_line(x1 = horizontal_position,
                                y1 = bottom - 5,
-                               x2 = horizontalPosition,
+                               x2 = horizontal_position,
                                y2 = bottom + 5,
                                line_color = "#C0C0C0")
         
             if(0):
-               label = math.ceil((count * maxX * increment)/(maxX))
+               label = math.ceil((count * x_range * increment)/(x_range))
             else:
-               label = (count * maxX * increment)/(maxX)
+               label = min_x + (count * x_range * increment)/(x_range)
             
-            graph.draw_text(x = horizontalPosition - 3, 
+            graph.draw_text(x = horizontal_position - 3, 
                             y = bottom + 15,
                             font_color = "#000000",
                             #background_color = "#FFFFFF",
                             text = label,
                             font_family="Helvetica")
+
          
         graph.draw_text(x = (left + (right - left)/2),
                         y = bottom + 35,
@@ -138,33 +164,40 @@ class line_graph_t(graph_t):
                         text       = self.xaxis["label"])
     
     def draw_data(self):
-        maxX = self.get_max_xcoordiate()
-        maxY = self.get_max_ycoordinate();
+        max_x = self.get_max_xcoordinate()
+        max_y = self.get_max_ycoordinate()
+        min_x = self.get_min_xcoordinate()
+        min_y = self.get_min_ycoordinate()
         graph = self.graph
+
+        y_range = max_y - min_y
+        x_range = max_x - min_x
         
-        yincrement = (maxY/10.0)
+        yincrement = (y_range/10.0)
         
         if(1 == self.xaxis["autoscale"]):
-            xincrement = (maxX/10.0)
+            xincrement = (x_range/10.0)
         else:
-            xincrement = maxX/10.0;
+            xincrement = x_range/10.0
 
         if(xincrement == 0):
             xincrement = 1
-            maxX = 1;
+            max_x = 1;
         if(yincrement == 0):
             yincrement = 1;
-            maxY = 1;
+            max_y = 1;
         
-        yAxisIncrements = maxY/yincrement;
-        xAxisIncrements = maxX/xincrement;
+        xAxisIncrements = int(math.ceil(x_range/xincrement))
+        yAxisIncrements = int(math.ceil(y_range/yincrement))
+        #yAxisIncrements = y_range/yincrement;
+        #xAxisIncrements = x_range/xincrement;
         height = self.height
         width = self.width
         top = self.top
         left = self.left
         right = self.right
         bottom = self.bottom
-
+        
         #print "Y axis increments: %d" % yAxisIncrements
         #print "X axis increments: %d" % xAxisIncrements
         
@@ -173,18 +206,26 @@ class line_graph_t(graph_t):
             prevy = bottom;
             color = self.datasets[dataset]["color"]
             points = []
+            startp = None
+            endp   = None
 
             #for key in (sort {$a <=> $b} keys(%{$self->{DATASETS}{$dataset}{"data"}}))
             keys = self.datasets[dataset]["data"].keys()
             keys.sort()
+
             for key in keys:
-                xvalue = key;
-                yvalue = self.datasets[dataset]["data"][key]
+
+                xvalue = key - min_x
+                yvalue = self.datasets[dataset]["data"][key] - min_y
                 
                 #print "x = %d, y = %d" % (xvalue, yvalue)
                 
                 x = (((xvalue/xincrement)/10.0) * width) + left;
                 y = bottom - (((yvalue/yincrement)/10.0) * height);
+
+                if(None == startp):
+                    startp = (x,bottom)
+
                 point = (x,y);
                 points.append(point)
         
@@ -218,14 +259,20 @@ class line_graph_t(graph_t):
                                   font_size  = 7)
                 prevx = x;
                 prevy = y;
-               
+
+            endp = (x,bottom)
             graph.draw_curve(points      = points,
                              line_color  = color,
-                             line_weight = 1.5)
+                             line_weight = 1.5,
+                             start_point = startp,
+                             end_point   = endp,
+                             fill        = self.filled)
     
     def draw_graph(self, path):
+
+        self.calculate_dimensions()
+
         graph_t.draw_graph(self)
-        
         self.draw_yaxis()
         self.draw_xaxis()
         self.draw_data()
@@ -233,4 +280,4 @@ class line_graph_t(graph_t):
         self.draw_title()
 
 
-        self.graph.image.write_to_png(path, self.width+280, self.height+110)
+        self.graph.image.write_to_png(path, self.orig_width, self.orig_height)

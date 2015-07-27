@@ -47,6 +47,10 @@
     -  Col 3       ! Col 4
     }
 
+    It also contains an image
+
+    @{image,src="examples/gallery/one.jpg"}
+
 -- prototype:
     int my_function(int val1 [], int val2 [][5]);
 -- returns:

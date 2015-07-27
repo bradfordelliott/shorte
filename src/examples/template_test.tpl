@@ -16,10 +16,16 @@ Another paragraph
 @h3 Heading 3
 This is a third level heading
 
+@table: title="Short table"
+- Heading 1 | Heading 2
+- Data 1    | Data 2
+- Data 3    | Data 4
+
 @table: title="This is my title"
 - Heading 1     | Heading 2
 -s Subheading 1 | Subheading 2
-- Data 1        | Data 2
+- Data 1        | This is some long data that will likely cause this table row to wrap. I want to see what
+                  it does so that I can deal with thinks like the text template.
 - Data 3        | Data 4
 - Data 5        | Data 6
 
@@ -65,6 +71,8 @@ int main(void)
                           with some more description
 - 8x12  | part_number   | The part number of the device
 - 4     | some_number   | Some random 4 byte number
+-- see:
+This is some other information about the structure here.
 
 @enum: name="e_loopback" description='''
 The loopback interface point
@@ -116,9 +124,11 @@ The loopback interface point
             and more blah blah
             plus blah;
         
-        2 = blah blah blah;
+        2 = blah blah blah and
+            some more blah blah blah
         
         0 = turn @{i,beacon} on
+
     -- val2 | I |
         *1* = blah blah
         

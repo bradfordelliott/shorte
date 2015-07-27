@@ -8,13 +8,13 @@ from graph import graph_t
 
 class pie_graph_t(graph_t):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height,bg_color,line_color):
 
-        graph_t.__init__(self,width,height)
+        graph_t.__init__(self,width,height,bg_color,line_color)
 
     def draw_yaxis(self):
         
-        maxX = self.get_max_xcoordiate()
+        maxX = self.get_max_xcoordinate()
         maxY = self.get_max_ycoordinate()
 
         graph = self.graph
@@ -73,7 +73,7 @@ class pie_graph_t(graph_t):
                         text_orientation = "vertical")
    
     def draw_xaxis(self):
-        maxX = self.get_max_xcoordiate();
+        maxX = self.get_max_xcoordinate();
         maxY = self.get_max_ycoordinate();
 
         # DEBUG BRAD: This is a temporary hack
@@ -138,7 +138,7 @@ class pie_graph_t(graph_t):
         '''This method draws the data that forms part of
            the pie graph'''
 
-        #maxX = self.get_max_xcoordiate()
+        #maxX = self.get_max_xcoordinate()
         #maxY = self.get_max_ycoordinate();
         graph = self.graph
 
@@ -268,6 +268,40 @@ class pie_graph_t(graph_t):
                                 text       = "%2.2f" % value,
                                 font_size  = 10)
     
+    
+    def legend_width(self):
+        
+        self.graph.image.save()
+        self.graph.image.set_font_size(10)
+
+        # The minimum width is the legend title
+        (width, height) = self.graph.text_extents(self.m_legend_title)
+        width += 10
+        
+        self.graph.image.set_font_size(8)
+
+        legend_pad = 40 + 20
+
+        for dataset in self.datasets:
+            (text_width, text_height) = self.graph.text_extents(dataset)
+            text_width += legend_pad
+
+            if(text_width > width):
+                width = text_width
+           
+            keys = self.datasets[dataset]["data"]
+            for point in keys:
+                value = self.datasets[dataset]["data"][point]
+            
+                (text_width, text_height) = self.graph.text_extents(dataset)
+                text_width += legend_pad + 15
+            
+                if(text_width > width):
+                    width = text_width
+
+        self.graph.image.restore()
+
+        return width
 
     def draw_legend(self, yoffset=50, xoffset=10):
        graph = self.graph
@@ -337,6 +371,9 @@ class pie_graph_t(graph_t):
            y += 10
 
     def draw_graph(self, path):
+
+        self.calculate_dimensions()
+
         graph_t.draw_graph(self)
         
         self.draw_data()
@@ -344,4 +381,4 @@ class pie_graph_t(graph_t):
         self.draw_title()
 
 
-        self.graph.image.write_to_png(path, self.width+280, self.height+110)
+        self.graph.image.write_to_png(path, self.orig_width, self.orig_height)

@@ -7,27 +7,43 @@ from graph import graph_t
 
 class bar_graph_t(graph_t):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, bg_color, line_color):
 
-        graph_t.__init__(self, width, height)
+        graph_t.__init__(self, width, height, bg_color, line_color)
 
     def draw_yaxis(self):
-        maxX = self.get_max_xcoordiate()
-        maxY = self.get_max_ycoordinate()
+        max_y = self.get_max_ycoordinate()
+        min_y = self.get_min_ycoordinate()
 
         graph = self.graph
        
-        if(maxY == 0):
-            maxY = 1
+        if(max_y == 0):
+            max_y = 1
+
+        y_range = (max_y - min_y)
     
-        increment = maxY/10.0
-        y_axis_increments = int(maxY/increment)
+        increment = y_range/10.0
+        y_axis_increments = int(y_range/increment)
         height = self.height
         width = self.width
         top = self.top
         left = self.left
         right = self.right
         bottom = self.bottom
+
+        # Figure out the zero crossing
+        if(min_y < 0):
+            yvalue = abs(min_y)
+            y = bottom - ((((yvalue)/(increment))/y_axis_increments) * height);
+            graph.draw_line(x1 = left,
+                            y1 = y,
+                            x2 = right,
+                            y2 = y,
+                            line_color = "#ff0000",
+                            background_color = "#FFFFFF",
+                            line_weight = 1,
+                            line_pattern = 1)
+            
         
         # Draw the Y-Axis
         for count in range(0, y_axis_increments + 1):
@@ -54,9 +70,9 @@ class bar_graph_t(graph_t):
                                 line_weight = 1)
     
             if(count == y_axis_increments):
-                label = 0
+                label = min_y
             else:
-                label = maxY - ((count * maxY * increment)/(maxY))
+                label = max_y - ((count * y_range * increment)/(y_range))
             
             graph.draw_text(x = left - 40,
                             y = vertical_position + 4,
@@ -71,11 +87,12 @@ class bar_graph_t(graph_t):
                         text_orientation = "vertical")
 
     def draw_xaxis(self):
-        maxX = self.get_max_xcoordiate();
+        max_x = self.get_max_xcoordinate()
+        min_x = self.get_min_xcoordinate()
 
-        if(maxX == 0):
-            maxX = 1
-        
+        if(max_x == 0):
+            max_x = 1
+
         graph = self.graph
         
         height = self.height
@@ -85,12 +102,12 @@ class bar_graph_t(graph_t):
         right = self.right
         bottom = self.bottom
         
-        increment = maxX/10.0;
+        increment = max_x/10.0;
         
         if(1 == self.xaxis["autoscale"]):
-            increment = math.ceil(maxX/10)
+            increment = math.ceil(max_x/10)
         
-        xAxisIncrements = int(maxX/increment)
+        xAxisIncrements = int(max_x/increment)
         
         # Draw the X-Axis
         for count in range(0, xAxisIncrements + 1):
@@ -112,9 +129,9 @@ class bar_graph_t(graph_t):
                                line_color = "#C0C0C0")
         
             if(0):
-               label = math.ceil((count * maxX * increment)/(maxX))
+               label = math.ceil((count * max_x * increment)/(max_x))
             else:
-               label = (count * maxX * increment)/(maxX)
+               label = (count * max_x * increment)/(max_x)
             
             graph.draw_text(x = horizontalPosition - 3, 
                             y = bottom + 15,
@@ -128,18 +145,23 @@ class bar_graph_t(graph_t):
                         text       = self.xaxis["label"])
 
     def draw_data(self):
-        maxX = self.get_max_xcoordiate();
-        maxY = self.get_max_ycoordinate();
+        max_x = self.get_max_xcoordinate();
+        max_y = self.get_max_ycoordinate();
+        min_x = self.get_min_xcoordinate();
+        min_y = self.get_min_ycoordinate();
         graph = self.graph
+
+        x_range = max_x - min_x
+        y_range = max_y - min_y
         
-        yincrement = (maxY/10.0);
+        yincrement = (y_range/10.0);
         if(1 == self.xaxis["autoscale"]):
-            xincrement = (maxX/10.0);
+            xincrement = (x_range/10.0);
         else:
-            xincrement = maxX/10.0;
+            xincrement = x_range/10.0;
         
-        yAxisIncrements = (maxY/yincrement);
-        xAxisIncrements = (maxX/xincrement);
+        y_axis_increments = (y_range/yincrement);
+        x_axis_increments = (x_range/xincrement);
         height = self.height
         width = self.width
         top = self.top
@@ -162,10 +184,11 @@ class bar_graph_t(graph_t):
         #print "barwidth: %d" % ((right-left) / (30 * numdatasets))
         offset = 0
 
+        # The zero-crossing is the bottom
+        bottom = bottom + ((((min_y)/(yincrement))/y_axis_increments) * height);
+
         for dataset in self.datasets:
             #numpoints = len(self.datasets[dataset]["data"])
-            prevx = left;
-            prevy = bottom;
             color = self.datasets[dataset]["color"]
             barheight = 0;
             
@@ -176,16 +199,16 @@ class bar_graph_t(graph_t):
             for key in self.datasets[dataset]["data"]:
                 # Need to round to the whole number because
                 # plotting fractions on a bar graph don't make sense
-                xvalue = "%.0f" % key
+                xvalue = "%.0f" % (key - min_x)
                 yvalue = self.datasets[dataset]["data"][key]
 
                 #x = (((int(xvalue)/int(xincrement))/10.0) * width) + left + offset;
                 #y = bottom - (((int(yvalue)/int(yincrement))/10.0) * height);
-                x = (((float(xvalue)/(xincrement))/xAxisIncrements) * width) + left + offset;
-                y = bottom - ((((yvalue)/(yincrement))/yAxisIncrements) * height);
+                x = (((float(xvalue)/(xincrement))/x_axis_increments) * width) + left + offset;
+                y = bottom - ((((yvalue)/(yincrement))/y_axis_increments) * height);
                 #print("x = $x, y = $y\n");
         
-                barheight =bottom - y;
+                barheight = bottom - y;
                 
                 graph.draw_rect(x = x,
                                 y = y,
@@ -203,11 +226,12 @@ class bar_graph_t(graph_t):
                 #                      "font-size"  => 7});
                 #}
                 
-                prevx = x;
-                prevy = y;
             offset += barwidth;
 
     def draw_graph(self, path):
+        
+        self.calculate_dimensions()
+
         graph_t.draw_graph(self)
 
         self.draw_yaxis()
@@ -217,5 +241,5 @@ class bar_graph_t(graph_t):
         self.draw_title()
 
 
-        self.graph.image.write_to_png(path, self.width+280, self.height+110)
+        self.graph.image.write_to_png(path, self.orig_width, self.orig_height)
 
