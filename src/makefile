@@ -205,21 +205,21 @@ test_show_tags:
 	${python} shorte.py -f examples/hello.tpl -i tags2html -o build-output/test_show_tags --of=hello.html
 
 test_mx:
-	${python} shorte.py -f SRSA.tpl -p "html+pdf" -t "${THEME}" -w "examples/mx" -o build-output/mx
+	${python} shorte.py -f SRSA.tpl -p "${html_pdf}" -t "${THEME}" -w "examples/mx" -o build-output/mx
 
 test_hello:
-#	${python} shorte.py -f examples/hello.tpl -t "${THEME}" -p "html+pdf" -o build-output/hello
-#	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
-#	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
-	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "${THEME}" -o build-output/hello_hsio
+#	${python} shorte.py -f examples/hello.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/hello
+#	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=cortina_web;pdf=cortina_transport" -o build-output/hello
+#	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=cortina_web;pdf=cortina" -o build-output/hello_hsio
+	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "${THEME}" -o build-output/hello_hsio
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline --profile=hello_profile --output_file=hello.html
 
 test_profiler:
 	${python} shorte.py -f examples/api_reference.tpl -p "html_inline" -t "${THEME}" -o build-output/profiler --profile=profile
-	${python} shorte.py -f examples/api_reference.tpl -p "html+pdf" -t "${THEME}" -o build-output/profiler_plus_pdf --profile=profile
+	${python} shorte.py -f examples/api_reference.tpl -p "${html_pdf}" -t "${THEME}" -o build-output/profiler_plus_pdf --profile=profile
 
 test_hello2:
-	${python} shorte.py -f examples/hello.tpl -p "html+pdf" -t "html=inphi;pdf=inphi2" -o build-output/hello_hsio
+	${python} shorte.py -f examples/hello.tpl -p "${html_pdf}" -t "html=inphi;pdf=inphi2" -o build-output/hello_hsio
 
 test_resume:
 	${python} shorte.py -f examples/resume.tpl -p "html_inline" -t "resume" -s "html.header_numbers=0" -o build-output/resume
@@ -229,19 +229,21 @@ test_hello_quick:
 	${python} shorte.py -f examples/hello.tpl -p "html_inline" -t "${THEME}" -o build-output/hello_hsio_inline
 
 html_pdf=html+pdf
+html_inline_pdf=html_inline+pdf
 ifneq ("${QUICK}","")
     html_pdf=html
+    html_inline_pdf=html_inline
 endif
 
 test_headings:
 	${python} shorte.py -f examples/headings.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/headings
 
 test_comments:
-	${python} shorte.py -f examples/comments.tpl -t "${THEME}" -p "html+pdf" -o build-output/comments
+	${python} shorte.py -f examples/comments.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/comments
 
 test_textblocks:
-	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html+pdf"
-	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock_inline -p "html_inline+pdf"
+	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "${html_pdf}"
+	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock_inline -p "${html_inline_pdf}"
 test_textblocks_quick:
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "html"
 
@@ -249,7 +251,7 @@ test_inline_styling:
 	${python} shorte.py -f examples/inline_styling.tpl -t "${THEME}" -o build-output/inline_styling -p "html"
 
 test_tables:
-	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "html+pdf" -o build-output/tables
+	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/tables
 
 test_api_reference:
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "${html_pdf}" -s "shorte.auto_summarize=0" --info=wikiwords
@@ -272,7 +274,7 @@ test_code:
 	${python} shorte.py --ignore_errors -f "examples/headings.tpl build-output/c_code/test.tpl" -t "${THEME}" -o build-output/c_code_error -p "${html_pdf}"
 
 test_long_prototype:
-	${python} shorte.py -f examples/long_prototype.h -xclang -t "${THEME}" -o build-output/long_prototypes -p "html+pdf"
+	${python} shorte.py -f examples/long_prototype.h -xclang -t "${THEME}" -o build-output/long_prototypes -p "${html_pdf}"
 
 
 test_code_execution:
@@ -283,8 +285,8 @@ test_code_execution:
 test_preprocessor:
 	cat examples/cs_t100_api.h | sed 's/#\(define\|include\)/@@\1/g' | gcc -E -C - | src/parsers/gcc_expand.py > cs_t100_api_preprocessed.h
 	cat examples/test.c | sed 's/#\(define\|include\)/@@\1/g' | gcc -E -C - | src/parsers/gcc_expand.py > examples/test_preprocessed.c
-	${python} shorte.py -f examples/cs_t100_api_preprocessed.h -t "${THEME}" -x cpp -o build-output/c_code_t100_preprocessed -p "html+pdf"
-	${python} shorte.py -f examples/test_preprocessed.c -t "${THEME}" -x cpp -o build-output/c_code_preprocessed -p "html+pdf"
+	${python} shorte.py -f examples/cs_t100_api_preprocessed.h -t "${THEME}" -x cpp -o build-output/c_code_t100_preprocessed -p "${html_pdf}"
+	${python} shorte.py -f examples/test_preprocessed.c -t "${THEME}" -x cpp -o build-output/c_code_preprocessed -p "${html_pdf}"
 
 test_defines:
 	${python} shorte.py -f examples/defines.h -t "${THEME}" -x clang -o build-output/defines -p "${html_pdf}"
@@ -292,10 +294,10 @@ test_defines:
 
 
 test_cpp_parser:
-	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/cpp_parser -p "html+pdf"
+	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/cpp_parser -p "${html_pdf}"
 
 test_clang:
-#	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "html_inline+pdf"
+#	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "${html_inline_pdf}"
 	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "${html_pdf}" -o build-output/clang_c
 	${python} shorte.py -f "examples/types_test.h" -t "${THEME}" -x clang -p "html" -s "clang.args=-xc++ -I`pwd`/examples/platform" -o build-output/clang_c_types
 
@@ -325,11 +327,11 @@ test_structs:
 	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/structs
 
 test_bullets:
-	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets --zip=bullets.zip
-	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets_shorte
-	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html+pdf" -o build-output/bullets2 --zip=bullets.zip
-	${python} shorte.py -f examples/bullets.tpl -t "html_inline=cortina_web;pdf=cortina_public" -p "html_inline+pdf" -o build-output/bullets_public --zip=bullets.zip
-	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "html_inline+pdf" -o build-output/bullets_inline --zip=bullets_inline.zip
+	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/bullets --zip=bullets.zip
+	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/bullets_shorte
+	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/bullets2 --zip=bullets.zip
+	${python} shorte.py -f examples/bullets.tpl -t "html_inline=inphi;pdf=shorte" -p "${html_inline_pdf}" -o build-output/bullets_public --zip=bullets.zip
+	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "${html_inline_pdf}" -o build-output/bullets_inline --zip=bullets_inline.zip
 
 test_t100:
 	${python} -m cProfile -s time shorte.py -f examples/cs_t100_api.h -t "${THEME}" -x cpp -p "html_inline" -o build-output/t100
@@ -339,10 +341,10 @@ test_wikiwords:
 	${python} shorte.py -f examples/wikiwords.tpl -t "${THEME}" -p "html_inline" -s "html.inline_toc=1" -o build-output/wikiwords_inline
 
 test_conditionals:
-	${python} shorte.py -f examples/conditionals.tpl -t "${THEME}" -p "html+pdf" -o build-output/conditionals
+	${python} shorte.py -f examples/conditionals.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/conditionals
 
 test_images:
-	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html+pdf" -o build-output/images
+	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/images
 test_images_quick:
 	${python} shorte.py -f examples/images.tpl -t "${THEME}" -p "html" -o build-output/images
 test_gallery:
@@ -357,7 +359,7 @@ test_show_wikiwords:
 	${python} shorte.py -f examples/include_tests.tpl -i "wikiwords"
 
 test_include_tests:
-	${python} shorte.py -f examples/include_tests.tpl -p "html+pdf" -o build-output/include_tests
+	${python} shorte.py -f examples/include_tests.tpl -p "${html_pdf}" -o build-output/include_tests
 
 
 test_graphing:
@@ -370,7 +372,7 @@ test_graphing:
 # in one assembly rather than trying to diff the output.
 test_mergefile:
 	${python} shorte.py -f "examples/images.tpl examples/headings.tpl" -t "${THEME}" -p mergefile -o build-output/mergefile
-	${python} shorte.py -f "build-output/mergefile/book.tpl" -t "${THEME}" -p "html+pdf" -o build-output/mergefile
+	${python} shorte.py -f "build-output/mergefile/book.tpl" -t "${THEME}" -p "${html_pdf}" -o build-output/mergefile
 
 test_sql:
 	${python} shorte.py -f "examples/test.c examples/test.h" -t "${THEME}" -x cpp -o build-output/sql -p "sql"
@@ -381,11 +383,11 @@ test_server:
 	${start} ${python} shorte.py --server --port=8400 &
 	${python} -c "import time;time.sleep(2)"
 	${python} server_test.py --package="html_inline" --theme="inphi" --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example.html
-	${python} server_test.py --package="html_inline+pdf" --theme="html=shorte;pdf=shorte" --zip --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example2.zip
+	${python} server_test.py --package="${html_inline_pdf}" --theme="html=shorte;pdf=shorte" --zip --ip=127.0.0.1 --port=8400 > build-output/server_example/server_example2.zip
 	${python} server_test.py --shutdown --ip=127.0.0.1 --port=8400
 
 test_extract_private:
-	${python} shorte.py -s "cpp_parser.extract_private=1" -f examples/test.h -x cpp -p "html+pdf" -o build-output/private_methods
+	${python} shorte.py -s "cpp_parser.extract_private=1" -f examples/test.h -x cpp -p "${html_pdf}" -o build-output/private_methods
 	${python} shorte.py -s "cpp_parser.extract_private=0" -f examples/test.h -x cpp -o build-output/public_methods
 
 test_revealjs:
@@ -399,7 +401,7 @@ test_revealjs_quick:
 
 test_sequences:
 	${python} shorte.py -f examples/sequences.tpl -p "reveal.js" --theme=shorte -o build-output/sequences
-	${python} shorte.py -f examples/sequences.tpl -p "html+pdf" --theme="${THEME}" -o build-output/sequences_pdf
+	${python} shorte.py -f examples/sequences.tpl -p "${html_pdf}" --theme="${THEME}" -o build-output/sequences_pdf
 test_sequences_quick:
 	${python} shorte.py -f examples/sequences.tpl -p "html" --theme="${THEME}" -o build-output/sequences
 
@@ -422,6 +424,9 @@ test_templates:
 	${python} shorte.py -f examples/template_test.tpl -p "shorte" -o build-output/template_tests/shorte
 	${python} shorte.py -f examples/template_test.tpl -p "sql" -o build-output/template_tests/sql
 
+test_mediawiki:
+	${python} shorte.py -f examples/template_test.tpl -p "mediawiki" -o build-output/test_mediawiki
+
 test_template_c:
 	${python} shorte.py -f examples/template_test.tpl -p "c" -o build-output/template_tests/c
 
@@ -429,26 +434,26 @@ test_shorte:
 	${python} shorte.py -f examples/shorte.tpl -p "html" -t shorte -o build-output/shorte_template
 
 test_inkscape:
-	${python} shorte.py -f examples/test_inkscape.tpl -p "html+pdf" -t shorte -o build-output/inkscape
+	${python} shorte.py -f examples/test_inkscape.tpl -p "${html_pdf}" -t shorte -o build-output/inkscape
 
 test_gnuplot:
-	${python} shorte.py -f examples/gnuplot.tpl -p "html+pdf" -t shorte -o build-output/gnuplot
+	${python} shorte.py -f examples/gnuplot.tpl -p "${html_pdf}" -t shorte -o build-output/gnuplot
 
 test_registers:
-	${python} shorte.py -f examples/registers.tpl -p "html+pdf" -t shorte -o build-output/registers
+	${python} shorte.py -f examples/registers.tpl -p "${html_pdf}" -t shorte -o build-output/registers
 test_registers_quick:
 	${python} shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers
 
 test_junk:
 #	${python} shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
 #	${python} shorte.py -f "build-output/code/test.h.tpl build-output/code/test.tpl" -p html -o build-output/code_to_html
-	${python} shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html+pdf"
+	${python} shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "${html_pdf}"
 	${python} shorte.py -f examples/test.c -x cpp -o build-output/c_code -p "html"
 	${python} shorte.py -f examples/test.h -x cpp -o build-output/c_code_header -p "html"
 	${python} shorte.py -f examples/code.tpl -p html_inline -o build-output/html
-	${python} shorte.py -f examples/functions.tpl -p "html+pdf" -o build-output/functions
-	${python} shorte.py -f examples/functions.tpl -p "html_inline+pdf" -o build-output/functions
-	${python} shorte.py -f examples/hello.tpl -o build-output/hello -p "html+pdf"
+	${python} shorte.py -f examples/functions.tpl -p "${html_pdf}" -o build-output/functions
+	${python} shorte.py -f examples/functions.tpl -p "${html_inline_pdf}" -o build-output/functions
+	${python} shorte.py -f examples/hello.tpl -o build-output/hello -p "${html_pdf}"
 
 
 # This test is used to convert source code files into HTML output code. This

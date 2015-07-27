@@ -47,51 +47,150 @@ class template_mediawiki_t(template_html.template_html_t):
     def __init__(self, engine, indexer):
         
         template_html.template_html_t.__init__(self, engine, indexer)
+        
+        self.list_indent_per_level=1
+    
+    def format_list_child(self, elem, indent, ordered=False, start=0):
+        source = ''
 
+        prefix = ""
+        if(elem.type in ("checkbox", "action")):
+            prefix = "[ ] "
+            if(elem.checked):
+                prefix = "[x] "
+
+        text = prefix + elem.text
+        if(ordered):
+            if(elem.children != None):
+
+                if(indent > 0):
+                    source += "%s %s\n" % ('#'*(indent+1), self.format_text(text))
+                else:
+                    source += "# %s\n" % (self.format_text(text))
+
+                num_children = len(elem.children)
+                
+                is_num = False
+                is_char = False
+
+                if(not ((indent/self.list_indent_per_level) & 0x1)):
+                    start = ord("a")
+                    is_char = True
+                else:
+                    start = 1
+                    is_num = True
+
+                for i in range(0, num_children):
+                    if(is_num):
+                        source += self.format_list_child(elem.children[i], indent+self.list_indent_per_level, ordered, start)
+                    else:
+                        source += self.format_list_child(elem.children[i], indent+self.list_indent_per_level, ordered, chr(start))
+                    start += 1
+            else:
+                if(indent > 0):
+                    source += "%s %s\n" % ("#"*(indent+1), self.format_text(text))
+                else:
+                    source += "# %s\n" % (self.format_text(text))
+        else:
+            if(elem.children):
+                if(indent > 0):
+                    source += "%s %s\n" % ('*'*(indent+1), self.format_text(text))
+                else:
+                    source += "* %s\n" % (self.format_text(text))
+
+                num_children = len(elem.children)
+                for i in range(0, num_children):
+                    source += self.format_list_child(elem.children[i], indent+self.list_indent_per_level)
+            else:
+                if(indent > 0):
+                    source += "%s %s\n" % ('*'*(indent+1), self.format_text(text))
+                else:
+                    source += "* %s\n" % (self.format_text(text))
+
+        return source
+    
+    def format_list(self, list, ordered=False):
+
+        source = "\n"
+
+        start = 1
+        for elem in list:
+            source += self.format_list_child(elem, 0, ordered, start)
+            start += 1
+
+        source += "\n"
+
+        return source
+
+    def format_textblock(self, tag, prefix='', prefix_first_line=True, pad_textblock=False):
+        '''This method is called to format an @text block.
+           
+           @param tag               [I] - The textblock tag being formatted
+           @param prefix            [I] - A prefix to prepend to each line.
+           @param prefix_first_line [I] - Indent the first line.
+           @param pad_textblock     [I] - Pad the textblock with spaces before and after.
+
+           @return The formatted text.
+        '''
+
+        if(isinstance(tag, tag_t)):
+            textblock = tag.contents
+        else:
+            textblock = tag
+
+        if(isinstance(textblock, textblock_t)):
+            paragraphs = textblock.paragraphs
+        else:
+            paragraphs = textblock
+
+        output = '\n'
+
+        for p in paragraphs:
+            text = p["text"]
+            is_code = p["code"]
+            is_list = p["list"]
+
+            if(is_code):
+                lines = text.split("\n")
+                for line in lines:
+                    output += "    %s\n" % line
+            elif(is_list):
+                output += self.format_list(text)
+            else:
+                output += self.format_text(text)
+            output += "\n"
+
+        while(output.startswith("\n")):
+            output = output[1:]
+
+        while(output.endswith("\n")):
+            output = output[0:-1]
+
+        lines = output.split('\n')
+        output = ''
+        for i in range(0, len(lines)):
+            if(i == 0):
+                if(prefix_first_line):
+                    output += prefix + lines[i] + '\n'
+                else:
+                    output += lines[i] + '\n'
+            else:
+                output += prefix + lines[i] + '\n'
+
+        if(pad_textblock):
+            return "\n" + output + "\n"
+
+        output += "\n"
+
+        return output
     
     def format_source_code(self, language, tags, source=""):
 
-        output = ''
-        
-        lt = re.compile("<")
-        gt = re.compile(">")
-        nl = re.compile("\\\\n")
-        ws = re.compile(" ")
-        amp = re.compile("&")
-
-        line = 1
-
-        source = source.replace('\\', '')
-        return '<pre>%s</pre>' % source
-
-        output += '<span style="color:#c0c0c0;">001&nbsp;&nbsp;</span>'
-        
-        for tag in tags:
-
-            type = tag["type"]
-            source = tag["data"]
-        
-            source = amp.sub("&amp;", source)
-            source = lt.sub("&lt;", source)
-            source = gt.sub("&gt;", source)
-
-            if(type == TAG_TYPE_CODE):
-
-                if(source != ""):
-                    source = self.format_keywords(language, source)
-                    output += '<span>%s</span>' % source
-            elif(type == TAG_TYPE_COMMENT or type == TAG_TYPE_MCOMMENT):
-                output += '<span style="color:green;">%s</span>' % source
-            elif(type == TAG_TYPE_WHITESPACE):
-                output += '&nbsp;'
-            elif(type == TAG_TYPE_STRING):
-                output += '<span style="color:#9933CC;">%s</span>' % source
-            elif(type == TAG_TYPE_NEWLINE):
-                output += '<br/>'
-                line += 1
-                output += "<span style='color:#c0c0c0;'>%03d&nbsp;&nbsp;</span>" % (line)
-
-        return output
+        return '''
+<syntaxhighlight lang=%s>
+%s
+</syntaxhighlight>
+''' % (language, source)
 
     def format_table(self, source, table):
 
@@ -115,7 +214,7 @@ class template_mediawiki_t(template_html.template_html_t):
                     col_widths[j] = len(col["text"])
                 j += 1
 
-        html += "{|\n"
+        html += "{| class=\"wikitable\"\n"
 
         for row in table.get_rows():
 
@@ -131,6 +230,7 @@ class template_mediawiki_t(template_html.template_html_t):
                 for col in row["cols"]:
 
                     txt = self.format_text(col["text"])
+                    txt = re.sub("\n *", "\n", txt)
                     colspan = col["span"]
                     
                     if(is_header):
@@ -291,6 +391,113 @@ class template_mediawiki_t(template_html.template_html_t):
         image = self.m_engine.m_parser.parse_inline_image(matches)
 
         return self.format_image(image)
+    
+    def format_struct(self, tag):
+        '''This method is called to format the contents of an @struct tag
+           as an HTML entity.
+
+           @param self [I] - The instance of the formatter class
+           @param tag  [I] - The tag containing the structure object
+
+           @return The HTML output of the structure
+        '''
+
+        #print tag
+
+        source = tag.source
+        struct = tag.contents
+        
+        
+        html = ""
+        
+        html += "{| class='wikitable' style='text-align:left;'\n"
+        
+        label = tag.name.title()
+        
+        html += "!colspan=3|Struct: %s\n" % struct.name
+        html += "|-\n"
+        html += "|colspan=3|%s\n" % self.format_textblock(struct.get_description()).strip()
+        html += "|-\n"
+        html += "!colspan=3|Fields\n"
+        html += "|-\n"
+
+        html += "!Width/Type\n"
+        html += "!Name\n"
+        html += "!Description\n"
+        html += "|-\n"
+
+        for field in struct.get_fields():
+            if(field.get_is_spacer()):
+                html += "!colspan=3\n"
+            else:
+                desc = self.format_textblock(field.get_description()).strip()
+                ftype = self.format_text(field.get_type())
+
+                html += "|%s\n" % ftype
+                html += "|%s\n" % field.get_name()
+                html += "|%s\n" % desc
+                html += "|-\n"
+
+        #self.format_object_construct(struct, 'example', col_span=3)
+
+        '''
+        html_example  = self.format_object_construct(struct, 'example')
+        html_see_also = self.format_object_construct(struct, 'see')
+        html_since    = self.format_object_construct(struct, 'since')
+        html_deprecated = self.format_object_construct(struct, 'deprecated')
+
+        struct_name = struct.name
+        style = []
+        if(len(html_deprecated) > 0):
+            struct_name += " (THIS STRUCTURE IS DEPRECATED)"
+            style.append("background: url('css/images/deprecated.png') center")
+        
+        xref = self.get_xref(struct.get_file(), struct.get_line())
+
+        desc = struct.get_description()
+        if(desc == None):
+            desc = ""
+        else:
+            desc = self.format_textblock(desc)
+
+        style = ';'.join(style)
+
+        html = string.Template('''
+<div class='bordered' style="$style">
+<div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img$xref</div>
+<div>
+    <div style="margin-left: 10px;margin-top:10px;">
+        <div class='cb_title'>Description:</div>
+        <div style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+    </div>
+</div>
+<div>
+    <div style="margin-left: 10px;">
+        <div class='cb_title'>Fields:</div>
+        <div style="margin:0px;">${values}</div>
+        ${example}
+        ${see_also}
+        ${since}
+        ${deprecated}
+    </div>
+</div>
+</div><br/>''').substitute({
+    "style"    : style,
+    "xref"     : xref,
+    "img"      : img,
+    "label"    : label,
+    "name"     : struct_name,
+    "values"   : html,
+    "example"  : html_example,
+    "see_also" : html_see_also,
+    "since"    : html_since,
+    "deprecated" : html_deprecated,
+    "desc"     : desc})
+        """
+
+        html += "|}"
+        
+        return html
 
     
     def append_header(self, tag, data, file):
@@ -367,15 +574,15 @@ class template_mediawiki_t(template_html.template_html_t):
         elif(name == "pre"):
             self.m_contents += "<pre style='margin-left:30px;'>" + self.format_text(tag.contents) + "</pre>\n"
         elif(name == "note"):
-            self.m_contents += "<sticky>" + self.format_note(self.format_text(tag.contents)) + "</sticky>"
+            self.m_contents += "<nowiki>" + self.format_note(self.format_text(tag.contents)) + "</nowiki>"
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += "<sticky>" + self.format_struct(tag) + "</sticky>"
+            self.m_contents += self.format_struct(tag)
         elif(name == "ul"):
-            self.m_contents += "<sticky>" + self.format_list(tag.contents, False) + "</sticky>"
+            self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
-            self.m_contents += "<sticky>" + self.format_list(tag.contents, True) + "</sticky>"
+            self.m_contents += self.format_list(tag.contents, True)
         else:
             WARNING("Tag %s not supported in template_mediawiki" % name)
 
