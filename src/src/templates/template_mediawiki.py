@@ -391,114 +391,84 @@ class template_mediawiki_t(template_html.template_html_t):
         image = self.m_engine.m_parser.parse_inline_image(matches)
 
         return self.format_image(image)
-    
-    def format_struct(self, tag):
-        '''This method is called to format the contents of an @struct tag
-           as an HTML entity.
 
-           @param self [I] - The instance of the formatter class
-           @param tag  [I] - The tag containing the structure object
-
-           @return The HTML output of the structure
-        '''
-
-        #print tag
-
-        source = tag.source
-        struct = tag.contents
+    def format_object(self, tag, title):
         
+        obj = tag.contents
+
+        text = "{| class='wikitable'\n"
         
-        html = ""
+        text += "!colspan=3 style='text-align:left'|%s: %s\n" % (title, obj.get_name())
+        text += "|-\n"
+        text += "|colspan=3 style='text-align:left'|%s\n" % self.format_textblock(obj.get_description()).strip()
+        text += "|-\n"
+
+        if(obj.has_fields()):
+            text += "!colspan=3 style='text-align:left'|Fields:\n"
+            text += "|-\n"
+            text += "!Width/Type\n"
+            text += "!Name\n"
+            text += "!Description\n"
+            text += "|-\n"
+
+            for field in obj.get_fields():
+                if(field.get_is_spacer()):
+                    text += "!colspan=3\n"
+                else:
+                    desc = self.format_textblock(field.get_description()).strip()
+                    ftype = self.format_text(field.get_type())
+
+                    text += "|%s\n" % ftype
+                    text += "|%s\n" % field.get_name()
+                    text += "|%s\n" % desc
+                    text += "|-\n"
+
+        elif(obj.has_params()):
+            text += "!colspan=3 style='text-align:left'|Parameters:\n"
+            text += "|-\n"
+            text += "!Type\n"
+            text += "!Name\n"
+            text += "!Description\n"
+            text += "|-\n"
+
+            params = obj.get_params()
+            for param in params:
+                text += "|%s\n" % param.get_type()
+                text += "|%s\n" % param.get_name()
+                text += "|%s\n" % self.format_textblock(param.get_description())
+                text += "|-\n"
+
+        elif(obj.has_values()):
+            text += "!colspan=3 style='text-align:left'|Values:\n"
+            text += "|-\n"
+            text += "!Name\n"
+            text += "!Value\n"
+            text += "!Description\n"
+            text += "|-\n"
+
+            values = obj.values2
+            for val in values:
+
+                text += "|%s\n" % val.get_name()
+                text += "|%s\n" % val.get_value()
+                text += "|%s\n" % self.format_textblock(val.get_description())
+                text += "|-\n"
         
-        html += "{| class='wikitable' style='text-align:left;'\n"
-        
-        label = tag.name.title()
-        
-        html += "!colspan=3|Struct: %s\n" % struct.name
-        html += "|-\n"
-        html += "|colspan=3|%s\n" % self.format_textblock(struct.get_description()).strip()
-        html += "|-\n"
-        html += "!colspan=3|Fields\n"
-        html += "|-\n"
+        if(obj.has_returns()):
+            text += "!colspan=3 style='text-align:left'|Returns:\n"
+            text += "|-\n"
+            text += "|colspan=3|%s\n" % self.format_text(obj.get_returns())
+            text += "|-\n"
 
-        html += "!Width/Type\n"
-        html += "!Name\n"
-        html += "!Description\n"
-        html += "|-\n"
+        if(obj.has_see_also()):
+            text += "!colspan=3 style='text-align:left'|See:\n"
+            text += "|-\n"
+            text += "|colspan=3|%s\n" % self.format_text(obj.get_see_also())
+            text += "|-\n"
+            
+        text += "|}\n"
 
-        for field in struct.get_fields():
-            if(field.get_is_spacer()):
-                html += "!colspan=3\n"
-            else:
-                desc = self.format_textblock(field.get_description()).strip()
-                ftype = self.format_text(field.get_type())
-
-                html += "|%s\n" % ftype
-                html += "|%s\n" % field.get_name()
-                html += "|%s\n" % desc
-                html += "|-\n"
-
-        #self.format_object_construct(struct, 'example', col_span=3)
-
-        '''
-        html_example  = self.format_object_construct(struct, 'example')
-        html_see_also = self.format_object_construct(struct, 'see')
-        html_since    = self.format_object_construct(struct, 'since')
-        html_deprecated = self.format_object_construct(struct, 'deprecated')
-
-        struct_name = struct.name
-        style = []
-        if(len(html_deprecated) > 0):
-            struct_name += " (THIS STRUCTURE IS DEPRECATED)"
-            style.append("background: url('css/images/deprecated.png') center")
-        
-        xref = self.get_xref(struct.get_file(), struct.get_line())
-
-        desc = struct.get_description()
-        if(desc == None):
-            desc = ""
-        else:
-            desc = self.format_textblock(desc)
-
-        style = ';'.join(style)
-
-        html = string.Template('''
-<div class='bordered' style="$style">
-<div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img$xref</div>
-<div>
-    <div style="margin-left: 10px;margin-top:10px;">
-        <div class='cb_title'>Description:</div>
-        <div style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${desc}</div>
-    </div>
-</div>
-<div>
-    <div style="margin-left: 10px;">
-        <div class='cb_title'>Fields:</div>
-        <div style="margin:0px;">${values}</div>
-        ${example}
-        ${see_also}
-        ${since}
-        ${deprecated}
-    </div>
-</div>
-</div><br/>''').substitute({
-    "style"    : style,
-    "xref"     : xref,
-    "img"      : img,
-    "label"    : label,
-    "name"     : struct_name,
-    "values"   : html,
-    "example"  : html_example,
-    "see_also" : html_see_also,
-    "since"    : html_since,
-    "deprecated" : html_deprecated,
-    "desc"     : desc})
-        """
-
-        html += "|}"
-        
-        return html
-
+        return text
     
     def append_header(self, tag, data, file):
 
@@ -578,7 +548,11 @@ class template_mediawiki_t(template_html.template_html_t):
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "struct"):
-            self.m_contents += self.format_struct(tag)
+            self.m_contents += self.format_object(tag, "Structure")
+        elif(name == "prototype"):
+            self.m_contents += self.format_object(tag, "Prototype")
+        elif(name == "enum"):
+            self.m_contents += self.format_object(tag, "Enumeration")
         elif(name == "ul"):
             self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):

@@ -741,6 +741,15 @@ class type_t:
         self.type = ""
         self.see_also = None
         self.since = None
+    
+    def has_fields(self):
+        return False
+    def has_values(self):
+        return False
+    def has_returns(self):
+        return False
+    def has_params(self):
+        return False
 
     def get_name(self):
         return self.name
@@ -842,6 +851,12 @@ class enum_t(type_t):
         self.values = {}
         self.max_cols = 0
         self.type = "enum"
+    
+    def has_values(self):
+        return True
+
+    def get_values(self):
+        return self.values
 
     def __str__(self):
         attrs = "Enum"
@@ -859,6 +874,19 @@ class enum_t(type_t):
             attrs += "\n"
 
         return attrs
+
+class enum_value_t(type_t):
+    def __init__(self):
+        type_t.__init__(self)
+        self.name = None
+        self.desc = None
+        self.desc_unparsed = None
+        self.value = None
+
+    def set_value(self, value):
+        self.value = value
+    def get_value(self):
+        return self.value
 
 class field_t(type_t):
     def __init__(self):
@@ -1016,6 +1044,9 @@ class struct_t(type_t):
         # This contains a list of any headings to associate
         # with the structure.
         self.headings = {}
+
+    def has_fields(self):
+        return True
 
     def __str__(self):
         attrs = "Struct"

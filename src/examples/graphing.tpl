@@ -3,8 +3,9 @@
 @body
 
 @h1 Line Graphs
+
 This is an example of a line graph.
-@graph: type="line" width=600 height=400 title="Blah blah blah" subtitle="Subtitle"
+@graph: type="line" width=600 height=400 title="Blah blah blah" subtitle="Subtitle" bgcolor="#ffffff" frame=True filled=False
 --data:
 data = {}
 data["one"] = {
@@ -17,19 +18,26 @@ data["one"] = {
     10: 8
 }
 
-data["two"] = {
-    0:  10 + 1,
-    1:  10 + 3,
-    4:  10 + 5,
-    6:  10 + 4,
-    7:  10 + 4,
-    8:  10 + 3,
-    10: 10 + 8
+@text
+Another example of a graph with negative numbers
+@graph: type="line" width=600 height=400 title="Blah blah blah" subtitle="Subtitle" bgcolor="#ffffff" frame=True filled=False
+--data:
+data = {}
+data["one"] = {
+    -1:10,
+    0: 1,
+    1: 3,
+    4: -5,
+    6: 4,
+    7: -4,
+    8: 3,
+    10: 8,
+    5.6: 7,
 }
 
 @text
 This is a randomly generated line graph
-@graph: type="line" width=800 height=600 title="A random line graph" subtitle="Randomly generated"
+@graph: type="line" width=800 height=600 title="A random line graph" subtitle="Randomly generated" bgcolor="#b0b0b0" filled=True
 --data:
 <?
 import math
@@ -85,7 +93,7 @@ data["two"] = {}
 
 @h1 Pie Graphs
 This is an example of a pie graph
-@graph: type="pie" title="A Pie Graph" width=600 height=400 subtitle="Just a random pie graph"
+@graph: type="pie" title="A Pie Graph" width=600 height=400 subtitle="Just a random pie graph" bgcolor="#a0a0a0"
 --data:
 data = {}
 data["one"] = {
@@ -131,9 +139,9 @@ data = {}
 data["one"] = {
     0:  1,
     1:  3,
-    4:  5,
+    4:  -5,
     6:  4,
-    7:  4,
+    7:  -4,
     8:  3,
     11: 8,
     22: 9,

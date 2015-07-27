@@ -7,13 +7,13 @@ from graph import graph_t
 
 class memorymap_graph_t(graph_t):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, bg_color, line_color):
         
         width = 600
         self.padding = 30
         self.block_width = 100
 
-        graph_t.__init__(self, width, height)
+        graph_t.__init__(self, width, height, bg_color, line_color)
 
     def draw_data(self):
         
@@ -114,11 +114,13 @@ class memorymap_graph_t(graph_t):
             
 
     def draw_graph(self, path):
+        self.calculate_dimensions()
+
         graph_t.draw_graph(self)
 
         self.draw_data()
         self.draw_legend()
         self.draw_title()
 
-        self.graph.image.write_to_png(path, self.width+280, self.height+110)
+        self.graph.image.write_to_png(path, self.orig_width, self.orig_height)
 

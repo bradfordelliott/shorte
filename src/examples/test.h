@@ -129,6 +129,7 @@ struct handle_table_entry_tag * phead, * ptail;
  * -[ ] three
  * -[x] four
  *
+ *
  * @param blah  [I] -
  *     Some dumb variable that behaves like
  *     a text block with a list
@@ -227,6 +228,14 @@ typedef struct {
  * implying that the C standard library is available. It uses sprintf()
  * and the CS_PRINTF() macro to display output which may not be
  * possible on systems that do not have a console.
+ 
+ * Here is an image
+ * 
+ * @{image,src="examples/gallery/two.jpg}
+ *
+ * And an animated image
+ *
+ * @{img,src="examples/gallery/1.gif}
  *
  * @cond SHORTE
  * @{table,
