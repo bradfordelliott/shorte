@@ -763,26 +763,68 @@ class template_html_t(template_t):
     
     def format_checklist(self, tag):
         
-        list = tag.contents
+        checklist = tag.contents
+
+        style = "default"
+        if(tag.modifiers.has_key("style")):
+            style = tag.modifiers["style"]
 
         source = ''
 
-        if(tag.modifiers.has_key("title")):
-            source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag.modifiers["title"] 
+        if(style == "default"):
+            if(tag.modifiers.has_key("title")):
+                source += "<p style='font-weight:bold;text-decoration:underline;'>%s</p>" % tag.modifiers["title"] 
 
-        source += "<ul style='list-style-type:none'>"
+            source += "<ul style='list-style-type:none'>"
 
-        for elem in list:
-            caption = ''
-            if(elem.has_key("caption")):
-                caption = " <span style='color:#999;font-style:italic;'>(%s)</span>" % elem["caption"]
+            for elem in checklist.get_items():
+                caption = ''
+                if(elem.has_caption()):
+                    caption = " <span style='color:#999;font-style:italic;'>(%s)</span>" % elem.get_caption()
 
-            source += "<li><input type='checkbox' name='%s' %s/>%s%s</li>" % (elem["name"], elem["checked"], elem["name"], caption)
+                source += "<li><input type='checkbox' name='%s' %s/>%s%s</li>" % (elem.get_name(), elem.get_checked(), elem.get_name(), caption)
 
-        source += "</ul>"
+            source += "</ul>"
 
-        if(tag.modifiers.has_key("caption")):
-            source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag.modifiers["title"] 
+            if(tag.modifiers.has_key("caption")):
+                source += "<p style='font-style:italic;margin-left:40px;'>Caption: %s</p>" % tag.modifiers["title"] 
+
+        elif(style == "table"):
+
+            columns = checklist.get_columns()
+            source = "<table class='bordered'><tr><th colspan=%d>%s</th></tr><tr class='header'>" % (len(columns), checklist.get_name())
+            for col in columns:
+                source += "<td class='header'>%s</td>" % col.title()
+            source += "</tr>"
+
+            for elem in checklist.get_items():
+                if(elem.get_checked()):
+                    classname = "class='reserved'"
+                    checked = "checked onclick='return false;'"
+                else:
+                    classname = ""
+                    checked = "onclick='return false;'"
+
+                source += "<tr %s>" % classname
+
+                for col in columns:
+                    text = elem.get_field(col)
+                    if(elem.get_checked()):
+                        text = "<strike>%s</strike>" % text
+
+                    if(col == "status"):
+                        source += "<td><input type='checkbox' %s/>%s</td>" % (checked, text)
+                    else:
+                        source += "<td>%s</td>" % text
+
+                #source += string.Template("<tr $class><td>$value</td><td><input type='checkbox' $checked/></tr>").substitute({
+                #    "class" : classname,
+                #    "value" : elem.get_name(),
+                #    "checked" : checked})
+
+                source += "</tr>"
+            source += "</table>"
+           
 
         return source
     
@@ -791,9 +833,10 @@ class template_html_t(template_t):
         
         source = ''
         style = ''
+        postfix = ''
+        prefix = ''
 
         if(elem.children != None):
-            prefix = ''
             
             # DEBUG BRAD: Need to do this in such a way that it doesn't
             #             re-link the image each time in the inlined version
@@ -803,15 +846,21 @@ class template_html_t(template_t):
             elif(elem.priority > 0):
                 prefix = "<div class='pri_0%d'></div>" % elem.priority
 
+            if(elem.who != None):
+                postfix += "<span style='color:red;background-color:yellow;font-size:0.8em;'>" + self.format_text(elem.who) + ": </span>"
+            if(elem.comments != None):
+                postfix += "<span style='color:red;background-color:yellow;font-size:0.8em;'>" + self.format_text(elem.comments) + "</span>"
+            if(elem.date != None):
+                postfix += "<span style='color:red;background-color:yellow;font-size:0.8em;'> (" + self.format_text(elem.date) + ")</span>"
 
             if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
-                    prefix += '<input type="checkbox" checked onclick="return false;" disabled></input>'
+                    prefix += '<input type="checkbox" checked onclick="return false;" disabled></input> '
                     style = 'style="color:#999;"'
                 else:
-                    prefix += '<input type="checkbox" onclick="return false;"></input>'
+                    prefix += '<input type="checkbox" onclick="return false;"></input> '
             
-            source += "<li>%s %s" % (prefix, self.format_text(elem.get_text()))
+            source += "<li>%s %s %s" % (prefix, self.format_text(elem.get_text()), postfix)
 
             num_children = len(elem.children)
             source += start_tag
@@ -819,8 +868,8 @@ class template_html_t(template_t):
             for i in range(0, num_children):
                 source += self.format_list_child(elem.children[i], start_tag, end_tag)
             source += "%s</li>" % (end_tag)
+
         else:
-            prefix = ''
             # DEBUG BRAD: Need to do this in such a way that it doesn't
             #             re-link the image each time in the inlined version
             if(elem.starred):
@@ -828,6 +877,13 @@ class template_html_t(template_t):
             
             elif(elem.priority > 0):
                 prefix = "<div class='pri_0%d'></div>" % elem.priority
+            
+            if(elem.who != None):
+                postfix += "<span style='color:red;background-color:yellow;font-size:0.8em;'>" + self.format_text(elem.who) + ": </span>"
+            if(elem.comments != None):
+                postfix += "<span style='color:red;background-color:yellow;font-size:0.8em;'>" + self.format_text(elem.comments) + "</span>"
+            if(elem.date != None):
+                postfix += "<span style='color:red;background-color:yellow;font-size:0.8em;'> (" + self.format_text(elem.date) + ")</span>"
 
             if(elem.type in ("checkbox", "action")):
                 if(elem.checked):
@@ -836,7 +892,9 @@ class template_html_t(template_t):
                 else:
                     prefix += "<input type='checkbox' onclick='return false;'></input>"
 
-            source += "<li %s>%s " % (style,prefix + self.format_text(elem.get_text()) + "</li>")
+            if(len(postfix) > 0):
+                postfix = " " + postfix
+            source += "<li %s>%s " % (style,prefix + self.format_text(elem.get_text()) + postfix + "</li>")
 
         return source
     
@@ -2146,12 +2204,25 @@ within an HTML document.
                         
             example = self.format_source_code(language, example)
 
+            example_result = ""
+
+            if(obj.has_example_result()):
+                result = obj.get_example_result()
+                if(result.has_compile_result()):
+                    rc  = result.get_compile_rc()
+                    val = result.get_compile_result()
+                    example_result += self.format_code_result(val, rc, "Compile:", "cb_title", "code2")
+                if(result.has_run_result()):
+                    rc = result.get_run_rc()
+                    val = result.get_run_result()
+                    example_result += self.format_code_result(val, rc, "Result:", "cb_title", "code2")
+                
             code = template_code.substitute(
                        {"contents" : example,
                         "source"   : source,
                         "code_header" : code_header,
                         "template" : "code2",
-                        "result"   : ""})
+                        "result"   : example_result})
 
             return template_example.substitute({"example" : code, "type" : obj.type})
 
@@ -3029,6 +3100,9 @@ $href_end
                 prefix += "<div>"
                 replace = self.format_inline_image_str(replace)
                 postfix += "</div>"
+            elif(tag == "closed"):
+                prefix = "<i>"
+                postfix = "</i>"
             elif(tag in "table"):
                 #print "PARSING INLINE TABLE"
                 #print "===================="
@@ -3223,24 +3297,12 @@ $href_end
         #print "@template_html.py::3099"
         #print self.m_indexer
 
-     
-    def append_source_code(self, tag):
+    def format_code_result(self, result, rc, label="Result:", style_code_result="code_result", style_code="code"):
         
-        #print "SOURCE:"
-        #print indent_lines(tag.source, "    ")
-
-        rc = self.format_source_code(tag.name, tag.contents)
-
-        source = self.format_source_code_no_lines(tag.name, tag.contents)
-
-        result = tag.result
-
-        snippet_id = self.m_snippet_id
-        self.m_snippet_id += 1
         nl2 = re.compile(r"\\n")
         nl = re.compile("\n")
         ws = re.compile(" ")
-
+        
         if(result != None):
 
             output_is_blank = False
@@ -3251,39 +3313,59 @@ $href_end
             lt = re.compile("<")
             gt = re.compile(">")
 
-            #print "Before:"
-            #print indent_lines(result, "    ")
-
             result = lt.sub("&lt;", result)
             result = gt.sub("&gt;", result)
             result = nl2.sub("<br/>", result)
             result = nl.sub("<br/>", result)
             result = ws.sub("&nbsp;", result)
-            
-            #print "After:"
-            #print indent_lines(result, "    ")
-            #print ""
-            
-            #parser = self.m_engine.m_source_code_analyzer
-            #tags = parser.parse_source_code(tag.name, result)
-            #result = self.format_source_code(tag.name, tags)
-            if(tag.rc == 0):
+
+            if(rc == 0):
                 if(output_is_blank):
-                    result = html_styles.template_code_result_no_output.substitute({"result": result})
+                    result = html_styles.template_code_result_no_output.substitute({"label" : label, "result": result, "code_result" : style_code_result})
                 else:
-                    result = html_styles.template_code_result.substitute({"result": result})
+                    result = html_styles.template_code_result.substitute({"label" : label, "result": result, "code_result" : style_code_result, "code" : style_code})
             else:
                 img_src = self.insert_image("icon_error_50x50.png")
-                result = html_styles.template_code_result_error.substitute({"result": result, "rc" : tag.rc, "image" : img_src})
+                result = html_styles.template_code_result_error.substitute({"label" : label, "result": result, "rc" : rc, "image" : img_src, "code_result" : style_code_result, "code" : style_code})
 
-            #snippet_id = self.m_snippet_id
-            #self.m_snippet_id += 1
-            #result = html_styles.template_source.substitute({"id": snippet_id, "source": result})
         else:
             result = ""
 
-        if(tag.result_image != None):
-            result += "<img style='margin-left:25px;' src='%s'/>" % self.insert_image_from_src(tag.result_image)
+        return result
+     
+
+    def append_source_code(self, tag):
+        
+        #print "SOURCE:"
+        #print indent_lines(tag.source, "    ")
+
+        formatted_source = self.format_source_code(tag.name, tag.contents)
+
+        source = self.format_source_code_no_lines(tag.name, tag.contents)
+
+        snippet_id = self.m_snippet_id
+        self.m_snippet_id += 1
+        nl2 = re.compile(r"\\n")
+        nl = re.compile("\n")
+        ws = re.compile(" ")
+        
+        html_result = ''
+
+        # If the tag has any source code compilation information then
+        # display it to the user.
+        if(tag.has_result()):
+            result = tag.get_result()
+            if(result.has_compile_result()):
+                rc  = result.get_compile_rc()
+                val = result.get_compile_result()
+                html_result += self.format_code_result(val, rc, label="Compile:")
+            if(result.has_run_result()):
+                rc = result.get_run_rc()
+                val = result.get_run_result()
+                html_result += self.format_code_result(val, rc, label="Result:")
+
+            if(result.has_image()):
+                html_result += "<img style='margin-left:25px;' src='%s'/>" % self.insert_image_from_src(result.get_image())
             
         if(self.m_show_code_headers["code"]):
             snippet_id = self.m_snippet_id
@@ -3302,11 +3384,11 @@ $href_end
             source = ""
 
         self.m_contents.append(template_code.substitute(
-                {"contents"    : rc,
+                {"contents"    : formatted_source,
                  "source"      : source,
                  "code_header" : code_header,
                  "template"    : "code",
-                 "result"      : result}))
+                 "result"      : html_result}))
 
     
     def append(self, tag):

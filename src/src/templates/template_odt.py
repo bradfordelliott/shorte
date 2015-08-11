@@ -2467,16 +2467,16 @@ ${desc}
 
         source = "<text:list text:style-name=\"%s\">" % style
 
-        list = tag.contents
+        checklist = tag.contents
 
-        for elem in list:
+        for elem in checklist.get_items():
 
             check = ''
 
             source += '''<text:list-item>
   <text:p text:style-name="%s">%s%s</text:p>
 </text:list-item>
-''' % (self.m_styles["para"]["list_level"][1], check, elem["name"])
+''' % (self.m_styles["para"]["list_level"][1], check, elem.get_name())
 
         source += '</text:list>'
 
@@ -3099,39 +3099,49 @@ ${desc}
         output += self.format_source_code(tag.name, tag.contents)
         output += self.format_pre('')
 
-        result = tag.result
-
-        if(result != None):
+        if(tag.has_result()):
+            result = tag.get_result()
             
-            output_is_blank = False
-            if(0 == len(result.strip())):
-                output_is_blank = True
-
             # Convert any HTML tags in the input source
             lt = re.compile("<")
             gt = re.compile(">")
             ws = re.compile(" ")
             nl = re.compile("\\\\n")
-            
-            result = lt.sub("&lt;", result)
-            result = gt.sub("&gt;", result)
-            result = nl.sub("__NEWLINE__", result)
+
+            if(result.has_compile_result()):
+                label = "Compile:"
+                rrc = result.get_compile_rc()
+                if(rrc != 0):
+                    label += " (Failed: rc=%d)" % rrc
+                    
+                output += self.format_bold(label)
+                tmp = lt.sub("&lt;", result.get_compile_result())
+                tmp = gt.sub("&gt;", tmp)
+                tmp = nl.sub("__NEWLINE__", tmp)
+                output += self.format_pre(tmp)
+
+            if(result.has_run_result()):
+                rrc = result.get_run_rc()
+                label = "Result:"
+                if(rrc != 0):
+                    label += " (Failed: rc=%d)" % rrc
+                    
+                output += self.format_bold(label)
+                tmp = lt.sub("&lt;", result.get_run_result())
+                tmp = gt.sub("&gt;", tmp)
+                tmp = nl.sub("__NEWLINE__", tmp)
+                output += self.format_pre(tmp)
         
-            output += self.format_bold("Result:")
+            if(result.has_image()):
+                image = {}
+                image["src"] = result.get_image()
 
-            if(not output_is_blank):
-                output += self.format_pre(result)
-        
-        if(tag.result_image != None):
-            image = {}
-            image["src"] = tag.result_image
+                iname = os.path.basename(image["src"])
+                (iname,iext) = os.path.splitext(iname)
+                image['ext']  = iext
+                image['name'] = iname
 
-            iname = os.path.basename(tag.result_image)
-            (iname,iext) = os.path.splitext(iname)
-            image['ext']  = iext
-            image['name'] = iname
-
-            output += self.format_image(image)
+                output += self.format_image(image)
                 
         output += self.format_pre('')
         

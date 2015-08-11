@@ -1635,34 +1635,42 @@ a C/C++ like define that looks like:
 
         struct2.set_name(self.get_attribute_as_string(modifiers, "name"))
         struct_desc = self.get_attribute_as_string(modifiers, "description")
+        
+        struct2.set_description(struct_desc, textblock=False)
+        struct2.set_description(textblock_t(struct_desc), textblock=True)
+        #struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
+        #struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
+        struct2.private = self.get_attribute_as_bool(modifiers, "private")
+        struct2.file = self.get_attribute_as_string(modifiers, "file")
+        struct2.line = self.get_attribute_as_int(modifiers, "line")
 
         for section in sections:
 
             if(section == ""):
                 continue
 
-            if(section.startswith("example:")):
-                example = section[8:len(section)]
-                self.parse_object_example(example, struct2)
+            #if(section.startswith("example:")):
+            #    example = section[8:len(section)]
+            #    self.parse_object_example(example, struct2)
 
-            elif(section.startswith("name:")):
+            if(section.startswith("name:")):
                 struct2.set_name(section[5:len(section)])
             
             elif(section.startswith("description:")):
                 source = section[12:len(section)].strip()
                 struct_desc = source
 
-            elif(section.startswith("see:")):
-                see_also = section[4:len(section)].strip()
-                struct2.set_see_also(see_also)
+            #elif(section.startswith("see:")):
+            #    see_also = section[4:len(section)].strip()
+            #    struct2.set_see_also(see_also)
             
-            elif(section.startswith("deprecated:")):
-                deprecated = section[11:len(section)].strip()
-                struct2.set_deprecated(True,textblock_t(deprecated))
+            #elif(section.startswith("deprecated:")):
+            #    deprecated = section[11:len(section)].strip()
+            #    struct2.set_deprecated(True,textblock_t(deprecated))
             
-            elif(section.startswith("since:")):
-                since = section[6:len(section)].strip()
-                struct2.set_since(textblock_t(since))
+            #elif(section.startswith("since:")):
+            #    since = section[6:len(section)].strip()
+            #    struct2.set_since(textblock_t(since))
 
             elif(section.startswith("fields:")):
                     
@@ -1970,6 +1978,10 @@ a C/C++ like define that looks like:
                     field.end = end
                     field.type = type
                     struct2.fields.append(field)
+        
+        for section in sections:
+            if(section != ""):
+                self.parse_object_section(struct2, 'struct', section)
 
         struct["max_cols"] = max_cols
         struct2.max_cols = max_cols
@@ -1977,13 +1989,6 @@ a C/C++ like define that looks like:
         index = len(self.m_engine.m_images)
         image_name = "record_%d.png" % index
 
-        struct2.set_description(struct_desc, textblock=False)
-        struct2.set_description(textblock_t(struct_desc), textblock=True)
-        #struct2.deprecated = self.get_attribute_as_bool(modifiers, "deprecated")
-        #struct2.deprecated_msg = self.get_attribute_as_string(modifiers, "deprecated_msg")
-        struct2.private = self.get_attribute_as_bool(modifiers, "private")
-        struct2.file = self.get_attribute_as_string(modifiers, "file")
-        struct2.line = self.get_attribute_as_int(modifiers, "line")
             
         # Generate a record describing the structure
         desc = struct2.get_description(textblock=False)
@@ -2042,50 +2047,77 @@ a C/C++ like define that looks like:
         struct2.record = record
         
         return struct2
-    
+
+    def set_if_valid(self, modifiers, name, callback):
+        if(modifiers.has_key(name)):
+            callback(modifiers[name])
+   
     def parse_checklist(self, source, modifiers):
 
-        splitter = re.compile("^-", re.DOTALL | re.MULTILINE)
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+                
+        column_splitter = ","
+        if(modifiers.has_key("column_splitter")):
+            column_splitter = modifiers["column_splitter"].strip()
+
+        checklist = checklist_t()
         
-        lines = splitter.split(source)
+        self.set_if_valid(modifiers, "name",  checklist.set_name)
+        self.set_if_valid(modifiers, "title", checklist.set_name)
+        self.set_if_valid(modifiers, "caption", checklist.set_caption)
 
-        list = []
+        for section in sections:
 
-        for line in lines:
-            
-            blank_line = re.compile("^[ \t]*\r?\n")
-            matches = blank_line.match(line)
-            if(matches or line==""):
+            if(section == ""):
                 continue
 
-            elements = line.split(":")
+            elif(section.startswith("name:")):
+                data = section[5:].strip()
+                checklist.set_name(data)
 
-            line_modifiers = ''
-
-            if(len(elements) > 1):
-                line_modifiers = elements[1]
-
-            line_modifiers = self.parse_modifiers(line_modifiers)
-
-            elem = {}
-            elem["name"] = elements[0]
-            elem["checked"] = ""
-
-            if(line_modifiers.has_key("caption")):
-                elem["caption"] = line_modifiers["caption"]
-            if(line_modifiers.has_key("name")):
-                elem["name"] = line_modifiers["name"]
-            if(line_modifiers.has_key("checked")):
-
-                checked = line_modifiers["checked"]
-                if(checked == "yes" or checked == "true"):
-                    elem["checked"] = "checked"
+            elif(section.startswith("columns:")):
+                data = section[8:]
+                checklist.set_columns(data.strip().split(column_splitter))
+            
+            else:
+                if(section.startswith("items:")):
+                    source = section[6:len(section)]
                 else:
-                    elem["checked"] = ""
+                    source = section
+                
+                splitter = re.compile("^-", re.DOTALL | re.MULTILINE)
+                
+                lines = splitter.split(source)
 
-            list.append(elem)
+                items = []
 
-        return list
+                for line in lines:
+                    
+                    blank_line = re.compile("^[ \t]*\r?\n")
+                    matches = blank_line.match(line)
+                    if(matches or line==""):
+                        continue
+
+                    elements = line.strip().split(column_splitter)
+                    columns = checklist.get_columns()
+
+                    if(len(elements) != len(columns)):
+                        FATAL("Number of elements %d does not match column count %d" % (len(elements), len(columns)))
+
+                    elem = checklist_item_t()
+                    for i in range(0, len(elements)):
+                        fname = columns[i]
+                        fvalue = elements[i].strip()
+
+                        elem.set_field(fname, fvalue)
+
+                    items.append(elem)
+
+                checklist.set_items(items)
+
+
+        return checklist
     
 
     def parse_testcase(self, source, modifiers):
@@ -2134,8 +2166,34 @@ a C/C++ like define that looks like:
             obj.set_deprecated(True, msg)
                 
         elif(section.startswith("example:")):
-            example = section[8:len(section)]
-            obj.set_example(example, self.m_engine.m_source_code_analyzer, 'code')
+            # Find the position of the first newline
+            pos = section.find("\n")
+            modifiers = section[8:pos]
+            example = section[pos+1:len(section)]
+            
+            result = None
+            rc     = None
+
+            # If the example has any modifiers then parse them
+            # to see if we should execute the code or not.
+            if(len(modifiers) > 0):
+                modifiers = self.parse_modifiers(modifiers)
+                if(modifiers.has_key("exec")):
+                    exec_example = to_boolean(modifiers["exec"])
+
+                    if(exec_example):
+                        tag = tag_t()
+                        tag.file = obj.file
+                        tag.name = "c"
+                        tag.line = obj.line
+                        tag.modifiers = modifiers
+                        tag.source = example
+                        self.m_engine.execute_code_block(tag)
+                        result     = tag.get_result()
+                        obj.set_example_result(result)
+            
+            obj.set_example(example, self.m_engine.m_source_code_analyzer, "code")
+
         elif(section.startswith("see:")):
             see_also = section[4:len(section)].strip()
             obj.set_see_also(see_also)

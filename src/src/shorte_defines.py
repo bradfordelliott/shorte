@@ -68,12 +68,12 @@ class tag_t:
         self.line2 = None
         self.is_header = False
         self.is_prototype = False
-        self.result = None
-        self.result_image = None
         self.hierarchy = ""
         self.category = ""
         self.page = None
         self.modifiers = None
+
+        self.result = None
 
         # The heading that this tag belongs to (if applicable)
         self.heading = None
@@ -92,6 +92,24 @@ class tag_t:
 
         WARNING("Tag %s has no source, should it?" % self.name)
         return True
+
+    def has_result(self):
+        if(None != self.result):
+            return True
+        return False
+    def set_result(self, result):
+        self.result = result
+    def get_result(self):
+        return self.result
+
+    def has_image(self):
+        if(None != self.result_image):
+            return True
+        return False
+    def get_image(self):
+        return self.result_image
+    def set_image(self, image):
+        self.result_image = image
 
     def get_source(self):
         return self.source
@@ -473,6 +491,101 @@ class indexer_t:
             self.m_image_index += 1
         
         return self.m_image_index
+
+
+class checklist_item_t(object):
+
+    def __init__(self):
+        self.value = None
+        self.status = None
+        self.caption = None
+        self.comments = None
+
+    def has_caption(self):
+        if(None != self.caption):
+            return True
+        return False
+    def get_caption(self):
+        return self.caption
+    def set_caption(self, caption):
+        self.caption = caption
+
+    def get_name(self):
+        return self.value
+    def get_value(self):
+        return self.value
+    def set_value(self, value):
+        self.value = value
+
+    def get_checked(self):
+        if(self.status == None):
+            return False
+        elif(self.status.upper() in ("CHECKED", "FINISHED", "CLOSED")):
+            return True
+        return False
+    def set_status(self, status):
+        self.status = status
+
+    def set_field(self, fname, value):
+        if(fname == "value"):
+            self.value = value
+        elif(fname == "comments"):
+            self.comments = value
+        elif(fname == "status"):
+            self.status = value
+        elif(fname == "who"):
+            self.who = value
+
+    def get_field(self, fname):
+        if(fname == "value"):
+            return self.value
+        elif(fname == "comments"):
+            return self.comments
+        elif(fname == "status"):
+            return self.status
+        elif(fname == "who"):
+            return self.who
+
+        return None
+
+
+class checklist_t(object):
+    def __init__(self):
+        self.columns = ["value"]
+        self.items = []
+        self.name = None
+        self.caption = None
+
+    def get_name(self):
+        if(self.name == None):
+            return "Checklist"
+
+        return self.name
+    def set_name(self, name):
+        self.name = name
+
+    def get_caption(self):
+        return self.caption
+    def has_caption(self):
+        if(self.caption != None):
+            return True
+        return False
+    def set_caption(self, caption):
+        self.caption = caption
+
+    def set_columns(self, columns):
+        self.columns = []
+        for col in columns:
+            self.columns.append(col.strip())
+
+    def get_columns(self):
+        return self.columns
+
+    def get_items(self):
+        return self.items
+    def set_items(self, items):
+        self.items = items
+
 
 
 class table_t:
@@ -1152,6 +1265,11 @@ class list_item_t:
         self.starred = False
         self.priority = 0
 
+        # Additional options for checklist items
+        self.comments = None
+        self.date     = None
+        self.who      = None
+
     def set_text(self, text):
 
         #print "LIST ITEM TEXT: %s" % text
@@ -1192,6 +1310,19 @@ class list_item_t:
                 elif(modifier[i] == '*'):
                     self.starred = True
 
+            text = text.strip()
+            if(text.startswith(":")):
+                text = text[1:].strip()
+                modifiers = shorte_parse_modifiers(text)
+                text = modifiers["text"]
+
+                if(modifiers.has_key("comments")):
+                    self.comments = modifiers["comments"]
+                if(modifiers.has_key("date")):
+                    self.date = modifiers["date"]
+                if(modifiers.has_key("who")):
+                    self.who = modifiers["who"]
+                    
 
             text = start_tag + text + end_tag
             text = text.strip()
@@ -1728,3 +1859,96 @@ def shorte_mkdir(newdir):
         #print "_mkdir %s" % repr(newdir)
         if tail:
             os.mkdir(newdir)
+       
+def shorte_parse_modifiers(modifiers):
+    STATE_TAG = 0
+    STATE_VALUE = 2
+    STATE_STRING = 1
+    STATE_TRIPLE_QUOTES = 3
+
+    tag = ""
+    value = ""
+    string = []
+
+    #WARNING("MODIFIERS: [%s]" % modifiers)
+
+    tags = {}
+    states = []
+    states.append(STATE_TAG)
+
+    i = 0
+    while i < len(modifiers):
+
+        state = states[-1]
+
+        #print "STATE: %d, char: %c" % (state, modifiers[i])
+
+        if(modifiers[i] == '\\'):
+            i += 1
+            continue
+
+        if(state == STATE_TAG):
+
+            if(modifiers[i] == "="):
+                value = ""
+                states.append(STATE_VALUE)
+            else:
+                tag += modifiers[i]
+                #print "building tag: %s" % tag
+        
+        elif(state == STATE_TRIPLE_QUOTES):
+            FATAL("Ooops, can I ever get here?")
+            if((modifiers[i:i+3] == start_sequence) and modifiers[i-1] != '\\'):
+                states.pop()
+                i += 2
+            else:
+                string.append(modifers[i])
+
+        elif(state == STATE_STRING):
+            
+            if(modifiers[i] == start_sequence and modifiers[i-1] != '\\'):
+                states.pop()
+            else:
+                string.append(modifiers[i])
+
+
+        elif(state == STATE_VALUE):
+           
+            value += ''.join(string)
+            string = []
+
+            
+            if(modifiers[i:i+3] in ("'''", '"""')):
+                FATAL("Ooops, can I ever get here?")
+                states.append(STATE_TRIPLE_QUOTES)
+                start_sequence = modifiers[i:i+3]
+                i += 2
+            elif(modifiers[i] in ('"', "'")):
+                states.append(STATE_STRING)
+                start_sequence = modifiers[i]
+            elif(modifiers[i] == " "):
+
+                tags[tag.strip()] = value.strip()
+
+                #print "Adding tag: %s" % tag
+                tag = ""
+                value = ""
+                states.pop()
+
+            else:
+                value += modifiers[i]
+
+        i += 1
+
+    if(value != "" or len(string) != 0):
+        value += ''.join(string)
+        #print "tag = %s, value = %s" % (tag, value)
+        tags[tag.strip()] = value.strip()
+    elif(tag != ""):
+        tags[tag.strip()] = ""
+
+
+    #for tag in tags:
+    #    print "TAG: [%s] = [%s]" % (tag, tags[tag])
+
+    return tags

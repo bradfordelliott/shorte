@@ -1033,8 +1033,15 @@ class engine_t:
 
         return '\n'.join(output)
             
-    def _execute_code_block(self, tag):
+    def execute_code_block(self, tag):
         source = tag.source 
+
+        if(tag.has_modifier("exec")):
+            exec_code = to_boolean(tag.get_modifier("exec"))
+            if(not exec_code):
+                return
+        else:
+            return
 
         if(tag.modifiers.has_key("template")):
             template = tag.modifiers["template"]
@@ -1062,17 +1069,27 @@ class engine_t:
             ignore_errors = to_boolean(tag.modifiers["ignore_errors"])
 
         executor = code_executor_t()
-        (tag.rc, tag.result, tag.result_image) = executor.execute(tag.name, source, tag.modifiers)
-        if((not ignore_errors) and (tag.rc != 0)):
+        result = executor.execute(tag.name, source, tag.modifiers)
+        tag.result = result
+
+        if((not ignore_errors) and result.has_compile_rc() and result.get_compile_rc() != 0):
+            ERROR("Failed compiling code snippet in %s @ line %d\nSource:\n%s\nErrors:\n%s" % (
+                tag.file, tag.line,
+                indent_lines(source, "    "),
+                indent_lines(result.get_compile_result(), "    ")))
+
+        if((not ignore_errors) and result.has_run_rc() and (result.get_run_rc() != 0)):
             ERROR("Failed executing code snippet in %s @ line %d\n%s" % (tag.file, tag.line, indent_lines(source, "    ")))
 
-        if(tag.result_image):
+        if(result.has_image()):
             self.m_image_id += 1 
-            if(os.path.exists(tag.result_image)):
+            result_image = result.get_image()
+            if(os.path.exists(result_image)):
                 image = '%s/example_%d.png' % (shorte_get_scratch_path(), self.m_image_id)
-                shutil.move(tag.result_image, image)
-                tag.result_image = image
-                self.m_images.append(tag.result_image)
+                shutil.move(result_image, image)
+                tag.set_image(image)
+                result.set_image(image)
+                self.m_images.append(image)
 
         code = self.m_source_code_analyzer
         tag.contents = code.parse_source_code(tag.name, source, tag.file, tag.line)
@@ -1098,7 +1115,7 @@ class engine_t:
                     continue
             
                 if(self.tag_is_executable(tag.name)):
-                    self._execute_code_block(tag)
+                    self.execute_code_block(tag)
                 
                 #if(tag.name == "struct"):
                 #    #if(len(tag.contents["heading"])):
@@ -1190,7 +1207,7 @@ else:
                 # If the code block has already been
                 # executed then don't run it again
                 if(self.tag_is_executable(tag.name)):
-                    self._execute_code_block(tag)
+                    self.execute_code_block(tag)
 
         # If the version number was not specified on the command
         # line then use any @docversion one specified in one of

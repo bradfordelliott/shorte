@@ -2,6 +2,8 @@
 @docsubtitle Some Shorte Examples with a really long subtitle to ensure header doesn't wrap
 @docnumber 23456
 
+
+@include "examples/snippet_templates.tpl"
 @body
 
 @h1 API Summary
@@ -69,12 +71,15 @@
         
         *2* = blah blah blah
 
--- example:
-    rc = my_function(val);
+-- example: exec=True template=one save=example.c ignore_errors=False
+    int val1[3] = {0};
+    int val2[2][5] = {0};
+
+    int rc = my_function(val1,val2);
 
     if(rc != 0)
     {
-        printf("Uh oh, something bad happened!\n");
+        printf("An error was returned from my_function()\n");
     }
 
 -- pseudocode:

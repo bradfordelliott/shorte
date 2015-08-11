@@ -253,6 +253,14 @@ class clang_parser_t(shorte_parser_t):
                 val = ''
                 if(matches != None):
                     val = matches.groups()[0]
+
+                    # Check to see if the section has any modifiers
+                    if(val.strip().startswith(":")):
+                        pos = val.find("\n")
+                        modifiers = val[0:pos-1]
+                        comment.modifiers[expr] = {}
+                        comment.modifiers[expr] = self.parse_modifiers(modifiers)
+                        val = val[pos+1:]
                 
                     if(field_format == "text"):
                         val = self.format_text(val)
@@ -281,48 +289,8 @@ class clang_parser_t(shorte_parser_t):
             print sys.exc_info()
             sys.exit(-1)
 
+        return comment
         #print "EXAMPLE: %s" % comment.example
-
-        
-        return comment
-
-        sys.exit(-1)
-
-        
-        expr_return = re.compile("[@\\\]return *([^@]*)", re.DOTALL)
-
-        matches = expr_return.search(text)
-        if(matches != None):
-            desc = self.format_text(matches.groups()[0])
-            comment.returns = desc
-        
-        expr_example = re.compile("[@\\\]example *([^@]*)", re.DOTALL)
-        matches = expr_example.search(text)
-        if(matches != None):
-            desc = matches.groups()[0]
-            comment.example = desc
-        
-        expr_pseudocode = re.compile("[@\\\]pseudocode *([^@]*)", re.DOTALL)
-        matches = expr_pseudocode.search(text)
-        if(matches != None):
-            pseudocode = matches.groups()[0]
-            comment.pseudocode = pseudocode
-        
-        expr_see_also = re.compile("[@\\\]see *([^@]*)", re.DOTALL)
-        matches = expr_see_also.search(text)
-        if(matches != None):
-            comment.see_also = matches.groups()[0]
-
-        expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
-        matches = expr_deprecated.search(text)
-        if(matches != None):
-            
-            msg = trim_leading_blank_lines(matches.groups()[0])
-            msg = textblock_t(msg)
-            comment.deprecated = True
-            comment.deprecated_msg = msg # matches.groups()[0]
-
-        return comment
 
     def query_comment_before(self, start, end):
 

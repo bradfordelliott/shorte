@@ -77,6 +77,9 @@ def hello(p1=None, p2=None, p3=True):
 
        @deprecated
          This function was deprecated in release 1.0
+
+       @example
+         hello()
     '''
 
     print "Hello "

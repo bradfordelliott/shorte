@@ -262,6 +262,9 @@ class python_parser_t(shorte_parser_t):
                     prototype.set_deprecated(True, comment.get_deprecated())
                 if(comment.has_see_also()):
                     prototype.set_see_also(comment.get_see_also())
+                if(comment.has_example()):
+                    prototype.set_example(comment.get_example(),
+                                    self.m_engine.m_source_code_analyzer, "python")
 
                 if(add_header):
                     tag = tag_t()

@@ -736,6 +736,7 @@ class type_t:
         self.comment = None
         self.source = None
         self.example = None
+        self.example_result = None
         self.file = None
         self.line = None
         self.type = ""
@@ -802,6 +803,15 @@ class type_t:
         cb.set_parsed(tmp)
         cb.set_unparsed(example)
         self.example = cb
+
+    def set_example_result(self, result):
+        self.example_result = result
+    def get_example_result(self):
+        return self.example_result
+    def has_example_result(self):
+        if(None != self.example_result):
+            return True
+        return False
 
     def has_deprecated(self):
         if(self.deprecated in (None, False)):
@@ -1360,6 +1370,7 @@ class comment_t:
         self.deprecated_msg = None
         self.heading = None
         self.since = None
+        self.modifiers = {}
         
         # For types that have pseudocode associated
         # with them, primarily function prototypes
@@ -1426,3 +1437,11 @@ class comment_t:
         return False
     def get_deprecated(self):
         return self.deprecated_msg
+
+    def has_modifiers(self, section):
+        if(self.modifiers.has_key(section)):
+            return True
+        return False
+    def get_modifiers(self, section):
+        return self.modifiers[section]
+

@@ -446,6 +446,12 @@ test_registers:
 test_registers_quick:
 	${python} shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers
 
+test_custom_theme:
+	${python} shorte.py -f examples/test_custom_theme.tpl -p "html" -o build-output/test_custom_theme
+
+test_checklist:
+	${python} shorte.py -f examples/checklist.tpl -t ${THEME} -p "${html_pdf}" -o build-output/test_checklist
+
 test_junk:
 #	${python} shorte.py -f "examples/test.c examples/test.h" -x cpp -p shorte -o build-output/code
 #	${python} shorte.py -f "build-output/code/test.h.tpl build-output/code/test.tpl" -p html -o build-output/code_to_html
@@ -473,7 +479,7 @@ test_batch_files:
 	${python} shorte.py -f examples/batch.tpl -p html -o build-output/test_batch_files
 
 test_snippets:
-	${python} shorte.py -f "examples/snippets.tpl" -p html -o build-output/test_snippets
+	${python} shorte.py -f "examples/snippets.tpl" -t ${THEME} -p html -o build-output/test_snippets
 
 test_cairo:
 	${python} shorte.py -f "examples/cairo.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_cairo

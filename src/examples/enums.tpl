@@ -11,6 +11,8 @@
                              change here and what changed in the document. It doesn't
                              match the format of the document but whatever.
 
+@include "examples/snippet_templates.tpl"
+
 @body
 
 @h1 A list of enums
@@ -107,8 +109,9 @@ This was introduced in version 1.2
 --example:
 e_loopback_intf intf = LOOPBK_HOST;
 
---example:
+--example: exec=True template=enums
 e_loopback_intf intf = LOOPBK_LINE;
+printf("intf = %d\n", (int)intf);
         
 @h4 loopback_state_t
 
