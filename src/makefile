@@ -329,8 +329,10 @@ test_enums:
 	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_enums/html
 	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "html_inline" -o build-output/test_enums/html_inline
 	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "shorte"      -o build-output/test_enums/shorte
+	${python} shorte.py -f examples/enums.h -xclang -t "${THEME}" -p "html"  -o build-output/test_enums/c
 test_structs:
 	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_structs/html
+	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "html_inline" -o build-output/test_structs/html_inline
 	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "shorte" -o build-output/test_structs/shorte
 
 test_bullets:
