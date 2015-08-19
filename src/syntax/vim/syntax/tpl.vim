@@ -47,19 +47,19 @@ syn region EmbeddedStyles start=/@{/ end=/}/ keepend
 syn region Links start=/\[\[/ end=/\]\]/ keepend
 
 " Prototype blocks
-syn match  PrototypeSections /^-- *\(deprecated:\|description:\|example:\|function:\|name:\|params:\|prototype:\|pseudocode:\|returns:\|see also:\|see:\|since:\)/
+syn match  PrototypeSections /^-- *\(deprecated:\|description:\|example:\|function:\|name:\|params:\|prototype:\|pseudocode:\|requires:\|returns:\|see also:\|see:\|since:\)/
 syn region Prototypes start=/@prototype/ end=/^@/ contains=Tags,PrototypeSections contained
 
-syn match  DefineSections /^-- *\(deprecated:\|description:\|example:\|name:\|see also:\|see:\|since:\|value:\)/
+syn match  DefineSections /^-- *\(deprecated:\|description:\|example:\|name:\|requires:\|see also:\|see:\|since:\|value:\)/
 syn region Defines start=/@define/ end=/^@/ contains=Tags,DefineSections contained
 
-syn match  EnumSections /^-- *\(deprecated:\|description:\|examples:\|name:\|see:\|see also:\|since:\|values:\)/
+syn match  EnumSections /^-- *\(deprecated:\|description:\|examples:\|name:\|requires:\|see:\|see also:\|since:\|values:\)/
 syn region Enums start=/@enum/ end=/^@/ contains=Tags,EnumSections contained
 
-syn match  StructSections /^-- *\(deprecated:\|description:\|examples:\|fields:\|name:\|see:\|see also:\|since:\)/
+syn match  StructSections /^-- *\(deprecated:\|description:\|examples:\|fields:\|name:\|requires:\|see:\|see also:\|since:\)/
 syn region Structs start=/@struct/ end=/^@/ contains=Tags,StructSections contained
 
-syn match  ClassSections /^-- *\(deprecated:\|description:\|examples:\|extends:\|name:\|public.functions:\|public.members:\|see:\|see also:\|since:\)/
+syn match  ClassSections /^-- *\(deprecated:\|description:\|examples:\|extends:\|name::\|public.functions:\|public.members:\|requires:\|see:\|see also:\|since:\)/
 syn region Classes start=/@class/ end=/^@/ contains=Tags,ClassSections contained
 
 
