@@ -138,7 +138,7 @@ class template_shorte_t(template_t):
 ''' % self.format_textblock(obj.get_since())
         
         elif(section == 'deprecated'):
-            if(not obj.has_deprecated()):
+            if(not obj.is_deprecated()):
                 return ''
 
             return '''
@@ -169,7 +169,14 @@ class template_shorte_t(template_t):
 --example:
 %s
 ''' % self.format_source_code(obj.example.get_unparsed())
-            
+
+        elif(section == 'requires'):
+            if(not obj.has_requirements()):
+                return ''
+            return '''
+--requires:
+%s
+''' % self.format_textblock(obj.get_requirements())
 
         return ''
             
@@ -213,10 +220,7 @@ $description
 --values:
 - Enum Name | Enum Value | Enum Description
 $values
-$example
-$see_also
-$since
-$deprecated
+${example}${see_also}${since}${deprecated}${requires}
 """)
         add_heading = shorte_get_config("shorte", "header_add_to_enum")
         if(tag.heading == None and ("None" != add_heading)):
@@ -232,6 +236,7 @@ $deprecated
         vars["example"]     = self.format_object_section(enum, 'example')
         vars["see_also"]    = self.format_object_section(enum, 'see')
         vars["description"] = self.format_object_section(enum, 'description')
+        vars["requires"]    = self.format_object_section(enum, 'requires')
 
         vars["name"] = title
         vars["heading"] = heading
@@ -246,16 +251,12 @@ $deprecated
 
         template = string.Template("""
 $heading
-@define: private="$private" deprecated="$deprecated" file="$file" line="$line"
+@define: private="$private" file="$file" line="$line"
 --name:
     $name
 --value:
     $value
-$description
-$example
-$see_also
-$since
-$deprecated
+${description}${example}${see_also}${since}${deprecated}${requires}
 """)
 
         vars = {}
@@ -278,6 +279,7 @@ $deprecated
         vars["example"]     = self.format_object_section(define, 'example')
         vars["see_also"]    = self.format_object_section(define, 'see')
         vars["description"] = self.format_object_section(define, 'description')
+        vars["requires"]    = self.format_object_section(define, 'requires')
             
         val = self.format_textblock(define.value)
         val = re.sub("\|", "\\\\\\|", val)
@@ -330,6 +332,7 @@ $example
 $see_also
 $since
 $deprecated
+$requires
 """)
 
         vars = {}
@@ -345,11 +348,12 @@ $deprecated
 
         #print "HEADING: %s" % heading
 
-        vars["example"]     = self.format_object_section(struct, 'example')
-        vars["see_also"]    = self.format_object_section(struct, 'see')
-        vars["deprecated"]  = self.format_object_section(struct, 'deprecated')
-        vars["since"]       = self.format_object_section(struct, 'since')
-        vars["description"] = self.format_object_section(struct, 'description')
+        vars["example"]     = self.format_object_section(struct, "example")
+        vars["see_also"]    = self.format_object_section(struct, "see")
+        vars["deprecated"]  = self.format_object_section(struct, "deprecated")
+        vars["since"]       = self.format_object_section(struct, "since")
+        vars["description"] = self.format_object_section(struct, "description")
+        vars["requires"]    = self.format_object_section(struct, "requires")
 
         vars["name"] = title
         vars["parent"] = parent
@@ -425,6 +429,7 @@ $pseudocode
 $seealso
 $since
 $deprecated
+$requires
 $heading
 $class
 ''')
@@ -454,7 +459,7 @@ $class
     %s
 ''' % prototype.get_prototype().get_unparsed()
 
-        if(prototype.has_params):
+        if(prototype.has_params()):
             output = ''
             params = prototype.get_params()
             
@@ -481,11 +486,12 @@ $class
 %s
 ''' % self.format_source_code(prototype.get_pseudocode().get_unparsed())
 
-        function["seealso"]    = self.format_object_section(prototype, 'see')
-        function["deprecated"] = self.format_object_section(prototype, 'deprecated')
-        function["desc"]       = self.format_object_section(prototype, 'description')
-        function['since']      = self.format_object_section(prototype, 'since')
-        function['example']    = self.format_object_section(prototype, 'example')
+        function["seealso"]    = self.format_object_section(prototype, "see")
+        function["deprecated"] = self.format_object_section(prototype, "deprecated")
+        function["desc"]       = self.format_object_section(prototype, "description")
+        function["since"]      = self.format_object_section(prototype, "since")
+        function["example"]    = self.format_object_section(prototype, "example")
+        function["requires"]   = self.format_object_section(prototype, "requires")
 
         if(prototype.has_class()):
             function['class'] = prototype.get_class().get_name()

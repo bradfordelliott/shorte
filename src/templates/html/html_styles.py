@@ -20,8 +20,8 @@ $source
 template_code_result = string.Template(
 """
     <br/>
-    <div class='code_result'>Result:</div>
-    <div class='code'>
+    <div class='${code_result}'>${label}</div>
+    <div class='${code}'>
         $result
     </div>
 """)
@@ -29,7 +29,7 @@ template_code_result = string.Template(
 template_code_result_no_output = string.Template(
 """
     <br/>
-    <div class='code_result'>Result:</div>
+    <div class='${code_result}'>${label}</div>
 """)
 
 
@@ -39,8 +39,8 @@ template_code_result_no_output = string.Template(
 template_code_result_error = string.Template(
 '''
     <br/>
-    <div class='code_result'><img style='height:35px;margin-left:-20px;margin-top:0px;' src="${image}"></img>Result (Failed, rc=${rc}):</div>
-    <div class='code' style='border:3px solid red;'>
+    <div class='${code_result}'>${label} (Failed, rc=${rc}) <img style='height:25px;margin-top:-10px;margin-left:10px;position:absolute;' src="${image}"></img></div>
+    <div class='${code}' style='border:3px solid red;'>
         $result
     </div>
     <br/>
@@ -62,7 +62,7 @@ class html_styles():
 * html {width: 500px;}
 body {width: 500px;font-family:"Helvetica Neue",helvetica,arial,sans-serif;}
 /* Table of Contents */
-div.toc1 {margin-top:8px;margin-bottom:4px;"}
+div.toc1 {margin-top:8px;margin-bottom:4px;}
 div.toc1 a{margin-left:20px;font-size:1.1em;color:${toc_1_fg};}
 div.toc2 {margin-top:4px;margin-bottom:2px;}
 div.toc2 a{margin-left:40px;font-size:1.0em;color:${toc_2_fg};}
@@ -614,7 +614,7 @@ div.gallery
   div.code_result
   {
      margin-left: 25px;
-     color: #396592;
+     color: ${heading_2_fg};
   }
 
 

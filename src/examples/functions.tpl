@@ -2,6 +2,8 @@
 @docsubtitle Some Shorte Examples with a really long subtitle to ensure header doesn't wrap
 @docnumber 23456
 
+
+@include "examples/snippet_templates.tpl"
 @body
 
 @h1 API Summary
@@ -69,12 +71,15 @@
         
         *2* = blah blah blah
 
--- example:
-    rc = my_function(val);
+-- example: exec=True template=one save=example.c ignore_errors=False
+    int val1[3] = {0};
+    int val2[2][5] = {0};
+
+    int rc = my_function(val1,val2);
 
     if(rc != 0)
     {
-        printf("Uh oh, something bad happened!\n");
+        printf("An error was returned from my_function()\n");
     }
 
 -- pseudocode:
@@ -169,6 +174,21 @@
     -- arg4 | In/Out | Argument 4
 -- returns:
     Always 0
+-- requires:
+    function4 requires something random to be defined
 
 
 @include "examples/test.h"
+
+@h3 my_test_func_with_requirements
+@prototype
+--function: test_func_with_requirements
+--prototype:
+    void test_func_with_requirements(void);
+--description:
+    This is just a function that requires a pre-compiler
+    flag in order to be defined.
+--requires:
+    In order for this function to be defined you must
+    set PC_FLAG == 1.
+

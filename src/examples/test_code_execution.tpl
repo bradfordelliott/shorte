@@ -20,7 +20,7 @@ c.compile.linux=
 c.compile.osx=
 c.compile.win32=
 
-@c: exec=True
+@c: exec=True run_args="--hello" compile_args="-DTEST"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -30,12 +30,19 @@ c.compile.win32=
  * @return
  *   Always returns EXIT_SUCCESS.
  */
-int main(void)
+int main(int argc, char* argv[])
 {
-    printf("Hello   world!\n");
+    int i = 0;
+#if defined(TEST)
+    printf("Hello   world!\n\n");
+#endif
     printf("This is a C example with a really long line in it "
            "that should wrap in the code output. I'm not sure what "
-           "it will do to the output box");
+           "it will do to the output box\n\n");
+    for(i = 0; i < argc; i++)
+    {
+        printf("argv[%d] = %s\n", i, argv[i]);
+    }
     return EXIT_SUCCESS;
 }
 

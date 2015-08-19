@@ -5,6 +5,73 @@ import shlex
 
 from shorte_defines import *
 
+class code_result_t(object):
+    def __init__(self):
+        self.run_rc = None
+        self.run_result = None
+        self.run_result_image = None
+        self.compile_result = None
+        self.compile_rc = None
+
+
+    def has_run_rc(self):
+        if(None != self.run_rc):
+            return True
+        return False
+    def get_run_rc(self):
+        return self.run_rc
+    def set_run_rc(self, rc):
+        self.run_rc = rc
+
+    def has_run_result(self):
+        if(None != self.run_result):
+            return True
+        return False
+    def get_run_result(self):
+        return self.run_result
+    def set_run_result(self, result):
+        self.run_result = result
+    
+    def has_compile_rc(self):
+        if(None == self.compile_rc):
+            return False
+        return True
+    def get_compile_rc(self):
+        return self.compile_rc
+    def set_compile_rc(self, rc):
+        self.compile_rc = rc
+
+    def has_compile_result(self):
+        if(None != self.compile_result and (len(self.compile_result.strip()) > 0)):
+            return True
+        return False
+    def get_compile_result(self):
+        return self.compile_result
+    def set_compile_result(self, result):
+        self.compile_result = result
+
+
+    def has_image(self):
+        if(None != self.run_result_image):
+            return True
+        return False
+    def get_image(self):
+        return self.run_result_image
+    def set_image(self, result):
+        self.run_result_image = result
+
+class CompileException(Exception):
+    def __init__(self, rc, message):
+        Exception.__init__(self, message)
+        self.rc = rc
+        self.message = message
+
+class RunException(Exception):
+    def __init__(self, rc, message):
+        Exception.__init__(self, message)
+        self.rc = rc
+        self.message = message
+
 class code_executor_t:
     def __init__(self):
 
@@ -73,22 +140,27 @@ class code_executor_t:
 
     def execute(self, language, source, modifiers):
 
-        rc = 0
-        result = ""
+        cresult = code_result_t()
 
         if(not modifiers.has_key("exec")):
-            return (rc,None,None)
+            return cresult
 
         if(modifiers["exec"] == "0" or modifiers["exec"] == "no"):
-            return (rc,None,None)
+            return cresult
 
         machine = ""
         port = "22"
+        run_args = ""
+        compile_args = ""
         
         if(modifiers.has_key("machine")):
             machine = modifiers["machine"]
         if(modifiers.has_key("port")):
             port = modifiers["port"]
+        if(modifiers.has_key("run_args")):
+            run_args = modifiers["run_args"]
+        if(modifiers.has_key("compile_args")):
+            compile_args = modifiers["compile_args"]
             
         exec_prefix = ""
         if(platform.system() == "Windows"):
@@ -125,23 +197,21 @@ class code_executor_t:
         # Create the temporary source file
         self.create_source_file(language, source_file, source)
 
-        rc = 0
-
         try:
             if(language in ('python', 'perl', 'tcl', 'bash', 'swift', 'go', 'javascript')):
 
                 if(language == "bash"):
                     if("Windows" == platform.system()):
-                        raise Exception("bash not currently supported under windows")
+                        raise RunException(-1, "bash not currently supported under windows")
                 elif(language == "swift"):
                     if("Darwin" != platform.system()):
-                        raise Exception("swift not currently supported on platforms other than OSX")
+                        raise RunException(-1, "swift not currently supported on platforms other than OSX")
                 elif(language == "go"):
                     if("Darwin" != platform.system()):
-                        raise Exception("go not currently supported on platforms other than OSX")
+                        raise RunException(-1, "go not currently supported on platforms other than OSX")
                 elif(language == "javascript"):
                     if("Darwin" != platform.system()):
-                        raise Exception("javascript not currently supported on platforms other than OSX")
+                        raise RunException(-1, "javascript not currently supported on platforms other than OSX")
 
                 if(machine != ""):
                     cmd_copy = "scp -P %s %s %s:/tmp/." % (port, source_file, machine)
@@ -157,12 +227,19 @@ class code_executor_t:
                     cmd_run = string.Template(shorte_get_config(language, "run", expand_os=True)).substitute({
                         "source" : source_file})
 
-                    cmd_run = cmd_run.split(' ')
+                    cmd_run = cmd_run.split(" ")
+
+                    if(len(run_args) > 0):
+                        cmd_run.extend(shlex.split(run_args))
+
                     phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     result = phandle.stdout.read()
                     result += phandle.stderr.read()
                     phandle.wait()
                     rc = phandle.returncode
+
+                    cresult.set_run_result(result)
+                    cresult.set_run_rc(rc)
                     
                     #result = os.popen("%s %s 2>&1" % (g_tools.get_python(), source_file)).read();
             
@@ -193,6 +270,9 @@ class code_executor_t:
                         "source" : source_file})
 
                     cmd_compile = shlex.split(cmd_compile)
+                    
+                    if(len(compile_args) > 0):
+                        cmd_compile.extend(shlex.split(compile_args))
 
                     phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     result = phandle.stdout.read()
@@ -200,17 +280,27 @@ class code_executor_t:
                     phandle.wait()
                     rc = phandle.returncode
 
+                    cresult.set_compile_result(result)
+                    cresult.set_compile_rc(rc)
+
                     if(rc != 0):
-                        raise Exception(result)
+                        raise CompileException(rc, result)
                         
                     #phandle.close()
                     #print "Compile result = [%s]" % result
+                    
+                    cmd_run = ["%stmpexample3" % exec_prefix]
+                    if(len(run_args) > 0):
+                        cmd_run.extend(shlex.split(run_args))
 
-                    phandle = subprocess.Popen(["%stmpexample3" % exec_prefix], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     result = phandle.stdout.read()
                     result += phandle.stderr.read()
                     phandle.wait()
                     rc = phandle.returncode
+
+                    cresult.set_run_result(result)
+                    cresult.set_run_rc(rc)
                     
                     # Make sure we cleanup the temporary executable after we're done
                     try:
@@ -262,7 +352,12 @@ class code_executor_t:
 
                     cmd_compile = cmd_compile.split(" ")
                     cmd_run     = cmd_run.split(" ")
-                        
+
+                    if(len(run_args) > 0):
+                        cmd_run.extend(shlex.split(run_args))
+                    if(len(compile_args) > 0):
+                        cmd_compile.extend(shlex.split(compile_args))
+
                     # First compile the application
                     try:
                         phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -270,11 +365,14 @@ class code_executor_t:
                         result += phandle.stderr.read()
                         phandle.wait()
                         rc = phandle.returncode
+
+                        cresult.set_compile_result(result)
+                        cresult.set_compile_rc(rc)
                     except:
-                        raise Exception("Failed running java compiler")
+                        raise CompileException(rc, "Failed running java compiler")
 
                     if(0 != rc):
-                        raise Exception(result)
+                        raise CompileException(rc, result)
                     
                     # Now run the application
                     phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -282,6 +380,9 @@ class code_executor_t:
                     result += phandle.stderr.read()
                     phandle.wait()
                     rc = phandle.returncode
+
+                    cresult.set_run_result(result)
+                    cresult.set_run_rc(rc)
                     
                     # Make sure we remove any .class files
                     try:
@@ -290,7 +391,7 @@ class code_executor_t:
                         pass
 
                     if(0 != rc):
-                        raise Exception((rc,result))
+                        raise RunException(rc,result)
 
                     #result = os.popen("%s tmpexample.java 2>&1" % compiler).read();
                     #print "result = %s" % result
@@ -326,8 +427,6 @@ class code_executor_t:
 
                     result = expr.sub("\\2", result)
 
-                    print "RESULT=[%s]" % result
-
                 else:
                     raise Exception("Cannot execute vera on local machine")
             
@@ -352,15 +451,13 @@ class code_executor_t:
 
                     result = expr.sub("\\2", result)
 
-                    print "RESULT=[%s]" % result
-
                 else:
                     raise Exception("Cannot execute verilog on local machine")
 
             elif(language == "batch"):
                 
                 if("windows" != platform.system()):
-                    raise Exception("batch not currently supported on platforms other than Windows")
+                    raise RunException(-1, "batch not currently supported on platforms other than Windows")
 
                 # Run the batch file using cmd /c
                 tmp = open(source_file, "w")
@@ -373,8 +470,14 @@ class code_executor_t:
 
                 #print "RESULT=[%s]" % result
 
-        except Exception as e:
-            return (rc, e.__str__(),None)
+        except RunException as e:
+            cresult.set_run_result(e.message)
+            cresult.set_run_rc(e.rc)
+            return cresult
+        except CompileException as e:
+            cresult.set_compile_result(e.message)
+            cresult.set_compile_rc(e.rc)
+            return cresult
         finally: 
 
             # Now that we're done with the file make sure we
@@ -387,5 +490,12 @@ class code_executor_t:
         #example_name = "example_%d" % self.m_example_id
         #shutil.copy("tmpexample.py", self.m_output_directory + "/" + example_name)
 
-        return (rc,result,image_file)
+        if(image_file != None and (not os.path.exists(image_file))):
+            ERROR("Image file %s was not created for some reason" % image_file)
+            image_file = None
+            rc = -1
+
+        cresult.set_image(image_file)
+
+        return cresult
 

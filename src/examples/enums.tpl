@@ -11,6 +11,8 @@
                              change here and what changed in the document. It doesn't
                              match the format of the document but whatever.
 
+@include "examples/snippet_templates.tpl"
+
 @body
 
 @h1 A list of enums
@@ -72,6 +74,8 @@ The loopback interface point
 - Enum Name                | Enum Value | Enum Description
 - LOOPBK_DUPLEX_NEAR_DATA  | 0x1        | Duplex Near data loopback
 - LOOPBK_DUPLEX_FAR_DATA   | 0x2        | Duplex Far data loopback
+-- requires:
+This enum requires blah blah to be defined
 
         
 @h4 e_loopback_interface
@@ -107,8 +111,9 @@ This was introduced in version 1.2
 --example:
 e_loopback_intf intf = LOOPBK_HOST;
 
---example:
+--example: exec=True template=enums
 e_loopback_intf intf = LOOPBK_LINE;
+printf("intf = %d\n", (int)intf);
         
 @h4 loopback_state_t
 

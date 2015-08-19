@@ -730,17 +730,18 @@ class type_t:
         self.name = ""
         self.description = None
         self.description_unparsed=None
-        self.deprecated = False
-        self.deprecated_msg = ""
+        self.deprecated = None
         self.private = False
         self.comment = None
         self.source = None
         self.example = None
+        self.example_result = None
         self.file = None
         self.line = None
         self.type = ""
         self.see_also = None
         self.since = None
+        self.requirements = None
     
     def has_fields(self):
         return False
@@ -803,17 +804,25 @@ class type_t:
         cb.set_unparsed(example)
         self.example = cb
 
+    def set_example_result(self, result):
+        self.example_result = result
+    def get_example_result(self):
+        return self.example_result
+    def has_example_result(self):
+        if(None != self.example_result):
+            return True
+        return False
+
     def has_deprecated(self):
-        if(self.deprecated in (None, False)):
+        if(self.deprecated == None):
             return False
         return True
+    def is_deprecated(self):
+        return self.has_deprecated()
     def get_deprecated(self):
         return self.deprecated
-    def get_deprecated_msg(self):
-        return self.deprecated_msg
-    def set_deprecated(self, deprecated, msg):
+    def set_deprecated(self, deprecated):
         self.deprecated = deprecated
-        self.deprecated_msg = msg
 
     def has_see_also(self):
         if(None != self.see_also):
@@ -844,6 +853,15 @@ class type_t:
 
     def set_comment(self, comment):
         self.comment = comment
+        
+    def has_requirements(self):
+        if(None == self.requirements):
+            return False
+        return True
+    def get_requirements(self):
+        return self.requirements
+    def set_requirements(self, val):
+        self.requirements = val
 
 class enum_t(type_t):
     def __init__(self):
@@ -862,7 +880,8 @@ class enum_t(type_t):
         attrs = "Enum"
         attrs += "  name:       %s\n" % self.name
         attrs += "  desc:       %s\n" % self.description
-        attrs += "  deprecated: %s (%s)\n" % (self.deprecated, self.deprecated_msg)
+        if(self.is_deprecated()):
+            attrs += "  deprecated: %s\n" % (self.deprecated)
         attrs += "  private:    %s\n" % self.private
         attrs += "  values:\n"  
 
@@ -1052,7 +1071,8 @@ class struct_t(type_t):
         attrs = "Struct"
         attrs += "  name:     %s\n" % self.name
         attrs += "  desc:     %s\n" % self.description
-        attrs += "  deprecated: %s (%s)\n" % (self.deprecated, self.deprecated_msg)
+        if(self.is_deprecated()):
+            attrs += "  deprecated: %s\n" % (self.deprecated)
         attrs += "  private:    %s\n" % self.private
         attrs += "  file:       %s\n" % self.file
         if(self.line == None):
@@ -1356,10 +1376,11 @@ class comment_t:
         self.example = None
         self.private = False
         self.see_also = None
-        self.deprecated = False
-        self.deprecated_msg = None
+        self.deprecated = None
         self.heading = None
         self.since = None
+        self.requirements = None
+        self.modifiers = {}
         
         # For types that have pseudocode associated
         # with them, primarily function prototypes
@@ -1421,8 +1442,29 @@ class comment_t:
         return self.since
 
     def has_deprecated(self):
-        if(self.deprecated_msg != None):
+        if(self.deprecated != None):
             return True
         return False
+    def is_deprecated(self):
+        return self.has_deprecated()
     def get_deprecated(self):
-        return self.deprecated_msg
+        return self.deprecated
+    def set_deprecated(self, deprecated):
+        self.deprecated = deprecated
+
+    def has_modifiers(self, section):
+        if(self.modifiers.has_key(section)):
+            return True
+        return False
+    def get_modifiers(self, section):
+        return self.modifiers[section]
+    
+    def has_requirements(self):
+        if(None == self.requirements):
+            return False
+        return True
+    def get_requirements(self):
+        return self.requirements
+    def set_requirements(self, val):
+        self.requirements = val
+

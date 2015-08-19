@@ -239,7 +239,10 @@ class clang_parser_t(shorte_parser_t):
                  "format" : ""},
             "since" :
                 {"expr" : "[@\\\]since *([^@]*)",
-                 "format" : ""}
+                 "format" : ""},
+            "requirements" : 
+                {"expr"   : "[@\\\]requires *([^@]*)",
+                 "format" : ""},
         }
 
         try:
@@ -253,6 +256,14 @@ class clang_parser_t(shorte_parser_t):
                 val = ''
                 if(matches != None):
                     val = matches.groups()[0]
+
+                    # Check to see if the section has any modifiers
+                    if(val.strip().startswith(":")):
+                        pos = val.find("\n")
+                        modifiers = val[0:pos-1]
+                        comment.modifiers[expr] = {}
+                        comment.modifiers[expr] = self.parse_modifiers(modifiers)
+                        val = val[pos+1:]
                 
                     if(field_format == "text"):
                         val = self.format_text(val)
@@ -260,8 +271,7 @@ class clang_parser_t(shorte_parser_t):
                     if(expr == "deprecated"):
                         msg = trim_leading_blank_lines(val)
                         msg = textblock_t(msg)
-                        comment.deprecated = True
-                        comment.deprecated_msg = msg
+                        comment.deprecated = msg
                     else:
                         if(field_format == "text"):
                             val = self.format_text(val)
@@ -276,53 +286,15 @@ class clang_parser_t(shorte_parser_t):
                             comment.see_also = val
                         elif(expr == "since"):
                             comment.since = val
+                        elif(expr in ("requires", "requirements")):
+                            comment.set_requirements(val)
 
         except:
             print sys.exc_info()
             sys.exit(-1)
 
+        return comment
         #print "EXAMPLE: %s" % comment.example
-
-        
-        return comment
-
-        sys.exit(-1)
-
-        
-        expr_return = re.compile("[@\\\]return *([^@]*)", re.DOTALL)
-
-        matches = expr_return.search(text)
-        if(matches != None):
-            desc = self.format_text(matches.groups()[0])
-            comment.returns = desc
-        
-        expr_example = re.compile("[@\\\]example *([^@]*)", re.DOTALL)
-        matches = expr_example.search(text)
-        if(matches != None):
-            desc = matches.groups()[0]
-            comment.example = desc
-        
-        expr_pseudocode = re.compile("[@\\\]pseudocode *([^@]*)", re.DOTALL)
-        matches = expr_pseudocode.search(text)
-        if(matches != None):
-            pseudocode = matches.groups()[0]
-            comment.pseudocode = pseudocode
-        
-        expr_see_also = re.compile("[@\\\]see *([^@]*)", re.DOTALL)
-        matches = expr_see_also.search(text)
-        if(matches != None):
-            comment.see_also = matches.groups()[0]
-
-        expr_deprecated = re.compile("[@\\\]deprecated *([^@]*)", re.DOTALL)
-        matches = expr_deprecated.search(text)
-        if(matches != None):
-            
-            msg = trim_leading_blank_lines(matches.groups()[0])
-            msg = textblock_t(msg)
-            comment.deprecated = True
-            comment.deprecated_msg = msg # matches.groups()[0]
-
-        return comment
 
     def query_comment_before(self, start, end):
 
@@ -367,7 +339,6 @@ class clang_parser_t(shorte_parser_t):
     def query_comment(self, cursor):
         comment = None
 
-
         #FATAL("Was this successful?")
         if(cursor.raw_comment != None):
             comment = self.parse_cpp_func_comment(cursor.raw_comment)
@@ -389,17 +360,14 @@ class clang_parser_t(shorte_parser_t):
                 # DEBUG BRAD: This is painfully slow!!!
                 items = reversed(list(tokens))
 
-            #print "CODE: [%s]" % self.m_file_src[start_location:end_location]
-
             # macro comment maybe in tokens. Not in cursor.raw_comment
             comment = None
 
             for t in items:
-                #print "T: %s" % t.spelling
                 # Ignore it if is # or define
                 if(t.spelling in ('#', 'define')):
                     continue
-                if t.kind == clang.cindex.TokenKind.COMMENT:
+                elif t.kind == clang.cindex.TokenKind.COMMENT:
                     comment = t.spelling
                     break
                 else:
@@ -684,6 +652,8 @@ class clang_parser_t(shorte_parser_t):
                         
                         if(comment.has_since()):
                             define.set_since(textblock_t(comment.since))
+                        if(comment.has_requirements()):
+                            define.set_requirements(textblock_t(comment.get_requirements()))
 
                         tag = tag_t()
                         tag.name = "define"
@@ -732,9 +702,11 @@ class clang_parser_t(shorte_parser_t):
                             
                         if(comment.has_since()):
                             prototype.set_since(textblock_t(comment.since))
+                        if(comment.has_requirements()):
+                            prototype.set_requirements(textblock_t(comment.get_requirements()))
 
                         prototype.set_private(comment.private)
-                        prototype.set_deprecated(comment.deprecated, comment.deprecated_msg)
+                        prototype.set_deprecated(comment.deprecated)
 
                         prototype.set_line(cursor.location.line)
                         prototype.set_file(self.m_source_file)
@@ -929,7 +901,6 @@ class clang_parser_t(shorte_parser_t):
                             enum.set_description(comment.description, textblock=True)
                             enum.private = comment.private
                             enum.deprecated = comment.deprecated
-                            enum.deprecated_msg = comment.deprecated_msg
                             enum.line = cursor.location.line
                             enum.file = self.m_source_file
                             enum.max_cols = 3
@@ -937,6 +908,8 @@ class clang_parser_t(shorte_parser_t):
                             
                             if(comment.has_since()):
                                 enum.set_since(textblock_t(comment.since))
+                            if(comment.has_requirements()):
+                                enum.set_requirements(textblock_t(comment.get_requirements()))
 
                             tag = tag_t()
                             tag.name = "enum"
@@ -1053,10 +1026,11 @@ class clang_parser_t(shorte_parser_t):
                         
                             if(comment.has_since()):
                                 struct.set_since(textblock_t(comment.since))
+                            if(comment.has_requirements()):
+                                struct.set_requirements(textblock_t(comment.get_requirements()))
                             #if(comment.has_deprecated()):
                             #    struct.set_deprecated(True, comment.deprecated_msg)
                             struct.deprecated = comment.deprecated
-                            struct.deprecated_msg = comment.deprecated_msg
 
                             tag = tag_t()
                             tag.name = "struct"
@@ -1097,10 +1071,10 @@ class clang_parser_t(shorte_parser_t):
                         if(comment.has_since()):
                             cls.set_since(textblock_t(comment.since))
 
-                        print "@class: file=%s line=%d" % (file, line)
-                        print "--name: " , cursor.type.spelling
-                        print "--description:"
-                        print indent_lines(comment.desc, '    ')
+                        #print "@class: file=%s line=%d" % (file, line)
+                        #print "--name: " , cursor.type.spelling
+                        #print "--description:"
+                        #print indent_lines(comment.desc, '    ')
 
                         tag = tag_t()
                         tag.name = "class"

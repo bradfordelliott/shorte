@@ -73,8 +73,7 @@ class comment_t:
         self.example = ""
         self.private = False
         self.see_also = ""
-        self.deprecated = False
-        self.deprecated_msg = ""
+        self.deprecated = None
         self.heading = ""
         self.since = ""
 
@@ -262,7 +261,6 @@ class cpp_parser_t(shorte_parser_t):
         struct2.comment = comment2
         struct2.private = comment2.private
         struct2.deprecated = comment2.deprecated
-        struct2.deprecated_msg = comment2.deprecated_msg
         struct2.max_cols = max_cols
         struct2.file = self.m_current_file
         struct2.line = start_of_struct
@@ -721,8 +719,7 @@ class cpp_parser_t(shorte_parser_t):
         comment["example"] = ""
         comment["private"] = False
         comment["see_also"] = ""
-        comment["deprecated"] = False
-        comment["deprecated_msg"] = ""
+        comment["deprecated"] = None
         comment["heading"] = ""
         
         # Anything before the @brief tag is a block of standard
@@ -838,10 +835,8 @@ class cpp_parser_t(shorte_parser_t):
             
             msg = trim_leading_blank_lines(matches.groups()[0])
             msg = textblock_t(msg)
-            comment["deprecated"] = True
-            comment["deprecated_msg"] = msg #matches.groups()[0]
-            comment2.deprecated = True
-            comment2.deprecated_msg = msg # matches.groups()[0]
+            comment["deprecated"] = msg #matches.groups()[0]
+            comment2.deprecated = msg # matches.groups()[0]
 
         
         return (comment,comment2)
@@ -948,7 +943,6 @@ class cpp_parser_t(shorte_parser_t):
         enum.description = textblock_t(text)
         enum.private = comment2.private
         enum.deprecated = comment2.deprecated
-        enum.deprecated_msg = comment2.deprecated_msg
         enum.line = start_of_enum
         enum.file = self.m_current_file
                  
@@ -1247,8 +1241,7 @@ class cpp_parser_t(shorte_parser_t):
         p2.set_see_also(function["see_also"])
 
         function["deprecated"] = func_comment2.deprecated
-        function["deprecated_msg"] = func_comment2.deprecated_msg
-        p2.set_deprecated(func_comment2.deprecated, func_comment2.deprecated_msg)
+        p2.set_deprecated(func_comment2.deprecated)
         function["private"] = func_comment2.private
         p2.set_private(func_comment2.private)
 

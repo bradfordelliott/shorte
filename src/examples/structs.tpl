@@ -1,5 +1,8 @@
 @doctitle Shorte Examples
 @docsubtitle Structures
+
+
+@include "examples/snippet_templates.tpl"
 @body
 
 @h1 Some Example Structures
@@ -36,10 +39,12 @@ And it can also have a new paragraph
     - three
         - four
 
--- example:
+-- example: exec=True template=structs
   blah2 x;
   x.serial_number = "xxx";
   x.part_number = "yyy";
+
+  printf("part_number = %s\n", x.part_number);
 
 -- since:
 This feature has been present since version 1.x.x
@@ -85,4 +90,6 @@ And it can also have a new paragraph
   x.serial_number = "xxx";
   x.part_number = "yyy";
 
+-- requires:
+This method requires some other random thing.
 

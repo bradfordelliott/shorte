@@ -67,7 +67,7 @@ typedef enum
  *
  * A second paragraph
  *
- * @example
+ * @example: exec=True
  *   if(curr_val == e_public_test)
  *   {
  *       printf("Found e_public_test");

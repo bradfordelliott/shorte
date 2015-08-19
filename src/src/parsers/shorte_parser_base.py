@@ -227,7 +227,7 @@ class parser_t:
 
         if(len(item) != 0):
             litem = list_item_t()
-            litem.text = ''.join(item)
+            litem.set_text(''.join(item))
             litem.indent = item_indent
             items.append(litem)
 
@@ -269,97 +269,5 @@ class parser_t:
     #+-----------------------------------------------------------------------------
     def parse_modifiers(self, modifiers):
 
-
-        STATE_TAG = 0
-        STATE_VALUE = 2
-        STATE_STRING = 1
-        STATE_TRIPLE_QUOTES = 3
-
-        tag = ""
-        value = ""
-        string = []
-
-        #WARNING("MODIFIERS: [%s]" % modifiers)
-
-        tags = {}
-        states = []
-        states.append(STATE_TAG)
-
-        i = 0
-        while i < len(modifiers):
-
-            state = states[-1]
-
-            #print "STATE: %d, char: %c" % (state, modifiers[i])
-
-            if(modifiers[i] == '\\'):
-                i += 1
-                continue
-
-            if(state == STATE_TAG):
-
-                if(modifiers[i] == "="):
-                    value = ""
-                    states.append(STATE_VALUE)
-                else:
-                    tag += modifiers[i]
-                    #print "building tag: %s" % tag
-            
-            elif(state == STATE_TRIPLE_QUOTES):
-                FATAL("Ooops, can I ever get here?")
-                if((modifiers[i:i+3] == start_sequence) and modifiers[i-1] != '\\'):
-                    states.pop()
-                    i += 2
-                else:
-                    string.append(modifers[i])
-
-            elif(state == STATE_STRING):
-                
-                if(modifiers[i] == start_sequence and modifiers[i-1] != '\\'):
-                    states.pop()
-                else:
-                    string.append(modifiers[i])
-
-
-            elif(state == STATE_VALUE):
-               
-                value += ''.join(string)
-                string = []
-
-                
-                if(modifiers[i:i+3] in ("'''", '"""')):
-                    FATAL("Ooops, can I ever get here?")
-                    states.append(STATE_TRIPLE_QUOTES)
-                    start_sequence = modifiers[i:i+3]
-                    i += 2
-                elif(modifiers[i] in ('"', "'")):
-                    states.append(STATE_STRING)
-                    start_sequence = modifiers[i]
-                elif(modifiers[i] == " "):
-
-                    tags[tag.strip()] = value.strip()
-
-                    #print "Adding tag: %s" % tag
-                    tag = ""
-                    value = ""
-                    states.pop()
-
-                else:
-                    value += modifiers[i]
-
-            i += 1
-
-        if(value != "" or len(string) != 0):
-            value += ''.join(string)
-            #print "tag = %s, value = %s" % (tag, value)
-            tags[tag.strip()] = value.strip()
-        elif(tag != ""):
-            tags[tag.strip()] = ""
-
-
-        #for tag in tags:
-        #    print "TAG: [%s] = [%s]" % (tag, tags[tag])
-
-        return tags
-
+        return shorte_parse_modifiers(modifiers)
 

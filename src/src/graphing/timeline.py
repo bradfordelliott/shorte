@@ -92,6 +92,20 @@ class timeline_graph_t(graph_t):
                         font_color = "#000000",
                         text       = self.yaxis["label"],
                         text_orientation = "vertical")
+    
+    def get_min_xcoordinate(self):
+        minX = None
+        for dataset in self.datasets:
+            for key in self.datasets[dataset]["data"]:
+                if(minX == None):
+                    minX = key
+                elif(key < minX):
+                    minX = key
+
+        #if(minX > 0):
+        #    minX = 0
+        
+        return minX
    
     def draw_xaxis(self):
 
