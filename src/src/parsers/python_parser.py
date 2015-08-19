@@ -130,7 +130,10 @@ class python_parser_t(shorte_parser_t):
                  "format" : ""},
             "since" :
                 {"expr" : "[@\\\]since *([^@]*)",
-                 "format" : ""}
+                 "format" : ""},
+            "requirements" : 
+                {"expr"   : "[@\\\]requires *([^@]*)",
+                 "format" : ""},
         }
 
         try:
@@ -151,8 +154,7 @@ class python_parser_t(shorte_parser_t):
                     if(expr == "deprecated"):
                         msg = trim_leading_blank_lines(val)
                         msg = textblock_t(msg)
-                        comment.deprecated = True
-                        comment.deprecated_msg = msg
+                        comment.set_deprecated(msg)
                     else:
                         if(field_format == "text"):
                             val = self.format_text(val)
@@ -167,6 +169,8 @@ class python_parser_t(shorte_parser_t):
                             comment.see_also = val
                         elif(expr == "since"):
                             comment.since = val
+                        elif(expr in ("requires", "requirements")):
+                            comment.set_requirements(val)
 
         except:
             print sys.exc_info()
@@ -259,12 +263,14 @@ class python_parser_t(shorte_parser_t):
                 if(comment.has_since()):
                     prototype.set_since(textblock_t(comment.get_since()))
                 if(comment.has_deprecated()):
-                    prototype.set_deprecated(True, comment.get_deprecated())
+                    prototype.set_deprecated(comment.get_deprecated())
                 if(comment.has_see_also()):
                     prototype.set_see_also(comment.get_see_also())
                 if(comment.has_example()):
                     prototype.set_example(comment.get_example(),
                                     self.m_engine.m_source_code_analyzer, "python")
+                if(comment.has_requirements()):
+                    prototype.set_requirements(comment.get_requirements())
 
                 if(add_header):
                     tag = tag_t()
@@ -294,7 +300,8 @@ class python_parser_t(shorte_parser_t):
                 self.page['tags'].append(tag)
 
             elif(inspect.ismethod(obj)):
-                print "Found method %s" % name
+                #print "Found method %s" % name
+                pass
 
             elif(inspect.isclass(obj)):
 
@@ -312,7 +319,7 @@ class python_parser_t(shorte_parser_t):
 
             
                     if(inspect.ismethod(mobj)):
-                        print "member = %s" % mname
+                        #print "member = %s" % mname
                         p = prototype_t()
                         p.set_name(mname)
                         argspec = inspect.getargspec(mobj)

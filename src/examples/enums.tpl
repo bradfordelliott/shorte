@@ -74,6 +74,8 @@ The loopback interface point
 - Enum Name                | Enum Value | Enum Description
 - LOOPBK_DUPLEX_NEAR_DATA  | 0x1        | Duplex Near data loopback
 - LOOPBK_DUPLEX_FAR_DATA   | 0x2        | Duplex Far data loopback
+-- requires:
+This enum requires blah blah to be defined
 
         
 @h4 e_loopback_interface

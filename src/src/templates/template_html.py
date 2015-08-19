@@ -1136,6 +1136,7 @@ class template_html_t(template_t):
                     ${see_also}
                     ${since}
                     ${deprecated}
+                    ${requires}
                 </div>
             </div>
         </div>
@@ -1330,6 +1331,7 @@ class template_html_t(template_t):
         function['example'] = self.format_object_construct(prototype, 'example')
         function['since'] = self.format_object_construct(prototype, 'since')
         function['see_also'] = self.format_object_construct(prototype, 'see')
+        function['requires'] = self.format_object_construct(prototype, 'requires')
 
         is_deprecated = False
         if(prototype.get_deprecated()):
@@ -1957,22 +1959,18 @@ within an HTML document.
         enum_name = enum.name
         
         style = ''
-        if(enum.deprecated):
+        if(enum.is_deprecated()):
             style = "style=\"%s\"" % self.insert_background("deprecated.png")
             #style = "style=\"background: url('css/images/deprecated.png') center;\"";
 
         img = ''
         
-        if(enum.deprecated):
+        if(enum.is_deprecated()):
             img += self.insert_image("icon_error.png", height=20, width=20, wrap=True, float="right", title="This enum is deprecated")
 
         if(enum.private == True):
             img += self.insert_image("lock.png", height=20, width=20, wrap=True, float="right", title="This enum is private")
         
-        html_example    = self.format_object_construct(enum, 'example')
-        html_see_also   = self.format_object_construct(enum, 'see')
-        html_since      = self.format_object_construct(enum, 'since')
-        html_deprecated = self.format_object_construct(enum, 'deprecated')
         
         if(self.m_engine.get_config("shorte", "show_enum_values") == "1"):
             show_enum_vals = True
@@ -2069,10 +2067,23 @@ within an HTML document.
 
         values += "</table>"
         
-        if(enum.has_deprecated()):
+        if(enum.is_deprecated()):
             enum_name += ' (THIS ENUM IS DEPRECATED)'
 
         xref = self.get_xref(enum.get_file(), enum.get_line())
+    
+        vars = {}
+        vars["example"]    = self.format_object_construct(enum, 'example')
+        vars["see_also"]   = self.format_object_construct(enum, 'see')
+        vars["since"]      = self.format_object_construct(enum, 'since')
+        vars["deprecated"] = self.format_object_construct(enum, 'deprecated')
+        vars["requires"]     = self.format_object_construct(enum, 'requires')
+        vars["style"]      = style
+        vars["xref"]       = xref
+        vars["img"]        = img
+        vars["name"]       = enum_name
+        vars["values"]     = values
+        vars["desc"]       = self.format_textblock(enum.get_description(textblock=True))
         
         html = string.Template('''
 <div class='bordered' $style>
@@ -2091,19 +2102,10 @@ within an HTML document.
         $see_also
         $since
         $deprecated
+        $requires
     </div>
 </div>
-</div><br/>''').substitute({
-    "style"      : style,
-    "xref"       : xref,
-    "img"        : img,
-    "name"       : enum_name,
-    "values"     : values,
-    "example"    : html_example,
-    "see_also"   : html_see_also,
-    "since"      : html_since,
-    'deprecated' : html_deprecated,
-    "desc"       : self.format_textblock(enum.get_description(textblock=True))})
+</div><br/>''').substitute(vars)
 
         return html
 
@@ -2112,16 +2114,30 @@ within an HTML document.
         #print tag
 
         define = tag.contents
-        
 
         xref = self.get_xref(define.get_file(), define.get_line())
 
-        html_example = self.format_object_construct(define, 'example')
-        html_since = self.format_object_construct(define, 'since')
-        html_see_also = self.format_object_construct(define, 'see')
+        define_name = define.get_name()
+        
+        style = []
+        if(define.is_deprecated()):
+            define_name += " (THIS DEFINE IS DEPRECATED)"
+            style.append(self.insert_background("deprecated.png"))
+        
+        dvars = {}
+        dvars["name"]       = define_name
+        dvars["xref"]       = xref
+        dvars["value"]      = self.format_textblock(define.value)
+        dvars["desc"]       = self.format_textblock(define.get_description())
+        dvars["example"]    = self.format_object_construct(define, 'example')
+        dvars["since"]      = self.format_object_construct(define, 'since')
+        dvars["seealso"]    = self.format_object_construct(define, 'see')
+        dvars["deprecated"] = self.format_object_construct(define, 'deprecated')
+        dvars["requires"]     = self.format_object_construct(define, 'requires')
+        dvars["style"]      = ";".join(style)
 
-        html = string.Template('''
-<div class='bordered'>
+        dhtml = string.Template("""
+<div class='bordered' style="$style">
 <div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}${xref}</div>
 <div>
     <div style="margin-left: 10px;margin-top:10px;">
@@ -2132,22 +2148,19 @@ within an HTML document.
 <div>
     <div style="margin-left: 10px;">
         <div class='cb_title'>Description:</div>
-        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">$desc</div>
         $example
         $seealso
         $since
+        $deprecated
+        $requires
     </div>
 </div>
-</div><br/>''').substitute({
-    "name" : define.name,
-    "xref" : xref,
-    "value" : self.format_textblock(define.value),
-    "desc" : self.format_textblock(define.description),
-    "example" : html_example,
-    "seealso" : html_see_also,
-    "since"   : html_since})
+</div><br/>""")
 
-        return html
+        dhtml = dhtml.substitute(dvars)
+
+        return dhtml
 
     def format_object_construct(self, obj, construct):
 
@@ -2159,12 +2172,19 @@ within an HTML document.
             paragraph = self.format_textblock(obj.get_since())
 
         elif(construct == 'deprecated'):
-            if(not obj.has_deprecated()):
+            if(not obj.is_deprecated()):
                 return ''
 
             title = 'Deprecated:'
-            #print "[%s]" % obj.get_deprecated_msg()
-            paragraph = self.format_textblock(obj.get_deprecated_msg())
+            print "[%s]" % obj.get_deprecated()
+            paragraph = self.format_textblock(obj.get_deprecated())
+        
+        elif(construct == 'requires'):
+            if(not obj.has_requirements()):
+                return ''
+
+            title = 'Requirements:'
+            paragraph = self.format_textblock(obj.get_requirements())
 
         elif(construct == 'see'):
             if(not obj.has_see_also()):
@@ -2341,10 +2361,11 @@ within an HTML document.
         html_see_also = self.format_object_construct(struct, 'see')
         html_since    = self.format_object_construct(struct, 'since')
         html_deprecated = self.format_object_construct(struct, 'deprecated')
+        html_requires = self.format_object_construct(struct, 'requires')
 
         struct_name = struct.name
         style = []
-        if(len(html_deprecated) > 0):
+        if(struct.is_deprecated()):
             struct_name += " (THIS STRUCTURE IS DEPRECATED)"
             style.append("background: url('css/images/deprecated.png') center")
         
@@ -2375,6 +2396,7 @@ within an HTML document.
         ${see_also}
         ${since}
         ${deprecated}
+        ${requires}
     </div>
 </div>
 </div><br/>''').substitute({
@@ -2388,6 +2410,7 @@ within an HTML document.
     "see_also" : html_see_also,
     "since"    : html_since,
     "deprecated" : html_deprecated,
+    "requires"   : html_requires,
     "desc"     : desc})
         
         return html

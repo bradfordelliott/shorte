@@ -174,6 +174,21 @@
     -- arg4 | In/Out | Argument 4
 -- returns:
     Always 0
+-- requires:
+    function4 requires something random to be defined
 
 
 @include "examples/test.h"
+
+@h3 my_test_func_with_requirements
+@prototype
+--function: test_func_with_requirements
+--prototype:
+    void test_func_with_requirements(void);
+--description:
+    This is just a function that requires a pre-compiler
+    flag in order to be defined.
+--requires:
+    In order for this function to be defined you must
+    set PC_FLAG == 1.
+

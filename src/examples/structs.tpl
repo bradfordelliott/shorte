@@ -90,4 +90,6 @@ And it can also have a new paragraph
   x.serial_number = "xxx";
   x.part_number = "yyy";
 
+-- requires:
+This method requires some other random thing.
 

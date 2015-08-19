@@ -406,6 +406,17 @@ int test_dot_c_my_private_function(void)
 {
 }
 
+/**
+ * This method has a requirement associated
+ * with it.
+ *
+ * @requires
+ *   This method is only defined if PC_FLAG == 1
+ */
+void test_func_with_requirements(void)
+{
+}
+
 int main(void)
 {
     return 0;

@@ -291,8 +291,10 @@ test_preprocessor:
 	${python} shorte.py -f examples/test_preprocessed.c -t "${THEME}" -x cpp -o build-output/c_code_preprocessed -p "${html_pdf}"
 
 test_defines:
-	${python} shorte.py -f examples/defines.h -t "${THEME}" -x clang -o build-output/defines -p "${html_pdf}"
-	${python} shorte.py -f examples/define.tpl -t "${THEME}" -o build-output/defines_tpl -p "${html_pdf}"
+	${python} shorte.py -f examples/defines.h -t "${THEME}" -x clang -o build-output/test_defines/c -p "${html_pdf}"
+	${python} shorte.py -f examples/defines.h -t "${THEME}" -x clang -o build-output/test_defines/c -p "shorte"
+	${python} shorte.py -f examples/define.tpl -t "${THEME}" -o build-output/test_defines/tpl -p "${html_pdf}"
+	${python} shorte.py -f examples/define.tpl -t "${THEME}" -o build-output/test_defines/tpl_inline -p "html_inline"
 
 
 test_cpp_parser:
@@ -321,12 +323,15 @@ test_c:
 
 
 test_functions:
-	${python} shorte.py -f examples/functions.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/functions
+	${python} shorte.py -f examples/functions.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_functions/html
+	${python} shorte.py -f examples/functions.tpl -t "${THEME}" -p "shorte" -o build-output/test_functions/shorte
 test_enums:
-	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/enums
-	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "html_inline" -o build-output/enums_inline
+	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_enums/html
+	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "html_inline" -o build-output/test_enums/html_inline
+	${python} shorte.py -f examples/enums.tpl -t "${THEME}" -p "shorte"      -o build-output/test_enums/shorte
 test_structs:
-	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/structs
+	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_structs/html
+	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "shorte" -o build-output/test_structs/shorte
 
 test_bullets:
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/bullets --zip=bullets.zip

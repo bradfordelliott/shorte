@@ -1,17 +1,27 @@
-
-/**
- * @h1 Defines
+/** @file: defines.h
  *
  * @brief
+ *
+ * @h1 Defines
+ */
+
+/**
  * This is some random description of a define here
  *
  * @example
  *   int random_int = PUBLIC_DEFINE_ZERO
+ *
+ * @requires
+ *   This method is only defined if PC_FLAG == 1
  */
 #define PUBLIC_DEFINE_ZERO 0
 
 /**
- * This define is public
+ * This define is public. It has a string
+ * value.
+ *
+ * @requires
+ *   This is only defined if PC_FLAG == 1
  */
 #define PUBLIC_DEFINE_STRING "This is a public define"
 
@@ -31,6 +41,15 @@
  * @private
  */
 #define PRIVATE_DEFINE_MARKED_PRIVATE 1
+
+/**
+ * This define has been deprecated
+ *
+ * @deprecated
+ *   Don't use this define anymore. You should find
+ *   something else
+ */
+#define DEPRECATED_DEFINE 1
 
 
 #if 1

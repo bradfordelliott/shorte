@@ -37,3 +37,5 @@
   blah,blah,blah
 --example:
   int blah = test1;
+--requires:
+  This define is only present if PC_FLAG == 1
