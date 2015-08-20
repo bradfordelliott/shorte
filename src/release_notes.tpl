@@ -6,10 +6,34 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@c
-printf("Hello world!\n");
-
-@h3 Version 1.0.73 (June XXX, 2015)
+@h3 Version 1.0.73 (Aug 20, 2015)
+- Code Execution
+    - Improved the code execution functionality for
+      code snippets.
+    - Added support for executing go, swift and javascript snippets.
+- Templates
+    - Added support for markdown output.
+    - Some minor improvements in the mediawiki output.
+- Parser
+    - Shorte Parser
+        - Cleaned up some issues with line number handling, particularly
+          in error reporting.
+    - Clang Parser
+        - Fixed handling of typedefs in C code.
+    - Python Parser
+        - Added a prototype python parser.
+- Tags
+    - Graphing Support
+        - Added support for negative coordiates in the graphing
+          libraries
+    - Checklists
+        - Some minor enhancements to the @checklist tag. This is an
+          ongoing activity to make them more useful.
+    - Source Code Tags
+        - Added the @require tag to show requirements for a particular
+          code object such as required compile flags.
+- Vim Syntax
+    - Improvements to the Vim lexer.
 
 @h3 Version 1.0.72 (June 29, 2015)
 - Clang Parser
