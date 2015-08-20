@@ -39,3 +39,16 @@
   int blah = test1;
 --requires:
   This define is only present if PC_FLAG == 1
+
+@h2 define2
+@define
+--name:
+  define2
+--description:
+  This is a random description of this define
+  with some more data here.
+--value:
+  This is my define2
+--deprecated:
+  This define was deprecated some time ago. You
+  should find another define to use.

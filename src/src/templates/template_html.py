@@ -1120,12 +1120,9 @@ class template_html_t(template_t):
         template = string.Template("""
         <div class="bordered" style="margin-top:10px;${background}">
             <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name} ${xref}</div>
-            <div style="margin-left: 10px;">
-                <div class='cb_title'>Description:</div>
-                <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
-            </div>
             <div class='prototype' style="font-size: 0.9em;">
                 <div style="margin-left: 10px; margin-top: 10px;">
+                    ${description}
                     ${prototype}
                     ${params}
                     ${returns}
@@ -1228,8 +1225,6 @@ class template_html_t(template_t):
         function["calls"] = ''
         function["called_by"] = ''
 
-        function["desc"] = self.format_textblock(prototype.get_description())
-
         exclude_wikiwords = []
         exclude_wikiwords.append(prototype.get_name())
 
@@ -1328,14 +1323,10 @@ class template_html_t(template_t):
             function["pseudocode"] = code
             function["pseudocode"] = template_pseudocode.substitute(function)
 
-        function['example'] = self.format_object_construct(prototype, 'example')
-        function['since'] = self.format_object_construct(prototype, 'since')
-        function['see_also'] = self.format_object_construct(prototype, 'see')
-        function['requires'] = self.format_object_construct(prototype, 'requires')
+        self.format_object_common_sections(function, prototype)
 
         is_deprecated = False
         if(prototype.get_deprecated()):
-            function["deprecated"] = self.format_object_construct(prototype, 'deprecated')
             is_deprecated = True
 
         is_private = False
@@ -1958,9 +1949,9 @@ within an HTML document.
         # The name of the enumeration
         enum_name = enum.name
         
-        style = ''
+        style = []
         if(enum.is_deprecated()):
-            style = "style=\"%s\"" % self.insert_background("deprecated.png")
+            style.append(self.insert_background("deprecated.png"))
             #style = "style=\"background: url('css/images/deprecated.png') center;\"";
 
         img = ''
@@ -2073,25 +2064,25 @@ within an HTML document.
         xref = self.get_xref(enum.get_file(), enum.get_line())
     
         vars = {}
-        vars["example"]    = self.format_object_construct(enum, 'example')
-        vars["see_also"]   = self.format_object_construct(enum, 'see')
-        vars["since"]      = self.format_object_construct(enum, 'since')
-        vars["deprecated"] = self.format_object_construct(enum, 'deprecated')
-        vars["requires"]     = self.format_object_construct(enum, 'requires')
+        
+        self.format_object_common_sections(vars, enum)
+
+        if(len(style) > 0):
+            style = 'style="%s"' % (";".join(style))
+        else:
+            style = ''
+
         vars["style"]      = style
         vars["xref"]       = xref
         vars["img"]        = img
         vars["name"]       = enum_name
         vars["values"]     = values
-        vars["desc"]       = self.format_textblock(enum.get_description(textblock=True))
         
         html = string.Template('''
 <div class='bordered' $style>
 <div style='background-color:#ccc;padding:10px;'><b>Enum:</b> ${name}$img${xref}</div>
 <div>
-    <div style="margin-left: 10px;">
-        <div class='cb_title'>Description:</div>
-        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+    <div style="margin-left: 10px;">${description}
     </div>
 </div>
 <div>
@@ -2111,7 +2102,6 @@ within an HTML document.
 
 
     def format_define(self, tag):
-        #print tag
 
         define = tag.contents
 
@@ -2123,21 +2113,23 @@ within an HTML document.
         if(define.is_deprecated()):
             define_name += " (THIS DEFINE IS DEPRECATED)"
             style.append(self.insert_background("deprecated.png"))
+
+        if(len(style) > 0):
+            style = 'style="%s"' % (";".join(style))
+        else:
+            style = ''
         
         dvars = {}
+
+        self.format_object_common_sections(dvars, define)
+
         dvars["name"]       = define_name
         dvars["xref"]       = xref
         dvars["value"]      = self.format_textblock(define.value)
-        dvars["desc"]       = self.format_textblock(define.get_description())
-        dvars["example"]    = self.format_object_construct(define, 'example')
-        dvars["since"]      = self.format_object_construct(define, 'since')
-        dvars["seealso"]    = self.format_object_construct(define, 'see')
-        dvars["deprecated"] = self.format_object_construct(define, 'deprecated')
-        dvars["requires"]     = self.format_object_construct(define, 'requires')
-        dvars["style"]      = ";".join(style)
+        dvars["style"]      = style
 
         dhtml = string.Template("""
-<div class='bordered' style="$style">
+<div class='bordered' $style>
 <div style='background-color:#ccc;padding:10px;'><b>Define:</b> ${name}${xref}</div>
 <div>
     <div style="margin-left: 10px;margin-top:10px;">
@@ -2147,10 +2139,9 @@ within an HTML document.
 </div>
 <div>
     <div style="margin-left: 10px;">
-        <div class='cb_title'>Description:</div>
-        <div style="margin-left:0px;margin-top:5px;margin-bottom:5px;">$desc</div>
+        $description
         $example
-        $seealso
+        $see_also
         $since
         $deprecated
         $requires
@@ -2162,7 +2153,7 @@ within an HTML document.
 
         return dhtml
 
-    def format_object_construct(self, obj, construct):
+    def format_object_section(self, obj, construct):
 
         if(construct == "since"):
             if(not obj.has_since()):
@@ -2176,7 +2167,7 @@ within an HTML document.
                 return ''
 
             title = 'Deprecated:'
-            print "[%s]" % obj.get_deprecated()
+            #print "[%s]" % obj.get_deprecated()
             paragraph = self.format_textblock(obj.get_deprecated())
         
         elif(construct == 'requires'):
@@ -2185,6 +2176,10 @@ within an HTML document.
 
             title = 'Requirements:'
             paragraph = self.format_textblock(obj.get_requirements())
+
+        elif(construct == "description"):
+            title = "Description:"
+            paragraph = self.format_textblock(obj.get_description())
 
         elif(construct == 'see'):
             if(not obj.has_see_also()):
@@ -2246,6 +2241,9 @@ within an HTML document.
 
             return template_example.substitute({"example" : code, "type" : obj.type})
 
+        else:
+            FATAL("Unsupported section: %s" % construct)
+
 
         template_section = string.Template('''
             <div>
@@ -2255,6 +2253,23 @@ within an HTML document.
         ''')
 
         return template_section.substitute({"title" : title, "paragraph" : paragraph})
+    
+    def format_object_common_sections(self, ovars, obj):
+        '''This method formats common sections of a
+           code object (like enum, struct, prototype, etc)
+           and sets them into the input dictionary
+
+           @param ovars [I] - The input dictionary describing
+                              the object.
+           @param obj   [I] - The code object being formatted
+        '''
+        
+        ovars['deprecated']  = self.format_object_section(obj, 'deprecated')
+        ovars['since']       = self.format_object_section(obj, 'since')
+        ovars["example"]     = self.format_object_section(obj, 'example')
+        ovars["see_also"]    = self.format_object_section(obj, 'see')
+        ovars["description"] = self.format_object_section(obj, 'description')
+        ovars["requires"]    = self.format_object_section(obj, 'requires')
             
     
     # Called for format a structure for HTML output 
@@ -2357,17 +2372,17 @@ within an HTML document.
         
         html += "</table><br/>"
 
-        html_example  = self.format_object_construct(struct, 'example')
-        html_see_also = self.format_object_construct(struct, 'see')
-        html_since    = self.format_object_construct(struct, 'since')
-        html_deprecated = self.format_object_construct(struct, 'deprecated')
-        html_requires = self.format_object_construct(struct, 'requires')
+        html_example  = self.format_object_section(struct, 'example')
+        html_see_also = self.format_object_section(struct, 'see')
+        html_since    = self.format_object_section(struct, 'since')
+        html_deprecated = self.format_object_section(struct, 'deprecated')
+        html_requires = self.format_object_section(struct, 'requires')
 
         struct_name = struct.name
         style = []
         if(struct.is_deprecated()):
             struct_name += " (THIS STRUCTURE IS DEPRECATED)"
-            style.append("background: url('css/images/deprecated.png') center")
+            style.append(self.insert_background("deprecated.png"))
         
         xref = self.get_xref(struct.get_file(), struct.get_line())
 
@@ -2377,15 +2392,28 @@ within an HTML document.
         else:
             desc = self.format_textblock(desc)
 
-        style = ';'.join(style)
+        if(len(style) > 0):
+            style = 'style="%s"' % (";".join(style))
+        else:
+            style = ''
+    
+        svars = {}
+        
+        svars["style"]      = style
+        svars["xref"]       = xref
+        svars["img"]        = img
+        svars["label"]      = label
+        svars["name"]       = struct_name
+        svars["values"]     = html
+
+        self.format_object_common_sections(svars, struct)
 
         html = string.Template('''
-<div class='bordered' style="$style">
+<div class='bordered' $style>
 <div style='background-color:#ccc;padding:10px;'><b>${label}:</b> ${name}$img$xref</div>
 <div>
     <div style="margin-left: 10px;margin-top:10px;">
-        <div class='cb_title'>Description:</div>
-        <div style="margin-left:10px;margin-top:5px;margin-bottom:5px;">${desc}</div>
+        ${description}
     </div>
 </div>
 <div>
@@ -2399,19 +2427,7 @@ within an HTML document.
         ${requires}
     </div>
 </div>
-</div><br/>''').substitute({
-    "style"    : style,
-    "xref"     : xref,
-    "img"      : img,
-    "label"    : label,
-    "name"     : struct_name,
-    "values"   : html,
-    "example"  : html_example,
-    "see_also" : html_see_also,
-    "since"    : html_since,
-    "deprecated" : html_deprecated,
-    "requires"   : html_requires,
-    "desc"     : desc})
+</div><br/>''').substitute(svars)
         
         return html
 
