@@ -407,11 +407,22 @@ onload onmouseup onmousedown onsubmit
 
         tmp = shorte_get_config('shorte', 'validate_line_length')
         if(tmp):
-            parts = tmp.split('@')
-            check  = parts[0]
-            length = int(parts[1])
+            tmp = tmp.strip()
+            length = 0
+            if('@' in tmp):
+                parts = tmp.split('@')
+                check  = parts[0]
+                length = int(parts[1])
+            else:
+                check = tmp
 
             if(check in ('warn', 'error')):
+                if(length == 0):
+                    FATAL("The shorte.validate_line_length setting must specify a length when warn or error are set.\n"
+                          "For example\n"
+                          "    validate_line_length=error@87\n"
+                          "    validate_line_length=warn@90\n")
+
                 lines = source.split('\n')
                 i = 0
                 for line in lines:
