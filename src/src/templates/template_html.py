@@ -1118,7 +1118,7 @@ class template_html_t(template_t):
         #print tag
 
         template = string.Template("""
-        <div class="bordered" style="margin-top:10px;${background}">
+        <div class="bordered" ${style}">
             <div style='background-color:#ccc;padding:10px;'>${private}<b>Function:</b> ${name} ${xref}</div>
             <div class='prototype' style="font-size: 0.9em;">
                 <div style="margin-left: 10px; margin-top: 10px;">
@@ -1323,6 +1323,9 @@ class template_html_t(template_t):
             function["pseudocode"] = code
             function["pseudocode"] = template_pseudocode.substitute(function)
 
+
+        # Format the common sections associated with source
+        # code types.
         self.format_object_common_sections(function, prototype)
 
         is_deprecated = False
@@ -1349,9 +1352,16 @@ class template_html_t(template_t):
 
         function["background"] = '';
         
+        style = []
         if(is_deprecated):
             function["name"] += " (THIS METHOD IS DEPRECATED)"
-            function["background"] = "background: url('css/images/deprecated.png') center;";
+            style.append(self.insert_background("deprecated.png"));
+        
+        if(len(style) > 0):
+            style = 'style="%s"' % (";".join(style))
+        else:
+            style = ''
+        function["style"] = style
             
         topic = topic_t({"name"   : prototype.get_name(),
                          "file"   : tag.file,
@@ -2371,12 +2381,6 @@ within an HTML document.
             i+=1
         
         html += "</table><br/>"
-
-        html_example  = self.format_object_section(struct, 'example')
-        html_see_also = self.format_object_section(struct, 'see')
-        html_since    = self.format_object_section(struct, 'since')
-        html_deprecated = self.format_object_section(struct, 'deprecated')
-        html_requires = self.format_object_section(struct, 'requires')
 
         struct_name = struct.name
         style = []
