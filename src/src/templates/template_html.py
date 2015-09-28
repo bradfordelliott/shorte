@@ -1516,7 +1516,6 @@ class template_html_t(template_t):
     def format_table(self, source, table):
         
         #html = "<div class='tb'><table class='tb'>\n"
-
         if(table.dict.has_key("width")):
             width = 'width="100%"'
         else:
@@ -2331,7 +2330,7 @@ within an HTML document.
             
             html += "      <td colspan='%d' class='header'>%s</td>\n" % (struct.get_max_cols(), "Diagram")
             html += struct.image["map"]
-            html += "<tr><td colspan='%d' style='background-color:white;padding:10px;'><div style='width:96%%'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none;'></img></div></th></td>" % (struct.max_cols, name, struct.name)
+            html += "<tr><td colspan='%d' style='background-color:#ffffff;padding:10px;'><div style='width:96%%;'><img src='%s' usemap='#diagram_%s' style='border:0px;text-decoration:none;'></img></div></th></td>" % (struct.max_cols, name, struct.name)
 
         if(struct.has_field_attributes()):
             html += '''
@@ -2354,6 +2353,7 @@ within an HTML document.
         for field in struct.get_fields():
             
             is_header = False
+            #print "NAME: [%s]" % field.get_name()
 
             if(field.get_is_header()):
                 html += "    <tr class='header'>\n";
@@ -2367,7 +2367,8 @@ within an HTML document.
             if(field.get_is_spacer()):
                 html += "      <td colspan='%d'>&nbsp;</td>\n" % struct.get_max_cols()
             else:
-                desc = self.format_textblock(field.get_description())
+                description = field.get_description()
+                desc = self.format_textblock(description)
 
                 attrs = ''
                 if(struct.has_field_attributes()):
@@ -2421,7 +2422,7 @@ within an HTML document.
     </div>
 </div>
 <div>
-    <div style="margin-left: 10px;">
+    <div style="margin-left: 10px;overflow:hidden;">
         <div class='cb_title'>Fields:</div>
         <div style="margin:0px;">${values}</div>
         ${example}
@@ -3602,6 +3603,7 @@ $href_end
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
         vars["html_tooltips"] = ""
+        vars["shorte_version"] = shorte_get_version_stamp()
 
 
         if(self.m_engine.get_config("html", "include_javascript") == "1"):
@@ -3784,7 +3786,8 @@ $href_end
              "link_index_framed" : "index_framed.html",
              "link_legal" : "content/legal.html",
              "link_revisions" : "content/revisions.html",
-             "html_tooltips" : ""
+             "html_tooltips" : "",
+             "shorte_version": shorte_get_version_stamp()
              })
         
         if(as_string):
@@ -3991,6 +3994,7 @@ $href_end
         vars["link_revisions"] = "../revisions.html"
         vars["html_tooltips"] = ""
         vars["subtitle"] = ""
+        vars["shorte_version"] = shorte_get_version_stamp()
 
         html = template.substitute(vars)
 
@@ -4028,6 +4032,7 @@ $href_end
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
+        vars["shorte_version"] = shorte_get_version_stamp()
 
         html = template.substitute(vars)
 
@@ -4069,6 +4074,7 @@ $href_end
         vars["link_index_framed"] = "../index_framed.html"
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
+        vars["shorte_version"] = shorte_get_version_stamp()
 
         html = template.substitute(vars)
 

@@ -6,6 +6,19 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
+@h3 Version 1.0.74 (???)
+- Parsers
+    - Shorte Parser
+        - Fixes for register definitions
+- Cairo
+    - Updated to support generating SVGs
+    - Some cleanup to the cairo_access.i SWIG wrapper
+- Templates
+    - Updated the HTML template to add the shorte version of the header
+    - Some minor cleanup of the ODT template
+- Other
+    - Switched to argparse from the legacy optparse module
+
 @h3 Version 1.0.73 (Aug 20, 2015)
 - Code Execution
     - Improved the code execution functionality for

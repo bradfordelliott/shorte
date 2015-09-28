@@ -1566,6 +1566,367 @@ a C/C++ like define that looks like:
 
         return image
 
+    def _parse_columns(self, row):
+
+        columns = []
+
+        states = []
+        state = STATE_NORMAL
+        states.append(state)
+
+        column = ""
+        pos = 0
+        start = 0
+        end = len(row)
+        i = start
+
+        while i < end:
+            if(i < pos):
+                i += 1
+                continue
+
+            if(state == STATE_NORMAL):
+                if(row[i] == '\\'):
+                    states.append(state)
+                    state = STATE_ESCAPE
+
+                elif(row[i] == '@' and row[i+1] == '{'):
+                    states.append(state)
+                    state = STATE_INLINE_STYLING
+                    column += row[i]
+                    column += row[i+1]
+                    indent_of_column += 1
+                    i += 1
+                    
+                elif(row[i] == '|'):
+                    data = trim_leading_indent(column)
+                    columns.append(trim_leading_indent(column))
+
+                    column = ""
+
+                else:
+                    column += row[i]
+
+            elif(state == STATE_INLINE_STYLING):
+                column += row[i]
+                if(row[i] == '}'):
+                    state = states.pop()
+
+            elif(state == STATE_ESCAPE):
+                column += row[i]
+                state = states.pop()
+
+            i += 1
+
+        if(len(column) > 0):
+            column = trim_leading_indent(column)
+            columns.append(column)
+
+        #for column in columns:
+        #    print "COL: [%s]" % column
+
+        return columns
+
+    def _parse_rows(self, source):
+
+        rows = []
+        buffer = ''
+        
+        # Split the structure into individual rows. This is
+        # done by looking for the \n- sequence which separates
+        # each line
+        for i in range(0, len(source)):
+            if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
+                if(buffer != ''):
+                    columns = self._parse_columns(buffer.strip())
+                    rows.append(columns)
+                    buffer = ''
+            else:
+                buffer += source[i]
+
+        if(buffer != ''):
+            columns = self._parse_columns(buffer.strip())
+            rows.append(columns)
+        
+        return rows
+
+               
+    def _parse_register_fields(self, source, columns, mark_reserved):
+
+        fields = []
+        rows = []
+        buffer = ''
+        fields_are_bits = True
+        fields_are_bytes = False
+        max_cols = 0
+
+        rows = self._parse_rows(source)
+
+        rindex = 0
+        start = 0
+        end = 0
+
+        for row in rows:
+
+            #print "[%s]" % row
+            cindex = 0
+
+            # Skip spacers for now
+            if(len(row) == 0):
+                continue
+
+            if(rindex > 0):
+                field = field_t()
+
+                if(len(row) == 0):
+                    field.is_spacer = True
+                    field.set_name("spacer")
+                    field.set_type("spacer")
+                else:
+                    for col in row:
+
+                        column_id = columns[cindex]
+                        #print "%s = %s" % (column_id, col)
+                        cindex += 1
+
+                        if(column_id == "bits"):
+                            field.set_type(col)
+
+                            bits = col
+
+                            if("'b" in bits):
+                                width = bits
+                                width = int(bits.replace("'b", ""))
+
+                            elif("-" in bits):
+                                parts = bits.split("-")
+                                min = int(parts[0].strip())
+                                max = int(parts[1].strip())
+                                width = (max - min)+1
+
+                                #print "  MIN: %d" % min
+                                #print "  END OF LAST: %d" % end
+
+                                # If min > end of last field then
+                                # insert a reserved block
+                                if(min > end):
+                                    len_reserved = min-end
+                                    
+                                    #print "  len reserved: %d" % len_reserved
+                                    new_field = field_t()
+                                    new_field.width = len_reserved
+                                    new_field.start = end
+                                    new_field.end   = start
+                                    new_field.set_name("Reserved")
+                                    new_field.set_description(textblock_t("Automatically generated"))
+                                    new_field.is_reserved = True
+                                    new_field.set_type("%d-%d" % (end, start))
+                                    fields.append(new_field)
+
+                                    start += len_reserved
+
+                            elif(bits in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]):
+                                #print "BITS: %s" % bits
+                                type = bits
+                                min = int(bits)
+
+                                #print "  MIN: %d" % min
+                                #print "  END OF LAST: %d" % end
+                                if(min > end):
+                                    len_reserved = min - end
+                                    #print "  len reserved: %d" % len_reserved
+                                    
+                                    new_field = field_t()
+                                    new_field.width = len_reserved
+                                    new_field.start = end
+                                    new_field.end   = start
+                                    new_field.set_name("Reserved")
+                                    new_field.set_description(textblock_t("Automatically generated"))
+                                    new_field.is_reserved = True
+                                    new_field.set_type("%d-%d" % (end, start))
+                                    fields.append(new_field)
+
+                                    start += len_reserved
+
+                                width = 1
+
+                            elif("x" in bits):
+                                parts = bits.split("x")
+                                if(len(parts) != 2):
+                                    FATAL("Cannot process type field %s" % bits)
+
+                                bit_width = int(parts[0])
+                                increment = int(parts[1])
+                                width = bit_width*increment
+
+                            else:
+                                if(bits in ("char", "unsigned char", "int8_t", "uint8_t")):
+                                    width = 8
+                                elif(bits in ("unsigned short", "short", "int16_t", "uint16_t")):
+                                    width = 16
+                                elif(bits in ("unsigned int", "int", "long", "unsigned long", "int32_t", "uint32_t")):
+                                    width = 32
+                                elif(bits in ("unsigned long long", "int64_t", "uint64_t")):
+                                    width = 64
+                                else:
+                                    FATAL("Cannot process this field type %s" % bits)
+                                
+                            start += width
+                            end += start
+
+                            field.width = width
+                            field.start = start
+                            field.end = end
+
+                        elif(column_id == "name"):
+                            if(col.upper() in ("RSVD", "RESERVED", "RESV")):
+                                field.is_reserved = True
+                            field.set_name(col)
+
+                        elif(column_id == "customer"):
+                            field.set_customer(col)
+
+                        elif(column_id == "description"):
+                            field.set_description(textblock_t(col))
+
+                        if(cindex > (max_cols-1)):
+                            max_cols = cindex + 1
+
+                #print field
+                fields.append(field)
+            rindex += 1
+
+        return (fields, max_cols)
+
+    
+    def parse_register(self, tag):
+        '''This method is called to parse an @register tag containing a
+           register definition.
+
+           @param self      [I] - The shorte parser instance
+           @param tag       [I] - The tag containing the register
+
+           @return An object containing the register, currently mapped as a structure
+        '''
+        struct = struct_t()
+        struct.fields = []
+
+        modifiers = tag.modifiers
+        source = tag.source
+
+        mark_reserved = True
+
+        for modifier in modifiers:
+            if(modifier in ("caption", "description")):
+                struct.set_description(textblock_t(modifiers[modifier]))
+
+        rows = []
+        buffer = ""
+
+        splitter = re.compile("^--[ \t]*", re.MULTILINE)
+        sections = splitter.split(source)
+
+        struct.headings = {}
+        
+        struct.set_name(self.get_attribute_as_string(modifiers, "name"))
+        struct_desc = self.get_attribute_as_string(modifiers, "description")
+        
+        struct.set_description(textblock_t(struct_desc))
+        struct.private = self.get_attribute_as_bool(modifiers, "private")
+        struct.file = self.get_attribute_as_string(modifiers, "file")
+        struct.line = self.get_attribute_as_int(modifiers, "line")
+        
+        columns = ["bits", "name", "description", "attributes"]
+
+        for section in sections:
+
+            if(section == ""):
+                continue
+
+            elif(section.startswith("columns:")):
+                source = section[8:len(section)].strip()
+                columns = source.strip().split(",")
+
+            elif(section.startswith("fields:")):
+                    
+                source = section[7:len(section)].strip()
+
+                (struct.fields, max_cols) = self._parse_register_fields(source, columns, mark_reserved)
+
+        
+        for section in sections:
+            if(section != ""):
+                self.parse_object_section(struct, 'struct', section)
+
+        struct.max_cols = max_cols
+
+        index = len(self.m_engine.m_images)
+        image_name = "record_%d.png" % index
+
+            
+        # Generate a record describing the structure
+        desc = struct.get_description().get_source()
+
+        record = record_t(struct.get_name(), desc)
+
+        for field in struct.fields:
+
+            #print "FIELD = [%s]" % (field["name"]) # field["attrs"][1], field["attrs"][0])
+
+            if(field.get_is_reserved()):
+                record.append_reserved(field.width, field.is_array, 8, field.get_type())
+            elif(not field.is_spacer):
+
+                is_array = field.is_array
+                array_elem_size = 8
+                
+                if(field.array_elem_size):
+                    array_elem_size = int(field.array_elem_size)
+
+                desc = field.get_description().get_source()
+                #print "FIELD: %s:" % field.get_name()
+                #print "DESC:"
+                #print desc
+                #print ""
+                record.append_field(field.get_name(), field.width, desc, field.is_reserved, is_array, array_elem_size, field.get_type())
+
+        # Generate an record of the structure so that images
+        # or source code can be generated from it.
+        if(modifiers.has_key("diagram")):
+
+            attributes = {}
+            attributes["bitorder"] = "decrement"
+            attributes["alignment"] = 64
+            
+            params = modifiers["diagram"].split(",")
+
+            for param in params:
+                parts = param.split(":")
+
+                if(len(parts) == 2):
+                    name = parts[0].strip()
+                    val  = parts[1].strip()
+
+                    if(name == "align"):
+                        attributes["alignment"] = int(val)
+                    elif(name == "bitorder"):
+                        attributes["bitorder"] = val
+
+            image_name = self.m_engine.get_config("shorte", "scratchdir") + "/" + image_name
+            image_map = record.draw(image_name, attributes)
+
+            self.m_engine.m_images.append(image_name)
+            img = {}
+            img["path"] = image_name
+            img["map"] = image_map
+            img["reference"] = self.m_current_file
+            struct.image = img
+
+        struct.record = record
+        
+        return struct
+
+
     def parse_struct(self, source, modifiers):
         '''This method is called to parse an @struct tag containing a structure
            definition.
@@ -1576,10 +1937,8 @@ a C/C++ like define that looks like:
 
            @return A dictionary defining the structure
         '''
-        struct2 = struct_t()
-        struct = {}
-        struct["fields"] = []
-        struct2.fields = []
+        struct = struct_t()
+        struct.fields = []
 
         fields_are_bytes = False
         fields_are_bits = False
@@ -1591,10 +1950,7 @@ a C/C++ like define that looks like:
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
-                struct[modifier] = textblock_t(modifiers[modifier])
-                struct2.set_description(textblock_t(modifiers[modifier]), textblock=True)
-            else:
-                struct[modifier] = modifiers[modifier]
+                struct.set_description(textblock_t(modifiers[modifier]))
 
 
         rows = []
@@ -1603,43 +1959,24 @@ a C/C++ like define that looks like:
         splitter = re.compile("^--[ \t]*", re.MULTILINE)
         sections = splitter.split(source)
 
-        struct2.headings = {}
+        struct.headings = {}
         
 
-        struct2.set_name(self.get_attribute_as_string(modifiers, "name"))
+        struct.set_name(self.get_attribute_as_string(modifiers, "name"))
         struct_desc = self.get_attribute_as_string(modifiers, "description")
         
-        struct2.set_description(struct_desc, textblock=False)
-        struct2.set_description(textblock_t(struct_desc), textblock=True)
-        struct2.private = self.get_attribute_as_bool(modifiers, "private")
-        struct2.file = self.get_attribute_as_string(modifiers, "file")
-        struct2.line = self.get_attribute_as_int(modifiers, "line")
+        struct.set_description(textblock_t(struct_desc))
+        struct.private = self.get_attribute_as_bool(modifiers, "private")
+        struct.file = self.get_attribute_as_string(modifiers, "file")
+        struct.line = self.get_attribute_as_int(modifiers, "line")
 
         for section in sections:
 
             if(section == ""):
                 continue
 
-            #if(section.startswith("example:")):
-            #    example = section[8:len(section)]
-            #    self.parse_object_example(example, struct2)
 
-            if(section.startswith("name:")):
-                struct2.set_name(section[5:len(section)])
-            
-            elif(section.startswith("description:")):
-                source = section[12:len(section)].strip()
-                struct_desc = source
-
-            #elif(section.startswith("see:")):
-            #    see_also = section[4:len(section)].strip()
-            #    struct2.set_see_also(see_also)
-            
-            #elif(section.startswith("since:")):
-            #    since = section[6:len(section)].strip()
-            #    struct2.set_since(textblock_t(since))
-
-            elif(section.startswith("fields:")):
+            if(section.startswith("fields:")):
                     
                 source = section[7:len(section)].strip()
 
@@ -1838,8 +2175,6 @@ a C/C++ like define that looks like:
                         if((bytes[0] >= '0') and (bytes[0] <= '9')):
                             parts = bytes.split("x") 
 
-                            #print parts
-
                             if(len(parts) == 2):
                                 type = int(parts[0].strip())
                                 num  = int(parts[1].strip())
@@ -1852,6 +2187,8 @@ a C/C++ like define that looks like:
 
                                 width = (type * num)
 
+                                type = bytes
+
                             else:
                                 width = int(parts[0].strip()) * 8
 
@@ -1863,18 +2200,31 @@ a C/C++ like define that looks like:
 
                     elif(fields_are_bits):
 
-                        bits = field.get_type()
-                        bits = bits.replace("'", '')
-
-                        if((bits[0] >= '0') and (bits[0] <= '9')):
-                            #print "BITS: %s" % bits
-                            width = int(bits.strip()[0:len(bits)-1])
-                            start += width
-                            end += start
-                            type = "unknown"
-                        else:
-                            width = 0
+                        bits = field.get_type().strip()
+                        #print "BITS: [%s]" % bits
+                        #bits = bits.replace("'", '')
+                        
+                        if("'b" in bits):
                             type = bits
+                            width = bits
+                            width = int(bits.replace("'b", ""))
+                        elif("-" in bits):
+                            type = bits
+                            parts = bits.split("-")
+                            min = int(parts[0].strip())
+                            max = int(parts[1].strip())
+                            width = (max - min)+1
+                        elif("x" in bits):
+                            FATAL("Don't handle this format yet")
+                            type = bits
+                            parts = bits.split("x")
+                        else:
+                            #print "BITS: %s" % bits
+                            type = bits
+                            width = 1
+
+                        start += width
+                        end += start
 
                     else:
                         bits = field.get_type()
@@ -1943,26 +2293,25 @@ a C/C++ like define that looks like:
                     field.width = width
                     field.start = start
                     field.end = end
-                    field.type = type
-                    struct2.fields.append(field)
+                    field.set_type(type)
+                    struct.fields.append(field)
         
         for section in sections:
             if(section != ""):
-                self.parse_object_section(struct2, 'struct', section)
+                self.parse_object_section(struct, 'struct', section)
 
-        struct["max_cols"] = max_cols
-        struct2.max_cols = max_cols
+        struct.max_cols = max_cols
 
         index = len(self.m_engine.m_images)
         image_name = "record_%d.png" % index
 
             
         # Generate a record describing the structure
-        desc = struct2.get_description(textblock=False)
+        desc = struct.get_description().get_source()
 
-        record = record_t(struct2.get_name(), desc)
+        record = record_t(struct.get_name(), desc)
 
-        for field in struct2.fields:
+        for field in struct.fields:
 
             #print "FIELD = [%s]" % (field["name"]) # field["attrs"][1], field["attrs"][0])
 
@@ -1976,7 +2325,7 @@ a C/C++ like define that looks like:
                 if(field.array_elem_size):
                     array_elem_size = int(field.array_elem_size)
 
-                desc = field.get_description_unparsed()
+                desc = field.get_description().get_source()
                 record.append_field(field.get_name(), field.width, desc, field.is_reserved, is_array, array_elem_size, field.get_type())
 
         # Generate an record of the structure so that images
@@ -2009,11 +2358,11 @@ a C/C++ like define that looks like:
             img["path"] = image_name
             img["map"] = image_map
             img["reference"] = self.m_current_file
-            struct2.image = img
+            struct.image = img
 
-        struct2.record = record
+        struct.record = record
         
-        return struct2
+        return struct
 
     def set_if_valid(self, modifiers, name, callback):
         if(modifiers.has_key(name)):
@@ -2171,7 +2520,7 @@ a C/C++ like define that looks like:
             name = section[5:len(section)].strip()
             obj.set_name(name)
         elif(section.startswith("description:")):
-            source = section[12:len(section)].strip()
+            source = trim_leading_indent(section[12:len(section)].strip())
             obj.description = textblock_t(source)
         elif(section.startswith("requires:")):
             source = section[9:len(section)].strip()
@@ -2809,9 +3158,9 @@ else:
             tag.name = "struct"
     
         elif(name == "register"):
-            modifiers["treat_fields_as"] = "bits"
-            struct = self.parse_struct(data, modifiers)
-            tag.contents = struct
+            reg = self.parse_register(tag)
+            tag.contents = reg
+            tag.name = "register"
 
         elif(name in ("ol", "ul")):
             tag.contents = self.parse_list(data, modifiers)

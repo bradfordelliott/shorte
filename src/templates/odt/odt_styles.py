@@ -89,6 +89,7 @@ class styles():
                  "color_table_subheader_fg" : self.colors["table"]["subheader"].fg,
                  "color_table_rsvd_fg"      : self.colors["table"]["reserved"].fg,
                  "color_table_normal_fg"    : self.colors["table"]["normal"].fg})
+        
 
         #<style:text-properties style:font-name="Courier New" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
         # Table Styles
@@ -141,6 +142,29 @@ class styles():
     <style:style style:name="shorte_table.normal_cell" style:family="table-cell">
       <style:table-cell-properties fo:padding="0.0in"
           fo:border="0.002in solid #000000" fo:background-color="${color_table_normal_bg}"/>
+    </style:style>
+    
+
+    <style:style style:name="shorte_table.code_header" style:family="table-cell">
+      <style:table-cell-properties
+            fo:background-color="${color_table_header_bg}"
+            fo:padding="0.0182in"
+            fo:border-top="0.002in solid #000000" >
+            fo:border-bottom="0.002in solid #000000" >
+        <style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+    <style:style style:name="shorte_table.code_cell" style:family="table-cell">
+      <style:table-cell-properties fo:padding="0.0in"
+          fo:border-top="0.002in solid #c0c0c0"
+          fo:border-bottom="0.002in solid #c0c0c0"
+          fo:background-color="${color_table_normal_bg}"/>
+    </style:style>
+    <style:style style:name="shorte_table.alternate_code_cell" style:family="table-cell">
+      <style:table-cell-properties fo:padding="0.0in"
+          fo:border-top="0.002in solid #c0c0c0"
+          fo:border-bottom="0.002in solid #c0c0c0"
+          fo:background-color="#f0f0f0"/>
     </style:style>
     
     <!-- Table Cell Paragraph Styles -->

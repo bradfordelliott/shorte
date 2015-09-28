@@ -753,6 +753,7 @@ class type_t:
         self.see_also = None
         self.since = None
         self.requirements = None
+        self.customer = None
     
     def has_fields(self):
         return False
@@ -873,6 +874,15 @@ class type_t:
         return self.requirements
     def set_requirements(self, val):
         self.requirements = val
+
+    def has_customer(self):
+        if(None == self.customer):
+            return False
+        return True
+    def set_customer(self, value):
+        self.customer = value
+    def get_customer(self):
+        return self.customer
 
 class enum_t(type_t):
     def __init__(self):
@@ -1011,6 +1021,8 @@ class field_t(type_t):
         bits = self.get_type()
         if(bits.find("'b") != -1):
             return True
+        elif(bits.find(":")):
+            return True
         return False
 
     def get_is_header(self):
@@ -1021,6 +1033,10 @@ class field_t(type_t):
     
     def get_is_reserved(self):
         return self.is_reserved
+
+    def set_type(self, type):
+        #print "TYPE: %s" % type
+        self.type = type
 
     def get_type(self):
         if(len(self.attrs) >= 2):
@@ -1331,7 +1347,7 @@ class class_t(type_t):
         self.m_methods['private'] = {}
 
     def prototype_add(self, ptype):
-        print "Adding prototype %s" % ptype.get_name()
+        #print "Adding prototype %s" % ptype.get_name()
         self.m_prototypes[ptype.get_prototype().get_unparsed()] = ptype
 
     def method_add(self, method, access='public'):

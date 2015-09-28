@@ -33,7 +33,7 @@ def parse(contents, package, theme, settings, zip_output):
     #print "Package: %s" % package
 
     config = shorte_get_startup_path() + os.path.sep + "shorte.cfg"
-    output_dir = "scratch2"
+    output_dir = shorte_get_scratch_path()
     if(not os.path.isabs(output_dir)):
         output_dir = "%s/%s" % (os.getcwd(), output_dir)
     try:
@@ -103,6 +103,12 @@ def parse(contents, package, theme, settings, zip_output):
 
     # Reset the engine to process the next request
     g_shorte.reset()
+
+    # Make sure we cleanup the output directory
+    try:
+        shutil.rmtree(output_dir, True)
+    except:
+        pass
 
     #if(package in ("odt","pdf")):
     #    info["type"] = "base64"

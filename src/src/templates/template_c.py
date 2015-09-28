@@ -399,7 +399,7 @@ $fields
         module = ''
 
         header = struct.record.to_c(self.m_format, define_prefix, self.m_comment_style, self.m_header_style)
-        #header = struct["record"].to_c("native", define_prefix, self.m_comment_style, self.m_header_style)
+        #header = struct.record.to_c("native", define_prefix, self.m_comment_style, self.m_header_style)
 
         if(self.m_allow_diagnostic_code):
             module = struct.record.to_c_support_routines()
@@ -487,7 +487,7 @@ $fields
 
         if(name == "#"):
             return
-        if(name == "struct"):
+        if(name in ("struct", "register")):
             contents = self.format_struct(tag)
             self.m_contents += contents["module"]
             self.m_header["structs"] += contents["header"]

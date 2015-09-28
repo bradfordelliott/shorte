@@ -4,6 +4,7 @@
 
 #if defined HAS_CAIRO
     #include "cairo.h"
+    #include "cairo-svg.h"
 #else
     #define CAIRO_FORMAT_ARGB24 1
     #define CAIRO_FORMAT_ARGB32 0 
@@ -110,6 +111,11 @@
         
         void ellipse(double x, double y, double width, double height)
         {
+            cairo_save(m_cairo_image);
+            
+            cairo_translate(m_cairo_image, x + width / 2., y + height / 2.);
+            cairo_scale(m_cairo_image, 1. * (width / 2.), 1. * (height / 2.));
+            cairo_arc(m_cairo_image, 0., 0., 1., 0., 2 * 3.1457);
         }
         
         void write_to_png(const char* file, int width_destination, int height_destination)
@@ -150,6 +156,43 @@
             // Flush the output surface since we've modified it
             cairo_surface_flush(new_surface);
             status = cairo_surface_write_to_png(new_surface, file);
+        }
+        
+        void write_to_svg(const char* file, int width_destination, int height_destination)
+        {
+            int            width_source;
+            int            height_source;
+            unsigned char* data_source;
+            unsigned char* data_destination;
+            int            row;
+            cairo_status_t status;
+            printf("Calling write_to_svg\n");
+    
+            cairo_surface_t* new_surface = cairo_svg_surface_create(file, width_destination, height_destination);
+            cairo_svg_surface_restrict_to_version(new_surface, CAIRO_SVG_VERSION_1_2);
+            cairo_t* cr = cairo_create(new_surface);
+
+            printf("Finished svg_surface_create\n");
+            
+            // Set the height/width of the surfaces
+            height_source = cairo_image_surface_get_height(m_cairo_surface);
+            width_source = cairo_image_surface_get_width(m_cairo_surface);
+            
+            printf("Copying source\n");
+            cairo_set_source_surface(cr, m_cairo_surface, 0, 0);
+            cairo_rectangle(cr, 0, 0, width_destination, height_destination);
+            cairo_fill(cr);
+            
+            cairo_move_to(cr, 50, 50);
+            cairo_set_source_rgb(cr, 0,0,0);
+            cairo_select_font_face(cr, "Sans", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+            cairo_set_font_size(cr, 40);
+            cairo_show_text(cr, "This is a test");
+
+            // Flush the output surface since we've modified it
+            cairo_surface_flush(new_surface);
+            cairo_surface_destroy(new_surface);
+            cairo_destroy(cr);
         }
         
         void set_source_rgb(double red, double green, double blue)
@@ -302,6 +345,7 @@
 
 #if defined(HAS_CAIRO)
 #include "cairo.h"
+#include "cairo-svg.h"
 #endif // HAS_CAIRO
 
 %include "typemaps.i"
@@ -345,202 +389,67 @@
 
 class cairo{
     public:
-        cairo(int width, int height)
-        {
-            m_cairo_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-            m_cairo_image = cairo_create(m_cairo_surface);
-        }
+        cairo(int width, int height);
         
-        void rectangle(double x, double y, double width, double height)
-        {
-            cairo_rectangle(m_cairo_image, x, y, width, height);
-        }
+        void rectangle(double x, double y, double width, double height);
         
-        void ellipse(double x, double y, double width, double height)
-        {
-            cairo_save(m_cairo_image);
+        void ellipse(double x, double y, double width, double height);
+        
+        void write_to_png(const char* file, int width_destination, int height_destination);
+       
+        void write_to_svg(const char* file, int width_destination, int height_destination);
+        
+        void set_source_rgb(double red, double green, double blue);
+        
+        void stroke(void);
+        void stroke_preserve(void);
+        
+        void fill(void);
+        
+        void save(void);
+        
+        void restore(void);
+        
+        void scale(double width, double height);
+        
+        void translate(double x, double y);
+        
+        void rotate(double angle);
+        
+        void arc(double xc, double yc, double radius, double angle1, double angle2);
+        
+        void fill_preserve(void);
             
-            cairo_translate(m_cairo_image, x + width / 2., y + height / 2.);
-            cairo_scale(m_cairo_image, 1. * (width / 2.), 1. * (height / 2.));
-            cairo_arc(m_cairo_image, 0., 0., 1., 0., 2 * 3.1457);
-            
-            //self.SetupFill()
-            //ctx.fill_preserve()
-            //self.SetupStroke()
-            //ctx.stroke()
-            
-            //ctx.restore();
-        }
+        void show_text(const char* text);
         
-        void write_to_png(const char* file, int width_destination, int height_destination)
-        {
-            int            width_source;
-            int            height_source;
-            unsigned char* data_source;
-            unsigned char* data_destination;
-            int            row;
-            cairo_status_t status;
-    
-            cairo_surface_t* new_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width_destination, height_destination);
-            
-            // Set the height/width of the surfaces
-            height_source = cairo_image_surface_get_height(m_cairo_surface);
-            width_source = cairo_image_surface_get_width(m_cairo_surface);
-            
-            // Get a pointer to the data of the original image surface
-            data_source = cairo_image_surface_get_data(m_cairo_surface);
-            data_destination = cairo_image_surface_get_data(new_surface);
-            
-            for(row = 0; row < min(height_source, height_destination); row++)
-            {
-                // If the source is wider than the destination surface then
-                // only copy the source width amount for each row.
-                if(width_source > width_destination)
-                {
-                    memcpy(data_destination + (row * width_destination * 4),
-                           data_source + (row * width_source * 4), width_destination * 4);
-                }
-                else
-                {
-                    memcpy(data_destination + (row * width_destination * 4),
-                           data_source + (row * width_source * 4), width_source * 4);
-                }
-            }
-            
-            // Flush the output surface since we've modified it
-            cairo_surface_flush(new_surface);
-            status = cairo_surface_write_to_png(new_surface, file);
-        }
-        
-        void set_source_rgb(double red, double green, double blue)
-        {
-            cairo_set_source_rgb(m_cairo_image, red, green, blue);
-        }
-        
-        void stroke(void)
-        {
-            cairo_stroke(m_cairo_image);
-        }
-        void stroke_preserve(void)
-        {
-            cairo_stroke_preserve(m_cairo_image);
-        }
-        
-        void fill(void)
-        {
-            cairo_fill(m_cairo_image);
-        }
-        
-        void save(void)
-        {
-            cairo_save(m_cairo_image);
-        }
-        
-        void restore(void)
-        {
-            cairo_restore(m_cairo_image);
-        }
-        
-        void scale(double width, double height)
-        {
-            cairo_scale(m_cairo_image, width, height);
-        }
-        
-        void translate(double x, double y)
-        {
-            cairo_translate(m_cairo_image, x, y);
-        }
-        
-        void arc(double xc, double yc, double radius, double angle1, double angle2)
-        {
-            cairo_arc(m_cairo_image, xc, yc, radius, angle1, angle2);
-        }
-        
-        void rotate(double angle)
-        {
-            cairo_rotate(m_cairo_image, angle);
-        }
-        
-        void fill_preserve(void)
-        {
-            cairo_fill_preserve(m_cairo_image);
-        }
-            
-        void show_text(const char* text)
-        {
-            cairo_show_text(m_cairo_image, text);
-        }
-        
-        void set_font_size(double size)
-        {
-            cairo_set_font_size(m_cairo_image, size);
-        }
+        void set_font_size(double size);
         
         void text_extents(const char *utf8,
                           int*        width,
-                          int*        height)
-        {
-            cairo_text_extents_t extents;
-            cairo_text_extents(m_cairo_image, utf8, &extents);
-            
-            *width = extents.width;
-            *height = extents.height;
-        }
+                          int*        height);
         
         void select_font_face(
             const char*         family,
             cairo_font_slant_t  slant,
-            cairo_font_weight_t weight)
-        {
-            cairo_select_font_face(m_cairo_image, family, slant, weight);
-        }
+            cairo_font_weight_t weight);
         
-        void line_to(double x, double y)
-        {
-            cairo_line_to(m_cairo_image, x, y);
-        }
-        void rel_line_to(double x, double y)
-        {
-            cairo_rel_line_to(m_cairo_image, x, y);
-        }
+        void line_to(double x, double y);
+        void rel_line_to(double x, double y);
         
-        void set_line_width(double width)
-        {
-            cairo_set_line_width(m_cairo_image, width);
-        }
+        void set_line_width(double width);
         
-        double set_dash(double input_dashes[], int num_dashes, double offset)
-        {
-            cairo_set_dash(m_cairo_image, input_dashes, num_dashes, offset);
-            
-            return input_dashes[1];
-        }
+        double set_dash(double input_dashes[], int num_dashes, double offset);
         
-        void move_to(double x, double y)
-        {
-            cairo_move_to(m_cairo_image, x, y);
-        }
+        void move_to(double x, double y);
         
         void curve_to(double x1, double y1, double x2,
-                      double y2, double x3, double y3)
-        {
-            cairo_curve_to(m_cairo_image, x1, y1, x2, y2, x3, y3);
-        }
+                      double y2, double x3, double y3);
         void rel_curve_to(double x1, double y1, double x2,
-                      double y2, double x3, double y3)
-        {
-            cairo_rel_curve_to(m_cairo_image, x1, y1, x2, y2, x3, y3);
-        }
+                      double y2, double x3, double y3);
         
-        void new_path(void)
-        {
-            cairo_new_path(m_cairo_image);
-        }
+        void new_path(void);
         
-        void close_path(void)
-        {
-            cairo_close_path(m_cairo_image);
-        }
+        void close_path(void);
         
         void set_antialias(cairo_antialias_t format);
         

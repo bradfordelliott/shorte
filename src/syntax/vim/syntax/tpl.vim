@@ -56,8 +56,9 @@ syn region Defines start=/@define/ end=/^@/ contains=Tags,DefineSections contain
 syn match  EnumSections /^-- *\(deprecated:\|description:\|examples:\|name:\|requires:\|see:\|see also:\|since:\|values:\)/
 syn region Enums start=/@enum/ end=/^@/ contains=Tags,EnumSections contained
 
-syn match  StructSections /^-- *\(deprecated:\|description:\|examples:\|fields:\|name:\|requires:\|see:\|see also:\|since:\)/
+syn match  StructSections /^-- *\(deprecated:\|description:\|examples:\|fields:\|name:\|requires:\|see:\|see also:\|since:\|columns:\)/
 syn region Structs start=/@struct/ end=/^@/ contains=Tags,StructSections contained
+syn region Registers start=/@register/ end=/^@/ contains=Tags,StructSections contained
 
 syn match  ClassSections /^-- *\(deprecated:\|description:\|examples:\|extends:\|name::\|public.functions:\|public.members:\|requires:\|see:\|see also:\|since:\)/
 syn region Classes start=/@class/ end=/^@/ contains=Tags,ClassSections contained

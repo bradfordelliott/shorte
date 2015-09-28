@@ -925,7 +925,7 @@ class template_odt_t(template_t):
 
         return xml
     
-    def format_object_construct(self, obj, construct, format_as_table_row=False):
+    def format_object_construct(self, obj, construct, format_as_table_row=False, show_title=True):
         xml = ''
         title = construct.title()
 
@@ -947,6 +947,14 @@ class template_odt_t(template_t):
         elif(construct == "since"):
             if(obj.has_since()):
                 xml = self.format_textblock(obj.get_since())
+        
+        elif(construct == "deprecated"):
+            if(obj.has_deprecated()):
+                xml = self.format_textblock(obj.get_deprecated())
+        
+        elif(construct == "requires"):
+            if(obj.has_requirements()):
+                xml = self.format_textblock(obj.get_requirements())
 
         elif(construct == 'see'):
             if(obj.has_see_also()):
@@ -958,7 +966,9 @@ class template_odt_t(template_t):
                 xml = self.format_textblock(obj.get_description())
                 
         if(len(xml) > 0 and format_as_table_row):
-            xml = string.Template('''
+            xml_title = ''
+            if(show_title):
+                xml_title = string.Template('''
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
             <text:p text:style-name="${section_style}">${title}:</text:p>
@@ -967,6 +977,13 @@ class template_odt_t(template_t):
           <table:covered-table-cell/>
           <table:covered-table-cell/>
         </table:table-row>
+''').substitute({"row_style" : self.m_styles["table"]["row"]["prototype_section"],
+                 "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
+                 "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
+                 "title" : title})
+
+            xml = string.Template('''
+        ${xml_title}
         <table:table-row table:style-name="${row_style}">
           <table:table-cell table:style-name="${cell_style2}" table:number-columns-spanned="4" office:value-type="string">
             ${xml}
@@ -977,7 +994,7 @@ class template_odt_t(template_t):
         </table:table-row>
 ''').substitute({
     "xml"           : xml,
-    "title"         : title,
+    "xml_title"     : xml_title,
     "row_style"     : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style"    : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
@@ -1396,6 +1413,21 @@ class template_odt_t(template_t):
                     "cell" : "shorte_table.normal_cell",
                     "text" : "shorte_table_standard" # "shorte_table.normal_text"
                     }
+
+            # For objects types like structure fields or
+            # enum values.
+            table["code_header"] = {
+                    "cell" : "shorte_table.code_header",
+                    "text" : "shorte_table_standard" # "shorte_table.normal_text"
+                    }
+            table["code_cell"] = {
+                    "cell" : "shorte_table.code_cell",
+                    "text" : "shorte_table_standard" # "shorte_table.normal_text"
+                    }
+            table["alternate_code_cell"] = {
+                    "cell" : "shorte_table.alternate_code_cell",
+                    "text" : "shorte_table_standard" # "shorte_table.normal_text"
+                    }
         else:
             table["title"] = {
                     "cell" : "shorte_table.title",
@@ -1506,10 +1538,10 @@ class template_odt_t(template_t):
             cell_style = style["reserved"]["cell"]
             text_style = style["reserved"]["text"]
         else:
-            cell_style = style["default"]["cell"]
+            cell_style = style[cell_type]["cell"]
             if(col.has_key("style")):
                 cell_style = col["style"]
-            text_style = style["default"]["text"]
+            text_style = style[cell_type]["text"]
             if(col.has_key("text-style")):
                 text_style = col["text-style"]
 
@@ -1848,7 +1880,7 @@ ${desc}
 <table:table-column table:style-name="%s"/>
 <table:table-column table:style-name="%s"/>
 %s
-''' % (self.m_table_id, self.m_styles["table"]["style"],
+''' % (self.m_table_id, "shorte_table_prototype", #self.m_styles["table"]["style"],
        "shorte_struct_col1",
        "shorte_struct_col2",
        "shorte_struct_col3",
@@ -1857,68 +1889,46 @@ ${desc}
 
         self.m_table_id += 1
             
-        xml += self.format_object_construct(struct, "description", True) 
+        xml += self.format_object_construct(struct, "description", True, show_title=False) 
         xml += self.format_object_section_title("Fields")
 
         xml += '''<table:table-row>'''
-        xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Field Type")
-        xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Field Name")
-        xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
+        xml += self.__format_table_cell({"span" : 1}, style, "code_header", "Field Type")
+        xml += self.__format_table_cell({"span" : 1}, style, "code_header", "Field Name")
+        xml += self.__format_table_cell({"span" : 1}, style, "code_header", "Description")
         xml += "</table:table-row>\n"
         
 
+        i = 0
         for field in struct.get_fields():
             
             xml += '''
     <table:table-row>
 '''
+            if((i & 1) == 1):
+                theme = "code_cell"
+            else:
+                theme = "alternate_code_cell"
+            i += 1
+
             frame_paragraph = True
             if(field.get_is_spacer()):
-                xml += self.__format_table_cell({"span" : 3}, style, "default", "", frame_paragraph)
+                xml += self.__format_table_cell({"span" : 3}, style, theme, "", frame_paragraph)
             else:
                 ftype = self.format_text(field.get_type())
-                xml += self.__format_table_cell({"span" : 1}, style, "default", ftype, frame_paragraph)
-                xml += self.__format_table_cell({"span" : 1}, style, "default", field.get_name(), frame_paragraph)
+                xml += self.__format_table_cell({"span" : 1}, style, theme, ftype, frame_paragraph)
+                xml += self.__format_table_cell({"span" : 1}, style, theme, field.get_name(), frame_paragraph)
 
                 desc = self.format_textblock(field.get_description())
-                xml += self.__format_table_cell({"span" : 1}, style, "default", desc, False)
-
-            #for attr in field["attrs"]:                     
-            #    
-            #    frame_paragraph = True
-
-            #    # DEBUG BRAD: cells for a structure are currently not formatted
-            #    #             the same way as a table - need to convert them
-            #    #             into a dictionary for the time being - need to fix
-            #    #             this in future releases for easier maintainability.
-            #    if(is_dict(attr)):
-
-            #        if(attr.has_key("textblock")):
-            #            cell_text = self.format_textblock(attr["textblock"])
-            #            frame_paragraph = False
-            #        else:
-            #            attr = attr["text"]
-            #            cell_text = self.format_text(attr)
-            #    else:
-            #        cell_text = self.format_text(attr)
-
-            #    #print "S.CELL: [%s]" % cell_text
-
-            #    if(field["is_header"]):
-            #        xml += self.__format_table_cell({"span" : 1}, style, "is_header", cell_text)
-            #    elif(field["is_subheader"]):
-            #        xml += self.__format_table_cell({"span" : 1}, style, "is_subheader", cell_text)
-            #    elif(field["is_reserved"]):
-            #        xml += self.__format_table_cell({"span" : 1}, style, "is_reserved", cell_text)
-            #    else:
-            #        xml += self.__format_table_cell({"span" : 1}, style, "default", cell_text, frame_paragraph)
-
+                xml += self.__format_table_cell({"span" : 1}, style, theme, desc, False)
 
             xml += "</table:table-row>\n"
         
         xml += self.format_object_construct(struct, "example", True) 
         xml += self.format_object_construct(struct, "see", True) 
         xml += self.format_object_construct(struct, "since", True) 
+        xml += self.format_object_construct(struct, "deprecated", True) 
+        xml += self.format_object_construct(struct, "requires", True) 
 
         xml += "</table:table>"
         
@@ -2932,7 +2942,7 @@ ${desc}
           <table:covered-table-cell/>
         </table:table-row>
 ''').substitute({
-    "deprecated" : self.format_textblock(prototype2.get_deprecated_msg()),
+    "deprecated" : self.format_textblock(prototype2.get_deprecated()),
     "row_style" : self.m_styles["table"]["row"]["prototype_section"],
     "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
     "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],

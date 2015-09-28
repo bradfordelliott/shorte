@@ -334,6 +334,7 @@ test_structs:
 	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_structs/html
 	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "html_inline" -o build-output/test_structs/html_inline
 	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "shorte" -o build-output/test_structs/shorte
+	${python} shorte.py -f examples/structs.tpl -t "${THEME}" -p "c" -o build-output/test_structs/c_generation
 
 test_bullets:
 	${python} shorte.py -f examples/bullets.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/bullets --zip=bullets.zip
@@ -449,9 +450,8 @@ test_gnuplot:
 	${python} shorte.py -f examples/gnuplot.tpl -p "${html_pdf}" -t shorte -o build-output/gnuplot
 
 test_registers:
-	${python} shorte.py -f examples/registers.tpl -p "${html_pdf}" -t shorte -o build-output/registers
-test_registers_quick:
-	${python} shorte.py -f examples/registers.tpl -p "html" -t shorte -o build-output/registers
+	${python} shorte.py -f examples/registers.tpl -p "${html_pdf}" -t shorte -o build-output/test_registers/html
+	${python} shorte.py -f examples/registers.tpl -p "c" -t shorte -o build-output/test_registers/c_generation
 
 test_custom_theme:
 	${python} shorte.py -f examples/test_custom_theme.tpl -p "html" -o build-output/test_custom_theme

@@ -39,6 +39,7 @@ types["uint8"]  = "uint8_t"
 types["uint16"] = "uint16_t"
 types["uint32"] = "uint32_t"
 types["uint64"] = "uint64_t"
+types["uint_prefix"] = "uint"
 
 
 
@@ -251,7 +252,7 @@ class record_t:
                 field_type = field["width"]
             
             if(field["is_array"]):
-                print "Not supported yet"
+                FATAL("Not supported yet")
                 sys.exit(-1)
             else:
                 if(field["type"] == "cs_uint64"):
@@ -313,7 +314,7 @@ class record_t:
 
                     if(field["is_array"]):
                         elem_size = field["array_elem_size"]
-                        output += "    %s%d %s[%s];\n" % (types["uint"], elem_size, name, field["width"]/elem_size)
+                        output += "    %s %s[%s];\n" % ("uint%d_t" % elem_size, name, field["width"]/elem_size)
                     
                         if(not field["is_reserved"]):
                             field["display"] = '''
@@ -757,7 +758,7 @@ void %s_display(void* io_handle, %s* type)
         elif(self.m_header_style == HEADER_STYLE_DOXYGEN):
             template = string.Template('''
 /**
- * ${desc}
+ ${desc}
  */''')
 
         else:
@@ -777,8 +778,14 @@ ${desc}
             prefix = "//|    "
         elif(self.m_comment_style == COMMENT_STYLE_KERNEL):
             prefix = " * " 
+        
+        #print "PREFIX:"
+        #print "[%s]" % prefix
+        #print "DESC:"
+        #print self.m_desc
 
         desc = self._parse_description(self.m_desc, prefix, 70).strip()
+
         
         vars = {}
         vars["name"] = struct_name
@@ -1193,127 +1200,133 @@ task ${struct_name}::display(string prefix)
     #|
     #+-----------------------------------------------------------------------------
     def _parse_description(self, desc, prefix, width):
-        segments = []
-        list_expr = re.compile("([ ]+)?<ul>(.*?)</ul>", re.DOTALL)
-        matches = list_expr.search(desc)
-        if(matches):
-            indent = matches.groups()[0]
-            list   = matches.groups()[1]
-            
-            # Find the indent of the first <li> element
-            indent_expr = re.compile("([ ]+)<li>", re.DOTALL)
-            matches = indent_expr.search(list)
-            if(matches):
-                subindent = matches.groups()[0]
-            
-            entries_expr = re.compile("<li>", re.DOTALL)
-            entries = entries_expr.split(list)
-            
-            for entry in entries:
-                
-                bspace_expr = re.compile("[ \t]{2,}")
-                entry = bspace_expr.sub(" ", entry)
-                
-                nl_expr = re.compile("\n")
-                entry = nl_expr.sub(" ", entry)
-                
-                bspace_expr = re.compile("\s")
-                matches = bspace_expr.match(entry)
-                
-                if(not matches):
-                    li_expr = re.compile("</li>")
-                    entry = li_expr.sub("", entry)
-                    
-                    bspace_expr = re.compile("[ \t]{2,}")
-                    entry = bspace_expr.sub(" ", entry)
-                    
-                    segments.append(subindent + entry)
+
+        # DEBUG BRAD: I think this is no longer useful
+        #segments = []
+        #list_expr = re.compile("([ ]+)?<ul>(.*?)</ul>", re.DOTALL)
+        #matches = list_expr.search(desc)
+        #if(matches):
+        #    indent = matches.groups()[0]
+        #    list   = matches.groups()[1]
+        #    
+        #    # Find the indent of the first <li> element
+        #    indent_expr = re.compile("([ ]+)<li>", re.DOTALL)
+        #    matches = indent_expr.search(list)
+        #    if(matches):
+        #        subindent = matches.groups()[0]
+        #    
+        #    entries_expr = re.compile("<li>", re.DOTALL)
+        #    entries = entries_expr.split(list)
+        #    
+        #    for entry in entries:
+        #        
+        #        bspace_expr = re.compile("[ \t]{2,}")
+        #        entry = bspace_expr.sub(" ", entry)
+        #        
+        #        nl_expr = re.compile("\n")
+        #        entry = nl_expr.sub(" ", entry)
+        #        
+        #        bspace_expr = re.compile("\s")
+        #        matches = bspace_expr.match(entry)
+        #        
+        #        if(not matches):
+        #            li_expr = re.compile("</li>")
+        #            entry = li_expr.sub("", entry)
+        #            
+        #            bspace_expr = re.compile("[ \t]{2,}")
+        #            entry = bspace_expr.sub(" ", entry)
+        #            
+        #            segments.append(subindent + entry)
+        #
+        #list = "<br>".join(segments)
+        #list += "<br>"
+        #
+        #desc = list_expr.sub(list, desc)
         
-        list = "<br>".join(segments)
-        list += "<br>"
+        #tmp = desc
+        #
+        #expr = re.compile("\n")
+        #lines = expr.split(tmp)
+        #
+        #indent = 0
+        #
+        ## This is a really complicated way of dealing with
+        ## multi-line strings in order to determine the indent
+        ## level in order to strip out extraneous spaces caused
+        ## by wrapping and indentation.
+        #for line in lines:
+        #    
+        #    # Find the first blank line, that will tell us our
+        #    # indent level
+        #    wspace = re.compile("^([ \t]+)$", re.MULTILINE)
+        #    matches = wspace.match(line)
+        #    if(matches):
+        #        indent = len(matches.groups()[0])
+        #        if(indent != 0):
+        #            break
+        #    
+        #    # If there isn't a blank line then try the first
+        #    # line that indenting at the front
+        #    indented = re.compile("^([ \t]+)", re.MULTILINE)
+        #    matches = indented.match(line)
+        #    if(matches):
+        #        indent = len(matches.groups()[0])
+        #        if(indent != 0):
+        #            break
+        #
+        #desc = expr.sub("", desc)
+        #expr = re.compile("<br>")
+
+        #lines = expr.split(desc);
+        #desc = "";
+        #
+        #for line in lines:
+        #    pos  = 0;
+        #    slen = 0;
+        #    segment = ""
+        #    char = ""
+        #    
+        #    indent_expr = re.compile("[ ]{%d}" % (indent))
+        #    matches = indent_expr.match(line)
+        #    
+        #    # First remove 'indent' characters from the
+        #    # beginning of each line
+        #    if(indent > 1):
+        #        indent_expr = re.compile("[ ]{%d}" % (indent))
+        #        line = indent_expr.sub(" ", line)
+        #    
+        #    if(line[0:1] == ' '):
+        #        line = line[1:len(line)]
+        #    
+        #    while(pos <= len(line)):
+        #        char = line[pos:pos+1]
+        #        segment += char;
+        #        
+        #        if(slen > width):
+        #            if((char == " ") or (char == "\t")):
+        #                desc += (prefix + segment + "\n")
+        #                slen = 0
+        #                segment = ""
+        #        
+        #        pos += 1;
+        #        slen += 1;
+        #    
+        #    if(segment != ""):
+        #        desc += (prefix + segment + "\n")
+        #    else:
+        #        desc += prefix + "\n"
+        #
+        #expr = re.compile("<b>(.*?)</b>")
+        #desc = expr.sub("[\\1]", desc)
+        #
+        #expr = re.compile("<.*?>")
+        #desc = expr.sub("", desc)
         
-        desc = list_expr.sub(list, desc)
-        
-        #print desc
-        
-        tmp = desc
-        
-        expr = re.compile("\n")
-        lines = expr.split(tmp)
-        
-        indent = 0
-        
-        # This is a really complicated way of dealing with
-        # multi-line strings in order to determine the indent
-        # level in order to strip out extraneous spaces caused
-        # by wrapping and indentation.
+        lines = desc.split("\n")
+        desc = ""
         for line in lines:
-            
-            # Find the first blank line, that will tell us our
-            # indent level
-            wspace = re.compile("^([ \t]+)$", re.MULTILINE)
-            matches = wspace.match(line)
-            if(matches):
-                indent = len(matches.groups()[0])
-                if(indent != 0):
-                    break
-            
-            # If there isn't a blank line then try the first
-            # line that indenting at the front
-            indented = re.compile("^([ \t]+)", re.MULTILINE)
-            matches = indented.match(line)
-            if(matches):
-                indent = len(matches.groups()[0])
-                if(indent != 0):
-                    break
-        
-        desc = expr.sub("", desc)
-        expr = re.compile("<br>")
-        lines = expr.split(desc);
-        desc = "";
-        
-        for line in lines:
-            pos  = 0;
-            slen = 0;
-            segment = ""
-            char = ""
-            
-            indent_expr = re.compile("[ ]{%d}" % (indent))
-            matches = indent_expr.match(line)
-            
-            # First remove 'indent' characters from the
-            # beginning of each line
-            if(indent > 1):
-                indent_expr = re.compile("[ ]{%d}" % (indent))
-                line = indent_expr.sub(" ", line)
-            
-            if(line[0:1] == ' '):
-                line = line[1:len(line)]
-            
-            while(pos <= len(line)):
-                char = line[pos:pos+1]
-                segment += char;
-                
-                if(slen > width):
-                    if((char == " ") or (char == "\t")):
-                        desc += (prefix + segment + "\n")
-                        slen = 0
-                        segment = ""
-                
-                pos += 1;
-                slen += 1;
-            
-            if(segment != ""):
-                desc += (prefix + segment + "\n")
-            else:
-                desc += prefix + "\n"
-        
-        expr = re.compile("<b>(.*?)</b>")
-        desc = expr.sub("[\\1]", desc)
-        
-        expr = re.compile("<.*?>")
-        desc = expr.sub("", desc)
-        
+            desc += "%s%s\n" % (prefix, line)
+
         return desc;
     
     
@@ -1404,10 +1417,12 @@ task ${struct_name}::display(string prefix)
             regex_tick = re.compile("'")
             regex_newline = re.compile("\n")
             regex_quote   = re.compile("\"")
+            regex_space   = re.compile(" ")
             tooltip = field["desc"]
             tooltip = regex_tick.sub("\\'", tooltip)
-            tooltip = regex_newline.sub(" ", tooltip)
+            tooltip = regex_newline.sub("<br/>", tooltip)
             tooltip = regex_quote.sub("\\'", tooltip)
+            tooltip = regex_space.sub("&nbsp;", tooltip)
             
             #tooltip =~ s/\\n/<br>/g;
             #tooltip =~ s/\\t/$SPACER/g;
@@ -1628,5 +1643,6 @@ task ${struct_name}::display(string prefix)
         image_map += "</map>\n"
         
         c.write_to_png(output_file, draw_width, y_offset + 10);
-        
+        #c.write_to_svg(output_file + ".svg", draw_width, y_offset + 10);
+
         return image_map

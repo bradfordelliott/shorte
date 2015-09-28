@@ -4,13 +4,6 @@
 @docfilename blah_blah
 @body
 @h1 Registers
-@register: name="blah16" description="blah blah" private="False" diagram="width:600px;show:yes,align:16,bitorder:increment"
--- fields:
-- Field | Name          | Description                      | Attributes
-- 0-5   | serial_number | The serial number of the device  
-                          with some more description       | customer="CORTINA"
-- 7     | blah          | A random field                   |
-- 8-15  | blah2         | A random field                   |
 
 @struct: name="blah16d" description="blah blah" private="False" diagram="show:yes,align:16,bitorder:decrement"
 -- fields:
@@ -54,16 +47,76 @@
 This register definition should really look different than a structure
 definition.
 
-@register: name="clause45" description="Clause 45 address bits" diagram="show:yes,align:32,bitorder:decrement"
+The serial number of the device  
+with some more description and
+a list:
+- one
+    - two
+- three
+
+and a new paragraph.
+and some more data.
+
+# DEBUG BRAD: If the description is intended it doesn't format correctly
+#             in the generated output.
+
+@register: name="clause45" diagram="show:yes,align:32,bitorder:decrement"
+--description:
+    This register defines the clause 45 address bits that are used by
+    the software to do something random
+    - one
+      - two
+    - three
+    
+    This is an additional paragraph if data describing the
+    structure.
+
+-- columns:
+bits,name,description,customer
+
 -- fields:
-- Bits  | Name          | Description
-- 8'b   | Reserved      | Reserved for future use
+- Bits  | Name          | Description                  | Customer
+- 8'b   | Reserved      | Reserved for future use      | INPHI
 -
-- 8'b   | MMD           | The MMD section of clause 45
+- 8'b   | MMD           | The MMD section of clause 45 | 
 - 16'b  | Address       | The address within the MMD
+                          - 1 = MMD 1
+                              - 2 = MMD 2
+                          - etc.   
+
+@register: name="blah16" description="blah blah" private="False" diagram="width:600px;show:yes,align:16,bitorder:increment"
+--description:
+The serial number of the device  
+with some more description and
+a list:
+- one
+    - two
+- three
+
+and a new paragraph.
+and some more data.
+
+--columns:
+bits,name,description,attributes
+
+-- fields:
+- Field    | Name          | Description                      | Attributes
+- 0-5      | serial_number | The serial number of the device  
+                             with some more description and
+                             a list:
+
+                             - one
+                                 - two
+                             - three
+
+                             and a new paragraph.             | customer="CORTINA"
+- 7        | blah          | A random field                   |
+- 8-15     | blah2         | A random field                   |
+- uint8_t  | blah3         | A char field     
+- uint32_t | blah4         | Another field
 
 
-@struct: name="slice" diagram="show:yes,align:32"
+@register: name="slice" diagram="show:yes,align:32"
 -- fields:
 - Bits   | Name             | Desc
 - 1x24   | user_defined     | User defined bits of the API. These get passed through from
