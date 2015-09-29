@@ -1,6 +1,6 @@
 @media screen
 {
-  body { margin: 0px;padding: 0px; font-size: 1.0em; background: #666;}
+  body {font-family:Arial,Helvetica,sans-serif; margin: 0px;padding: 0px; background: white;font-size:100%;}
   
   @page { margin:2in 2in 2in 2in; }
   

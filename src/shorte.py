@@ -18,7 +18,7 @@ import os
 import re
 import platform
 import shutil
-from optparse import OptionParser
+import argparse
 import string
 from string import Template;
 import time
@@ -48,98 +48,98 @@ from src.shorte_engine import *
 
 
 
-parser = OptionParser()
-parser.add_option("-f", "--files",
+parser = argparse.ArgumentParser()
+parser.add_argument("-f", "--files",
                   action="store", dest="files",
                   help="The list of files to generate")
-parser.add_option("-l", "--list",
+parser.add_argument("-l", "--list",
                   action="store", dest="file_list",
                   help="The list of files to generate in an input file")
-parser.add_option("-o", "--output",
+parser.add_argument("-o", "--output",
                   action="store", dest="output_dir",
                   help="The directory where output is generated")
-parser.add_option("--of", "--output_file",
+parser.add_argument("--of", "--output_file",
                   action="store", dest="output_file",
                   help="The main output file to generate")
-parser.add_option("-v", "--version",
+parser.add_argument("-v", "--version",
                   action="store", dest="version",
                   help="The version of the document")
-parser.add_option("-t", "--theme",
-                  action="store",type="string",dest="theme",
+parser.add_argument("-t", "--theme",
+                  action="store",dest="theme",
                   help="The output theme")
-parser.add_option("-n", "--name",
-                  action="store",type="string",dest="name",
+parser.add_argument("-n", "--name",
+                  action="store",dest="name",
                   help="The document name or title")
-parser.add_option("-p", "--package",
-                  action="store",type="string",dest="package",default="html",
+parser.add_argument("-p", "--package",
+                  action="store",dest="package",default="html",
                   help="The output package. Supported types are html, odt, word, and pdf")
-parser.add_option("-b", "--output_format",
+parser.add_argument("-b", "--output_format",
                   action="store",dest="output_format",default="bitfields",
                   help="Set the output format in C generated code: bitfields, byte_array, or defines")
-parser.add_option("-y", "--diagnostic_code",
+parser.add_argument("-y", "--diagnostic_code",
                   action="store_true",dest="allow_diagnostic_code",default=False,
                   help="Generate diagnostic code in generate code")
-parser.add_option("-c", "--config",
-                  action="store",type="string",dest="config",
+parser.add_argument("-c", "--config",
+                  action="store",dest="config",
                   help="The config file to load")
-parser.add_option("-s", "--settings",
-                  action="store",type="string",dest="settings",
+parser.add_argument("-s", "--settings",
+                  action="store",dest="settings",
                   help="A list of settings to use that overrides the standard config file")
-parser.add_option("-x", "--parser",
-                  action="store",type="string",dest="parser",
+parser.add_argument("-x", "--parser",
+                  action="store",dest="parser",
                   help="The parser to use",default="shorte")
-parser.add_option("-a", "--about",
+parser.add_argument("-a", "--about",
                   action="store_true",dest="about",
                   help="About this program")
-parser.add_option("-m", "--macros",
-                  action="store",type="string",dest="macros",
+parser.add_argument("-m", "--macros",
+                  action="store",dest="macros",
                   help="Macro substitution")
-parser.add_option("-D", "--define",
-                  action="store",type="string",dest="define",
+parser.add_argument("-D", "--define",
+                  action="store",dest="define",
                   help="Macro substitution")
-parser.add_option("-I", "--include",
-                  action="store",type="string",dest="include",
+parser.add_argument("-I", "--include",
+                  action="store",dest="include",
                   help="Include paths - currently only used for Clang")
-parser.add_option("-r", "--search_and_replace",
-                  action="store",type="string",dest="replace",
+parser.add_argument("-r", "--search_and_replace",
+                  action="store",dest="replace",
                   help="An input search and replace module that is loaded to pre-process input files and replace any references")
-parser.add_option("-w", "--working_directory",
-                  action="store",type="string",dest="working_directory",
+parser.add_argument("-w", "--working_directory",
+                  action="store",dest="working_directory",
                   help="The working directory")
-parser.add_option("-i", "--info",
-                  action="store",type="string",dest="info",
+parser.add_argument("-i", "--info",
+                  action="store",dest="info",
                   help="List info about the document, for example, --info=wikiwords will show the list of scanned wikiwords")
 
-parser.add_option("--srv", "--server",
+parser.add_argument("--srv", "--server",
                   action="store_true",dest="server",
                   help="Run a background XML-RPC server to process remote requests")
-parser.add_option("--port", "--port",
+parser.add_argument("--port", "--port",
                   action="store",dest="server_port", default="8300",
                   help="The port number to start the XML-RPC server listening on")
-parser.add_option("--zip", "--zip",
+parser.add_argument("--zip", "--zip",
                   action="store", dest="zip",default=None,
                   help="Create an archive of the output")
-parser.add_option("--resize", "--resize_image",
+parser.add_argument("--resize", "--resize_image",
                   action="store", dest="resize", default=None,
                   help="Resize an input image")
-parser.add_option("--verbose", "--verbose",
+parser.add_argument("--verbose", "--verbose",
                   action="store_true", dest="verbose", default=False,
                   help="Verbosity of the output log")
-parser.add_option("--ierr", "--ignore_errors",
+parser.add_argument("--ierr", "--ignore_errors",
                  action="store_true", dest="ignore_errors", default=False,
                  help="Ingore errors")
-parser.add_option("--werr", "--warnings_as_errors",
+parser.add_argument("--werr", "--warnings_as_errors",
                  action="store_true", dest="warnings_as_errors", default=False,
                  help="Treat warnings as errors")
-parser.add_option("--profile", "--profile",
+parser.add_argument("--profile", "--profile",
                   action="store", dest="profile", default=False,
                   help="Turn on profiling")
 
-#parser.add_option("-I", "--include",
+#parser.add_argument("-I", "--include",
 #                  action="store",type="string",dest="include",
 #                  help="Include paths to search for include files")
 
-(options, args) = parser.parse_args()
+options = parser.parse_args()
 
 if(options.verbose):
     shorte_set_verbosity(True)
@@ -221,15 +221,19 @@ if(options.settings):
 # or
 #    -d "macro1=2;macro2=2"
 if(options.macros):
+    #print "MACROS: %s" % options.macros
     fields = options.macros.split(";")
     macros = {}
 
     for field in fields:
         matches = re.search("(.*?)=(.*)", field)
 
+
         if(matches != None):
             key = matches.groups()[0]
             val = matches.groups()[1]
+
+            #print "%s = %s" % (key, val)
            
             macros[key] = val
         # If there was no equal sign then assume
@@ -353,6 +357,10 @@ if(errors != 0):
         error_on_exit = True
 
 print "  - See %s for more detail" % shorte_get_log_file_path()
+
+# Before we exit make sure we cleanup the scratch directory
+if(os.path.exists(scratchdir)):
+    shutil.rmtree(scratchdir)
    
 if(error_on_exit):
     sys.exit(-1)

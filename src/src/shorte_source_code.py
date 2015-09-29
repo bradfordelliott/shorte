@@ -407,11 +407,22 @@ onload onmouseup onmousedown onsubmit
 
         tmp = shorte_get_config('shorte', 'validate_line_length')
         if(tmp):
-            parts = tmp.split('@')
-            check  = parts[0]
-            length = int(parts[1])
+            tmp = tmp.strip()
+            length = 0
+            if('@' in tmp):
+                parts = tmp.split('@')
+                check  = parts[0]
+                length = int(parts[1])
+            else:
+                check = tmp
 
             if(check in ('warn', 'error')):
+                if(length == 0):
+                    FATAL("The shorte.validate_line_length setting must specify a length when warn or error are set.\n"
+                          "For example\n"
+                          "    validate_line_length=error@87\n"
+                          "    validate_line_length=warn@90\n")
+
                 lines = source.split('\n')
                 i = 0
                 for line in lines:
@@ -742,6 +753,7 @@ class type_t:
         self.see_also = None
         self.since = None
         self.requirements = None
+        self.customer = None
     
     def has_fields(self):
         return False
@@ -863,6 +875,15 @@ class type_t:
     def set_requirements(self, val):
         self.requirements = val
 
+    def has_customer(self):
+        if(None == self.customer):
+            return False
+        return True
+    def set_customer(self, value):
+        self.customer = value
+    def get_customer(self):
+        return self.customer
+
 class enum_t(type_t):
     def __init__(self):
         type_t.__init__(self)
@@ -983,11 +1004,14 @@ class field_t(type_t):
     def get_description(self):
         if(self.desc == None):
             if(len(self.attrs) >= 3):
+                FATAL("DO I GET HERE?")
                 return self.attrs[2]["textblock"]
             return "empty"
 
         return self.desc
+
     def get_description_unparsed(self):
+        FATAL("DO I GET HERE?")
         return self.desc_unparsed
 
     def set_description(self, desc):
@@ -1000,6 +1024,8 @@ class field_t(type_t):
         bits = self.get_type()
         if(bits.find("'b") != -1):
             return True
+        elif(bits.find(":")):
+            return True
         return False
 
     def get_is_header(self):
@@ -1010,6 +1036,10 @@ class field_t(type_t):
     
     def get_is_reserved(self):
         return self.is_reserved
+
+    def set_type(self, type):
+        #print "TYPE: %s" % type
+        self.type = type
 
     def get_type(self):
         if(len(self.attrs) >= 2):
@@ -1320,7 +1350,7 @@ class class_t(type_t):
         self.m_methods['private'] = {}
 
     def prototype_add(self, ptype):
-        print "Adding prototype %s" % ptype.get_name()
+        #print "Adding prototype %s" % ptype.get_name()
         self.m_prototypes[ptype.get_prototype().get_unparsed()] = ptype
 
     def method_add(self, method, access='public'):

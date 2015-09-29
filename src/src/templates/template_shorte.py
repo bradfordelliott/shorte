@@ -179,8 +179,24 @@ class template_shorte_t(template_t):
 ''' % self.format_textblock(obj.get_requirements())
 
         return ''
-            
+           
+    def format_object_common_sections(self, ovars, obj):
+        '''This method formats common sections of a
+           code object (like enum, struct, prototype, etc)
+           and sets them into the input dictionary
 
+           @param ovars [I] - The input dictionary describing
+                              the object.
+           @param obj   [I] - The code object being formatted
+        '''
+        
+        ovars['deprecated']  = self.format_object_section(obj, 'deprecated')
+        ovars['since']       = self.format_object_section(obj, 'since')
+        ovars["example"]     = self.format_object_section(obj, 'example')
+        ovars["see_also"]    = self.format_object_section(obj, 'see')
+        ovars["description"] = self.format_object_section(obj, 'description')
+        ovars["requires"]    = self.format_object_section(obj, 'requires')
+        
     def format_enum(self, tag):
 
         self.m_num_enums += 1
@@ -231,12 +247,7 @@ ${example}${see_also}${since}${deprecated}${requires}
             
         vars = {}
 
-        vars['deprecated']  = self.format_object_section(enum, 'deprecated')
-        vars['since']       = self.format_object_section(enum, 'since')
-        vars["example"]     = self.format_object_section(enum, 'example')
-        vars["see_also"]    = self.format_object_section(enum, 'see')
-        vars["description"] = self.format_object_section(enum, 'description')
-        vars["requires"]    = self.format_object_section(enum, 'requires')
+        self.format_object_common_sections(vars, enum)
 
         vars["name"] = title
         vars["heading"] = heading
@@ -274,13 +285,8 @@ ${description}${example}${see_also}${since}${deprecated}${requires}
         vars["name"] = define.name
         vars["heading"] = heading
         
-        vars['deprecated']  = self.format_object_section(define, 'deprecated')
-        vars['since']       = self.format_object_section(define, 'since')
-        vars["example"]     = self.format_object_section(define, 'example')
-        vars["see_also"]    = self.format_object_section(define, 'see')
-        vars["description"] = self.format_object_section(define, 'description')
-        vars["requires"]    = self.format_object_section(define, 'requires')
-            
+        self.format_object_common_sections(vars, define)
+         
         val = self.format_textblock(define.value)
         val = re.sub("\|", "\\\\\\|", val)
         vars["value"] = escape_string(val)
@@ -347,13 +353,8 @@ $requires
         heading = ''
 
         #print "HEADING: %s" % heading
-
-        vars["example"]     = self.format_object_section(struct, "example")
-        vars["see_also"]    = self.format_object_section(struct, "see")
-        vars["deprecated"]  = self.format_object_section(struct, "deprecated")
-        vars["since"]       = self.format_object_section(struct, "since")
-        vars["description"] = self.format_object_section(struct, "description")
-        vars["requires"]    = self.format_object_section(struct, "requires")
+        
+        self.format_object_common_sections(vars, struct)
 
         vars["name"] = title
         vars["parent"] = parent
@@ -420,13 +421,13 @@ $title
     $name
 $prototype
 --description:
-$desc
+$description
 $params
 --returns:
     $returns
 $example
 $pseudocode
-$seealso
+$see_also
 $since
 $deprecated
 $requires
@@ -486,12 +487,7 @@ $class
 %s
 ''' % self.format_source_code(prototype.get_pseudocode().get_unparsed())
 
-        function["seealso"]    = self.format_object_section(prototype, "see")
-        function["deprecated"] = self.format_object_section(prototype, "deprecated")
-        function["desc"]       = self.format_object_section(prototype, "description")
-        function["since"]      = self.format_object_section(prototype, "since")
-        function["example"]    = self.format_object_section(prototype, "example")
-        function["requires"]   = self.format_object_section(prototype, "requires")
+        self.format_object_common_sections(function, prototype)
 
         if(prototype.has_class()):
             function['class'] = prototype.get_class().get_name()
@@ -692,7 +688,9 @@ $class
                 cnt += 1
 
             page_names[base] = base
-            output_file = base + ".tpl"
+
+            if(not base.endswith(".tpl")):
+                output_file = base + ".tpl"
 
             #print "BASENAME: %s" % base
 
