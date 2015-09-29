@@ -93,6 +93,11 @@ This is a test of the table captions
 -& Basic Parameters
 - \-mode | <cs_mx00_cfg_mode_e>        | Configuration Classification
 
+@table
+-h Configuration Rules
+- tx_if.dplx_line_driver.traceloss | This is a test
+- tx_if.blah.another_rule          | This is another rule
+
 
 # DEBUG BRAD: Haven't updated the parser to support this format yet
 #@h3 A table with no header

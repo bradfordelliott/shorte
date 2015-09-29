@@ -1661,7 +1661,6 @@ class template_odt_t(template_t):
             xml += self.__table_format_column_styles(table, style, title)
         #xml += self.__table_format_column_styles(table, style, title)
 
-
         row_index = 0
         col_index = 0
         max_cols = table.get_max_cols()
@@ -1763,7 +1762,9 @@ class template_odt_t(template_t):
             xml += self.format_textblock(table.get_caption(), style="shorte_standard_indented")
 
 
-        #xml += "<text:p></text:p>"
+        # Add a blank paragraph after the table so that tables don't run into
+        # one another. Should really style this so that it doesn't consume too much space
+        xml += "<text:p></text:p>"
 
         return xml
     
@@ -1932,6 +1933,9 @@ ${desc}
 
         xml += "</table:table>"
         
+        # Add a blank paragraph after the table so that tables don't run into
+        # one another. Should really style this so that it doesn't consume too much space
+        xml += "<text:p></text:p>"
 
         return xml
 

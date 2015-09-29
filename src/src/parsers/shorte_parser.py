@@ -41,6 +41,49 @@ from libs.records import *
 #        self.text = ""
 #        self.textblock = ""
 
+class col_t():
+    '''This class is used to manage a column within a table
+       row which is used by declarations such as @struct, @register
+       and @table
+    '''
+
+    def __init__(self):
+        self.text = ""
+        self.span = 1
+
+class row_t():
+    '''This class is used to manage a table row which is used
+       by declarations such as @struct, @register, and @table
+    '''
+
+    def __init__(self):
+        '''The constructor for the class'''
+
+        self.cols = []
+        self.is_heading = False
+        self.is_subheading = False
+        self.is_title = False
+        self.is_spacer = False
+        self.is_crossed = False
+        self.is_reserved = False
+
+    def __str__(self):
+        '''Convert the row object into a human readable string
+           for debug purposes'''
+
+        output =  "ROW\n"
+        output += "  is_spacer     = %s\n" % self.is_spacer
+        output += "  is_heading    = %s\n" % self.is_heading
+        output += "  is_subheading = %s\n" % self.is_subheading
+        output += "  is_title      = %s\n" % self.is_title
+        output += "  is_crossed    = %s\n" % self.is_crossed
+        output += "  is_reserved   = %s\n" % self.is_reserved
+
+        output += "  cols          = %d\n" % len(self.cols)
+        for col in self.cols:
+            output += indent_lines(col, "    > ")
+        return output 
+
 class shorte_header_t():
     def __init__(self):
         self.start = 0
@@ -796,6 +839,9 @@ class shorte_parser_t(parser_t):
         index = 0
         for row in table.rows:
 
+            #print "ROW[%d]:" % index
+            #print row
+
             if(index == 0):
                 index += 1
                 continue
@@ -869,6 +915,9 @@ class shorte_parser_t(parser_t):
 
 
     def parse_table(self, source, modifiers, col_separators=['|']):
+        '''This method is called to parse the contents of a table
+           declaration
+        '''
 
         table = {}
         table2 = table_t()
@@ -925,183 +974,40 @@ class shorte_parser_t(parser_t):
         if(source.startswith("--")):
             FATAL("Can't parse this table yet!")
 
-
-        # Split the table into individual rows. This is
-        # done by looking or the \n- sequence which separates
-        # each line
-        for i in range(0, len(source)):
-            if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
-                rows.append(buffer)
-                buffer = ''
-            else:
-                buffer += source[i]
-
-        if(buffer != ''):
-            rows.append(buffer)
-        
-        is_header = True
+        rows = self._parse_rows(source)
 
         row_num = 0
-        
+
         for row in rows:
-
-            if(row == ""):
-                continue
-            
-            row = row.strip()
-
             table_row = {}
             table_row["cols"] = []
-            table_row["is_subheader"] = False
+            table_row["is_header"] = row.is_heading
+            table_row["is_subheader"] = row.is_subheading
             table_row["is_caption"] = False
-            table_row["is_reserved"] = False
-            table_row["is_spacer"] = False
-            table_row["is_crossed"] = False
-            table_row["is_title"] = False
+            table_row["is_reserved"] = row.is_reserved
+            table_row["is_spacer"] = row.is_spacer
+            table_row["is_crossed"] = row.is_crossed
+            table_row["is_title"] = row.is_title
 
-            # Mark the first row as the header
             if(row_num == 0):
                 table_row["is_header"] = True
-            else:
-                table_row["is_header"] = False
 
             row_num = row_num + 1
 
-            cols = []
-
-            #print "ROW: [%s]" % row
-            
-            # If the row is made up entirely of spaces
-            # then skip it and move to the next since
-            is_spaces = re.compile("^[ \t]*$", re.DOTALL)
-            if(is_spaces.match(row)):
-                table_row["is_spacer"] = True
-            
-            row = row + "\n"
-            
-            STATE_NORMAL     = 0
-            STATE_ESCAPE     = 4
-            
-            states = []
-            state = STATE_NORMAL
-            states.append(state)
-            
-            col = ""
-            colspan = 1
-            colnum = 1
-            
-            pos = 0
-            start = 0
-
-            # Check to see the leading characters in each
-            # row. If they are &, *, or ^ then they have
-            # special significance.
-            if(row[0] == '&' or row[0] == 's'):
-                table_row["is_subheader"] = True
-                start = 1
-            elif(row[0] == '*' or row[0] == 'h'):
-                table_row["is_header"] = True
-                start = 1
-            elif(row[0] == '^'):
-                table_row["is_caption"] = True
-                start = 1
-            elif(row[0] == '='):
-                table_row["is_crossed"] = True
-                start = 1
-            elif(row.startswith("rsvd")):
-                table_row["is_reserved"] = True
-                start = 1
-            elif(row[0] == 't'):
-                table_row["is_title"] = True
-                table_row["is_header"] = False
-                start = 1
-            elif(row[0] == 'x'):
-                table_row["is_crossed"] = False
-                table_row["is_header"] = False
-                start = 1
-
-
-            i = start 
-            end = len(row)
-
-            while i < end:
-
-                if(i < pos):
-                    i += 1
-                    continue
-                    
-                #if(row[i] == '\\'):
-                #    print "DO I GET HERE?"
-                #    i += 2
-                #    continue
-                        
-                if(state == STATE_NORMAL):
-
-                    if(row[i] in col_separators):
-                        
-                        colspan = 1
-                        colnum += 1
-
-                        # If we hit a || then we need
-                        # to merge with the next column
-                        # and increment our colspan
-                        while(row[i+1] in col_separators):
-                            colspan += 1
-                            i += 1
-
-                        text = col.strip()
-                        #print "text = %s" % text
-                        #print "colspan = %d" % colspan
-
-                        if(mark_reserved and self.is_reserved_text(text)):
-                            table_row["is_reserved"] = True
-
-                        tmp = {}
-                        tmp["span"] = colspan 
-                        tmp["text"] = text
-                        tmp["textblock"] = textblock_t(trim_leading_indent(text))
-
-                        #print "TEXT:\n%s" % text
-
-                        table_row["cols"].append(tmp)
-                        col = ""
-
-                        ## If we've hit a || to span a column we need
-                        ## to skip forward to find the next | which starts
-                        ## the next column
-                        #if(colspan > 1):
-                        #    #print "Skipping stuff after %s" % text
-                        #    while(row[i+1] != '|'):
-                        #        i += 1
-                        #    i += 1
-
-                    else:
-                        col += row[i]
-
-                elif(state == STATE_ESCAPE):
-                    col += row[i]
-                    state = states.pop()
-
-                i += 1
-
-            if(col != ""):
-
-                col = col.strip()
+            for col in row.cols:
                 tmp = {}
-                tmp["span"] = 1
-                tmp["text"] = col
-                #print "TEXT\n[%s]" % col
-                tmp["textblock"] = textblock_t(trim_leading_indent(col))
+                tmp["span"] = col.span
+                tmp["text"] = col.text
+                tmp["textblock"] = textblock_t(col.text)
                 table_row["cols"].append(tmp)
-
-            table["rows"].append(table_row)
+            
             table2.rows.append(table_row)
 
 
         # Now step through the table and figure out how many
         # columns there actually are.
         max_cols = 0 
-        for row in table["rows"]:
+        for row in table2.rows:
 
             cols = row["cols"]
             colspan = 0
@@ -1111,14 +1017,16 @@ class shorte_parser_t(parser_t):
             if(colspan > max_cols):
                 max_cols = colspan
         
-        table["max_cols"] = max_cols
         table2.max_cols = max_cols
+        #print "MAX COLS: %d" % max_cols
 
         # Now right expand any columns that are shorter
         # than the maximum number of columns
-        for row in table["rows"]:
-            
+        for row in table2.rows:
             cols = row["cols"]
+
+            if(row["is_spacer"]):
+                continue
 
             # Sum the span of all columns
             span = 0
@@ -1566,9 +1474,12 @@ a C/C++ like define that looks like:
 
         return image
 
-    def _parse_columns(self, row):
+    def _parse_columns(self, buffer, col_separators=["|"]):
 
         columns = []
+
+        STATE_NORMAL = 0
+        STATE_ESCAPE = 4
 
         states = []
         state = STATE_NORMAL
@@ -1577,8 +1488,30 @@ a C/C++ like define that looks like:
         column = ""
         pos = 0
         start = 0
-        end = len(row)
         i = start
+        indent_of_column = 0
+
+        row = row_t()
+        if(buffer[0:2] in ("h ", "* ")):
+            row.is_heading = True
+            buffer = buffer[2:]
+        elif(buffer[0:2] in ("s ", "& ")):
+            row.is_subheading = True
+            buffer = buffer[2:]
+        elif(buffer[0:2] == "t "):
+            row.is_title = True
+            buffer = buffer[2:]
+        elif(buffer[0:2] in ("= ", "x ")):
+            row.is_crossed = True
+            buffer = buffer[2:]
+        elif(buffer[0:2] == "r "):
+            row.is_reserved = True
+            buffer = buffer[2:]
+
+        buffer = buffer.strip()
+        end = len(buffer)
+
+        colspan = 1
 
         while i < end:
             if(i < pos):
@@ -1586,46 +1519,86 @@ a C/C++ like define that looks like:
                 continue
 
             if(state == STATE_NORMAL):
-                if(row[i] == '\\'):
+                if(buffer[i] == '\\'):
                     states.append(state)
+                    column += buffer[i]
                     state = STATE_ESCAPE
 
-                elif(row[i] == '@' and row[i+1] == '{'):
+                elif(buffer[i] == '@' and buffer[i+1] == '{'):
                     states.append(state)
                     state = STATE_INLINE_STYLING
-                    column += row[i]
-                    column += row[i+1]
+                    column += buffer[i]
+                    column += buffer[i+1]
                     indent_of_column += 1
                     i += 1
                     
-                elif(row[i] == '|'):
+                elif(buffer[i] in col_separators):
+
+                    colspan = 1
+                    # If we hit a || then we need to merge
+                    # with the next column and increment our colspan
+                    try:
+                        while(buffer[i+1] in col_separators):
+                            colspan += 1
+                            i += 1
+                    except:
+                        pass
+                    
                     data = trim_leading_indent(column)
-                    columns.append(trim_leading_indent(column))
-
+                    col = col_t()
+                    col.text = data
+                    col.span = colspan
+                    row.cols.append(col)
                     column = ""
-
                 else:
-                    column += row[i]
+                    column += buffer[i]
 
             elif(state == STATE_INLINE_STYLING):
-                column += row[i]
-                if(row[i] == '}'):
+                column += buffer[i]
+                if(buffer[i] == '}'):
                     state = states.pop()
 
             elif(state == STATE_ESCAPE):
-                column += row[i]
+                column += buffer[i]
                 state = states.pop()
 
             i += 1
 
-        if(len(column) > 0):
+        if(len(column) > 0 or (buffer[end-1] in col_separators)):
             column = trim_leading_indent(column)
-            columns.append(column)
+            col = col_t()
+            col.text = column
+            col.span = 1
+            row.cols.append(col)
 
         #for column in columns:
         #    print "COL: [%s]" % column
+        if(len(row.cols) == 0):
+            row.is_spacer = True
 
-        return columns
+        return row
+
+    def _parse_field_type(self, ftype):
+        matches = re.search("(.*?)\[(.*?)\]", ftype)
+        fnum = 1
+        if(matches != None):
+            ftype = matches.groups()[0] 
+            fnum  = int(matches.groups()[1]) 
+
+        if(ftype in ("char", "unsigned char", "int8_t", "uint8_t", "cs_uint8", "cs_int8", "boolean", "cs_boolean")):
+            width = 8
+        elif(ftype in ("unsigned short", "short", "int16_t", "uint16_t", "cs_uint16", "cs_int16")):
+            width = 16
+        elif(ftype in ("unsigned int", "int", "long", "unsigned long", "int32_t", "uint32_t", "cs_uint32", "cs_int32")):
+            width = 32
+        elif(ftype in ("unsigned long long", "int64_t", "uint64_t", "cs_uint64", "cs_int64")):
+            width = 64
+        else:
+            WARNING("Cannot process this field type [%s]" % ftype)
+            width = 0
+
+        return (fnum * width)
+
 
     def _parse_rows(self, source):
 
@@ -1637,16 +1610,18 @@ a C/C++ like define that looks like:
         # each line
         for i in range(0, len(source)):
             if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
-                if(buffer != ''):
-                    columns = self._parse_columns(buffer.strip())
-                    rows.append(columns)
+                if(buffer.strip() != ''):
+                    row = self._parse_columns(buffer)
+                    #print row
+                    rows.append(row)
                     buffer = ''
             else:
                 buffer += source[i]
 
-        if(buffer != ''):
-            columns = self._parse_columns(buffer.strip())
-            rows.append(columns)
+        if(buffer.strip() != ''):
+            row = self._parse_columns(buffer)
+            #print row
+            rows.append(row)
         
         return rows
 
@@ -1672,24 +1647,26 @@ a C/C++ like define that looks like:
             cindex = 0
 
             # Skip spacers for now
-            if(len(row) == 0):
+            if(row.is_spacer == True):
                 continue
 
             if(rindex > 0):
                 field = field_t()
 
-                if(len(row) == 0):
+                if(row.is_spacer == True):
                     field.is_spacer = True
                     field.set_name("spacer")
                     field.set_type("spacer")
                 else:
-                    for col in row:
+                    for col in row.cols:
+
+                        col = col.text
 
                         column_id = columns[cindex]
                         #print "%s = %s" % (column_id, col)
                         cindex += 1
 
-                        if(column_id == "bits"):
+                        if(column_id in ("bits", "type")):
                             field.set_type(col)
 
                             bits = col
@@ -1728,29 +1705,34 @@ a C/C++ like define that looks like:
                             elif(bits in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]):
                                 #print "BITS: %s" % bits
                                 type = bits
+
                                 min = int(bits)
 
-                                #print "  MIN: %d" % min
-                                #print "  END OF LAST: %d" % end
-                                if(min > end):
-                                    len_reserved = min - end
-                                    #print "  len reserved: %d" % len_reserved
-                                    
-                                    new_field = field_t()
-                                    new_field.width = len_reserved
-                                    new_field.start = end
-                                    new_field.end   = start
-                                    new_field.set_name("Reserved")
-                                    new_field.set_description(textblock_t("Automatically generated"))
-                                    new_field.is_reserved = True
-                                    new_field.set_type("%d-%d" % (end, start))
-                                    fields.append(new_field)
+                                if(column_id == "bits"):
+                                    #print "  MIN: %d" % min
+                                    #print "  END OF LAST: %d" % end
+                                    if(min > end):
+                                        len_reserved = min - end
+                                        #print "  len reserved: %d" % len_reserved
+                                        
+                                        new_field = field_t()
+                                        new_field.width = len_reserved
+                                        new_field.start = end
+                                        new_field.end   = start
+                                        new_field.set_name("Reserved")
+                                        new_field.set_description(textblock_t("Automatically generated"))
+                                        new_field.is_reserved = True
+                                        new_field.set_type("%d-%d" % (end, start))
+                                        fields.append(new_field)
 
-                                    start += len_reserved
+                                        start += len_reserved
 
-                                width = 1
+                                    width = 1
 
-                            elif("x" in bits):
+                                elif(column_id == "type"):
+                                    width = (min * 8)
+
+                            elif(None != (re.search("[0-9]+x[0-9]+", bits))):
                                 parts = bits.split("x")
                                 if(len(parts) != 2):
                                     FATAL("Cannot process type field %s" % bits)
@@ -1760,16 +1742,7 @@ a C/C++ like define that looks like:
                                 width = bit_width*increment
 
                             else:
-                                if(bits in ("char", "unsigned char", "int8_t", "uint8_t")):
-                                    width = 8
-                                elif(bits in ("unsigned short", "short", "int16_t", "uint16_t")):
-                                    width = 16
-                                elif(bits in ("unsigned int", "int", "long", "unsigned long", "int32_t", "uint32_t")):
-                                    width = 32
-                                elif(bits in ("unsigned long long", "int64_t", "uint64_t")):
-                                    width = 64
-                                else:
-                                    FATAL("Cannot process this field type %s" % bits)
+                                width = self._parse_field_type(bits)
                                 
                             start += width
                             end += start
@@ -1792,7 +1765,6 @@ a C/C++ like define that looks like:
                         if(cindex > (max_cols-1)):
                             max_cols = cindex + 1
 
-                #print field
                 fields.append(field)
             rindex += 1
 
@@ -1837,6 +1809,7 @@ a C/C++ like define that looks like:
         struct.line = self.get_attribute_as_int(modifiers, "line")
         
         columns = ["bits", "name", "description", "attributes"]
+        max_cols = 4
 
         for section in sections:
 
@@ -1870,7 +1843,6 @@ a C/C++ like define that looks like:
         record = record_t(struct.get_name(), desc)
 
         for field in struct.fields:
-
             #print "FIELD = [%s]" % (field["name"]) # field["attrs"][1], field["attrs"][0])
 
             if(field.get_is_reserved()):
@@ -1883,6 +1855,7 @@ a C/C++ like define that looks like:
                 if(field.array_elem_size):
                     array_elem_size = int(field.array_elem_size)
 
+                #print field
                 desc = field.get_description().get_source()
                 #print "FIELD: %s:" % field.get_name()
                 #print "DESC:"
@@ -1939,19 +1912,12 @@ a C/C++ like define that looks like:
         '''
         struct = struct_t()
         struct.fields = []
-
-        fields_are_bytes = False
-        fields_are_bits = False
-
-        if(modifiers.has_key("treat_fields_as") and modifiers["treat_fields_as"] == "bytes"):
-            fields_are_bytes = True
-
+        
         mark_reserved = True
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
                 struct.set_description(textblock_t(modifiers[modifier]))
-
 
         rows = []
         buffer = ""
@@ -1969,332 +1935,18 @@ a C/C++ like define that looks like:
         struct.private = self.get_attribute_as_bool(modifiers, "private")
         struct.file = self.get_attribute_as_string(modifiers, "file")
         struct.line = self.get_attribute_as_int(modifiers, "line")
+        
+        columns = ["type", "name", "description", "attributes"]
+        max_cols = 4
 
         for section in sections:
 
             if(section == ""):
                 continue
 
-
             if(section.startswith("fields:")):
-                    
                 source = section[7:len(section)].strip()
-
-                # Split the structure into individual rows. This is
-                # done by looking for the \n- sequence which separates
-                # each line
-                for i in range(0, len(source)):
-                    if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
-                        #print "BUFFER = [%s]" % buffer
-
-                        if(buffer != ''):
-                            rows.append(buffer)
-                            buffer = ''
-                    else:
-                        buffer += source[i]
-
-                if(buffer != ''):
-                    #print "BUFFER = [%s]" % buffer
-                    rows.append(buffer)
-
-                is_header = True
-                is_subheader = False
-                is_caption = False
-
-                max_cols = 0
-                row_num = 0
-                pos_last = 0
-
-                fields = []
-                fields2 = []
-                
-                rindex = 0
-                for row in rows:
-                    
-                    # Skip the first row since it is just the header. Should this really
-                    # be done here?
-                    if(rindex == 0):
-                        rindex += 1
-                        continue
-
-                    rindex += 1
-                        
-                    f2 = field_t()
-                    field = {}
-
-                    # Mark the first row as a header
-                    if(row_num == 0):
-                        f2.is_header = True
-
-                    row_num = row_num + 1
-                    
-                    cols = []
-                    if(row == ""):
-                        continue
-
-                    
-                    is_spaces = re.compile("^[ \t]*$", re.DOTALL)
-                    if(is_spaces.match(row)):
-                        f2.is_spacer = True
-                    
-                    row = row + "\n"
-                    
-                    STATE_NORMAL     = 0
-                    STATE_ESCAPE     = 4
-                    
-                    states = []
-                    state = STATE_NORMAL
-                    states.append(state)
-                    
-                    col = ""
-                    colspan = 1
-                    colnum = 1
-                    
-                    pos = 0
-                    start = 0
-
-                    
-                    # Check to see the leading characters in each
-                    # row. If they are &, *, or ^ then they have
-                    # special significance.
-                    if(row[0] == '&'):
-                        f2.is_subheader = True
-                        start = 1
-                    elif(row[0] == '*'):
-                        f2.is_header = True
-                        start = 1
-                    elif(row[0] == '^'):
-                        f2.is_caption = True
-                        start = 1
-
-                    i = start
-                    end = len(row)
-                    
-                    while i < end:
-                        
-                        if(i < pos):
-                            i += 1
-                            continue
-                        
-                        if(state == STATE_NORMAL):
-                            if(row[i] == '\\'):
-                                states.append(state)
-                                state = STATE_ESCAPE
-
-                            elif(row[i] == '@' and row[i+1] == '{'):
-                                states.append(state)
-                                state = STATE_INLINE_STYLING
-                                col += row[i]
-                                col += row[i+1]
-                                i += 1
-
-                            elif(row[i] == '|'):
-                                
-                                colnum += 1
-                                if(colnum > max_cols):
-                                    max_cols = colnum
-                                
-                                #print "ATTR: [%s]" % col
-
-                                attr = col.strip()
-                                tmp = {}
-                                tmp["textblock"] = textblock_t(col)
-
-                                # Strip any formatting characters
-                                attr = self.strip_formatting(attr)
-                                text = attr.strip()
-
-                                if(mark_reserved and self.is_reserved_text(text)):
-                                    f2.is_reserved = True
-
-                                #field["attrs"].append(attr)
-                                
-                                tmp["text"] = attr
-                                f2.append_attr(tmp)
-
-                                col = ""
-
-                            else:
-                                col += row[i]
-
-                        elif(state == STATE_INLINE_STYLING):
-                            col += row[i]
-
-                            if(row[i] == '}'):
-                                    state = states.pop()
-
-                        elif(state == STATE_ESCAPE):
-                            col += row[i]
-                            state = states.pop()
-
-                        i += 1
-
-
-                    if(col != ""):
-                        
-                        tmp = {}
-                        tmp["textblock"] = textblock_t(col)
-                                
-                        attr = col.strip()
-
-                        if(attr == "Reserved" or attr == 'reserved' or attr == 'Rsvd' or attr == 'rsvd'):
-                            f2.is_reserved = True
-
-                        tmp["text"] = attr
-                        f2.append_attr(tmp)
-
-                    #print field
-
-                    fields2.append(f2)
-
-                for field in fields2:
-                    if(not fields_are_bytes):
-                        if(field.get_field_is_bits()):
-                            fields_are_bits = True
-
-                type = ""
-                for field in fields2:
-
-                    if(field.get_is_header()):
-                        i = 0
-                        for attr in field.attrs:
-                            struct2.headings[i] = attr["text"]
-                            i += 1
-
-                        continue
-
-                    if(field.get_is_spacer()):
-                        width = 0
-                        start = 0
-                        end = 0
-
-                    elif(fields_are_bytes):
-
-                        bytes = field.get_type()
-
-                        if((bytes[0] >= '0') and (bytes[0] <= '9')):
-                            parts = bytes.split("x") 
-
-                            if(len(parts) == 2):
-                                type = int(parts[0].strip())
-                                num  = int(parts[1].strip())
-
-                                field.is_array        = True
-                                field.array_elem_size = type
-
-                                #print("type = %d" % type)
-                                #print("num = %d" % num)
-
-                                width = (type * num)
-
-                                type = bytes
-
-                            else:
-                                width = int(parts[0].strip()) * 8
-
-                            start += width
-                            end += start
-                        else:
-                            width = 0
-                            type = bytes
-
-                    elif(fields_are_bits):
-
-                        bits = field.get_type().strip()
-                        #print "BITS: [%s]" % bits
-                        #bits = bits.replace("'", '')
-                        
-                        if("'b" in bits):
-                            type = bits
-                            width = bits
-                            width = int(bits.replace("'b", ""))
-                        elif("-" in bits):
-                            type = bits
-                            parts = bits.split("-")
-                            min = int(parts[0].strip())
-                            max = int(parts[1].strip())
-                            width = (max - min)+1
-                        elif("x" in bits):
-                            FATAL("Don't handle this format yet")
-                            type = bits
-                            parts = bits.split("x")
-                        else:
-                            #print "BITS: %s" % bits
-                            type = bits
-                            width = 1
-
-                        start += width
-                        end += start
-
-                    else:
-                        bits = field.get_type()
-
-                        # If it's not the header then see if we should insert
-                        # a reserved field befor this one to accomodate any gaps
-                        # in the data structure
-                        if((bits[0] >= '0') and (bits[0] <= '9')):
-
-                            #print "BITS: %s" % bits
-                            parts = bits.split("-")
-
-                            if(len(parts) == 2):
-                                start = int(parts[0].strip())
-                                end   = int(parts[1].strip())
-
-                                width = int(end - start + 1)
-                            else:
-                                width = 1
-                                start = int(bits.strip())
-                                end = start
-
-                            #print "START: %d:%d (%d)" % (start, end, pos_last)
-
-                            # If there was a gap between this field and
-                            # the last then automatically add a reserved
-                            # field.
-                            if(start != pos_last):
-
-                                new_start = pos_last
-                                new_end = start - 1
-                                new_width = new_end - new_start + 1
-
-                                new_field = field_t()
-
-                                new_field.width = new_width
-                                new_field.start = new_start
-                                new_field.end   = new_end
-                                new_field.attrs = []
-
-                                if(new_width > 1):
-                                    new_field.attrs.append("%d - %d" % (new_start, new_end))
-                                else:
-                                    new_field.attrs.append("%d" % (new_start))
-                                        
-                                new_field.attrs.append("Reserved")
-                                new_field.attrs.append("Automatically generated")
-                                new_field.set_name("Reserved")
-                                new_field.set_description(textblock_t("Automatically generated"))
-                                new_field.set_description_unparsed("Automatically generated")
-                                new_field.is_reserved = True
-                                new_field.is_header = False
-                                new_field.is_title = False
-                                new_field.is_subheader = field.is_subheader
-                                new_field.is_spacer = False
-                                new_field.is_array = False
-                                new_field.type = ""
-                                struct2.fields.append(new_field)
-
-                            pos_last = end+1
-                        else:
-                            width = 0
-                            start = 0
-                            end = 0
-
-                    field.width = width
-                    field.start = start
-                    field.end = end
-                    field.set_type(type)
-                    struct.fields.append(field)
+                (struct.fields, max_cols) = self._parse_register_fields(source, columns, mark_reserved) 
         
         for section in sections:
             if(section != ""):

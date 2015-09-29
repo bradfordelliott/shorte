@@ -1004,11 +1004,14 @@ class field_t(type_t):
     def get_description(self):
         if(self.desc == None):
             if(len(self.attrs) >= 3):
+                FATAL("DO I GET HERE?")
                 return self.attrs[2]["textblock"]
             return "empty"
 
         return self.desc
+
     def get_description_unparsed(self):
+        FATAL("DO I GET HERE?")
         return self.desc_unparsed
 
     def set_description(self, desc):

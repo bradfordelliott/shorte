@@ -98,8 +98,9 @@ This method requires some other random thing.
 
 @struct: diagram="show:yes,align:64,bitorder:increment"
 --fields:
-- Field    | Name      | Description
-- uint8_t  | field_one | This is a random description of Field 1
-- uint16_t | field_two | This is a description of field 2.
+- Field    | Name        | Description
+- uint8_t  | field_one   | This is a random description of Field 1
+- uint16_t | field_two   | This is a description of field 2.
+- char[8]  | field_three | An array of 8 characters.
 
 

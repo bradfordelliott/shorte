@@ -450,8 +450,8 @@ test_gnuplot:
 	${python} shorte.py -f examples/gnuplot.tpl -p "${html_pdf}" -t shorte -o build-output/gnuplot
 
 test_registers:
-	${python} shorte.py -f examples/registers.tpl -p "${html_pdf}" -t shorte -o build-output/test_registers/html
-	${python} shorte.py -f examples/registers.tpl -p "c" -t shorte -o build-output/test_registers/c_generation
+	${python} shorte.py -f examples/registers.tpl -p "${html_pdf}" -t ${THEME} -o build-output/test_registers/html
+	${python} shorte.py -f examples/registers.tpl -p "c" -t ${THEME} -o build-output/test_registers/c_generation
 
 test_custom_theme:
 	${python} shorte.py -f examples/test_custom_theme.tpl -p "html" -o build-output/test_custom_theme

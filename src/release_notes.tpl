@@ -6,10 +6,11 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.74 (???)
+@h3 Version 1.0.74 (Sep 29, 2015)
 - Parsers
     - Shorte Parser
-        - Fixes for register definitions
+        - Cleanup to the register, structure and table parsing
+          to try to re-use the same code.
 - Cairo
     - Updated to support generating SVGs
     - Some cleanup to the cairo_access.i SWIG wrapper
