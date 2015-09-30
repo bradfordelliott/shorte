@@ -1515,9 +1515,8 @@ class template_html_t(template_t):
     
     def format_table(self, source, table):
         
-        #html = "<div class='tb'><table class='tb'>\n"
-        if(table.dict.has_key("width")):
-            width = 'width="100%"'
+        if(table.width):
+            width = 'width="%s%%"' % table.width
         else:
             width = ''
 
@@ -1532,8 +1531,8 @@ class template_html_t(template_t):
         i = 0
 
         widths = []
-        if(table.dict.has_key("widths")):
-            widths = table.dict["widths"]
+        if(table.has_widths()):
+            widths = table.get_widths()
 
         for row in table.rows:
             
@@ -2558,7 +2557,7 @@ within an HTML document.
                 else:
                     imagemap = self.m_engine.m_imagemaps[image["imagemap"]]
                     image_map = ""
-                    image_map_link = " usemap = '#%s' " % imagemap["id"]
+                    image_map_link = " usemap = '#%s' " % imagemap.title
 
             else:
                 image_map = ""
@@ -2585,14 +2584,14 @@ $href_end
     def format_imagemap(self, imagemap):
         
         imagemap = imagemap.contents
-        id = imagemap["id"]
+        id = imagemap.title
 
         html = '''<map name="%s">
 ''' % id
 
         i = 0
 
-        for row in imagemap["rows"]:
+        for row in imagemap.rows:
 
             if(i == 0):
                 i += 1

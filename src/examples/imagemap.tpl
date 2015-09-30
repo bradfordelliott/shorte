@@ -7,7 +7,7 @@
 
 @h1 Test Results
 
-@imagemap: id="one"
+@imagemap: title="one"
 - shape  | coords          | Label     | Description
 - circle | 25,25,25        | Blah      | Blah blah blah
 - rect   | 100,100,200,200 | Blah2     | More blah blah

@@ -486,7 +486,7 @@ A: This is the answer to that question
 #- time | Event     | Description
 #- 0    | Blah blah | Blah blah blah blah
 
-@imagemap: id="one"
+@imagemap: title="one"
 - x | y | Label     | Description
 - 0 | 0 | 1         | Blah blah blah
 
