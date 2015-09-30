@@ -495,6 +495,9 @@ test_cairo:
 test_python:
 	${python} shorte.py -f "examples/test_python.py" -xpython -t ${THEME} -p "${html_pdf}" -o build-output/test_python
 
+test_imagemap:
+	${python} shorte.py -f "examples/imagemap.tpl" -t ${THEME} -p ${html_pdf} -o build-output/imagemap
+
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python
 exe:

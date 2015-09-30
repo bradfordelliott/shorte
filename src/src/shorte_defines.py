@@ -593,8 +593,8 @@ class table_t:
         self.rows = []
         self.modifiers = {}
         self.max_cols = 1
-        self.widths = []
-        self.width = 0
+        self.widths = None
+        self.width = None
         self.title = None
         self.caption = None
 
@@ -616,7 +616,7 @@ class table_t:
     def get_widths(self):
         return self.widths
     def has_widths(self):
-        if(len(self.widths) > 0):
+        if(self.widths != None and len(self.widths) > 0):
             return True
         return False
 

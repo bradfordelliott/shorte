@@ -919,23 +919,17 @@ class shorte_parser_t(parser_t):
            declaration
         '''
 
-        table = {}
         table2 = table_t()
-
-        table["rows"] = []
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):
-                table[modifier] = textblock_t(modifiers[modifier])
-                table2.modifiers[modifier] = table[modifier]
+                table2.modifiers[modifier] = modifiers[modifier]
 
                 if(modifier == "caption"):
-                    table2.set_caption(table[modifier])
+                    table2.set_caption(textblock_t(modifiers[modifier]))
             else:
-                table[modifier] = modifiers[modifier]
-
                 if(modifier in ("name", "title")):
-                    table2.title = table[modifier]
+                    table2.title = modifiers[modifier]
 
                 table2.modifiers[modifier] = modifiers[modifier]
 
@@ -957,11 +951,9 @@ class shorte_parser_t(parser_t):
                 #FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, self.m_current_line[self.m_current_file]))
                 FATAL("Table widths do not add up to 100%% at %s:%d" % (self.m_current_file, -1))
 
-            table["widths"] = widths
             table2.widths = widths
 
         if(modifiers.has_key("width")):
-            table["width"] = modifiers["width"]
             table2.width = modifiers["width"]
 
         if(modifiers.has_key("style")):
@@ -1038,7 +1030,6 @@ class shorte_parser_t(parser_t):
 
                 col["span"] = max_cols - len(row["cols"]) + 1
 
-        table2.dict = table
         return table2
 
 
@@ -2436,10 +2427,10 @@ a C/C++ like define that looks like:
 
     def parse_imagemap(self, source, modifiers):
 
-        imagemap = self.parse_table(source, modifiers).dict
-        self.m_engine.m_imagemaps[imagemap["id"]] = imagemap
+        table = self.parse_table(source, modifiers)
+        self.m_engine.m_imagemaps[table.title] = table
 
-        return imagemap
+        return table
 
     def parse_gallery(self, source, modifiers):
         
