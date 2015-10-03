@@ -134,6 +134,8 @@ parser.add_argument("--werr", "--warnings_as_errors",
 parser.add_argument("--profile", "--profile",
                   action="store", dest="profile", default=False,
                   help="Turn on profiling")
+parser.add_argument("--build_index", "--build_index",
+                    action="store", dest="build_index", help="Scan a directory and generate an index file")
 
 #parser.add_argument("-I", "--include",
 #                  action="store",type="string",dest="include",
@@ -281,6 +283,7 @@ if(options.name != None):
 if(options.working_directory != None):
     shorte.set_working_dir(options.working_directory)
 
+
 # Save the version number of the document
 # if it was specified.
 shorte.set_version(options.version)
@@ -296,11 +299,37 @@ if(options.info):
 
         sys.exit(0)
 
+
+# See if we should just use shorte to generate an index file
+if(options.build_index != None):
+    output = '''@doctitle Index Page
+@body
+@h1 Document Index
+This is the document index page.
+@table
+- Page
+'''
+    for root, dirs, paths in os.walk(options.build_index):
+        for path in paths:
+            if("index.html" in path):
+                link = root + os.sep + path
+                link = link.replace(options.build_index, "")
+                if(link.startswith("/")):
+                    link = link[1:]
+
+                output += "- [[%s]]\n" % link 
+                #print "PATH: %s" % link
+    shorte.parse_string(output)
+    shorte.generate_packages(options.package, shorte_get_config("shorte", "theme"), options, options.zip)
+    sys.exit(0)
+
+
 # If profiling is enabled then profile the parsing task
 if(options.profile):
     import cProfile, pstats, StringIO
     profiler = cProfile.Profile()
     profiler.enable()
+
 
 shorte.parse_pages(options.file_list, options.files, options.macros)
 
