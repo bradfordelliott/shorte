@@ -197,6 +197,8 @@ tests:
 	make test_gnuplot
 	make test_sequences
 	make test_python
+	make test_imagemap
+	${python} shorte.py --build_index=build-output -p html_inline -t ${THEME}
 
 THEME:=shorte
 
