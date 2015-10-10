@@ -1339,6 +1339,13 @@ class list_item_t:
 
 class textblock_t:
 
+    TYPE_TEXT         = 0
+    TYPE_LIST         = 1
+    TYPE_ORDERED_LIST = 2
+    TYPE_CODE         = 3
+    TYPE_QUOTE        = 4
+    TYPE_TABLE        = 5
+
     def __init__(self, data=""):
         self.source = data
         self.paragraphs = []
@@ -1701,6 +1708,9 @@ class textblock_t:
         STATE_CODE = 2
         STATE_INLINE = 3
         STATE_ESCAPE = 4
+        STATE_QUOTE = 5
+        STATE_ORDERED_LIST = 6
+        STATE_CODE_BACKTICKS = 7
         states = []
         states.append(STATE_NORMAL)
 
@@ -1711,7 +1721,7 @@ class textblock_t:
         i = 0
 
         #print "DATA: [%s]" % data
-
+        end = len(data)-1
         while(i < len(data)):
 
             state = states[-1]
@@ -1744,6 +1754,16 @@ class textblock_t:
                         segment["text"] += data[i]
                         i += 1
 
+                # If the line starts with a number followed by . then it
+                # must be the start of an ordered list
+                elif(i > 0 and (data[i-1] == "\n") and (data[i].isdigit()) and data[i+1] == "."):
+                    segments.append(segment)
+                    segment = {}
+                    segment["type"] = "orderedlist"
+                    segment["text"] = data[i]
+                    i += 1
+                    states.append(STATE_ORDERED_LIST)
+
                 # Start of a new segment
                 elif(data[i] == "\n" and (i < len(data)-1) and data[i+1] == "\n"):
                     #print "SEGMENT [%s]" % segment["text"]
@@ -1751,20 +1771,37 @@ class textblock_t:
                     segments.append(segment)
                     segment = {}
                     segment["type"] = "text"
-                    segment["text"] = ""
+                    segment["text"] = "" 
                     i += 1 
+
                 # DEBUG BRAD: This is not implemented
                 #  If a line is indented then we should treat all consecutive lines
                 #  that have the same indent level as an indented block.
                 #elif(data[i] == "\n" and (i < len(data)-1) and data[i+1] in (" ")):
-                elif(data[i] == "\n" and data[i+1] == " "):
+                elif((data[i] == "\n") and (i < end) and (data[i+1] == " ")):
                     segments.append(segment)
+
+                    # Look forward and see if there are anything but spaces. If not
+                    # then we'll ignore it.
+                    j = i+1
+                    all_whitespace = True
+                    while(j <= end and data[j] != "\n"):
+                        if(data[j] != " "):
+                            all_whitespace = False
+                        j += 1
+
+
                     segment = {}
                     segment["type"] = "text"
                     segment["text"] = ""
-                    
-                    #print "\n\nParsing Indented text [%s]\n" % data[i+1:]
 
+                    if(all_whitespace):
+                        i = j
+                        continue
+
+                    #tmp = data[i:]
+                    #tmp = tmp.replace(" ", ".")
+                    
                     j = i+1
 
                     block = ""
@@ -1785,6 +1822,7 @@ class textblock_t:
                         while((j <= len(data)-1) and data[j] != '\n'):
                             block += data[j]
                             j += 1
+
                         #print "data[%d] = [%s]" % (j, data[j])
                         block += "\n"
 
@@ -1804,7 +1842,8 @@ class textblock_t:
                     segment["text"] = block
 
                     #print "   TEXT: [%s]" % segment["text"]
-                    i = j+1
+                    #i = j+1
+                    i = j
                     
                     segments.append(segment)
                     segment = {}
@@ -1812,6 +1851,22 @@ class textblock_t:
                     segment["text"] = ""
 
                     #i += 2
+
+                elif(data[i:i+3] == "```"):
+                    segments.append(segment)
+                    segment = {}
+                    segment["type"] = "code"
+                    segment["text"] = ""
+                    i += 3
+                    states.append(STATE_CODE_BACKTICKS)
+                    
+                    # Search forward till we find the end of line. Everything
+                    # up till then is the language specifier
+                    language = ""
+                    while(i < end and data[i] != "\n"):
+                        language += data[i]
+                        i += 1
+                    segment["language"] = language
 
                 elif(data[i] == "{" and data[i+1] == "{"):
                     segments.append(segment)
@@ -1828,6 +1883,15 @@ class textblock_t:
                     segment["text"] += "@"
                     i += 1
                     states.append(STATE_INLINE)
+                
+                # Check for inline quotes
+                elif((i == 0 or data[i] == "\n") and (i < end) and (data[i+1] == ">")):
+                    i += 2
+                    segments.append(segment)
+                    segment = {}
+                    segment["type"] = "quote"
+                    segment["text"] = ""
+                    states.append(STATE_QUOTE)
 
                 else:
                     #print "In Else block"
@@ -1862,6 +1926,23 @@ class textblock_t:
                     segment["text"] += data[i]
                     i += 1
 
+
+            elif(state == STATE_CODE_BACKTICKS):
+                if(data[i:i+3] == "```"):
+                    segments.append(segment)
+                    segment = {}
+                    segment["type"] = "text"
+                    segment["text"] = ""
+                    
+                    i += 3
+
+
+                    states.pop()
+                else:
+                    segment["text"] += data[i]
+                    i += 1
+
+
             elif(state == STATE_LIST):
                 #print "PARSING LIST"
                 if(data[i] == "\n" and (i > len(data)-2 or data[i+1] == "\n")):
@@ -1877,6 +1958,38 @@ class textblock_t:
                     i += 1
                 #print "  [%s]" % segment["text"]
 
+            elif(state == STATE_ORDERED_LIST):
+                if(data[i] == "\n" and (i > len(data)-2 or data[i+1] == "\n")):
+                    segment["text"] += data[i]
+                    i += 2 
+                    segments.append(segment)
+                    states.pop()
+                    segment = {}
+                    segment["type"] = "text"
+                    segment["text"] = ""
+                else:
+                    segment["text"] += data[i]
+                    i += 1
+
+
+            elif(state == STATE_QUOTE):
+                if(data[i] == "\n" and data[i+1] != ">"):
+                    segment["text"] += data[i]
+                    i += 1
+                    segments.append(segment)
+                    states.pop()
+                    segment = {}
+                    segment["type"] = "text"
+                    segment["text"] = ""
+                else:
+                    if(data[i] == "\n" and data[i+1] == ">"):
+                        segment["text"] += data[i]
+                        i += 2
+                    else:
+                        segment["text"] += data[i]
+                        i += 1
+
+
         if(segment["text"] != ""):
             segments.append(segment)
 
@@ -1891,7 +2004,8 @@ class textblock_t:
             text = segment["text"]
             type = segment["type"]
 
-            #print "Segment [%s]" % segment
+            #print "Segment"
+            #print text
 
             for i in range(0, len(text)):
                 if(text[i] == ' '):
@@ -1902,6 +2016,7 @@ class textblock_t:
             is_code = False
             is_list = False
             is_table = False
+            is_quote = False
             
             # Handle any code blocks detected within the
             # textblock. Code blocks are represented by {{ }}
@@ -1909,29 +2024,80 @@ class textblock_t:
                 #print "TEXT = [%s]" % text
                 text = self.parse_block(text)
                 is_code = True
+                type = textblock_t.TYPE_CODE
+
+            elif(type == "quote"):
+                text = self.parse_block(trim_leading_indent(text))
+                is_quote = True
+                type = textblock_t.TYPE_QUOTE
+
             elif(type == "list"):
 
                 #print "LIST: [%s]" % text
-
+                
                 elements = self.parse_list(text, "")
 
                 text = elements
                 is_list = True
+
+                type = textblock_t.TYPE_LIST
+
+            elif(type == "orderedlist"):
+                #print "LIST: [%s]" % text
+
+                # For ordered lists we need to strip off any 1. prefix
+                # to make it easier for shorte to parse.
+                lines = text.split("\n")
+                output = []
+                for line in lines:
+                    line = re.sub(r"^(\s*)[0-9]+\.", r"\1-", line)
+                    output.append(line)
+
+                elements = self.parse_list("\n".join(output), "")
+
+                text = elements
+                is_list = True
+
+                type = textblock_t.TYPE_ORDERED_LIST
+
+
             elif(type == "table"):
                 elements = self.parse_table(text, "")
 
                 text = elements
                 is_table = True
 
+                type = textblock_t.TYPE_TABLE
+
+            else:
+                type = textblock_t.TYPE_TEXT
+                text = trim_blank_lines(text)
+
             paragraphs.append({
                 "indent":indent,
+                "type":type,
                 "text":text,
                 "code":is_code,
                 "list":is_list,
+                "quote":is_quote,
                 "table":is_table})
         
         self.paragraphs = paragraphs
         return paragraphs
+
+    def __str__(self):
+        output =  "Textblock\n"
+        output += "=========\n"
+        output += "  num paragraphs: %d\n" % len(self.paragraphs)
+        for paragraph in self.paragraphs:
+            ptype = paragraph["type"]
+            output += "  paragraph:\n"
+            output += "    type: %s\n" % ptype
+            if(ptype in (textblock_t.TYPE_TEXT, textblock_t.TYPE_CODE)):
+                output += indent_lines(paragraph["text"], "      ")
+
+        return output
+
 
 def shorte_get_os():
     import platform

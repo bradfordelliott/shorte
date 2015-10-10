@@ -216,7 +216,7 @@ class template_revealjs_t(template_html_t):
             pass
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
-        elif(name in ('class')):
+        elif(name in ('class', "quote")):
             WARNING("This tag [%s] is not supported yet" % name)
         else:
             FATAL("Undefined tag: %s [%s]" % (name, tag.source))

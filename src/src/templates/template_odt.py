@@ -1221,6 +1221,14 @@ class template_odt_t(template_t):
 
                 xml += "<text:p text:style-name=\"shorte_standard\">"
                 return xml
+            elif(tag == "quote"):
+                textblock = textblock_t(replace)
+                xml = "</text:p>"
+                xml += self.format_quote(textblock, nest_level=0)
+                xml += "<text:p text:style-name=\"shorte_standard\">"
+
+                return xml
+
 
 
         return prefix + replace + postfix
@@ -2147,7 +2155,8 @@ ${desc}
     def format_textblock(self, tag,
         style="shorte_standard",
         indent_style="indent",
-        list_style="list_level"):
+        list_style="list_level",
+        nest_level=0):
 
         if(tag == None):
             return ''
@@ -2169,6 +2178,7 @@ ${desc}
             text    = p["text"]
             is_code = p["code"]
             is_list = p["list"]
+            ptype   = p["type"]
 
             if(p["text"] == ""):
                 continue
@@ -2177,7 +2187,15 @@ ${desc}
                 xml += self.format_pre(text, "code")
                 #xml += '<text:p text:style-name="shorte_spacer"></text:p>'
             elif(is_list):
-                xml += self.format_list(p["text"], False,list_style=list_style)
+                if(ptype == textblock_t.TYPE_ORDERED_LIST):
+                    xml += self.format_list(p["text"], True, list_style=list_style)
+                else:
+                    xml += self.format_list(p["text"], False,list_style=list_style)
+
+            elif(ptype == textblock_t.TYPE_QUOTE):
+                tblock = textblock_t(p["text"])
+                xml += self.format_quote(tblock, nest_level + 1)
+
             elif(indent > 0):
                 lcl_style = self.m_styles["para"][indent_style][0]
                 xml += '''<text:p text:style-name="%s">%s</text:p>''' % (lcl_style, self.format_text(text.strip(), expand_equals_block=True))
@@ -2240,6 +2258,8 @@ ${desc}
 
         return xml
 
+
+
     def format_note(self, tag, type="note", label="Note", image="note.png"):
 
         #print "format_note, image=%s, label=%s\n" % (image, label)
@@ -2270,6 +2290,11 @@ ${desc}
         self.m_frame_id += 1
         self.m_image_id += 1
 
+        return xml
+    
+    def format_quote(self, tag, nest_level=0):
+        #print "STYLE: %s" % "shorte_quote_l%d" % nest_level
+        xml = self.format_textblock(tag, style="shorte_quote_l%d" % nest_level, nest_level=nest_level+1)
         return xml
     
     def format_question(self, source):
@@ -3226,7 +3251,7 @@ ${desc}
         elif(name == "class"):
             WARNING("Classes not supported in OTD documents yet")
         # These tags are not supported in OTD documents
-        elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns", "gallery")):
+        elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns", "gallery", "quote")):
             #print "WARNING: %s tag not supported in ODT documents" % name
             pass
         else:

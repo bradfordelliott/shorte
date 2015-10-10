@@ -6,7 +6,7 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.74 (Sep 29, 2015)
+@h3 Version 1.0.74 (Oct 10, 2015)
 - Parsers
     - Shorte Parser
         - Cleanup to the register, structure and table parsing
@@ -19,6 +19,9 @@ This document describes the release history of the Shorte language.
     - Some minor cleanup of the ODT template
 - Other
     - Switched to argparse from the legacy optparse module
+- Syntax
+    - Updated the textblock syntax to support a few elements from markdown
+      like quote blocks and code blocks in backticks.
 
 @h3 Version 1.0.73 (Aug 20, 2015)
 - Code Execution

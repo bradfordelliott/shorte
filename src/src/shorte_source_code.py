@@ -190,7 +190,7 @@ class source_code_t:
  @note @tbd @warning @question
  @ul
  @ol
- @struct @enum @prototype
+ @struct @enum @prototype @define @register
  @acronyms @questions
  @input @embed @columns @column
  @testcasesummary @testcase @functionsummary @typesummary
@@ -404,7 +404,7 @@ onload onmouseup onmousedown onsubmit
         #print "BEFORE\n======\n%s" % source
 
         source_lang = type
-
+        
         tmp = shorte_get_config('shorte', 'validate_line_length')
         if(tmp):
             tmp = tmp.strip()
@@ -594,8 +594,16 @@ onload onmouseup onmousedown onsubmit
                     tag.start = source[i:i+3]
                     i += 2
                 
-                # Treat " or ''' as the start of a string
-                elif(source[i] in ('"', "'")): # or source[i] == "'"):
+                # Treat " as a string in shorte
+                elif(source_lang == "shorte" and source[i] == '"'):
+                    states.append(STATE_STRING)
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+                    tag = shorte_source_code_tag_t(TAG_TYPE_STRING, source[i])
+                    tag.start = source[i]
+
+                # Treat " or ''' as the start of a string (as long as it is not shorte)
+                elif((source_lang != "shorte") and (source[i] in ('"', "'"))): # or source[i] == "'"):
                     states.append(STATE_STRING)
 
                     if(not tag.is_empty()):
@@ -614,7 +622,7 @@ onload onmouseup onmousedown onsubmit
                 # Treat @{ as inline styling
                 elif(source[i] == '@' and source[i+1] == '{'):
                     states.append(STATE_INLINE_STYLING)
-                    if(not tags.is_empty()):
+                    if(not tag.is_empty()):
                         tags.append(tag)
 
                     tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '@')

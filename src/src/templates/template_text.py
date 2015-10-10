@@ -103,6 +103,25 @@ class template_text_t(template_t):
 %s
 ''' % (label,label_underline,output)
 
+    def format_quote(self, tag):
+        '''This method is called to format a note tag.
+           
+           @param tag   [I] - The tag note object.
+
+           @return The formatted quote object
+        '''
+
+        content = self.format_textblock(tag)
+        lines = content.split('\n')
+        output_lines = [" >"]
+        for line in lines:
+            if(len(line) > 0):
+                output_lines.append(" > %s" % line)
+        output_lines.append(" >")
+
+        return "\n".join(output_lines)
+
+
     def format_define(self, tag):
         define = tag.contents
 
@@ -300,7 +319,7 @@ ${fields}+----------------------------------------------------------------------
 
             # Embed an inline note. This is useful when documenting
             # source code.
-            elif(tag in ("note", "warning", "tbd", "question")):
+            elif(tag in ("quote", "note", "warning", "tbd", "question")):
                 # We've already converted breaks so we need to unconvert them
                 # to format the note properly.
                 replace = replace.replace("<br/>", "\n")
@@ -315,6 +334,8 @@ ${fields}+----------------------------------------------------------------------
                     label = "TBD"
                 elif(tag == "question"):
                     label = "Question"
+                elif(tag == "quote"):
+                    label = "Quote"
 
                 return self.format_note(textblock, label)
 
@@ -825,6 +846,8 @@ ${fields}+----------------------------------------------------------------------
             self.m_contents += self.format_note(tag, "WARNING")
         elif(name == "tbd"):
             self.m_contents += self.format_note(tag, "TBD")
+        elif(name == "quote"):
+            self.m_contents += self.format_quote(tag)
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "text"):

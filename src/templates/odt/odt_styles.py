@@ -48,12 +48,40 @@ class styles():
         return outline_styles
     
     def get_common_styles(self):
+        indents = [self.standard_indented,
+                   self.standard_indented + 0.3,
+                   self.standard_indented + 0.5,
+                   self.standard_indented + 0.7,
+                   self.standard_indented + 0.9,
+                   self.standard_indented + 1.1]
+
+        # Quote styles
+        quote_styles = ""
+        for i in xrange(0, len(indents)):
+            name = "shorte_quote_l%d" % i
+            indent = indents[i]
+            quote_styles += string.Template('''
+<style:style style:name="${name}" style:family="paragraph" style:parent-style-name="shorte_standard">
+  <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm"
+      fo:margin-left="${indent}cm"
+      fo:border-left="0.020in solid #c0c0c0"
+      fo:padding-left="0.2in"/>
+  <style:text-properties fo:color="#000000"/>
+</style:style>
+''').substitute({"name"   : name,
+                 "indent" : indent})
+
+
         return string.Template('''
     <!-- Styling for hyperlinks -->
     <style:style style:name="hyperlink" style:family="text">
         <style:text-properties fo:color="${color_hyperlink}"/>
     </style:style>
-    ''').substitute({"color_hyperlink" : self.colors["hyperlink"].fg})
+    
+    <!-- Quote levels -->
+    ${quote_styles}
+    ''').substitute({"color_hyperlink" : self.colors["hyperlink"].fg,
+                     "quote_styles"    : quote_styles})
        
 
     def get_table_styles(self):

@@ -1134,6 +1134,8 @@ $box_end
             print "WARNING: Skipping testcase for now"
         elif(name == "embed"):
             print "WARNING: Skipping embed for now"
+        elif(name == "quote"):
+            WARNING("Skipping quote for now")
         else:
             FATAL("Undefined tag: %s [%s]" % (name, tag.source))
  

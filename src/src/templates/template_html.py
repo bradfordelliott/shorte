@@ -53,6 +53,15 @@ note_template = string.Template(
 </div>
 """)
 
+quote_template = string.Template(
+"""
+<div style='margin-left: 20px; margin-top:10px; margin-bottom:0px; margin-right:30px;border-left:2px solid #ccc;background:#e0e0e;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;'>
+<div style="margin-left:10px;margin-top:0px;font-style:italic;">
+$contents
+</div>
+</div>
+""")
+
 question_template = string.Template(
 """
     <div style='margin-left: 30px; color: red; border-left: 1px solid #C0C0C0;width:100%;'>
@@ -599,7 +608,6 @@ class template_html_t(template_t):
                                           and functions can hyperlink to them.
            @return The HTML string defining the structure.
         '''
-        
         lt = re.compile("<")
         gt = re.compile(">")
         nl = re.compile("\\\\n")
@@ -760,6 +768,13 @@ class template_html_t(template_t):
             {"contents" : content,
              "image"    : img_src,
              "title"    : label})
+
+    def format_quote(self, tag):
+        content = self.format_textblock(tag)
+        
+        return quote_template.substitute(
+            {"contents" : content,
+             "title"    : "Quote"})
     
     def format_checklist(self, tag):
         
@@ -1683,6 +1698,8 @@ within an HTML document.
         else:
             textblock = tag
 
+        #print textblock
+
         html = ''
 
         if(isinstance(textblock, textblock_t)):
@@ -1693,10 +1710,12 @@ within an HTML document.
 
         if(is_array(paragraphs)):
             for p in paragraphs:
-                indent  = p["indent"]
-                text    = p["text"]
-                is_code = p["code"]
-                is_list = p["list"]
+                indent   = p["indent"]
+                text     = p["text"]
+                is_code  = p["code"]
+                is_list  = p["list"]
+                is_quote = p["quote"]
+                ptype    = p["type"]
 
                 #print "Indent: [%d], text: [%s]" % (indent, text)
 
@@ -1717,7 +1736,13 @@ within an HTML document.
                 if(is_code):
                     html += "<div class='code' %s><div class='snippet' style='white-space:pre'>" % style + self.format_text(text) + "</div></div>\n"
                 elif(is_list):
-                    html += self.format_list(p["text"], False, indent)
+                    if(ptype == textblock_t.TYPE_ORDERED_LIST):
+                        html += self.format_list(p["text"], True, indent)
+                    else:
+                        html += self.format_list(p["text"], False, indent)
+                elif(is_quote):
+                    tblock = textblock_t(p["text"])
+                    html += self.format_quote(tblock)
                 else:
                     if(standalone):
                         html += "<div class='tblkps' %s>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
@@ -3174,8 +3199,15 @@ $href_end
                 elif(tag == "question"):
                     label = "Question"
                     img = "question.png"
+                elif(tag == "quote"):
+                    label = "Quote"
+                    img = "note.png"
 
                 return self.format_note(textblock, label, img)
+
+            elif(tag == "quote"):
+                textblock = textblock_t(replace)
+                return self.format_quote(textblock)
 
 
         return prefix + replace + postfix
@@ -3457,6 +3489,8 @@ $href_end
             self.m_contents.append(self.format_note(tag, "Question", "question.png"))
         elif(name == "warning"):
             self.m_contents.append(self.format_note(tag, "Warning", "warning.png"))
+        elif(name == "quote"):
+            self.m_contents.append(self.format_quote(tag))
         elif(name == "table"):
             self.m_contents.append(self.format_table(tag.source, tag.contents))
         elif(name in ("struct", "register")):

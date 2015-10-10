@@ -186,6 +186,7 @@ class shorte_parser_t(parser_t):
             "prototype"       : True,
             "class"           : True,
             "imagemap"        : True,
+            "quote"           : True,
 
             "java"            : True,
             "verilog"         : True,
@@ -494,7 +495,7 @@ class shorte_parser_t(parser_t):
 
     def tag_is_executable(self, tag_name):
 
-        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go", "javascript")):
+        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go", "javascript", "shorte")):
             return True
 
         return False
@@ -2767,6 +2768,11 @@ else:
         elif(self.tag_is_source_code(name)):
             code = self.m_engine.m_source_code_analyzer
         
+            # DEBUG BRAD: This is a bit of a hack. Not sure if there
+            #             is a better way of stripping escapes in shorte
+            #             blocks
+            if(name == "shorte"):
+                data = data.replace("\\", "")
             tag.source = data
             tag.contents = code.parse_source_code(name, data, tag.file, tag.line)
 
@@ -2982,7 +2988,7 @@ else:
         elif(name == "questions"):
             tag.contents = self.parse_questions(data, modifiers)
 
-        elif(name in ("text", "note", "warning", "question", "tbd")):
+        elif(name in ("text", "note", "warning", "question", "tbd", "quote")):
             tag.source = tag.contents
             tag.contents = textblock_t(tag.source)
 

@@ -149,3 +149,18 @@ The loopback interface point
 
 -- see also:
     THis is a test
+
+
+@quote
+This is a random quote from somebody. It might contain an embedded list:
+- one
+  - two
+    - three
+-
+
+or perhaps even an embedded table:
+@{table,
+- One ! Two
+- Three ! Four
+}
+
