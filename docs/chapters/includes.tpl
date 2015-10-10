@@ -10,17 +10,24 @@ Shorte supports include files using either of the following tags:
 @h3 @include
 The @include tag is used to include another file. This is to allow breaking
 a document up into multiple modules. The @include will break any cascading of
-conditional statements in the document hierarchy. To cascade conditional
-text in the document hierarcy use the @include_child tag instead.
+conditional statements in the document hierarchy. For example, if you have this
+code:
 
 @shorte
-\@include "chapters/my_chapter.tpl" 
+\@h1: if="0"
+Heading 1
+
+\@include: "my_source_file.tpl"
 
 @text
+Then my_source_file.tpl will still be included as the @include tag will ignore the
+condition on the previous heading. If you want my_source_file.tpl to be excluded
+then the @include_child tag would be a better choice.
+
 Includes also support conditionals in order to
 support generating multiple documents from the same source. The example
-below uses a command line conditional called *VARIABLE* to include
-or exclude the file.
+below uses a command line define called *VARIABLE* to include
+or exclude the file(s).
 
 @shorte
 \@include: if="VARIABLE == 'xyz'"
@@ -28,7 +35,7 @@ chapters/my_chapter.tpl
 chapters/my_chapter2.tpl
 
 @h3 @include_child
-The @include_child tag is an alternative to the @child tag. It behaves
+The @include_child tag is an alternative to the @include tag. It behaves
 slightly differently in that it does not break the cascase of conditional
 text but continues the current cascade.
 

@@ -8,7 +8,7 @@ This tag is used to generate an Image map. It currently only works in the
 HTML output template. Links are not currently supported.
 
 @shorte
-\@imagemap: id="one"
+\@imagemap: title="one"
 - shape  | coords         | Label       | Description
 - circle | 50,50,50       | A Circle    | This is a description of my circle
 - rect   | 72,144,215,216 | A rectangle | This is a description of my rectangle.
@@ -18,7 +18,7 @@ HTML output template. Links are not currently supported.
 @text
 Will generate the following imagemap:
 
-@imagemap: id="one"
+@imagemap: title="one"
 - shape  | coords         | Label       | Description
 - circle | 50,50,50       | A Circle    | This is a description of my circle
 - rect   | 72,144,215,216 | A rectangle | This is a description of my rectangle.
