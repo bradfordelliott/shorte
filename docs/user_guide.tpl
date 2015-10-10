@@ -481,6 +481,8 @@ A: This is the answer to that question
 
 @include "chapters/structs_and_vectors.tpl"
 
+@include "chapters/tag_type_registers.tpl"
+
 @h3 @define
 The @define is used to document a \#define structure in C.
 
