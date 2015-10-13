@@ -48,51 +48,142 @@ class styles():
         return outline_styles
     
     def get_common_styles(self):
+        indents = [self.standard_indented,
+                   self.standard_indented + 0.3,
+                   self.standard_indented + 0.5,
+                   self.standard_indented + 0.7,
+                   self.standard_indented + 0.9,
+                   self.standard_indented + 1.1]
+
+        # Quote styles
+        quote_styles = ""
+        for i in xrange(0, len(indents)):
+            name = "shorte_quote_l%d" % i
+            indent = indents[i]
+            quote_styles += string.Template('''
+<style:style style:name="${name}" style:family="paragraph" style:parent-style-name="shorte_standard">
+  <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm"
+      fo:margin-left="${indent}cm"
+      fo:border-left="0.020in solid #c0c0c0"
+      fo:padding-left="0.2in"/>
+  <style:text-properties fo:color="#000000"/>
+</style:style>
+''').substitute({"name"   : name,
+                 "indent" : indent})
+
+        paragraph_styles = '''
+<!-- Common Paragraph Styles -->
+<style:style style:name="shorte_para_bold_white" style:family="paragraph" style:parent-style-name="shorte_standard">
+  <style:paragraph-properties
+      fo:margin-left="0.2cm" fo:margin-top="0cm"/>
+  <style:text-properties fo:color="#ffffff" fo:font-weight="bold"/>
+</style:style>
+'''
+
         return string.Template('''
     <!-- Styling for hyperlinks -->
     <style:style style:name="hyperlink" style:family="text">
         <style:text-properties fo:color="${color_hyperlink}"/>
     </style:style>
-    ''').substitute({"color_hyperlink" : self.colors["hyperlink"].fg})
-       
+    
+    <!-- Quote levels -->
+    ${quote_styles}
+
+    <!-- Paragraph Styles -->
+    ${paragraph_styles}
+    ''').substitute({"color_hyperlink"  : self.colors["hyperlink"].fg,
+                     "quote_styles"     : quote_styles,
+                     "paragraph_styles" : paragraph_styles})
+      
+    def create_table_paragraph_styles(self, name, font_size):
+
+        table = string.Template('''
+<style:style style:name="shorte_table.title.text${name}" style:family="paragraph" style:parent-style-name="Standard">
+  <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+  <style:text-properties
+      fo:color="${color_table_title_fg}"
+      fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"
+      ${font_size}
+  />
+</style:style>
+    
+<style:style style:name="shorte_table.header.text${name}" style:family="paragraph" style:parent-style-name="Standard">
+  <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+  <style:text-properties
+      fo:color="${color_table_header_fg}"
+      fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"
+      ${font_size}
+  />
+</style:style>
+    
+<style:style style:name="shorte_table.subheader.text${name}" style:family="paragraph" style:parent-style-name="Standard">
+  <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+  <style:text-properties
+      fo:color="${color_table_subheader_fg}"
+      fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"
+      ${font_size}
+  />
+</style:style>
+    
+<style:style style:name="shorte_table.reserved.text${name}" style:family="paragraph" style:parent-style-name="Standard">
+  <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+  <style:text-properties
+      fo:color="${color_table_rsvd_fg}"
+      ${font_size}
+  />
+</style:style>
+    
+<style:style style:name="shorte_table.caption.text${name}" style:family="paragraph" style:parent-style-name="Standard">
+  <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in" fo:margin-left="0.4in"/>
+  <style:text-properties
+      fo:color="${color_table_caption_fg}"
+      fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"
+      ${font_size}
+  />
+</style:style>
+
+<style:style style:name="shorte_table.caption.title.text${name}" style:family="paragraph" style:parent-style-name="shorte_standard">
+  <style:paragraph-properties
+      fo:margin-left="0.2cm" fo:margin-top="0cm"/>
+  <style:text-properties
+      fo:color="#ffffff"
+      fo:font-weight="bold"
+      ${font_size}
+  />
+</style:style>
+
+<style:style style:name="shorte_table.standard.text${name}" style:family="paragraph" style:parent-style-name="Standard">
+  <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
+  <style:text-properties
+      fo:color="${color_table_normal_fg}"
+      ${font_size}
+  />
+</style:style>
+
+''').substitute({"name"                     : name,
+                 "font_size"                : font_size,
+                 "color_table_title_bg"     : self.colors["table"]["title"].bg,
+                 "color_table_title_fg"     : self.colors["table"]["title"].fg,
+                 "color_table_header_bg"    : self.colors["table"]["header"].bg,
+                 "color_table_header_fg"    : self.colors["table"]["header"].fg,
+                 "color_table_subheader_bg" : self.colors["table"]["subheader"].bg,
+                 "color_table_subheader_fg" : self.colors["table"]["subheader"].fg,
+                 "color_table_rsvd_bg"      : self.colors["table"]["reserved"].bg,
+                 "color_table_rsvd_fg"      : self.colors["table"]["reserved"].fg,
+                 "color_table_normal_bg"    : self.colors["table"]["normal"].bg,
+                 "color_table_normal_fg"    : self.colors["table"]["normal"].fg,
+                 "color_table_caption_bg"   : self.colors["table"]["caption"].bg,
+                 "color_table_caption_fg"   : self.colors["table"]["caption"].fg})
+
+        return table
+
 
     def get_table_styles(self):
 
-        micro = string.Template('''
-    <style:style style:name="shorte_table_title_micro" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_title_fg}" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-    
-    <style:style style:name="shorte_table_heading_micro" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_header_fg}" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-    
-    <style:style style:name="shorte_table_subheading_micro" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_subheader_fg}" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-    
-    <style:style style:name="shorte_table_standard_micro" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_normal_fg}" fo:font-size="${font_size}"/>
-    </style:style>
-    
-    <style:style style:name="shorte_table_reserved_micro" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_rsvd_fg}" fo:font-size="${font_size}"/>
-    </style:style>
-''').substitute({"font_size" : "7pt",
-                 "color_table_title_fg"     : self.colors["table"]["title"].fg,
-                 "color_table_header_fg"    : self.colors["table"]["header"].fg,
-                 "color_table_subheader_fg" : self.colors["table"]["subheader"].fg,
-                 "color_table_rsvd_fg"      : self.colors["table"]["reserved"].fg,
-                 "color_table_normal_fg"    : self.colors["table"]["normal"].fg})
-        
+        default = self.create_table_paragraph_styles(name=".default",font_size='')
+        micro   = self.create_table_paragraph_styles(name=".micro",  font_size='fo:font-size="7pt"')
+        blank   = self.create_table_paragraph_styles(name="",        font_size='')
 
-        #<style:text-properties style:font-name="Courier New" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
-        # Table Styles
         return string.Template('''
     <!-- The standard table format -->
     <style:style style:name="shorte_table" style:display-name="shorte_table" style:family="table" style:master-page-name="">
@@ -110,7 +201,14 @@ class styles():
     </style:style>
     
     <!-- Table Cell Styles -->
-    <style:style style:name="shorte_table.header" style:family="table-cell">
+    <style:style style:name="shorte_table.title.cell" style:family="table-cell">
+      <style:table-cell-properties fo:background-color="${color_table_title_bg}" fo:padding="0.0282in"
+        fo:border="0.002in solid #000000">
+        <style:background-image/>
+      </style:table-cell-properties>
+    </style:style>
+
+    <style:style style:name="shorte_table.header.cell" style:family="table-cell">
       <style:table-cell-properties
             fo:background-color="${color_table_header_bg}"
             fo:padding="0.0182in"
@@ -118,7 +216,8 @@ class styles():
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.subheader" style:family="table-cell">
+    
+    <style:style style:name="shorte_table.subheader.cell" style:family="table-cell">
       <style:table-cell-properties
          fo:background-color="${color_table_subheader_bg}"
          fo:padding="0.0182in"
@@ -126,26 +225,30 @@ class styles():
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.reserved" style:family="table-cell">
+
+
+    <style:style style:name="shorte_table.reserved.cell" style:family="table-cell">
         <style:table-cell-properties
             fo:background-color="${color_table_rsvd_bg}" fo:padding="0.0182in"
             fo:border="0.002in solid #000000">
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.title" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="${color_table_title_bg}" fo:padding="0.0282in"
-        fo:border="0.002in solid #000000">
-        <style:background-image/>
-      </style:table-cell-properties>
-    </style:style>
-    <style:style style:name="shorte_table.normal_cell" style:family="table-cell">
+    
+
+    <style:style style:name="shorte_table.normal.cell" style:family="table-cell">
       <style:table-cell-properties fo:padding="0.0in"
           fo:border="0.002in solid #000000" fo:background-color="${color_table_normal_bg}"/>
     </style:style>
     
-
-    <style:style style:name="shorte_table.code_header" style:family="table-cell">
+    <style:style style:name="shorte_table.code.cell" style:family="table-cell">
+      <style:table-cell-properties fo:padding="0.0in"
+          fo:border-top="0.002in solid #c0c0c0"
+          fo:border-bottom="0.002in solid #c0c0c0"
+          fo:background-color="${color_table_normal_bg}"/>
+    </style:style>
+    
+    <style:style style:name="shorte_table.code.header.cell" style:family="table-cell">
       <style:table-cell-properties
             fo:background-color="${color_table_header_bg}"
             fo:padding="0.0182in"
@@ -154,33 +257,17 @@ class styles():
         <style:background-image/>
       </style:table-cell-properties>
     </style:style>
-    <style:style style:name="shorte_table.code_cell" style:family="table-cell">
+    
+    <style:style style:name="shorte_table.caption.cell" style:family="table-cell">
       <style:table-cell-properties fo:padding="0.0in"
-          fo:border-top="0.002in solid #c0c0c0"
-          fo:border-bottom="0.002in solid #c0c0c0"
-          fo:background-color="${color_table_normal_bg}"/>
+          fo:border="0.002in solid #000000" fo:background-color="${color_table_caption_bg}"/>
     </style:style>
-    <style:style style:name="shorte_table.alternate_code_cell" style:family="table-cell">
+
+    <style:style style:name="shorte_table.alternate.code.cell" style:family="table-cell">
       <style:table-cell-properties fo:padding="0.0in"
           fo:border-top="0.002in solid #c0c0c0"
           fo:border-bottom="0.002in solid #c0c0c0"
           fo:background-color="#f0f0f0"/>
-    </style:style>
-    
-    <!-- Table Cell Paragraph Styles -->
-    <style:style style:name="shorte_table_title" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_title_fg}" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-    
-    <style:style style:name="shorte_table_heading" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_header_fg}" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
-    </style:style>
-    
-    <style:style style:name="shorte_table_subheading" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_subheader_fg}" fo:font-weight="bold" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
     
     <style:style style:name="shorte_table_standard" style:family="paragraph" style:parent-style-name="Standard">
@@ -188,11 +275,8 @@ class styles():
       <style:text-properties fo:color="${color_table_normal_fg}"/>
     </style:style>
     
-    <style:style style:name="shorte_table_reserved" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0in" fo:margin-bottom="0in"/>
-      <style:text-properties fo:color="${color_table_rsvd_fg}"/>
-    </style:style>
-
+    ${style_blank}
+    ${style_default}
     ${style_micro}
     
     ''').substitute({"table_indent"             : self.table_indent,
@@ -206,7 +290,11 @@ class styles():
                      "color_table_rsvd_fg"      : self.colors["table"]["reserved"].fg,
                      "color_table_normal_bg"    : self.colors["table"]["normal"].bg,
                      "color_table_normal_fg"    : self.colors["table"]["normal"].fg,
-                     "style_micro"              : micro})
+                     "color_table_caption_bg"   : self.colors["table"]["caption"].bg,
+                     "color_table_caption_fg"   : self.colors["table"]["caption"].fg,
+                     "style_micro"              : micro,
+                     "style_default"            : default,
+                     "style_blank"              : blank})
 
 
     def get_list_styles(self):

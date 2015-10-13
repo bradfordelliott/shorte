@@ -9,7 +9,7 @@
 @docsubtitle Reference Manual
 
 # A version number (can be overwritten from the command line)
-@docversion 1.0.58
+@docversion 1.0.74
 
 # A number to assign to the document
 @docnumber 34567
@@ -20,7 +20,9 @@
 - 1.0.58   | 15 Oct, 2013  | Updated the documentation to describe preliminary
                              install instructions, the new @h and @xml tags and
                              the procedure to assign wikiwords to headings.
-
+- 1.0.67   | 23 Oct, 2014  | Cleanup of the shorte documentation in preparation
+                             for publishing.
+- 1.0.74   | 9 Oct, 2015   | Overhaul of the user guide to bring it up to date
 
 # Shorte documents are split into a header and a body
 # similar to an HTML document. The body tag defines
@@ -52,7 +54,7 @@ hard to format quite like I wanted.
 
 
 @h2 Document Structure
-Shorte documents generally end with a .tpl extension and follow the format
+Shorte documents generally end with a .tpl extension and follow the format:
 
 @shorte
 # Document heading here
@@ -66,9 +68,13 @@ Shorte documents generally end with a .tpl extension and follow the format
 Some text here
 ...
 
+@text
+Like HTML they are split into a heading and a body. The heading is
+everything before the @body tag.
+
 @h2 Shorte Comments
-Shorte currently only supports single line comments using the \# character
-at the beginning of a line.
+Shorte currently supports single line comments using the \# character
+at the beginning of a line:
 
 @shorte
 # This is a single line comment
@@ -77,18 +83,23 @@ This is not a comment
 
 @text
 If you want to use the \# character elsewhere in the document it should normally
-be escaped with a \\ character. This is not necessary inside source code blocks
+be escaped with a \\\\ character. This is not necessary inside source code blocks
 such as @c, @java, @python, etc.
+
+Multi-line comments use a format similar to HTML:
+
+@shorte
+\<!-- This is a multi-line comment -->
 
 @h2 Conditional Text
 The Shorte language supports two types of conditional text
-- PHY style inline blocks
+- PHP style inline blocks
 - conditionals using the if="xxx" attribute on tags
 
-@h3 PHY Style Code Blocks
-These blocks of code are similar to the inline PHY syntax. You use
+@h3 PHP Style Code Blocks
+These blocks of code are similar to the inline PHP syntax. You use
 the \<\? ... \?\> syntax to inline a block of Python code. Any output
-must get assigned to a variable called *result* which gets return in
+must get assigned to a variable called *result* which gets returned in
 its expanded form. In this way you can conditionally generate text
 or use Python to create documentation.
 
@@ -116,7 +127,10 @@ if(0):
 ?>
 
 @h3 Conditional Attributes
-Conditional test is also supported using the *if=* attribute on a tag.
+Conditional text is also supported using the *if=* attribute on a tag.
+The if clause is interpreted as a block of Python code so you can make use
+of defines passed from the command line.
+
 For example:
 
 @shorte
@@ -144,34 +158,11 @@ will expand to:
 - Data 3 | Data 4
 
 @text
-As will the inline code blocks you can specify variables to pass
+As with inline code blocks you can specify variables to pass
 to the *if* text to evaluate using the *-m* command line paramter.
 
-
-@h2 Include Files
-Shorte supports include files. There are two tags, @include and @include_child
-which are used to include files.
-
-They can be included anywhere in the body of the document.
-
-@shorte
-\@body
-\@include "chapters/chapter_one.tpl"
-\@include "chapters/chapter_two.tpl"
-
-\@include: if="ALLOW_CHAPTER3 == True"
-chapters/chapter_three.tpl
-
-# Here we'll use the @include_child tag since
-# the @include tag normally breaks the flow of
-# conditional statements. By using @include_child
-# this file will only be included if ALLOW_CHAPTER3 == True
-\@include_child "chapters/child_of_chapter_three.tpl"
-
-@note
-Shorte currently can't handle include paths. The include path has to
-be a sub-directory where the top level file is included. Eventually
-support for include paths will be added.
+@include
+chapters/includes.tpl
 
 @h2 Inline Formatting
 TBD: Add description of this section
@@ -181,8 +172,7 @@ TBD: Add description of this section
 Shorte uses the @ character as a simple markup
 character. Wherever possible it attempts to avoid
 having an end character to make the document more
-readable and simplify typing. The document is entered
-by the use of tags that have the syntax @tag.
+readable and simplify typing.
 
 The following table describes the tags currently
 supported by Shorte:
@@ -198,11 +188,11 @@ supported by Shorte:
 
 -* Document Body
 -& Heading Tags
-- @h1 | A top level header similar to H1 in HTML
-- @h2 | A header similar to H2 in HTML
-- @h3 | A header similar to H3 in HTML
-- @h4 | A header similar to H4 in HTML
-- @h5 | A header similar to H5 in HTML
+- @h1      | A top level header similar to H1 in HTML
+- @h2      | A header similar to H2 in HTML
+- @h3      | A header similar to H3 in HTML
+- @h4      | A header similar to H4 in HTML
+- @h5      | A header similar to H5 in HTML
 
 -& Text Entry Tags
 - @text      | A document text block
@@ -268,143 +258,13 @@ supported by Shorte:
 
 @include "chapters/installation_instructions.tpl"
 
-@include "chapters/command_line.tpl"
+@include "chapters/example_document.tpl"
 
-
-@h1 The Document Header
-The first part of any Shorte document is the document header. It is
-structured like HTML but isn't a strict. It is basically anything
-in the document before the @body tag. An example document header looks like:
-
-@shorte
-# The beginning of the document is assumed to be the document
-# header. As a convention normally the top level file will
-# contain metadata about the document.
-
-# The title of the document
-\@doctitle The Shorte Language
-
-# The subtitle of the document
-\@docsubtitle Reference Manual
-
-# A version number (can be overwritten from the command line)
-\@docversion 1.0
-
-# A number to assign to the document
-\@docnumber 34567
-
-\@docrevisions:
-- Revision | Date          | Description
-- 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
-
-
-@h3 @doctitle
-The @doctitle defines the title associated with the document. Only the first instance of this
-tag is used. If a second instance is encountered it will be ignored.
-
-@h3 @docsubtitle
-The @docsubtitle defines a subtitle for the document. Only the first instance of this
-tag is used. If a second instance is encountered it will be ignored.
-
-@h3 @docversion
-The @docversion tag defines a version number for the document. This can be overridden
-at the command line.
-
-@h3 @docnumber
-The @docnumber tag defines a number to associate with the document.
-
-@h3 @docrevisions
-The @docrevisions tag defines a revision history for the document.
-
+@include "chapters/document_header.tpl"
 
 @h1 The Document Body
 
-@h2 Heading Tags
-Headings use the @hN format where *N* currently
-ranges from 1-5.
-
-@h3 @h1
-The @h1 tag is the highest level header. It is similar in use
-to the H1 tag from HTML.
-
-@shorte
-# An example header
-\@h1 This is an example header
-This is some text for the example header
-
-@h3 @h2
-The @h2 tag is a hierarchial header directly beneath
-the @h1 tag. It is similar to the H2 tag from HTML.
-
-@shorte
-\@h1 This is an example header
-
-# An example second level header
-\@h2 This is a sub header
-This is some text related to the sub @h1 tag.
-
-@h3 @h3
-The @h3 tag is a hierarchial header directly beneath
-the @h2 tag. It is similar to the H3 tag from HTML.
-
-@shorte
-\@h1 This is an example header
-
-\@h2 This is a sub header
-
-\@h3 This is a third level header
-Some text related to this header
-
-@h3 @h4
-The @h4 tag is a hierarchial header directly beneath
-the @h3 tag. It is similar to the H4 tag from HTML.
-
-@shorte
-\@h1 This is an example header
-
-\@h2 This is a sub header
-
-\@h3 This is a third level header
-
-\@h4 This is a fourth level header
-Some example text here
-
-@h3 @h5
-The @h5 tag is a hierarchial header directly beneath
-the @h4 tag. It is similar to the H5 tag from HTML.
-
-@shorte
-\@h1 This is an example header
-
-\@h2 This is a sub header
-
-\@h3 This is a third level header
-
-\@h4 This is a fourth level header
-
-\@h5 This is a fifth level header
-Some example text here
-
-@h3 @h
-The @h tag can be used to create a header that is
-un-numbered.
-
-@shorte
-\@h This is an un-numbered header
-Some random text after the header
-
-@h3 Assigning Wikiwords
-Sometimes it is desirable to assign wikiwords to a heading. This
-allows multi-word headings to be automatically linked but also allows
-the user to prevent a short heading from being automatically linked
-
-@shorte
-\@h2: wikiword="MyHeading"
-Test
-
-This is some text associated with MyHeading. MyHeading will be expanded
-to the word "Test" but Test won't get expanded.
-
+@include "chapters/tag_type_headings.tpl"
 
 @h2 Text Entry Tags
 
@@ -413,6 +273,20 @@ The @text tag creates a text block that is automatically
 parsed for things like bullets, indentation, or blocks
 of code.
 
+You can insert lists:
+@shorte: exec=True
+- One
+  - Two
+    - Three
+
+@text
+Creating numbered lists can be done using the following syntax:
+@shorte
+1. One
+    1. Two
+        1. Three
+2. Blah
+
 @shorte
 blah blah blah
 
@@ -420,7 +294,7 @@ blah blah blah
   - A second level in the list
     - A third level in the list
 
-Another paragraph with \@\{hl, some inlined styling\} and
+Another paragraph with @\{hl, some inlined styling\} and
 
 - A second list
 
@@ -445,6 +319,8 @@ Another paragraph with @{hl, some inlined styling} and
 {{
 and a block of code
 }}
+
+@include "chapters/inline_styling.tpl"
 
 
 @h3 @p
@@ -605,24 +481,31 @@ A: This is the answer to that question
 
 @include "chapters/structs_and_vectors.tpl"
 
+@include "chapters/tag_type_registers.tpl"
+
 @h3 @define
 The @define is used to document a \#define structure in C.
 
 @h3 @enum
 The @enum tag is used to define an enumeration.
 
-@enum: name="e_my_test" caption="This is a test enum" description='This is a test enum'
+@shorte
+\@enum: name="e_my_test" caption="This is a test enum" description="This is a test enum"
 --values:
-- Name | Value | Description
-- LEEDS_VLT_SUPPLY_1V_TX | 0x0 |  1V supply TX 
-- LEEDS_VLT_SUPPLY_1V_RX | 0x1 |  1V supply RX 
-- LEEDS_VLT_SUPPLY_1V_CRE | 0x2 |  1V supply digital core 
-- LEEDS_VLT_SUPPLY_1V_DIG_RX | 0x3 |  1V supply digital RX 
-- LEEDS_VLT_SUPPLY_1p8V_RX | 0x4 |  1.8V supply RX 
-- LEEDS_VLT_SUPPLY_1p8V_TX | 0x5 |  1.8V supply TX 
-- LEEDS_VLT_SUPPLY_2p5V | 0xf |  2.5V supply 
-- LEEDS_VLT_SUPPLY_TP_P | 0x9 |  Test point P 
-- LEEDS_VLT_SUPPLY_TP_N | 0x8 |  Test point N 
+- Name         | Value | Description
+- SUPPLY_1V_TX | 0x0   |  1V supply TX 
+- SUPPLY_1V_RX | 0x1   |  1V supply RX 
+- SUPPLY_2p5V  | 0xf   |  2.5V supply 
+
+@text
+This generates the following snippet:
+
+@enum: name="e_my_test" caption="This is a test enum" description="This is a test enum"
+--values:
+- Name         | Value | Description
+- SUPPLY_1V_TX | 0x0   |  1V supply TX 
+- SUPPLY_1V_RX | 0x1   |  1V supply RX 
+- SUPPLY_2p5V  | 0xf   |  2.5V supply 
 
 
 @include "chapters/functions.tpl"
@@ -818,3 +701,6 @@ TBD - Add description of this tag
 
 #@include "chapters/test_cases.tpl"
 
+@include "chapters/command_line.tpl"
+
+@include chapters/vim.tpl

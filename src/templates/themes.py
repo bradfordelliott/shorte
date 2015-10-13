@@ -37,6 +37,7 @@ class theme():
         self.colors["shorte"]["table"]["subheader"] = color(fg="#000000", bg="#d0d0d0")
         self.colors["shorte"]["table"]["reserved"]  = color(fg="#a0a0a0", bg="#f0f0f0")
         self.colors["shorte"]["table"]["normal"]    = color(fg="#000000", bg="#ffffff")
+        self.colors["shorte"]["table"]["caption"]   = color(fg="#ffffff", bg="#8ba327")
 
         # Hyperlink Colors
         self.colors["shorte"]["hyperlink"]       = color(fg="#586a0d") #color(fg="#8ba327")

@@ -69,13 +69,16 @@ This is a test of the table captions
 - Blah blah 2 | Blah blah blah
                 and some more blah blah blah
 
-@h2 A Table with no Title
-@table: widths="10,20,20,50" style="micro" width="100%"
+@h2 A "micro" table
+This table makes use of the micro style to output into something really
+small. This is currently only supported for tables within PDFs.
+
+@table: widths="10,20,20,50" style="micro" width="100%" title="This is my title" name="This is my title" caption='''This is my caption here'''
 - One | Two | Three | Four
 - Blah | Blah | blah blah | blah blah
--& Blah 2 | Blah 2 | Blah 3 | Blah 4
+-h Blah 2 | Blah 2 | Blah 3 | Blah 4
 - Blah 2 | Blah 2 | Blah 3 | Blah 4
--* Blah 2 | Blah 2 | Blah 3 | Blah 4
+-s Blah 2 | Blah 2 | Blah 3 | Blah 4
 - Blah 2 | Blah 2 | Blah 3 | Blah 4
 -r Blah 2 | Blah 2 | Blah 3 | Blah 4
 - Blah 2 | Blah 2 | Blah 3 | Blah 4

@@ -451,8 +451,8 @@ div.gallery
       background-color:${color_table_altrow_bg};
   }
   ${prefix}.bordered tr.caption {
-      background-color:#8C9CB8;
-      color:white;
+      background-color:${color_table_caption_bg};
+      color:${color_table_caption_fg};
   }
   
   ${prefix}.bordered tr.header td {
@@ -658,6 +658,8 @@ div.gallery
                    "color_table_subheader_bg" : self.colors["table"]["subheader"].bg,
                    "color_table_reserved_bg" : self.colors["table"]["reserved"].bg,
                    "color_table_reserved_fg" : self.colors["table"]["reserved"].fg,
+                   "color_table_caption_bg" : self.colors["table"]["caption"].bg,
+                   "color_table_caption_fg" : self.colors["table"]["caption"].fg,
                    "color_hyperlink"       : self.colors["hyperlink"].fg,
                    "color_hyperlink_hover" : self.colors["hyperlink.hover"].fg,
                    "color_codeblock_section" : self.colors["codeblock.section"].fg,

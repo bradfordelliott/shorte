@@ -136,10 +136,15 @@ release_notes:
 	${python} shorte.py -f release_notes.tpl -p html_inline -t ${THEME} -v ${version} -o build-output/release_notes
 	${python} shorte.py -f release_notes.tpl -p markdown -t ${THEME} -v ${version} -o build-output/release_notes
 
+install_darwin:
+	make checkout_vendor_templates
+	make clang_plugin
+	cp -f src/shell/shorte.osx .
+
 install_linux:
 	make checkout_vendor_templates
-	make clang_plugin_rh6
-	rm -rf shorte && ln -s shorte.py shorte
+	make clang_plugin_rh5
+	cp -f src/shell/shorte.linux .
 
 install_rh5:
 	cp 3rdparty/clang/linux/rh5/libclang.so 3rdparty/clang/linux/.
@@ -255,7 +260,7 @@ test_inline_styling:
 	${python} shorte.py -f examples/inline_styling.tpl -t "${THEME}" -o build-output/inline_styling -p "html"
 
 test_tables:
-	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/tables
+	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_tables
 
 test_api_reference:
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "${html_pdf}" -s "shorte.auto_summarize=0" --info=wikiwords
@@ -443,7 +448,7 @@ test_template_c:
 	${python} shorte.py -f examples/template_test.tpl -p "c" -o build-output/template_tests/c
 
 test_shorte:
-	${python} shorte.py -f examples/shorte.tpl -p "html" -t shorte -o build-output/shorte_template
+	${python} shorte.py -f examples/shorte.tpl -p "html" -t shorte --output_file=user_guide.html -o build-output/test_shorte
 
 test_inkscape:
 	${python} shorte.py -f examples/test_inkscape.tpl -p "${html_pdf}" -t shorte -o build-output/inkscape
@@ -499,6 +504,9 @@ test_python:
 
 test_imagemap:
 	${python} shorte.py -f "examples/imagemap.tpl" -t ${THEME} -p ${html_pdf} -o build-output/imagemap
+
+test_markdown:
+	${python} shorte.py -f "examples/markdown.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_markdown
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python

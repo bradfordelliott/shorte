@@ -1,0 +1,2 @@
+#!/bin/sh
+/opt/local/bin/python /Users/belliott/Dropbox/shorte/src/shorte.py "$@"

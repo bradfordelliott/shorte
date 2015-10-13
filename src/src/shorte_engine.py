@@ -1096,7 +1096,6 @@ class engine_t:
         tag.source = source
         
     def generate(self, package):
-        
 
         # First evaluate any code snippets
         pages = self.m_parser.get_pages()
@@ -1107,23 +1106,41 @@ class engine_t:
 
             #print "NAME: %s" % page["source_file"]
             tags = page["tags"]
+            
+            i = 0
+            num_tags = len(tags)
 
-            for tag in tags:
+            while i < num_tags:
+                tag = tags[i]
 
                 if(tag.result != None):
                     INFO("Skipping tag, already executed")
+                    i += 1
                     continue
             
                 if(self.tag_is_executable(tag.name)):
-                    self.execute_code_block(tag)
-                
-                #if(tag.name == "struct"):
-                #    #if(len(tag.contents["heading"])):
-                #    print "FOUND A STRUCT, heading = %s" % tag.contents["heading"]
-                #    tags.remove(tag)
+                    # Executing a shorte block requires special
+                    # handling. Instead of actually executing anything we
+                    # want to expand the results inline so that they get inserted
+                    # into the document. This is mostly to support
+                    # documenting shorte itself.
+                    if(tag.name == "shorte"):
+                        if(tag.has_modifier("exec")):
+                            src = tag.source
+                            # Strip any \ characters
+                            src = src.replace("\\", "")
+                            # Parse the tags
+                            child_tags = self.m_parser._parse_header_tags("", src, 0) 
+                            j = i
+                            # Now insert them after the current tag
+                            for t in child_tags:
+                                tags.insert(j+1, t)
+                                j += 1
+                            i = j
+                    else:
+                        self.execute_code_block(tag)
 
-                #    if(tag.heading != None):
-                #        tags.remove(tag.heading)
+                i += 1
                 
         # If the version number was not specified on the command
         # line then use any @docversion one specified in one of

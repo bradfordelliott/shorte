@@ -136,6 +136,13 @@ echo Hello world!
 <one>
 </one>
 
+
+@h2 Shorte
+@shorte: exec=True
+\@text
+This is a shorte textblock. I should be able to execute
+to see the results.
+
 @h1 Failing Examples
 
 @h2 C
