@@ -6,7 +6,18 @@
 @h1 Releases
 This document describes the release history of the Shorte language.
 
-@h3 Version 1.0.74 (Oct 10, 2015)
+@h3 LibreOffice Spurious Errors
+@pre
+W: Unknown node under /registry/extlang: deprecated
+W: Unknown node under /registry/grandfathered: comments
+W: Unknown node under /registry/grandfathered: comments
+
+@text
+This is a known issue with LibreOffice and is a harmless note echoed by a subcomponent.
+Please see this bug for information on this issue.
+[[http://lists.freedesktop.org/archives/libreoffice-bugs/2015-July/289309.html]]
+
+@h3 Version 1.0.74 (Oct 13, 2015)
 - Parsers
     - Shorte Parser
         - Cleanup to the register, structure and table parsing

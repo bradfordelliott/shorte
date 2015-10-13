@@ -1115,6 +1115,7 @@ class engine_t:
 
                 if(tag.result != None):
                     INFO("Skipping tag, already executed")
+                    i += 1
                     continue
             
                 if(self.tag_is_executable(tag.name)):

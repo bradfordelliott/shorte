@@ -1402,80 +1402,111 @@ class template_odt_t(template_t):
 
         if(name == "default"):
             table["title"] = {
-                    "cell" : "shorte_table.title",
-                    "text" : "shorte_table_title" # "shorte_table.title_text"
+                    "cell" : "shorte_table.title.cell",
+                    "text" : "shorte_table.title.text" # "shorte_table.title_text"
                     }
             table["header"] = {
-                    "cell" : "shorte_table.header",
-                    "text" : "shorte_table_heading" # "shorte_table.header_text"
+                    "cell" : "shorte_table.header.cell",
+                    "text" : "shorte_table.header.text" # "shorte_table.header_text"
                     }
             table["subheader"] = {
-                    "cell" : "shorte_table.subheader",
-                    "text" : "shorte_table_subheading" # "shorte_table.normal_text"
+                    "cell" : "shorte_table.subheader.cell",
+                    "text" : "shorte_table.subheader.text" # "shorte_table.normal_text"
                     }
             table["reserved"] = {
-                    "cell" : "shorte_table.reserved",
-                    "text" : "shorte_table_reserved" # "shorte_table.reserved_text"
+                    "cell" : "shorte_table.reserved.cell",
+                    "text" : "shorte_table.reserved.text" # "shorte_table.reserved_text"
                     }
             table["default"] = {
-                    "cell" : "shorte_table.normal_cell",
+                    "cell" : "shorte_table.normal.cell",
                     "text" : "shorte_table_standard" # "shorte_table.normal_text"
+                    }
+            table["caption"] = {
+                    "cell" : "shorte_table.caption.cell",
+                    "text" : "shorte_table.caption.text" # "shorte_table.normal_text"
                     }
 
             # For objects types like structure fields or
             # enum values.
-            table["code_header"] = {
-                    "cell" : "shorte_table.code_header",
+            table["code.header"] = {
+                    "cell" : "shorte_table.code.header.cell",
                     "text" : "shorte_table_standard" # "shorte_table.normal_text"
                     }
-            table["code_cell"] = {
-                    "cell" : "shorte_table.code_cell",
+            table["code.cell"] = {
+                    "cell" : "shorte_table.code.cell",
                     "text" : "shorte_table_standard" # "shorte_table.normal_text"
                     }
-            table["alternate_code_cell"] = {
-                    "cell" : "shorte_table.alternate_code_cell",
+            table["alternate.code.cell"] = {
+                    "cell" : "shorte_table.alternate.code.cell",
                     "text" : "shorte_table_standard" # "shorte_table.normal_text"
                     }
         else:
             table["title"] = {
-                    "cell" : "shorte_table.title",
-                    "text" : "shorte_table_title_%s" % name
+                    "cell" : "shorte_table.title.cell",
+                    "text" : "shorte_table.title.text.%s" % name
                     }
             table["header"] = {
-                    "cell" : "shorte_table.header",
-                    "text" : "shorte_table_heading_%s" % name
+                    "cell" : "shorte_table.header.cell",
+                    "text" : "shorte_table.header.text.%s" % name
                     }
             table["subheader"] = {
-                    "cell" : "shorte_table.subheader",
-                    "text" : "shorte_table_subheading_%s" % name
+                    "cell" : "shorte_table.subheader.cell",
+                    "text" : "shorte_table.subheader.text.%s" % name
                     }
             table["reserved"] = {
-                    "cell" : "shorte_table.reserved",
-                    "text" : "shorte_table_reserved_%s" % name
+                    "cell" : "shorte_table.reserved.cell",
+                    "text" : "shorte_table.reserved.text.%s" % name
                     }
             table["default"] = {
-                    "cell" : "shorte_table.normal_cell",
-                    "text" : "shorte_table_standard_%s" % name
+                    "cell" : "shorte_table.normal.cell",
+                    "text" : "shorte_table.standard.text.%s" % name
+                    }
+            table["caption"] = {
+                    "cell" : "shorte_table.caption",
+                    "text" : "shorte_table.title.text.%s" % name
                     }
 
         return table
 
 
-    def __table_format_title(self, table, style):
+    def __table_format_title(self, table):
         '''This is an internal method used to format the
            table title'''
 
         if(table.has_title()):
+            table_style = table.table_style_name
             odt = '''
 <table:table-row>
     <table:table-cell table:style-name="%s" office:value-type="string" table:number-columns-spanned="%d">
         <text:p text:style-name="%s">%s</text:p>
     </table:table-cell>
 </table:table-row>
-''' % (style["title"]["cell"],
+''' % ("shorte_table.title.cell",
        table.get_max_cols(),
-       style["title"]["text"],
+       "shorte_table.title.text.%s" % table_style,
        table.get_title())
+        else:
+            odt = ''
+
+        return odt
+    
+    def __table_format_caption(self, table):
+        '''This is an internal method used to format the
+           table caption'''
+
+        if(table.has_caption()):
+            table_style = table.table_style_name
+            xml = '''<text:p text:style-name="%s">Caption:</text:p>''' % "shorte_table.caption.title.text.%s" % table_style
+            xml += self.format_textblock(table.get_caption(), style="shorte_table.caption.text.%s" % table_style)
+            odt = '''
+<table:table-row>
+    <table:table-cell table:style-name="%s" office:value-type="string" table:number-columns-spanned="%d">
+        %s
+    </table:table-cell>
+</table:table-row>
+''' % ("shorte_table.caption.cell",
+       table.get_max_cols(),
+       xml)
         else:
             odt = ''
 
@@ -1654,14 +1685,14 @@ class template_odt_t(template_t):
         # get the style information associated with the style name
         if(table.has_style()):
             style = self.__table_get_style(table.get_style())
+            table.table_style_name = table.get_style()
         else:
             style = self.__table_get_style(table_style_name)
-
-        table.table_style_name = table_style_name
+            table.table_style_name = table_style_name
         
         #xml += self.format_caption("Caption: %s" % table["caption"])
 
-        title = self.__table_format_title(table, style)
+        title = self.__table_format_title(table)
 
         if(table.has_widths()):
             xml += self.add_column_styles(table.get_widths(), title)
@@ -1722,6 +1753,10 @@ class template_odt_t(template_t):
                         cell_text = self.format_textblock(
                             tag,
                             style=style["subheader"]["text"])
+                    elif(row["is_caption"]):
+                        cell_text = self.format_textblock(
+                            tag,
+                            style=style["caption"]["text"])
                     else:
                         cell_text = self.format_textblock(
                             tag,
@@ -1761,15 +1796,12 @@ class template_odt_t(template_t):
             xml += "</table:table-row>\n"
 
         xml += extra_rows
+        
+        # If the table has a caption then output it
+        xml += self.__table_format_caption(table)
 
         xml += "</table:table>"
         
-        # If the table has a caption then output the caption
-        if(table.has_caption()):
-            xml += self.format_bold("Caption:")
-            xml += self.format_textblock(table.get_caption(), style="shorte_standard_indented")
-
-
         # Add a blank paragraph after the table so that tables don't run into
         # one another. Should really style this so that it doesn't consume too much space
         xml += "<text:p></text:p>"
@@ -1790,10 +1822,10 @@ class template_odt_t(template_t):
         value  = define.value
         desc   = define.get_description(textblock=True)
 
-        style = "shorte_table.normal_cell"
+        style = "shorte_table.normal.cell"
 
         cols = []
-        cols.append({"span":2, 'text': "Description:", "style": "shorte_table.header", "text-style": self.m_styles["para"]["bold"]})
+        cols.append({"span":2, 'text': "Description:", "style": "shorte_table.header.cell", "text-style": self.m_styles["para"]["bold"]})
         row = self._table_row()
         row["cols"] = cols
         table.rows.append(row)
@@ -1805,7 +1837,7 @@ class template_odt_t(template_t):
         table.rows.append(row)
         
         cols = []
-        cols.append({"span":2, 'text': "Value:", "style": "shorte_table.header", "text-style": self.m_styles["para"]["bold"]})
+        cols.append({"span":2, 'text': "Value:", "style": "shorte_table.header.cell", "text-style": self.m_styles["para"]["bold"]})
         row = self._table_row()
         row["cols"] = cols
         table.rows.append(row)
@@ -1881,8 +1913,9 @@ ${desc}
         table = table_t()
         table.title = "Structure: %s" % struct.get_name()
         table.max_cols = struct.get_max_cols()
+        table.table_style_name = style_name
 
-        title = self.__table_format_title(table, style)
+        title = self.__table_format_title(table)
         xml += '''
 <table:table table:name="shorte_table_%d" table:style-name="%s">
 <table:table-column table:style-name="%s"/>
@@ -1902,9 +1935,9 @@ ${desc}
         xml += self.format_object_section_title("Fields")
 
         xml += '''<table:table-row>'''
-        xml += self.__format_table_cell({"span" : 1}, style, "code_header", "Field Type")
-        xml += self.__format_table_cell({"span" : 1}, style, "code_header", "Field Name")
-        xml += self.__format_table_cell({"span" : 1}, style, "code_header", "Description")
+        xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Field Type")
+        xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Field Name")
+        xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Description")
         xml += "</table:table-row>\n"
         
 
@@ -1915,9 +1948,9 @@ ${desc}
     <table:table-row>
 '''
             if((i & 1) == 1):
-                theme = "code_cell"
+                theme = "code.cell"
             else:
-                theme = "alternate_code_cell"
+                theme = "alternate.code.cell"
             i += 1
 
             frame_paragraph = True
@@ -1974,8 +2007,9 @@ ${desc}
         table = table_t()
         table.title = "Enum: " + enum.name
         table.max_cols = enum.max_cols
+        table.table_style_name = style_name
 
-        title = self.__table_format_title(table, style)
+        title = self.__table_format_title(table)
         
         xml = ''
 
@@ -2081,7 +2115,8 @@ ${desc}
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        title = self.__table_format_title(table, style)
+        table.table_style_name = style_name
+        title = self.__table_format_title(table)
 
         xml = '''
 <table:table table:name="shorte_table_%d" table:style-name="%s">
@@ -2144,11 +2179,37 @@ ${desc}
         
         return xml
 
+    def get_style(self, family, style):
+        '''This method is called to manage the styles associated with the
+           document.
+
+           @param family [I] - The family that the style belongs to.
+           @param style  [I] - The name of the style to fetch.
+
+           @return The name of the style to use.
+        '''
+        if(family in ("paragraph", "para")):
+            return self.m_styles["para"]["bold"]
+
+        # Table styles
+        elif(family in ("table")):
+            if(style == "caption.title"):
+                return "shorte_para_bold_white"
+            elif(style == "caption.text"):
+                return "shorte_table.caption.text"
+            elif(style == "caption.cell"):
+                return "shorte_table.caption.cell"
+
+            return "TBD"
+        elif(family in ("cell", "table.cell")):
+            return "TBD"
+        
+        return self.m_styles[family][style]
 
     def format_bold(self, input):
 
         xml = '''<text:p text:style-name="%s">%s</text:p>''' % (
-            self.m_styles["para"]["bold"], input)
+            self.get_style("para", "bold"), input)
 
         return xml
     
@@ -3531,7 +3592,7 @@ ${desc}
         handle = open("%s/odt/content.xml" % scratchdir, "wt")
         handle.write(xml)
         handle.close()
-        
+
         #print xml
         #sys.exit(-1)
 

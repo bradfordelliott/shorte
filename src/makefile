@@ -260,7 +260,7 @@ test_inline_styling:
 	${python} shorte.py -f examples/inline_styling.tpl -t "${THEME}" -o build-output/inline_styling -p "html"
 
 test_tables:
-	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/tables
+	${python} shorte.py -f examples/tables.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/test_tables
 
 test_api_reference:
 	${python} shorte.py -f examples/api_reference.tpl -t "${THEME}" -o build-output/api_reference -p "${html_pdf}" -s "shorte.auto_summarize=0" --info=wikiwords

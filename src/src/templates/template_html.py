@@ -3632,7 +3632,7 @@ $href_end
         vars["css"] = self.get_css()
         vars["pdf"] = self.include_link("../" + self.get_pdf_name(), "css/")
         vars["link_index"] = "../" + self.get_index_name()
-        vars["link_index_framed"] = "../index_framed.html"
+        vars["link_index_framed"] = "../" + self.get_index_name(framed=True)
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
         vars["html_tooltips"] = ""
@@ -3656,10 +3656,28 @@ $href_end
         return html.substitute(vars)
 
 
-    def get_index_name(self):
+    def get_index_name(self, framed=False):
+        '''This method is called to fetch the name to associate
+           with the index file.
+
+           @param framed [I] - This is a boolean parameter that is used
+                               if the index file is used with HTML frames to
+                               put the TOC panel side by side with the content.
+
+           @return The name of the index file which is something
+                   like index.html or index_framed.html
+        '''
 
         if(self.m_engine.has_output_file()):
-            return self.m_engine.get_output_file()
+            index_name = self.m_engine.get_output_file()
+            if(framed):
+                index_name = index_name.replace(".html", "")
+                index_name += "_frame.html"
+
+            return index_name
+
+        if(framed):
+            return "index_framed.html"
 
         return "index.html"
 
@@ -3733,7 +3751,7 @@ $href_end
 
 </HTML>
 ''' % (title, self.get_index_name())
-        file = open(self.m_engine.m_output_directory + "/index_framed.html", "w")
+        file = open(self.m_engine.m_output_directory + "/" + self.get_index_name(framed=True), "w")
         file.write(self._cleanup_html(html))
         file.close()
     
@@ -3816,7 +3834,7 @@ $href_end
              "javascript" : javascript,
              "links" : txt_links,
              "link_index" : self.get_index_name(),
-             "link_index_framed" : "index_framed.html",
+             "link_index_framed" : self.get_index_name(framed=True),
              "link_legal" : "content/legal.html",
              "link_revisions" : "content/revisions.html",
              "html_tooltips" : "",
@@ -4022,7 +4040,7 @@ $href_end
         vars["title"] = input
         vars["javascript"] = ""
         vars["link_index"] = "../" + self.get_index_name()
-        vars["link_index_framed"] = "../index_framed.html"
+        vars["link_index_framed"] = "../" + self.get_index_name(framed=True)
         vars["link_legal"] = "../legal.html"
         vars["link_revisions"] = "../revisions.html"
         vars["html_tooltips"] = ""
@@ -4062,7 +4080,7 @@ $href_end
         vars["links"] = ""
         vars["title"] = "Legal Information"
         vars["link_index"] = "../" + self.get_index_name()
-        vars["link_index_framed"] = "../index_framed.html"
+        vars["link_index_framed"] = "../" + self.get_index_name(framed=True)
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
         vars["shorte_version"] = shorte_get_version_stamp()
@@ -4104,7 +4122,7 @@ $href_end
         vars["subtitle"] = "Document History"
         vars["title"] = "Revision History"
         vars["link_index"] = "../" + self.get_index_name()
-        vars["link_index_framed"] = "../index_framed.html"
+        vars["link_index_framed"] = "../" + self.get_index_name(framed=True)
         vars["link_legal"] = "legal.html"
         vars["link_revisions"] = "revisions.html"
         vars["shorte_version"] = shorte_get_version_stamp()
