@@ -94,7 +94,10 @@ setup(
     options = {"py2exe": {
                    "packages": ["PIL"], # For everything
                    "includes": ["PIL.Image", # Or here for bits and pieces 
-                                "PIL.PngImagePlugin"]}},
+                                "PIL.PngImagePlugin",
+                                "templates.odt.shorte",
+                                "templates.odt.inphi"]},
+                   },
     console=['shorte.py'],
     data_files=files
 )
