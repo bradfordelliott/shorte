@@ -18,6 +18,7 @@ import os
 import string
 import shutil
 import time
+import subprocess
 from string import Template;
 
 from src.shorte_defines import *
@@ -3833,8 +3834,15 @@ ${desc}
                 params_oowriter,
                 path_converter,
                 path_input)
-
-            os.system(cmd)
+            
+            try:
+                if(sys.platform == "win32"):
+                    subprocess.call(cmd)
+                else:
+                    subprocess.call(cmd, shell=True)
+            except:
+                print sys.exc_info()
+                raise
 
             shutil.move(path_output, path_input)
 
@@ -3843,7 +3851,6 @@ ${desc}
         if(package == PACKAGE_TYPE_PDF):
 
             #print "PATH_OOWRITER: %s" % path_oowriter
-            import subprocess
 
             cmd = '''"%s" %s \"%s\" \"macro://convert_to_pdf/Standard.Module1.ConvertToPDF(\\\"%s\\\")\"''' % (
                     path_oowriter,

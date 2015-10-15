@@ -232,11 +232,15 @@ class code_executor_t:
                     if(len(run_args) > 0):
                         cmd_run.extend(shlex.split(run_args))
 
-                    phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    result = phandle.stdout.read()
-                    result += phandle.stderr.read()
-                    phandle.wait()
-                    rc = phandle.returncode
+                    rc = -1
+                    try:
+                        phandle = subprocess.Popen(cmd_run, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                        result = phandle.stdout.read()
+                        result += phandle.stderr.read()
+                        phandle.wait()
+                        rc = phandle.returncode
+                    except:
+                        raise CompileException(rc, "Failed running %s example" % language)
 
                     cresult.set_run_result(result)
                     cresult.set_run_rc(rc)
@@ -359,6 +363,7 @@ class code_executor_t:
                         cmd_compile.extend(shlex.split(compile_args))
 
                     # First compile the application
+                    rc = -1
                     try:
                         phandle = subprocess.Popen(cmd_compile, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                         result = phandle.stdout.read()

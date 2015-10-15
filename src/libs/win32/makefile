@@ -1,4 +1,4 @@
-PATH_VCEXPRESS := "${PATH_VISUAL_STUDIO}/Common7/IDE/vcexpress.EXE"
+PATH_VCEXPRESS := "${PATH_VISUAL_STUDIO}/Common7/IDE/devenv.EXE"
 PATH_VCVARS    := "${PATH_VISUAL_STUDIO}/VC/bin/vcvars32.bat"
 
 all:

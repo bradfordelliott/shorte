@@ -35,6 +35,15 @@ def find_data_files(source,target,patterns):
 
 
 #data_files = find_data_files('templates', 'templates', ['*'])
+cairo=find_data_files('libs/win32','libs/win32',[
+        '*.pyd',
+        '*.dll',
+        '*.py'])
+clang=find_data_files("3rdparty/clang/windows", "3rdparty/clang/windows",[
+        '*.dll'])
+clangpy=find_data_files("3rdparty/clang/windows/clang", "3rdparty/clang/windows/clang",[
+        '*.py'])
+
 examples=find_data_files('examples','examples',[
         '*.tpl',
         '*.png',
@@ -76,8 +85,16 @@ templates=find_data_files('templates','templates',[
 files = examples
 files.extend(templates)
 files.extend(syntax)
+files.extend(cairo)
+files.extend(clang)
+files.extend(clangpy)
+files.extend(["version.inc"])
 
 setup(
+    options = {"py2exe": {
+                   "packages": ["PIL"], # For everything
+                   "includes": ["PIL.Image", # Or here for bits and pieces 
+                                "PIL.PngImagePlugin"]}},
     console=['shorte.py'],
     data_files=files
 )
