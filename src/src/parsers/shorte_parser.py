@@ -515,15 +515,16 @@ class shorte_parser_t(parser_t):
         states.append(STATE_NORMAL)
 
         # Skip any leading whitespace
-        while(input[i] == ' ' or input[i] == '\t'):
+        while(i < len(input) and (input[i] == ' ' or input[i] == '\t')):
             i = i + 1
 
-        if(input[i] == ':'):
-            states.append(STATE_MODIFIER)
-            i += 1
-        elif(input[i] == '\n'):
-            line_no += 1
-            i += 1
+        if(i < len(input)):
+            if(input[i] == ':'):
+                states.append(STATE_MODIFIER)
+                i += 1
+            elif(input[i] == '\n'):
+                line_no += 1
+                i += 1
 
         while i < len(input):
 
@@ -2600,6 +2601,7 @@ a C/C++ like define that looks like:
         #print "CURRENT_FILE = %s" % os.path.basename(self.m_current_file)
 
         if(not self.is_valid_tag(name)):
+            return None
             FATAL("Invalid tag '%s' encountered at %s:%d" % (name, self.m_current_file, self.m_current_line))
             
         # Expand any PHP style embedded snippets
