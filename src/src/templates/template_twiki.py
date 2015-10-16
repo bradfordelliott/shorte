@@ -74,6 +74,7 @@ class template_twiki_t(template_html.template_html_t):
         self.m_theme = ""
         self.m_template_dir = shorte_get_startup_path() + "/templates/text/"
         self.m_inline = False
+        self.list_indent_per_level=4
 
     def format_keywords(self, language, source):
 
@@ -218,25 +219,76 @@ class template_twiki_t(template_html.template_html_t):
 
         return source
     
-    def format_list(self, list, ordered=False):
-
+    
+    def format_list_child(self, elem, indent, ordered=False, start=0):
         source = ''
 
-        for elem in list:
+        prefix = ""
+        if(elem.type in ("checkbox", "action")):
+            prefix = "[ ] "
+            if(elem.checked):
+                prefix = "[x] "
 
-            if(elem.has_key("children")):
+        text = prefix + elem.text
+        if(ordered):
+            if(elem.children != None):
 
-                num_children = len(elem["children"])
+                if(indent > 0):
+                    source += "%*s%s. %s\n" % (indent, " ", start, self.format_text(text))
+                else:
+                    source += "%s. %s\n" % (start, self.format_text(text))
 
-                source += "   * %s\n" % self.format_text(elem["parent"])
+                num_children = len(elem.children)
+                
+                is_num = False
+                is_char = False
+
+                if(not ((indent/self.list_indent_per_level) & 0x1)):
+                    start = ord("a")
+                    is_char = True
+                else:
+                    start = 1
+                    is_num = True
 
                 for i in range(0, num_children):
-                    source += "   * %s\n" % self.format_text(elem["children"][i])
-
+                    if(is_num):
+                        source += self.format_list_child(elem.children[i], indent+self.list_indent_per_level, ordered, start)
+                    else:
+                        source += self.format_list_child(elem.children[i], indent+self.list_indent_per_level, ordered, chr(start))
+                    start += 1
             else:
-                source += "   * " + self.format_text(elem["parent"]) + "\n"
+                if(indent > 0):
+                    source += "%*s%s. %s\n" % (indent, " ", start, self.format_text(text))
+                else:
+                    source += "%s. %s\n" % (start, self.format_text(text))
+        else:
+            if(elem.children):
+                if(indent > 0):
+                    source += "%*s- %s\n" % (indent, " ", self.format_text(text))
+                else:
+                    source += "- %s\n" % (self.format_text(text))
 
-        return source + "\n"
+                num_children = len(elem.children)
+                for i in range(0, num_children):
+                    source += self.format_list_child(elem.children[i], indent+self.list_indent_per_level)
+            else:
+                if(indent > 0):
+                    source += "%*s- %s\n" % (indent, " ", self.format_text(text))
+                else:
+                    source += "- %s\n" % (self.format_text(text))
+
+        return source
+    
+    def format_list(self, list, ordered=False):
+
+        source = ""
+
+        start = 1
+        for elem in list:
+            source += self.format_list_child(elem, 0, ordered, start)
+            start += 1
+
+        return source
     
     
     def format_table(self, source, table):

@@ -1,10 +1,17 @@
 
-llvm_version:=3.6.1
-llvm_compilerrt_version:=3.6.1
+llvm_version:=3.7.0
+llvm_compilerrt_version:=3.7.0
 llvm_compilerrt_ext:=.src
 tar_xtension:=xz
 tar_flag:=J
 clang_name:=cfe
+
+#llvm_version:=3.6.1
+#llvm_compilerrt_version:=3.6.1
+#llvm_compilerrt_ext:=.src
+#tar_xtension:=xz
+#tar_flag:=J
+#clang_name:=cfe
 
 #llvm_version:=3.4.2
 #llvm_compilerrt_version:=3.4
@@ -39,7 +46,7 @@ extract:
 	mv compiler-rt-${llvm_compilerrt_version}${llvm_compilerrt_ext} llvm.${llvm_version}/projects/compiler-rt
 
 build:
-	mkdir build.${llvm_version}
+	mkdir -p build.${llvm_version}
 	cd build.${llvm_version} && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DLLVM_ENABLE_THREADS=OFF ../llvm.${llvm_version}
 	cd build.${llvm_version} && make -j8 libclang
 

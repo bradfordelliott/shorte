@@ -81,7 +81,7 @@ checkout_vendor_templates:
 	mkdir vendor_templates
 	cd vendor_templates && wget -O 3rdparty.zip http://sw.inphi-corp.local/gitblit/zip/?r=3rdparty.git&p=shorte/templates&h=master&format=zip
 extract_vendor_templates:
-	cd vendor_templates && unzip 3rdparty.zip 'shorte/*'
+	cd vendor_templates && unzip 3rdparty.zip
 	cp -rf vendor_templates/shorte/templates/* templates/.
 
 
@@ -189,7 +189,6 @@ tests:
 	make test_server
 	make test_extract_private
 	make test_revealjs
-#	make test_mx
 	make test_templates
 	make test_registers
 	make test_comments
@@ -309,13 +308,12 @@ test_cpp_parser:
 	${python} shorte.py -f examples/test.c -t "${THEME}" -x cpp -o build-output/cpp_parser -p "${html_pdf}"
 
 test_clang:
-#	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "${html_inline_pdf}"
+	${python} shorte.py -f examples/test.h -t "${THEME}" -DTEST1 -x clang -o build-output/clang -p "${html_inline_pdf}"
 	${python} shorte.py -f "examples/test.h examples/test.c" -t "${THEME}" -x clang -p "${html_pdf}" -o build-output/clang_c
 	${python} shorte.py -f "examples/types_test.h" -t "${THEME}" -x clang -p "html" -s "clang.args=-xc++ -I`pwd`/examples/platform" -o build-output/clang_c_types
 
-test_clang2:
-	${python} shorte.py -f "examples/cs4321_api.h examples/cs4321_api.c" -t "${THEME}" -x clang -o build-output/clang_c -p "html"
-
+test_clang_cygwin:
+	${python} -mtrace --trace shorte.py -f "examples/test.h" -t "${THEME}" -x clang -p "${html_pdf}" -o build-output/clang_c
 
 test_classes:
 	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args=-xc++" -t "${THEME}" -o build-output/class_parser -p "shorte"
@@ -455,7 +453,7 @@ test_inkscape:
 	${python} shorte.py -f examples/test_inkscape.tpl -p "${html_pdf}" -t shorte -o build-output/inkscape
 
 test_gnuplot:
-	${python} shorte.py -f examples/gnuplot.tpl -p "${html_pdf}" -t shorte -o build-output/gnuplot
+	${python} shorte.py --ignore_errors -f examples/gnuplot.tpl -p "${html_pdf}" -t shorte -o build-output/gnuplot
 
 test_registers:
 	${python} shorte.py -f examples/registers.tpl -p "${html_pdf}" -t ${THEME} -o build-output/test_registers/html
@@ -497,8 +495,8 @@ test_snippets:
 	${python} shorte.py -f "examples/snippets.tpl" -t ${THEME} -p html -o build-output/test_snippets
 
 test_cairo:
-	${python} shorte.py -f "examples/cairo.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_cairo
-	${python} shorte.py -f "examples/cairo.tpl" -t ${THEME} -p html_inline -o build-output/test_cairo_inline
+	${python} shorte.py --ignore_errors -f "examples/cairo.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_cairo
+	${python} shorte.py --ignore_errors -f "examples/cairo.tpl" -t ${THEME} -p html_inline -o build-output/test_cairo_inline
 
 test_python:
 	${python} shorte.py -f "examples/test_python.py" -xpython -t ${THEME} -p "${html_pdf}" -o build-output/test_python
@@ -517,7 +515,7 @@ exe:
 	cp libs/win32/msvc/msvcr100.dll dist
 	cp shorte.cfg dist/.
 	cp build-output/release_notes/index.html dist/release_notes.html
-	cd dist && zip -r shorte.${version}.zip *
+	cd dist && zip -r shorte.${version}.win32.zip *
 
 tarball:
 	

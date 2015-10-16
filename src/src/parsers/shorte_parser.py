@@ -3074,9 +3074,12 @@ else:
 
     def parse_include(self, source_file):
 
-        source = open(source_file, "r")
-        input = source.read()
-        source.close()
+        try:
+            source = open(source_file, "r")
+            input = source.read()
+            source.close()
+        except:
+            FATAL("Failed opening source file [%s]" % source_file)
         
         #self.parse_line_info(source_file, input)
 

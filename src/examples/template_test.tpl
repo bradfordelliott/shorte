@@ -51,6 +51,13 @@ And this is another list with a checklist in it
 
 This is some @{b,bold} text, some @{i,italic} text, and some @{strike,striked} text.
 
+This is an ordered list:
+@ol
+- One
+    - Two
+    - Three
+- Four
+
 @c
 int main(void)
 {
