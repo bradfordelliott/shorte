@@ -15,6 +15,7 @@ from src.parsers.shorte_parser import *
 from src.parsers.cpp_parser import *
 from src.parsers.clang_parser import *
 from src.parsers.python_parser import *
+from src.parsers.markdown_parser import *
 from src.shorte_code_executor import *
 from src.templates.template_html import template_html_t
 from src.templates.template_odt  import template_odt_t
@@ -190,12 +191,15 @@ class engine_t:
             self.m_parser = clang_parser_t(self)
         elif(parser == "python"):
             self.m_parser = python_parser_t(self)
+        elif(parser == "markdown"):
+            self.m_parser = markdown_parser_t(self)
         else:
             self.m_parser = shorte_parser_t(self)
             #self.m_parser.set_cpp_parser(cpp_parser_t(self))
             # DEBUG BRAD: If you don't have the proper includes then
             #             clang may fail on types it doesn't understand. 
             self.m_parser.set_cpp_parser(clang_parser_t(self))
+            self.m_parser.set_markdown_parser(markdown_parser_t(self))
 
         self.m_classes = {}
 

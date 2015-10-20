@@ -1,10 +1,51 @@
 from src.shorte_defines import *
+from src.textblock import list_item_t, textblock_t
 
 class parser_t:
 
     def __init__(self):
 
-        do_nothing=1
+        # The list of tags that qualify as source code elements
+        self.m_source_code_tags = {
+            "python"     : True,
+            "perl"       : True,
+            "shell"      : True,
+            "c"          : True,
+            "cpp"        : True,
+            "sql"        : True,
+            "code"       : True,
+            "batch"      : True,
+            "vera"       : True,
+            "bash"       : True,
+            "java"       : True,
+            "verilog"    : True,
+            "tcl"        : True,
+            "shorte"     : True,
+            "xml"        : True,
+            "swift"      : True,
+            "go"         : True,
+            "javascript" : True,
+            }
+    
+    def tag_is_header(self, tag_name):
+        if(tag_name in ("h1", "h2", "h3", "h4", "h5", "h")):
+            return True
+
+        return False
+
+    def tag_is_executable(self, tag_name):
+
+        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go", "javascript", "shorte")):
+            return True
+
+        return False
+    
+    def tag_is_source_code(self, tag_name):
+
+        if(self.m_source_code_tags.has_key(tag_name)):
+            return True
+
+        return False
     
     def get_attribute_as_bool(self, attributes, key):
     

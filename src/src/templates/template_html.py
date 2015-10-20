@@ -23,7 +23,7 @@ import time
 import datetime
 import base64
 
-from src.shorte_defines import *
+from src.shorte_includes import *
 from template import *
 from src.shorte_source_code import *
 import templates.html.html_styles as html_styles
@@ -909,6 +909,7 @@ class template_html_t(template_t):
 
             if(len(postfix) > 0):
                 postfix = " " + postfix
+
             source += "<li %s>%s " % (style,prefix + self.format_text(elem.get_text()) + postfix + "</li>")
 
         return source
@@ -1727,14 +1728,31 @@ within an HTML document.
                 else:
                     if(indent > 0):
                         if(standalone):
-                            style = "style='margin-left:%dpx;'" % (20 + (indent * 6))
+                            style = "style='margin-left:%dpx;background-color:#eee;border:1px solid #ccc;white-space:pre-wrap;border-radius:2px;padding:0px;font-family:monospace;'" % (20 + (indent * 6))
                         else:
                             style = "style='margin-left:%dpx;'" % ((indent * 6))
                     else:
                         style = ''
 
                 if(is_code):
-                    html += "<div class='code' %s><div class='snippet' style='white-space:pre'>" % style + self.format_text(text) + "</div></div>\n"
+                    #html += "<div class='code' %s><div class='snippet' style='white-space:pre'>" % style + self.format_text(text) + "</div></div>\n"
+                    language = p["language"]
+                
+                    code = self.m_engine.m_source_code_analyzer
+                    file = ""
+                    line = 0
+                    source = code.parse_source_code(language, text, file, line)
+                    output = self.format_source_code(language, source)
+                    output = template_code.substitute(
+                       {"contents" : output,
+                        "source"   : "",
+                        "code_header" : "",
+                        "template" : "code2",
+                        "result"   : ""})
+
+                    html += output
+                    #print output
+
                 elif(is_list):
                     if(ptype == textblock_t.TYPE_ORDERED_LIST):
                         html += self.format_list(p["text"], True, indent)
@@ -1743,6 +1761,9 @@ within an HTML document.
                 elif(is_quote):
                     tblock = textblock_t(p["text"])
                     html += self.format_quote(tblock)
+                elif(indent > 0):
+                    text = trim_leading_indent(text)
+                    html += "<div class='tb_code_%d'>" % indent + self.format_text(text, expand_equals_block=True) + "</div>\n"
                 else:
                     if(standalone):
                         html += "<div class='tblkps' %s>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
@@ -2475,7 +2496,7 @@ within an HTML document.
 
         #return "[[<a href='%s'>%s</a> (source=%s, label=%s)]]" % (source, label, source, label)
         return "<a href='%s' title='source=%s, label=%s'>%s</a>" % (source, source, label, label)
-    
+
     def _expand_anchors(self, matches):
 
         (source, label, external) = self._process_link(matches)
@@ -2484,15 +2505,149 @@ within an HTML document.
     
     def _format_links(self, data):
 
-        # Expand any anchors
-        expr = re.compile("\[\[\[(.*?)\]\]\]", re.DOTALL)
-        data = expr.sub(self._expand_anchors, data)
-           
-        # Expand any links
-        expr = re.compile("\[\[(.*?)\]\]", re.DOTALL)
-        data = expr.sub(self._expand_links, data)
+        output = ""
+        start = 0
+        end = len(data)
 
-        return data
+        STATE_NORMAL = 0
+        STATE_HYPERLINK = 1
+        STATE_SHORTE_LINK = 2
+        STATE_MARKDOWN_LINK = 3
+        STATE_MARKDOWN_IMAGE = 4
+        STATE_OPEN_BRACKET = 5
+
+        states = []
+        states.append(STATE_NORMAL)
+
+        i = start
+        output = ""
+
+        replacement = "" 
+
+        while(i < end):
+            state = states[-1]
+
+            segment = data[i:i+8]
+
+            #print "STATE: %d" % state
+            #print "segment: [%s]" % segment
+
+            if(state == STATE_NORMAL):
+                if(data[i:i+2] == "[["):
+                    replacement = ""
+                    states.append(STATE_SHORTE_LINK)
+                    i += 2
+                elif(data[i] == "["):
+                    replacement = "["
+                    states.append(STATE_OPEN_BRACKET)
+                    i += 1
+                elif(data[i:i+2] == "!["):
+                    replacement = "!["
+                    states.append(STATE_OPEN_BRACKET)
+                    i += 2
+                elif(segment.startswith("http://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+7]
+                    i += 7
+                elif(segment.startswith("https://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+8]
+                    i += 8
+                elif(segment.startswith("mailto://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+9]
+                    i += 9
+                elif(segment.startswith("ftp://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+6]
+                    i += 6
+                else:
+                    output += data[i]
+                    i += 1
+
+            elif(state == STATE_HYPERLINK):
+
+                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=")):
+                    replacement += data[i]
+                else:
+                    if(replacement.endswith(".")):
+                        replacement = replacement[0:-1]
+                        output += "<a href='%s'>%s</a>." % (replacement, replacement)
+                    else:
+                        output += "<a href='%s'>%s</a>" % (replacement, replacement) 
+                    replacement = ""
+
+                    states.pop()
+                    output += data[i]
+
+                i += 1
+
+            elif(state == STATE_SHORTE_LINK):
+                if(data[i:i+2] == "]]"):
+                    if("," in replacement):
+                        parts = replacement.split(",")
+                        output += "<a href='%s'>%s</a>" % (parts[0], parts[1])
+                    else:
+                        output += "<a href='%s'>%s</a>" % (replacement, replacement)
+                    replacement = ""
+                    i += 2
+                    states.pop()
+                else:
+                    replacement += data[i]
+                    i += 1
+
+            elif(state == STATE_OPEN_BRACKET):
+                if(data[i-1] == "]"):
+                    states.pop()
+
+                    if(data[i] == "("):
+                        url = ""
+
+                        if(replacement.startswith("![")):
+                            states.append(STATE_MARKDOWN_IMAGE)
+                            label = replacement[2:-1]
+                        else:
+                            states.append(STATE_MARKDOWN_LINK)
+                            label = replacement[1:-1]
+                        replacement = ""
+                    else:
+                        output += replacement
+                        replacement = ""
+                else:
+                    replacement += data[i]
+
+                i += 1
+
+            elif(state == STATE_MARKDOWN_LINK):
+                if(data[i] == ")"):
+                    output += "<a href='%s'>%s</a>" % (url, label)
+                    states.pop()
+                else:
+                    url += data[i]
+
+                i += 1
+            
+            elif(state == STATE_MARKDOWN_IMAGE):
+                if(data[i] == ")"):
+                    tag = {}
+                    tag["src"] = url
+                    tag["caption"] = label
+                    image = self.m_engine.m_parser.parse_image(tag)
+                    output += self.format_image(image)
+                    states.pop()
+                else:
+                    url += data[i]
+
+                i += 1
+
+        if(replacement != ""):
+            if(replacement.endswith(".")):
+                replacement = replacement[0:-1]
+                output += "<a href='%s'>%s</a>." % (replacement, replacement)
+            else:
+                output += "<a href='%s'>%s</a>" % (replacement, replacement) 
+
+        return output
 
     def parse_style(self, data):
         data = style.strip()
@@ -2545,6 +2700,9 @@ within an HTML document.
         href_start = ""
         href_end   = ""
 
+        if(image.has_key("caption")):
+            caption = image["caption"]
+
         if(image.has_key("href")):
             href_start = "<a style='text-decoration:none;' href='%s'>" % image["href"]
             href_end = "</a>"
@@ -2592,8 +2750,8 @@ within an HTML document.
 $map
 $href_start
 <div class='image_inline'>
-    <div style='float:left;'><img class="map" src='${name}' style=\"${style};max-width:1000px;\" $map_link/></div>
-    <div style='float:left;'><b>${caption}</b></div>
+    <div style=''><img class="map" src='${name}' style=\"${style};max-width:1000px;\" $map_link/></div>
+    <div style=''><b>${caption}</b></div>
     <div style='clear:both;'></div>
 </div>
 $href_end
@@ -3260,6 +3418,9 @@ $href_end
         
         # First make any links or references
         data = self._format_links(data)
+
+        # Covert code between single backticks to an inline code block
+        data = re.sub("`(.*?)`", "<span class='inline_code'>\\1</span>", data)
 
         # Then insert any images. Make sure to add
         # them to the list of images that need to be

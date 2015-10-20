@@ -21,7 +21,7 @@ from string import Template;
 import shutil
 import datetime
 
-from src.shorte_defines import *
+from src.shorte_includes import *
 from template import *
 
 

@@ -139,6 +139,7 @@ div.snippet span.ln {color: #C0C0C0;}
 /* Styling of text blocks */
 div.tblkps {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;margin-left:20px;}
 div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
+
 '''
 
     def get_screen_styles(self):
@@ -179,6 +180,7 @@ div.tblkp  {margin:0px;padding:0px;margin-top:5px;margin-bottom:5px;}
 
   table div.tblkps {margin-left:4px;margin-top:5px;margin-bottom:5px;font-size:1.0em;}
   table div.tblkp  {margin-left:4px;padding:0px;margin-top:5px;margin-bottom:5px;font-size:1.0em;}
+
     '''
     
     def get_gallery_styles(self):
@@ -367,10 +369,13 @@ div.gallery
   /* Horizontal Rule */
   div.hr
   {
-      float:left;
       width:100%;
       border-top:1px solid #ccc;
       height:1px;
+      padding:0px;
+      margin:0px;
+      font-size:0px;
+      line-height:0px;
   }
 
   div.tb
@@ -527,6 +532,7 @@ div.gallery
   .image_inline
   {
       display:inline;
+      text-align:center;
   }
   .image_inline table
   {
@@ -592,6 +598,18 @@ div.gallery
       color:${color_codeblock_section};
       font-weight:bold;
   }
+
+  span.inline_code
+  {
+      background-color:#eee;
+      border:1px solid #ccc;
+      border-radius:2px;
+      padding:4px;
+      padding-top:2px;
+      padding-bottom:2px;
+      white-space:pre;
+      font-family:monospace;
+  }
   
   div.code a
   {
@@ -631,10 +649,38 @@ div.gallery
       $star
   }
 
+  /* Change the ordered list styles so that the
+   * increment like 1.1, 1.1.3, etc. */
+  ol
+  {
+      counter-reset: item;
+  }
+  ol li
+  {
+      display: block;
+      margin-top:5px;
+      margin-bottom:5px;
+      position: relative;
+  }
+  ol li:before
+  {
+      color:#aaa;
+      content: counters(item, ".")".";
+      counter-increment: item;
+      position: absolute;
+      margin-right: 100%;
+      right: 10px; /* space between number and text */
+  }
 
   $styles_gallery
 
   $priority
+  
+  /* Inline code blocks */
+  div.tb_code_1 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:0px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
+  div.tb_code_2 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:10px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
+  div.tb_code_3 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:20px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
+  div.tb_code_4 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:30px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
   ''').substitute({"priority"              : "$priority",
                    "star"                  : "$star",
                    "headings"              : headings,

@@ -21,7 +21,7 @@ import time
 import subprocess
 from string import Template;
 
-from src.shorte_defines import *
+from src.shorte_includes import *
 
 import sys
 sys.path.append("libs")
@@ -886,7 +886,7 @@ class template_odt_t(template_t):
         else:
             hyperlink = '''<text:a xlink:type="simple" xlink:href="#%s|outline" office:name="%s">%s</text:a>''' % (source, label, label)
             return '''<text:span text:style-name="hyperlink">%s</text:span>''' % hyperlink
-    
+
     def _expand_anchors(self, matches):
 
         (source, label, external) = self._process_link(matches)
@@ -896,19 +896,167 @@ class template_odt_t(template_t):
 <text:bookmark-start text:name="%s"/>
     <text:a xlink:type="simple" xlink:href="" office:name="%s">%s</text:a>
 <text:bookmark-end text:name="%s"/>''' % (source, label, label, label)
-    
+
+    def _format_link(self, url, label):
+
+        # This is an external link
+        if(url.startswith("http")):
+            return '''<text:a xlink:type="simple" xlink:href="%s" office:name="%s">%s</text:a>''' % (url, label, label)
+        else:
+            hyperlink = '''<text:a xlink:type="simple" xlink:href="#%s|outline" office:name="%s">%s</text:a>''' % (url, label, label)
+            return '''<text:span text:style-name="hyperlink">%s</text:span>''' % hyperlink
+
     def _format_links(self, data):
-        
-        # Expand any anchors
-        expr = re.compile("\[\[\[(.*?)\]\]\]", re.DOTALL)
-        data = expr.sub(self._expand_anchors, data)
-        
-        # Expand any links
-        expr = re.compile("\[\[(.*?)\]\]", re.DOTALL)
-        data = expr.sub(self._expand_links, data)
-       
-        return data
-       
+
+        output = ""
+        start = 0
+        end = len(data)
+
+        STATE_NORMAL = 0
+        STATE_HYPERLINK = 1
+        STATE_SHORTE_LINK = 2
+        STATE_MARKDOWN_LINK = 3
+        STATE_MARKDOWN_IMAGE = 4
+        STATE_OPEN_BRACKET = 5
+
+        states = []
+        states.append(STATE_NORMAL)
+
+        i = start
+        output = ""
+
+        replacement = "" 
+
+        while(i < end):
+            state = states[-1]
+
+            segment = data[i:i+8]
+
+            #print "STATE: %d" % state
+            #print "segment: [%s]" % segment
+
+            if(state == STATE_NORMAL):
+                if(data[i:i+2] == "[["):
+                    replacement = ""
+                    states.append(STATE_SHORTE_LINK)
+                    i += 2
+                elif(data[i] == "["):
+                    replacement = "["
+                    states.append(STATE_OPEN_BRACKET)
+                    i += 1
+                elif(data[i:i+2] == "!["):
+                    replacement = "!["
+                    states.append(STATE_OPEN_BRACKET)
+                    i += 2
+                elif(segment.startswith("http://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+7]
+                    i += 7
+                elif(segment.startswith("https://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+8]
+                    i += 8
+                elif(segment.startswith("mailto://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+9]
+                    i += 9
+                elif(segment.startswith("ftp://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+6]
+                    i += 6
+                else:
+                    output += data[i]
+                    i += 1
+
+            elif(state == STATE_HYPERLINK):
+
+                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=")):
+                    replacement += data[i]
+                else:
+                    if(replacement.endswith(".")):
+                        replacement = replacement[0:-1]
+                        output += self._format_link(replacement, replacement)
+                    else:
+                        output += self._format_link(replacement, replacement) 
+                    replacement = ""
+
+                    states.pop()
+                    output += data[i]
+
+                i += 1
+
+            elif(state == STATE_SHORTE_LINK):
+                if(data[i:i+2] == "]]"):
+                    if("," in replacement):
+                        parts = replacement.split(",")
+                        output += self._format_link(parts[0], parts[1])
+                    else:
+                        output += self._format_link(replacement, replacement)
+                    replacement = ""
+                    i += 2
+                    states.pop()
+                else:
+                    replacement += data[i]
+                    i += 1
+
+            elif(state == STATE_OPEN_BRACKET):
+                if(data[i-1] == "]"):
+                    states.pop()
+
+                    if(data[i] == "("):
+                        url = ""
+
+                        if(replacement.startswith("![")):
+                            states.append(STATE_MARKDOWN_IMAGE)
+                            label = replacement[2:-1]
+                        else:
+                            states.append(STATE_MARKDOWN_LINK)
+                            label = replacement[1:-1]
+                        replacement = ""
+                    else:
+                        output += replacement
+                        replacement = ""
+                else:
+                    replacement += data[i]
+
+                i += 1
+
+            elif(state == STATE_MARKDOWN_LINK):
+                if(data[i] == ")"):
+                    output += self._format_link(url, label)
+                    states.pop()
+                else:
+                    url += data[i]
+
+                i += 1
+            
+            elif(state == STATE_MARKDOWN_IMAGE):
+                if(data[i] == ")"):
+                    tag = {}
+                    tag["src"] = url
+                    tag["caption"] = label
+                    image = self.m_engine.m_parser.parse_image(tag)
+                    image = self.format_image(image)
+
+                    # DEBUG BRAD: Need a better way of detecting what
+                    #             the previous style was.
+                    output += "</text:p>" + image + "<text:p>"
+
+                    states.pop()
+                else:
+                    url += data[i]
+
+                i += 1
+
+        if(replacement != ""):
+            if(replacement.endswith(".")):
+                replacement = replacement[0:-1]
+                output += self._format_link(replacement, replacement)
+            else:
+                output += self._format_link(replacement, replacement) 
+
+        return output
+
     def format_object_section_title(self, title):
         xml = string.Template('''
         <table:table-row table:style-name="${row_style}">

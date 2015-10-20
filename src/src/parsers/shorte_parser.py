@@ -29,6 +29,7 @@ from shorte_parser_base import parser_t
 from shorte_images import *
 
 from src.templates.template_shorte import template_shorte_t
+from src.textblock import textblock_t
 
 import src.graphing.sequence_diagram as sequence_diagram
 import src.shorte_defines
@@ -149,6 +150,8 @@ class shorte_header_t():
 class shorte_parser_t(parser_t):
     def __init__(self, engine):
 
+        parser_t.__init__(self)
+
         self.m_pages = []
         
         self.m_engine = engine
@@ -208,6 +211,7 @@ class shorte_parser_t(parser_t):
             "javascript"      : True,
             "include"         : True,
             "include_child"   : True,
+            "markdown"        : True,
 
             "checklist"       : True,
             "enum"            : True,
@@ -276,27 +280,6 @@ class shorte_parser_t(parser_t):
             "least"   : 100
         }
 
-        # The list of tags that qualify as source code elements
-        self.m_source_code_tags = {
-            "python"     : True,
-            "perl"       : True,
-            "shell"      : True,
-            "c"          : True,
-            "cpp"        : True,
-            "sql"        : True,
-            "code"       : True,
-            "batch"      : True,
-            "vera"       : True,
-            "bash"       : True,
-            "java"       : True,
-            "verilog"    : True,
-            "tcl"        : True,
-            "shorte"     : True,
-            "xml"        : True,
-            "swift"      : True,
-            "go"         : True,
-            "javascript" : True,
-            }
 
         self.m_include_queue = []
         self.m_snippets = {}
@@ -476,30 +459,6 @@ class shorte_parser_t(parser_t):
 
         return False
     
-    def tag_is_source_code(self, tag_name):
-
-        if(self.m_source_code_tags.has_key(tag_name)):
-            return True
-
-        #if(tag_name in ("python", "perl", "shell", "d", "c", "cpp", "sql", "code", "batch", "vera", "bash", "java", "verilog", "tcl", "shorte", "xml", "swift", "go", "javascript")):
-        #   return True
-
-        return False
-    
-    def tag_is_header(self, tag_name):
-        
-        if(tag_name in ("h1", "h2", "h3", "h4", "h5", "h")):
-            return True
-
-        return False
-
-    def tag_is_executable(self, tag_name):
-
-        if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go", "javascript", "shorte")):
-            return True
-
-        return False
-    
     def _parse_tag_data(self, tag_name, input, i, line_no):
 
         tag_data = []
@@ -540,7 +499,8 @@ class shorte_parser_t(parser_t):
 
             if(state == STATE_NORMAL):
 
-                if(not self.tag_is_source_code(tag_name) and tag_name != "gnuplot"):
+                # Don't treat # as a comment inside a code block, a gnuplot block or a markdown block
+                if(not self.tag_is_source_code(tag_name) and (tag_name != "gnuplot") and (tag_name != "markdown")):
                     
                     # parse any comments
                     if(input[i] == '#'):
@@ -2380,7 +2340,7 @@ a C/C++ like define that looks like:
         if(tags.has_key("src")):
 
             # First fetch the URL so that it can be converted
-            if("http://" in tags["src"]):
+            if(("http://" in tags["src"]) or ("https://" in tags["src"])):
                 import urllib
                 image_path = self.m_engine.get_config("shorte", "scratchdir") + "/" + os.path.basename(tags["src"])
                 urllib.urlretrieve(tags["src"], image_path)
@@ -2601,6 +2561,9 @@ a C/C++ like define that looks like:
         #print "CURRENT_FILE = %s" % os.path.basename(self.m_current_file)
 
         if(not self.is_valid_tag(name)):
+            # DEBUG BRAD: Need to return None rather than FATAL because
+            #             the c2html of shorte.py example fails with a blank
+            #             tag. Need to investigate this at some point.
             return None
             FATAL("Invalid tag '%s' encountered at %s:%d" % (name, self.m_current_file, self.m_current_line))
             
@@ -2777,6 +2740,15 @@ else:
                 data = data.replace("\\", "")
             tag.source = data
             tag.contents = code.parse_source_code(name, data, tag.file, tag.line)
+
+        elif(name == "markdown"):
+            indexer = indexer_t()
+            page = self.m_markdown_parser.parse_string(data, tag.file, is_include=True)
+            tags = page["tags"]
+            for t in tags:
+                t.line += tag.line
+
+            return page["tags"]
 
         elif(name == "table"):
             tag.contents = self.parse_table(data, modifiers)
@@ -3071,6 +3043,8 @@ else:
 
     def set_cpp_parser(self, cpp_parser):
         self.m_cpp_parser = cpp_parser
+    def set_markdown_parser(self, markdown_parser):
+        self.m_markdown_parser = markdown_parser
 
     def parse_include(self, source_file):
 
@@ -3092,12 +3066,19 @@ else:
         # If the include is a source file then first convert it
         # to shorte format.
         if(source_file.endswith(".c") or source_file.endswith(".h")):
-
             indexer = indexer_t()
             page = self.m_cpp_parser.parse_buffer(input, source_file)
             template = template_shorte_t(self.m_engine, indexer)
             input = template.generate_buffer(page)
 
+        # If it ends with .md or .markdown then it must be in markdown format
+        elif(source_file.endswith(".md") or source_file.endswith(".markdown")):
+            indexer = indexer_t()
+            page = self.m_markdown_parser.parse_string(input, source_file, is_include=True)
+            template = template_shorte_t(self.m_engine, indexer)
+            input = template.generate_buffer(page)
+
+        # If it ends with .py it must be in python format
         elif(source_file.endswith('.py')):
             indexer = indexer_t()
             pyparse = src.parsers.python_parser.python_parser_t(self.m_engine)
@@ -3293,7 +3274,6 @@ def exists(s):
         if(source_file == "result"):
             return None
 
-        #print "PARSE: %s" % source_file
         source = open(source_file, "r")
         input = source.read()
         source.close()
@@ -3551,7 +3531,7 @@ def exists(s):
 
             # Now walk the list of tags and cascade conditionals on headers
             #for tag in page["tags"]:
-            #    print "TAG: %s at %d" % (tag.name, tag.line)
+            #    print "TAG: %s at %s.%d" % (tag.name, tag.file, tag.line)
 
             #print "Finished parsing"
 
