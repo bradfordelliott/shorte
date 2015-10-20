@@ -1,3 +1,7 @@
+"""The clang parser is a replacement for cpp_parser. It is used to
+   parse C/C++ files and convert them into tagged objects suitable for
+   use within shorte.
+"""
 import sys
 import inspect
 import re
@@ -63,9 +67,18 @@ def get_rtokens(tu, extent):
 
     
 class clang_parser_t(shorte_parser_t):
+    """This is the implementation of the clang parser
+       for C/C++ source files"""
+
     def __init__(self, engine):
+        """The constructor for the clang parser.
+
+           @param engine [I] - Reference to the shorte engine defined in shorte.py
+        """
 
         self.m_engine = engine
+
+        # Initialize the base parser class
         shorte_parser_t.__init__(self, engine)
 
         self.m_author = "Unknown"
@@ -206,10 +219,14 @@ class clang_parser_t(shorte_parser_t):
             desc = self.format_text(matches.groups()[1])
             io = ""
 
-            matches2 = re.search("\[(.*?)\] *- *(.*)", desc, re.DOTALL)
+            # Parameters declarations typically look like
+            #     @param my_param [I] - This is a description
+            # or
+            #     @param my_param (I) - This is a description
+            matches2 = re.search("(\[|\()(.*?)(\]|\)) *- *(.*)", desc, re.DOTALL)
             if(matches2 != None):
-                desc = matches2.groups()[1]
-                io = matches2.groups()[0]
+                desc = matches2.groups()[3]
+                io = matches2.groups()[1]
 
             p = param_t()
             p.set_description(desc, textblock=False)

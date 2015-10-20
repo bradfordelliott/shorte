@@ -1,9 +1,20 @@
+"""This module contains the base class for all parsers in the shorte
+   documentation system.
+"""
 from src.shorte_defines import *
 from src.textblock import list_item_t, textblock_t
 
 class parser_t:
 
     def __init__(self):
+        """This is the base class for all parsers. It contains a minimal
+           set of items that are common to all parsers"""
+        
+        # The title associated with the document
+        self.m_title = None
+
+        # The subtitle associated with the document
+        self.m_subtitle = None
 
         # The list of tags that qualify as source code elements
         self.m_source_code_tags = {
@@ -27,13 +38,73 @@ class parser_t:
             "javascript" : True,
             }
     
+    def get_title(self):
+        """Fetch the title associated with the document. This
+           is generally specified by the @doctitle tag in the
+           document header
+           
+           @return The title associated with the document.
+           """
+
+        if(self.m_title == None):
+            return "untitled"
+
+        return self.m_title
+
+    def set_title(self, title):
+        """Set the title associated with the document. This is
+           generally specified by the @doctitle tag in the
+           document header
+           
+           @param title [I] - The title to associate with
+                              the document.
+           """
+        self.m_title = title
+   
+    def get_subtitle(self):
+        """Fetch the subtitle associated with the document. This is
+           generally specified by the @docsubtitle tag in the
+           document header
+
+           @return The subtitle associated with the document.
+        """
+
+        if(self.m_subtitle == None):
+            return "untitled"
+
+        return self.m_subtitle
+    
+    def set_subtitle(self, subtitle):
+        """Set the subtitle associated with the document. This is
+           generally specified by the @docsubtitle tag in the
+           document header.
+
+           @param subtitle [I] - The subtitle asssociated with the
+                                 document.
+        """
+        self.m_subtitle = subtitle
+    
     def tag_is_header(self, tag_name):
+        """This method is called to determine whether or not a specific
+           tag is a heading element
+
+           @param tag_name [I] - The tag to check
+
+           @return True if the tag is a heading and False otherwise
+        """
         if(tag_name in ("h1", "h2", "h3", "h4", "h5", "h")):
             return True
 
         return False
 
     def tag_is_executable(self, tag_name):
+        """This method is called to determine whether or not a specific
+           tag is an executable code element.
+
+           @param tag_name [I] - The tag to check
+
+           @return True if the tag is executable and False otherwise
+        """
 
         if(tag_name in ("python", "perl", "d", "c", "cpp", "vera", "bash", "java", "verilog", "tcl", "batch", "swift", "go", "javascript", "shorte")):
             return True
@@ -202,7 +273,14 @@ class parser_t:
         return (i+1,nodes)
 
     def parse_list(self, source, modifiers):
+        """This method is called to parse an input list and convert it to an
+           array of list_item_t objects.
 
+           @param source    [I] - The source to parse
+           @param modifiers [I] - The modifiers associated with the list.
+
+           @return A list of list_item_t objects defining the input list.
+        """
         items = []
         item = []
         item_indent = 0
@@ -291,24 +369,14 @@ class parser_t:
         
         return ''.join(indent)
 
-
-    #+-----------------------------------------------------------------------------
-    #|
-    #| FUNCTION:
-    #|    parse_modifiers()
-    #|
-    #| DESCRIPTION:
-    #| 
-    #| PARAMETERS:
-    #|    modifiers    (I) - Modifiers impacting the source
-    #| 
-    #| RETURNS:
-    #|    Dictionary containing any code modifiers. Currently consists of   
-    #|      source  - The name of the source machine
-    #|      machine - The target machine to execute on
-    #|
-    #+-----------------------------------------------------------------------------
     def parse_modifiers(self, modifiers):
+        """This method is called to parse the modifiers string associated
+           with a tag.
+
+           @param [I] The modifier string to parse
+
+           @return A dictionary containing the modifier fields
+        """
 
         return shorte_parse_modifiers(modifiers)
 

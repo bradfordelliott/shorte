@@ -130,7 +130,7 @@ struct handle_table_entry_tag * phead, * ptail;
  * -[x] four
  *
  *
- * @param blah  [I] -
+ * @param blah2  [I] -
  *     Some dumb variable that behaves like
  *     a text block with a list
  *
@@ -157,8 +157,8 @@ struct handle_table_entry_tag * phead, * ptail;
  *
  *     and a table
  *     @{table,
- *     - One   ! Two
- *     - Three ! Four
+ *     - One   | Two
+ *     - Three | Four
  *     }
  *
  * @example

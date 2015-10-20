@@ -24,7 +24,15 @@ import src.shorte_defines
 
 
 class markdown_parser_t(parser_t):
+    """This class contains the implementation of markdown parser
+       used for parsing files implemented in markdown syntax
+    """
+
     def __init__(self, engine):
+        """The constructor for the markdown parser.
+
+           @param engine [I] - Reference to the shorte engine defined in shorte.py
+        """
 
         parser_t.__init__(self)
 
@@ -36,9 +44,6 @@ class markdown_parser_t(parser_t):
         self.m_snippets = {}
         self.m_urls = {}
         self.m_links = []
-
-        self.m_title = None
-        self.m_subtitle = None
 
         # Rough parser position of current
         # tag
@@ -56,20 +61,6 @@ class markdown_parser_t(parser_t):
     def get_pages(self):
         return self.m_pages
 
-    def get_title(self):
-        
-        if(self.m_title == None):
-            return "untitled"
-
-        return self.m_title
-    
-    def get_subtitle(self):
-
-        if(self.m_subtitle == None):
-            return "untitled"
-
-        return self.m_subtitle
-    
     def parse(self, source_file):
         """This method opens a markdown source file and parses its
            contents
@@ -94,67 +85,15 @@ class markdown_parser_t(parser_t):
 
         return result
     
-    def parse_buffer(self, data):
-
-        output = ""
-        start = 0
-        end = len(data)
-
-        STATE_NORMAL = 0
-        STATE_HEADER = 1
-
-        states = []
-        states.append(STATE_NORMAL)
-
-        i = start
-        output = ""
-            
-        tag = tag_t()
-        tag.file = source_file
-        tag.line = 1
-
-        while(i < end):
-            state = states[-1]
-
-            if(state == STATE_NORMAL):
-
-                if((i == 0 or data[i-1] == "\n") and data[i] == "#"):
-                    states.append(STATE_HEADER)
-                    i += 1
-
-                else:
-                    tag.source += data[i]
-
-            elif(state == STATE_HEADER):
-
-                i += 1
-
-        return output
 
     def parse_string(self, input, source_file="default.tpl", is_include=False):
+        """This method is used to parse an input block of markdown text
+           and convert it into something that shorte can understand. Currently
+           it doesn't support macro preprocessing like shorte syntax does
+        """.
 
         if(None == self.m_current_file):
             self.m_current_file = source_file
-
-        # Strip any illegal characters
-        #input = re.sub("[]", "'", input)
-        #input = re.sub("", "", input)
-        
-        # Replace any references to Leeds
-        #input = self.__search_and_replace(input)
-
-        # Perform any preprocessing/expansion
-        # of macros
-        #macros = self.m_engine.get_macros()
-        #tmp_macros = {}
-        #for macro in macros:
-        #    tmp_macros[macro] = macros[macro]
-        #
-        #expr = re.compile("<\?(.*?)\?>", re.DOTALL)
-        #input = expr.sub(self._evaluate_macros, input)
-
-        #if(not is_include):
-        #    source_file = self.m_engine.search_and_replace(source_file)
 
         try:
 
