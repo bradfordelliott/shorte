@@ -50,6 +50,7 @@ examples=find_data_files('examples','examples',[
         '*.svg',
         '*.swf',
         '*.c',
+        '*.markdown',
         '*.h'])
 syntax=find_data_files('syntax','syntax',[
         'vim/*',

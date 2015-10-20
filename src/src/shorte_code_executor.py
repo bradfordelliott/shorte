@@ -461,7 +461,7 @@ class code_executor_t:
 
             elif(language == "batch"):
                 
-                if("windows" != platform.system()):
+                if("Windows" != platform.system()):
                     raise RunException(-1, "batch not currently supported on platforms other than Windows")
 
                 # Run the batch file using cmd /c
@@ -469,11 +469,13 @@ class code_executor_t:
                 tmp.write(source)
                 tmp.close()
 
-                cmd_run = "cmd /c %s" % source_file
+                phandle = subprocess.Popen(["cmd", "/c", source_file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                result = phandle.stdout.read()
+                result += phandle.stderr.read()
+                phandle.wait()
+                cresult.set_run_rc(phandle.returncode)
+                cresult.set_run_result(result)
 
-                result = os.popen(cmd_run).read()
-
-                #print "RESULT=[%s]" % result
 
         except RunException as e:
             cresult.set_run_result(e.message)
