@@ -90,7 +90,7 @@ class markdown_parser_t(parser_t):
         """This method is used to parse an input block of markdown text
            and convert it into something that shorte can understand. Currently
            it doesn't support macro preprocessing like shorte syntax does
-        """.
+        """
 
         if(None == self.m_current_file):
             self.m_current_file = source_file
