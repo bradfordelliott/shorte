@@ -204,6 +204,7 @@ tests:
 	make test_imagemap
 	make test_code_styling
 	make test_markdown
+	make test_document_header
 	${python} shorte.py --build_index=build-output -p html_inline -t ${THEME}
 
 THEME:=shorte
@@ -510,6 +511,9 @@ test_markdown:
 
 test_markdown_parser:
 	${python} shorte.py -f "examples/example.markdown" -xmarkdown -t ${THEME} -p html -o build-output/test_markdown/parser
+
+test_document_header:
+	${python} shorte.py -f "examples/test_document_header.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_document_header
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python

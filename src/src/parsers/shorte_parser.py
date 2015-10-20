@@ -1,23 +1,14 @@
 # -*- coding: iso-8859-15 -*-
-#+----------------------------------------------------------------------------
-#|
-#| SCRIPT:
-#|   shorte_parser.py
-#|
-#| DESCRIPTION:
-#|   This module contains the definition of a parser class used to
-#|   parse shorte documents in order to convert them into another output
-#|   format.
-#|
-#+----------------------------------------------------------------------------
-#|
-#| Copyright (c) 2010 Brad Elliott
-#|
-#+----------------------------------------------------------------------------
+"""
+This module contains the definition of a parser class used to
+parse shorte documents in order to convert them into another output
+format.
+"""
 import re
 import sys
 import os
 from src.shorte_source_code import *
+from src.parsers.shorte_header import shorte_header_t
 import platform
 import time
 import random
@@ -85,67 +76,6 @@ class row_t():
             output += indent_lines(col, "    > ")
         return output 
 
-class shorte_header_t():
-    def __init__(self):
-        self.start = 0
-        self.title = ""
-        self.subtitle = ""
-        self.version = ""
-        self.toc = False
-        self.numbered = False
-        self.number = ""
-        self.revision_history = None
-        self.filename = None
-        self.sourcedir = None
-        self.outdir = None
-        self.line = 0
-        self.footer_title = None
-        self.footer_subtitle = None
-        self.doc_info = None
-        self.author = None
-        self.csource = None
-        self.template = None
-    def get_start(self):
-        return self.start
-    def get_line(self):
-        return self.line
-    def get_title(self):
-        return self.title
-    def get_subtitle(self):
-        return self.subtitle
-    def get_toc(self):
-        return self.toc
-    def get_numbered(self):
-        return self.numbered
-    def get_version(self):
-        return self.version
-    def get_number(self):
-        return self.number
-    def get_revision_history(self):
-        return self.revision_history
-    def get_author(self):
-        return self.author
-    def has_author(self):
-        if(self.author != None):
-            return True
-        return False
-    def has_filename(self):
-        if(self.filename != None):
-            return True
-        return False
-    def get_filename(self):
-        return self.filename
-
-    def has_csource(self):
-        if(self.csource != None):
-            return True
-        return False
-    def get_csource(self):
-        return self.csource
-
-    def __str__(self):
-        print "Heading"
-       
 
 class shorte_parser_t(parser_t):
     def __init__(self, engine):
@@ -228,21 +158,26 @@ class shorte_parser_t(parser_t):
             "testcase"        : True,
             "testcasesummary" : True,
 
+            # Document header tags
             "doctitle"        : True,
             "doc.title"       : True,
             "footertitle"     : True,
             "docsubtitle"     : True,
             "doc.subtitle"    : True,
             "docnumber"       : True,
+            "doc.number"      : True,
             "docauthor"       : True,
             "csource"         : True,
             "docrevisions"    : True,
             "docversion"      : True,
             "doc.version"     : True,
             "docfilename"     : True,
+            "doc.filename"    : True,
             "outdir"          : True,
+            "doc.outdir"      : True,
             "sourcedir"       : True,
             "template"        : True,
+            "doc.template"    : True,
             "doc.config"      : True,
             "doc.info"        : True,
 
@@ -285,9 +220,6 @@ class shorte_parser_t(parser_t):
         self.m_snippets = {}
         self.m_urls = {}
         self.m_links = []
-
-        self.m_title = None
-        self.m_subtitle = None
 
         # Track WikiWords in the document
         #self.m_wiki_links = {}
@@ -335,26 +267,6 @@ class shorte_parser_t(parser_t):
 
     def get_pages(self):
         return self.m_pages
-
-    def get_title(self):
-        
-        if(self.m_title == None):
-            return "untitled"
-
-        return self.m_title
-
-    def set_title(self, title):
-        self.m_title = title
-   
-    def get_subtitle(self):
-
-        if(self.m_subtitle == None):
-            return "untitled"
-
-        return self.m_subtitle
-    
-    def set_subtitle(self, subtitle):
-        self.m_subtitle = subtitle
 
     def __parse_header(self, data):
 
@@ -427,13 +339,13 @@ class shorte_parser_t(parser_t):
             elif(tag.name == "sourcedir"):
                 header.sourcedir = tag.contents
                 self.m_engine.set_working_dir(header["sourcedir"])
-            elif(tag.name == "template"):
+            elif(tag.name in ("template", "doc.template")):
                 header.template = tag.contents
                 name = tag.modifiers["name"]
                 self.m_engine.get_doc_info().add_template(name, tag.contents)
-            elif(tag.name == "outdir"):
+            elif(tag.name in ("outdir", "doc.outdir")):
                 header.outdir = tag.contents
-                self.m_engine.set_output_dir(header["outdir"])
+                self.m_engine.set_output_dir(header.outdir)
 
             elif(tag.name in ("footertitle", "doc.footer.title")):
                 header.footer_title = tag.contents
@@ -448,7 +360,9 @@ class shorte_parser_t(parser_t):
                 val = parts[1]
                 shorte_set_config(section, key, val)
             else:
-                WARNING("Unknown tag %s" % tag)
+                FATAL("Unknown tag %s" % tag)
+
+        #print header
 
         return header
 
