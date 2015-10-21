@@ -84,85 +84,15 @@ This is not a comment
 @text
 If you want to use the \# character elsewhere in the document it should normally
 be escaped with a \\\\ character. This is not necessary inside source code blocks
-such as @c, @java, @python, etc.
+such as @c, @java, @python or in markdown segments that start with @markdown.
 
 Multi-line comments use a format similar to HTML:
 
 @shorte
 \<!-- This is a multi-line comment -->
 
-@h2 Conditional Text
-The Shorte language supports two types of conditional text
-- PHP style inline blocks
-- conditionals using the if="xxx" attribute on tags
-
-@h3 PHP Style Code Blocks
-These blocks of code are similar to the inline PHP syntax. You use
-the \<\? ... \?\> syntax to inline a block of Python code. Any output
-must get assigned to a variable called *result* which gets returned in
-its expanded form. In this way you can conditionally generate text
-or use Python to create documentation.
-
-Variables can be passed to the interpreter using the *-m* command
-line parameter.
-
-@shorte
-\<\?
-result = ''
-if(1):
-    result += 'This is some *bold text* here'
-if(0):
-    result += 'But this line is not included' 
-\?\>
-
-@text
-When output you will see something like:
-
-<?
-result = ''
-if(1):
-    result += 'This is some *bold text* here'
-if(0):
-    result += 'But this line is not included' 
-?>
-
-@h3 Conditional Attributes
-Conditional text is also supported using the *if=* attribute on a tag.
-The if clause is interpreted as a block of Python code so you can make use
-of defines passed from the command line.
-
-For example:
-
-@shorte
-# Include this table
-\@table: if="1"
-- Col 1 | Col2
-- Data1 | Data 2
-
-# But not this table
-\@table: if="0"
-- Col 3  | col 4
-- Data 3 | Data 4
-
-@text
-will expand to:
-
-# Include this table
-@table: if="1"
-- Col 1 | Col2
-- Data1 | Data 2
-
-# But not this table
-@table: if="0"
-- Col 3  | col 4
-- Data 3 | Data 4
-
-@text
-As with inline code blocks you can specify variables to pass
-to the *if* text to evaluate using the *-m* command line paramter.
-
-@include
-chapters/includes.tpl
+@include chapters/conditional_text.tpl
+@include chapters/includes.tpl
 
 @h2 Inline Formatting
 TBD: Add description of this section
@@ -483,32 +413,10 @@ A: This is the answer to that question
 
 @include "chapters/tag_type_registers.tpl"
 
-@h3 @define
-The @define is used to document a \#define structure in C.
+@include "chapters/tags/define.tpl"
+@include "chapters/tags/enum.tpl"
 
-@h3 @enum
-The @enum tag is used to define an enumeration.
-
-@shorte
-\@enum: name="e_my_test" caption="This is a test enum" description="This is a test enum"
---values:
-- Name         | Value | Description
-- SUPPLY_1V_TX | 0x0   |  1V supply TX 
-- SUPPLY_1V_RX | 0x1   |  1V supply RX 
-- SUPPLY_2p5V  | 0xf   |  2.5V supply 
-
-@text
-This generates the following snippet:
-
-@enum: name="e_my_test" caption="This is a test enum" description="This is a test enum"
---values:
-- Name         | Value | Description
-- SUPPLY_1V_TX | 0x0   |  1V supply TX 
-- SUPPLY_1V_RX | 0x1   |  1V supply RX 
-- SUPPLY_2p5V  | 0xf   |  2.5V supply 
-
-
-@include "chapters/functions.tpl"
+@include "chapters/tags/functions.tpl"
 
 
 @h2 Source Code Tags
