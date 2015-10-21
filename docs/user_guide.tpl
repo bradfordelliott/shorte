@@ -476,6 +476,8 @@ being expanded by shorte.
 </methodCall>
 
 
+@h2 Acronyms
+@include "chapters/tags/acronyms.tpl"
 
 
 
@@ -499,15 +501,6 @@ The @checklist tag creates a non-interactive checklist
 - two
 - three: checked="yes"
 - four
-
-
-@h3 @acronyms
-@acronyms
-- Acronym | Definition
-- EPT     | Egress Parser Table
-- EPC     | Egress Parser CAM
-
-
 
 @h3 @embed
 TBD - Add description of this tag
