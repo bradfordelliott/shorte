@@ -2,14 +2,17 @@
 
 @h3 @struct
 The @struct tag defines a C style structure. It also supports generating
-a picture showing the layout of the structure. The *title* attribute
-should currently be a unique name since it is used to map any generated
+a picture showing the layout of the structure. The @{bold,name} attribute
+should be unique name since it is used to map any generated
 image to the structure itself as well as generate C code from the structure
 definition.
 
-For example:
+An example is shown below:
 
-@shorte
+@shorte: exec=True
+\@text
+The generated output from this example will look like:
+
 \@struct: diagram="show:yes,align:128,bitorder:decrement"
 --name:
 struct1
@@ -21,6 +24,7 @@ This is a description of the tag.
                           with some more description
 - 8x12  | part_number   | The part number of the device
 - 4     | some_number   | Some random 4 byte number
+
 
 @text
 #@text
