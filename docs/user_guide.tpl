@@ -94,10 +94,6 @@ Multi-line comments use a format similar to HTML:
 @include chapters/conditional_text.tpl
 @include chapters/includes.tpl
 
-@h2 Inline Formatting
-TBD: Add description of this section
-
-
 @h2 Shorte Tags
 Shorte uses the @ character as a simple markup
 character. Wherever possible it attempts to avoid
@@ -110,11 +106,11 @@ supported by Shorte:
 @table: title="Shorte Supported Tags"
 - Tag | Description
 -& Document Metadata (only in document header)
-- @doctitle     | The title associated with the document
-- @docsubtitle  | The subtitle associated with the document
-- @docversion   | The version associatied with the document
-- @docnumber    | The number associated with the document
-- @docrevisions | The revision history associated with the document
+- TagDocTitle     | The title associated with the document
+- TagDocSubtitle  | The subtitle associated with the document
+- TagDocVersion   | The version associatied with the document
+- TagDocNumber    | The number associated with the document
+- TagDocRevisions | The revision history associated with the document
 
 -* Document Body
 -& Heading Tags
@@ -128,6 +124,7 @@ supported by Shorte:
 - @text      | A document text block
 - @p         | A paragraph similar to the *P* tag from HTML
 - @pre       | A block of unformatted test similar to the *PRE* tag from HTML
+- @markdonw  | A block of markdown text
 
 -& Includes
 - @include       | This tag is used to include another file (breaks conditional cascade)
@@ -137,9 +134,11 @@ supported by Shorte:
 - @image     | An inline image
 - @imagemap  | Include an HTML image map
 
--& Lists and Tables
+-& Lists
 - @ul        | An un-ordered list
 - @ol        | An ordered list
+
+-s Tables
 - @table     | A table
 
 -& Notes, TBDs and Questions
@@ -196,99 +195,10 @@ supported by Shorte:
 
 @include "chapters/tag_type_headings.tpl"
 
-@h2 Text Entry Tags
-
-@h3 @text
-The @text tag creates a text block that is automatically
-parsed for things like bullets, indentation, or blocks
-of code.
-
-You can insert lists:
-@shorte: exec=True
-- One
-  - Two
-    - Three
-
-@text
-Creating numbered lists can be done using the following syntax:
-@shorte
-1. One
-    1. Two
-        1. Three
-2. Blah
-
-@shorte
-blah blah blah
-
-- An multi-level list
-  - A second level in the list
-    - A third level in the list
-
-Another paragraph with @\{hl, some inlined styling\} and
-
-- A second list
-
-{{
-and a block of code
-}}
-
-@text
-When rendered we get something that looks like this:
-
-@text
-blah blah blah
-
-- An multi-level list
-  - A second level in the list
-    - A third level in the list
-
-Another paragraph with @{hl, some inlined styling} and
-
-- A second list
-
-{{
-and a block of code
-}}
-
-@include "chapters/inline_styling.tpl"
-
-
-@h3 @p
-The @p tag is used to create a paragraph. It is similar to the *P* tag
-in HTML. It does not attempt to parse the text block like the @text
-tag does in order to extract lists or indented code.
-
-@shorte
-\@p This is a paragraph in my document
-\@p This is another paragraph in my document
-
-@text
-This creates a two paragraphs that looks like:
-
-@p This is a paragraph in my document
-@p This is another paragraph in my document
-
-@h3 @pre
-The @pre tag creates a block of unformatted text:
-
-@shorte
-\@pre
-This is a test
-  this is a test
-    this is also a test
-
-@text
-When rendered it will look like:
-@pre
-This is a test
-  this is a test
-    this is also a test
-
-@include "chapters/includes.tpl"
+@include "chapters/tags/text.tpl"
 
 @include "chapters/images.tpl"
 
-@h2 Lists and Tables
 @include "chapters/lists.tpl"
 @include "chapters/tables.tpl"
 
@@ -407,19 +317,17 @@ A: This is the answer to the question with a lot
 Q: This is another question with some more information
 A: This is the answer to that question
 
-@h2 Structures and Functions
+@h2 Register Definitions
+@include "chapters/tags/register.tpl"
 
-@include "chapters/structs_and_vectors.tpl"
-
-@include "chapters/tag_type_registers.tpl"
-
+@h2 Source Code Types
 @include "chapters/tags/define.tpl"
 @include "chapters/tags/enum.tpl"
-
+@include "chapters/tags/struct.tpl"
 @include "chapters/tags/functions.tpl"
 
 
-@h2 Source Code Tags
+@h2 Syntax Highlighting Code Segments
 Shorte was built with technical documentation in mind so it supports
 including a variety of source code snippets. These are described in the
 following section.

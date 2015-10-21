@@ -1,7 +1,6 @@
 @body
 
-@h2 Registers
-
+@h3 @register
 @shorte: exec="True"
 \@register: name="clause45" diagram="show:yes,align:32,bitorder:decrement"
 --description:

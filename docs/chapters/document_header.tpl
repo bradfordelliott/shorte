@@ -27,8 +27,8 @@ in the document before the @body tag. An example document header looks like:
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
 
 
-@h3 @doc.title
-The @doc.title defines the title associated with the document. Only the first instance of this
+@h3 [[TagDocTitle, @doc.title]]
+The TagDocTitle defines the title associated with the document. Only the first instance of this
 tag is used. If another instance is encountered parsing the document it will be
 ignored.
 
@@ -36,27 +36,28 @@ ignored.
 # The document title
 \@doc.title The Shorte Language
 
-@h3 @doc.subtitle
-The @doc.subtitle defines a subtitle for the document. Only the first instance of this
+@h3 [[TagDocSubtitle, @doc.subtitle]]
+The TagDocSubtitle defines a subtitle for the document. Only the first instance of this
 tag is used. If a second instance is encountered it will be ignored.
 
 @shorte
 # The document sub-title
 \@doc.subtitle Reference Manual
 
-@h3 @doc.version
-The @doc.version tag defines a version string for the document. This can be overridden
-at the command line.
+@h3 [[TagDocVersion, @doc.version]]
+The TagDocVersion tag defines a version string for the document. This can be overridden
+at the command line using the @{bold,-version} command line option.
 
-@h3 @docnumber
-The @docnumber tag defines a number to associate with the document.
+@h3 [[TagDocNumber, @doc.number]]
+The TagDocNumber tag defines a number to associate with the document. This is used in some
+output templates to uniquely identify the document.
 
-@h3 @docrevisions
-The @docrevisions tag defines a revision history for the document. It's
+@h3 [[TagDocRevisions, @doc.revisions]]
+The TagDocRevisions tag defines a revision history for the document. It's
 syntax is similar to the @table tag.
 
 @shorte
-\@docrevisions:
+\@doc.revisions:
 - Revision | Date          | Description
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
 - 1.0.1    | 09 July, 2013 | Another random update
