@@ -5,37 +5,59 @@
 @h1 Markdown
 
 The following provides a `demonstration` of markdown
-support in textblocks. It includes support for markdown tags.
+support in textblocks. It @{bold,includes} support for @{italic,markdown tags}.
 This line should wrap across multiple lines if I've done
-things correctly. However, my inline code block shouldn't
-make things look wonky and shouldn't overlap the next line.
+things correctly. However, my @{hl,inline code block} shouldn't
+make things look wonky and @{pre,shouldn't} overlap the next line.
 
-  This is a block of indented text
-  
-  and a new paragraph
+    This is a block of indented text
+     
+    and a new paragraph
 
     This block is doubly nested
     with a second line that shouldn't wrap
     because I want to treat it like a block of code
 
-        This block is triply nested
-        and it shouldn't wrap
+    This block is triply nested
+    and it shouldn't wrap
 
 @{pre,
 This is a block of code
 }
 
+I'd like to be able to have blocks of code inside list items. Right
+now I can only do that with inline tags but that doesn't work very
+well inside PDFs.
+
+- one
+  - two
+      @{code,
+blah blah blah
+blah blah blah
+      }
+  - three
+    - a
+    - b
+      @{code,
+This is some more nested code
+inside a list item.
+}
+- four
+
+@markdown
 This is an image: ![Image of Yaktocat](https://octodex.github.com/images/yaktocat.png)
 
 Change the definition of the primary network interface eth0 to look like the following. Use your assigned network values in place of the 10.243.10.x values.
 
-@code
-# The primary network interface
-auto eth0
-iface eth0 inet static
-    address 10.243.10.5
-    netmask 255.255.255.0
-    gateway 10.243.10.1
+    # The primary network interface
+    auto eth0
+    iface eth0 inet static
+        address 10.243.10.5
+        netmask 255.255.255.0
+        gateway 10.243.10.1
+    
+    This should be a new paragraph
+    and this should be part of the same paragraph
 
 @text
 This is a link to a URL http://www.cbcnews.ca/news/blah
@@ -93,18 +115,18 @@ This is my inline quote
 This is another line in a block quote with
 a nested list:
 
- This is indented text
+    This is indented text
 
-   This is indented deeper
+        This is indented deeper
 
-     as is this paragraph
+            as is this paragraph
 
 > THis is a block quote
 > and more data in the block quote
 >   
->   Some indented text in the block quote
->   
->   and another indented paragraph
+>     Some indented text in the block quote
+>     
+>     and another indented paragraph
 >
 > What happens with a quote within a quote?
 > > This is a nested quote

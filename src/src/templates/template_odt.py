@@ -75,9 +75,9 @@ def unzip_file_into_dir(file, dir):
 
 class template_odt_t(template_t):
 
-    def __init__(self, parser, indexer):
+    def __init__(self, engine, indexer):
 
-        template_t.__init__(self, parser, indexer)
+        template_t.__init__(self, engine, indexer)
    
         self.m_sections = []
         section = {}
@@ -627,14 +627,7 @@ class template_odt_t(template_t):
         <style:paragraph-properties fo:break-after="page"/>
     </style:style>
     
-    <style:style style:name="shorte_highlight" style:family="text">
-        <style:text-properties fo:background-color="#ffff00"/>
-    </style:style>
-    
-    <style:style style:name="shorte_strikethru" style:family="text"><style:text-properties style:text-line-through-style="solid"/>
-    </style:style>
-    
-<style:style style:name="T8" style:family="text">
+    <style:style style:name="T8" style:family="text">
       <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color" fo:font-weight="bold" officeooo:rsid="000885f5" style:font-weight-asian="bold" style:font-weight-complex="bold"/>
     </style:style>
 
@@ -1302,6 +1295,14 @@ class template_odt_t(template_t):
                 output += self.format_pre(replace, "pre")
                 output += "<text:p text:style-name='shorte_standard'>"
                 return output
+            # Indented code blocks using the @{code,...} syntax
+            elif(tag == "code"):
+                replace = replace.rstrip(" \r\n")
+                #print "PRE: [%s]" % replace
+                output = "</text:p>"
+                output += '''<text:p text:style-name="shorte_indented_code_block">%s</text:p>''' % (self.format_text(replace))
+                output += "<text:p text:style-name='shorte_standard'>"
+                return output
             elif(tag == "color"):
                 color = qualifier
                 self.m_styles_extra += self.create_style_color(color)
@@ -1461,10 +1462,10 @@ class template_odt_t(template_t):
         data = self.xmlize(data)
 
         if(expand_equals_block):
-            data = re.sub("\n\s*\n", "<text:line-break/><text:line-break/>", data)
+            #data = re.sub("\n\s*\n", "<text:line-break/><text:line-break/>", data)
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
-            data = re.sub("===+", "<text:line-break/>====================<text:line-break/>", data)
+            data = re.sub("===+", "</text:p><text:p text:style-name='Horizontal_20_Line'/><text:p text:style-name='shorte_standard'>", data)
         
         #data = data.replace("\n", " ")
         
@@ -1506,6 +1507,9 @@ class template_odt_t(template_t):
         
         # First make any links
         data = self._format_links(data)
+        
+        # Covert code between single backticks to an inline code block
+        data = re.sub("`(.*?)`", "<text:span text:style-name='shorte_inline_code_span'>\\1</text:span>", data)
         
         if(allow_wikify):
             data = self.wikify(data)
@@ -2394,8 +2398,8 @@ ${desc}
                 continue
 
             if(is_code):
-                xml += self.format_pre(text, "code")
-                #xml += '<text:p text:style-name="shorte_spacer"></text:p>'
+                #xml += self.format_pre(text, "code")
+                xml += '''<text:p text:style-name="shorte_indented_code_block">%s</text:p>''' % (self.format_text(text.strip(), expand_equals_block=True))
             elif(is_list):
                 if(ptype == textblock_t.TYPE_ORDERED_LIST):
                     xml += self.format_list(p["text"], True, list_style=list_style)
@@ -2407,8 +2411,7 @@ ${desc}
                 xml += self.format_quote(tblock, nest_level + 1)
 
             elif(indent > 0):
-                lcl_style = self.m_styles["para"][indent_style][0]
-                xml += '''<text:p text:style-name="%s">%s</text:p>''' % (lcl_style, self.format_text(text.strip(), expand_equals_block=True))
+                xml += '''<text:p text:style-name="shorte_indented_code_block">%s</text:p>''' % (self.format_text(text.strip(), expand_equals_block=True))
             else:
                 if(text.strip() != ""):
                     xml += '''<text:p text:style-name="%s">%s</text:p>''' % (style, self.format_text(text.strip(),expand_equals_block=True))

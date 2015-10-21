@@ -599,17 +599,6 @@ div.gallery
       font-weight:bold;
   }
 
-  span.inline_code
-  {
-      background-color:#eee;
-      border:1px solid #ccc;
-      border-radius:2px;
-      padding:4px;
-      padding-top:2px;
-      padding-bottom:2px;
-      white-space:pre;
-      font-family:monospace;
-  }
   
   div.code a
   {
@@ -676,11 +665,30 @@ div.gallery
 
   $priority
   
-  /* Inline code blocks */
-  div.tb_code_1 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:0px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
-  div.tb_code_2 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:10px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
-  div.tb_code_3 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:20px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
-  div.tb_code_4 {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:30px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
+  span.shorte_inline_code_span
+  {
+      background-color:#eee;
+      border:1px solid #ccc;
+      border-radius:2px;
+      padding:4px;
+      padding-top:2px;
+      padding-bottom:2px;
+      white-space:pre;
+      font-family:monospace;
+  }
+
+  div.shorte_quote
+  {
+      margin-left: 20px;
+      margin-top:10px;
+      margin-bottom:0px;
+      margin-right:30px;
+      border-left:2px solid #ccc;background:#e0e0e;
+      border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;
+  }
+  
+  /* Indented code blocks inside text blocks */
+  div.shorte_indented_code_block {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:20px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
   ''').substitute({"priority"              : "$priority",
                    "star"                  : "$star",
                    "headings"              : headings,

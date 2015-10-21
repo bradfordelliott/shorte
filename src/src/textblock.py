@@ -1,6 +1,16 @@
+"""
+This module contains the definition of the textblock
+object. This is the basis of most blocks of text
+within a shorte document.
+"""
+
+import sys
+sys.path.append(".")
 from src.shorte_defines import *
 
 class list_item_t:
+    """This class contains the definition of an item
+       within a list"""
 
     def __init__(self):
 
@@ -612,12 +622,14 @@ class textblock_t:
                         # Now that I've hit the newline get the indent
                         # level of the next line. If it is the same then
                         # continue adding this line to the current paragraph
+                        #
                         # If it is different then stop processing
                         j += 1
                         #print "REMAINDER: [%s]" % data[j:]
                         indent = self.get_indent_of_line(data, j)
 
-                        if(indent != prefix):
+                        #if(indent != prefix):
+                        if(len(indent) < 4):
                             same_indent = False
                             #print "indent [%s] != prefix [%s]" % (indent,prefix)
                             break
@@ -891,3 +903,20 @@ class textblock_t:
                     output += "    [%s]\n" % line
 
         return output
+
+
+if __name__ == "__main__":
+
+    text = """
+This is a block of text
+
+    # This line is indented
+    this is a line
+    this is also a line
+        this is indented further
+        so is this
+
+This is some more text
+"""
+    tb = textblock_t(text)
+    print tb
