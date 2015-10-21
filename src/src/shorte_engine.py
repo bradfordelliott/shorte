@@ -1136,6 +1136,20 @@ class engine_t:
                             # Parse the tags
                             child_tags = self.m_parser._parse_header_tags("", src, 0) 
                             j = i
+                            
+                            # If we're executing shorte tags then create a textblock
+                            # that describes the result so it is obvious in the
+                            # generated document.
+                            ctag = tag_t()
+                            ctag.source = "The result of executing this example is shown below:"
+                            ctag.contents = textblock_t(ctag.source)
+                            ctag.name = "text"
+                            ctag.modifiers = tag.modifiers
+                            ctag.page_title = tag.page_title
+                            ctag.file = tag.file
+                            ctag.line = tag.line
+                            child_tags.insert(0, ctag)
+
                             # Now insert them after the current tag
                             for t in child_tags:
                                 tags.insert(j+1, t)

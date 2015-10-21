@@ -1853,13 +1853,14 @@ within an HTML document.
 
                     # Don't attempt to wikify or format the acronym name. Instead
                     # create a link to it
-                    if(col_index == 0):
+                    if(col_index == 0 or i == 0):
                         if(is_header or is_subheader):
                             text = col["text"]
                         else:
                             text = '<a name="%s"></a>%s' % (col["text"], col["text"])
                     else:
-                        text = self.format_text(col["text"])
+                        #text = self.format_text(col["text"])
+                        text = self.format_textblock(col["textblock"])
 
                     colspan = col["span"]
 

@@ -1754,7 +1754,7 @@ class template_odt_t(template_t):
                     cell_style = "shorte_table_rounded.center_center_first"
                 else:
                     cell_style = "shorte_table_rounded.center_center"
-
+        
         if(frame_paragraph):
             xml = '''
           <table:table-cell table:style-name="%s" office:value-type="string" table:number-columns-spanned="%d">
@@ -2295,9 +2295,11 @@ ${desc}
 
             for col in row["cols"]:
                 is_header = True
+                frame_paragraph = True
+
                 # Don't attempt to wikify or format the acronym name. Instead
                 # create a link to it
-                if(col_index == 0):
+                if(col_index == 0 or i == 0):
                     if(row["is_header"] or row["is_subheader"]):
                         text = col["text"]
                     else:
@@ -2308,16 +2310,17 @@ ${desc}
 <text:bookmark-end text:name="%s"/>''' % (word, word, word, word)
                         #text = '<a name="%s"></a>%s' % (col["text"], col["text"])
                 else:
-                    text = self.format_text(col["text"])
+                    text = self.format_textblock(col["textblock"])
+                    frame_paragraph = False
 
                 colspan = col["span"]
                 
                 if(row["is_header"]):
-                    xml += self.__format_table_cell(col, style, "is_header", text)
+                    xml += self.__format_table_cell(col, style, "is_header", text, frame_paragraph)
                 elif(row["is_subheader"]):
-                    xml += self.__format_table_cell(col, style, "is_subheader", text)
+                    xml += self.__format_table_cell(col, style, "is_subheader", text, frame_paragraph)
                 else:
-                    xml += self.__format_table_cell(col, style, "default", text)
+                    xml += self.__format_table_cell(col, style, "default", text, frame_paragraph)
                 
                 col_index += 1
             

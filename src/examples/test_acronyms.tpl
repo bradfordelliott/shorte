@@ -10,7 +10,12 @@ cross referenced throughout the remainder of the document.
 @acronyms
 - Acronym | Description
 - ABC     | A random acronym
-- DEF     | Another random acronym
+- DEF     | Another random acronym. This should be a textblock
+            but for some reason it appears like it is not:
+
+            - a list element
+                - another list element
+            - a third list element
 
 @text
 This is a test of ABC and DEF. They should get automatically
