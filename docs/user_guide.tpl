@@ -513,3 +513,5 @@ TBD - Add description of this tag
 @include "chapters/command_line.tpl"
 
 @include chapters/vim.tpl
+
+@include "chapters/documenting_source_code.tpl"

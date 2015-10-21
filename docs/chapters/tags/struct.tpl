@@ -17,7 +17,21 @@ The generated output from this example will look like:
 --name:
 struct1
 --description:
-This is a description of the tag.
+This is a description of the structure that is in textblock
+format so you can have
+
+- a list
+  - a sub list
+
+or things like:
+
+    an indented code block
+    with more lines
+
+or even a note
+@{note,
+This is my note here}
+
 --fields:
 - Field | Name          | Description
 - 8x8   | serial_number | The serial number of the device
