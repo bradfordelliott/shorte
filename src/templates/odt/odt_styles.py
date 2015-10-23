@@ -46,30 +46,10 @@ class styles():
     '''
     
         return outline_styles
-    
-    def get_common_styles(self):
-        indents = [self.standard_indented,
-                   self.standard_indented + 0.3,
-                   self.standard_indented + 0.5,
-                   self.standard_indented + 0.7,
-                   self.standard_indented + 0.9,
-                   self.standard_indented + 1.1]
 
-        # Quote styles
-        quote_styles = ""
-        for i in xrange(0, len(indents)):
-            name = "shorte_quote_l%d" % i
-            indent = indents[i]
-            quote_styles += string.Template('''
-<style:style style:name="${name}" style:family="paragraph" style:parent-style-name="shorte_standard">
-  <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm"
-      fo:margin-left="${indent}cm"
-      fo:border-left="0.020in solid #c0c0c0"
-      fo:padding-left="0.2in"/>
-  <style:text-properties fo:color="#000000"/>
-</style:style>
-''').substitute({"name"   : name,
-                 "indent" : indent})
+    def get_common_styles(self):
+
+
 
         paragraph_styles = '''
 <!-- Common Paragraph Styles -->
@@ -79,6 +59,73 @@ class styles():
   <style:text-properties fo:color="#ffffff" fo:font-weight="bold"/>
 </style:style>
 '''
+        
+        #############################################
+        #
+        # Textblock Styling
+        #
+        #############################################
+
+        # Indented Code Blocks in Textblocks
+        paragraph_styles += '''
+<style:style style:name="shorte_indented_code_block" style:family="paragraph" style:parent-style-name="shorte_standard">
+  <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm"
+      fo:margin-left="0.5cm"
+      fo:margin-right="0.5cm"
+      fo:border="0.01in solid #c0c0c0"
+      fo:padding="0.2cm"
+      fo:background-color="#f2f2f2"/>
+  <style:text-properties style:font-name="Courier New" fo:color="#000000" fo:font-size="8.5pt"/>
+</style:style>
+''' 
+    
+        # Highlighted text spans
+        paragraph_styles += '''
+        <style:style style:name="shorte_highlight" style:family="text">
+            <style:text-properties fo:background-color="#ffff00"/>
+        </style:style>
+'''
+    
+        # Striked text spans
+        paragraph_styles += '''
+<style:style style:name="shorte_strikethru" style:family="text"><style:text-properties style:text-line-through-style="solid"/>
+</style:style>
+'''
+
+        # Inline code spans
+        paragraph_styles += '''
+    <style:style style:name="shorte_inline_code_span" style:family="text">
+        <style:text-properties
+            fo:background-color="#F2F2F2"
+            fo:border="0.01in solid #c0c0c0"
+            fo:padding="0.04cm"
+            fo:padding-top="0.01cm"
+            fo:padding-bottom="0.01cm"
+        />
+    </style:style>
+'''
+        
+        # Quote styles
+        indents = [self.standard_indented,
+                   self.standard_indented + 0.5,
+                   self.standard_indented + 0.9,
+                   self.standard_indented + 1.1,
+                   self.standard_indented + 1.5,
+                   self.standard_indented + 1.9]
+
+        for i in xrange(0, len(indents)):
+            name = "shorte_quote_l%d" % i
+            indent = indents[i]
+            paragraph_styles += string.Template('''
+<style:style style:name="${name}" style:family="paragraph" style:parent-style-name="shorte_standard">
+  <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm"
+      fo:margin-left="${indent}cm"
+      fo:border-left="0.020in solid #c0c0c0"
+      fo:padding-left="0.2in"/>
+  <style:text-properties fo:color="#000000" fo:font-style="italic"/>
+</style:style>
+''').substitute({"name"   : name,
+                 "indent" : indent})
 
         return string.Template('''
     <!-- Styling for hyperlinks -->
@@ -86,13 +133,9 @@ class styles():
         <style:text-properties fo:color="${color_hyperlink}"/>
     </style:style>
     
-    <!-- Quote levels -->
-    ${quote_styles}
-
     <!-- Paragraph Styles -->
     ${paragraph_styles}
     ''').substitute({"color_hyperlink"  : self.colors["hyperlink"].fg,
-                     "quote_styles"     : quote_styles,
                      "paragraph_styles" : paragraph_styles})
       
     def create_table_paragraph_styles(self, name, font_size):
@@ -432,7 +475,9 @@ class styles():
         return string.Template('''
     <!-- Source code styling -->
     <style:style style:name="shorte_code3" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
-        <style:paragraph-properties fo:margin-left="${code_indent}cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-indent="0cm" style:auto-text-indent="false" style:page-number="auto" fo:background-color="#f2f2f2" fo:keep-with-next="auto">
+        <style:paragraph-properties fo:margin-left="${code_indent}cm"
+            fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-indent="0cm"
+            style:auto-text-indent="false" style:page-number="auto" fo:background-color="#f2f2f2" fo:keep-with-next="auto">
             <style:background-image/>
         </style:paragraph-properties>
         <style:text-properties style:font-name="Courier New" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>

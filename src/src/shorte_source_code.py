@@ -1,44 +1,44 @@
-#+----------------------------------------------------------------------------
-#|
-#| SCRIPT:
-#|   shorte_source_code.py
-#|
-#| DESCRIPTION:
-#|   This module contains the definition of a parser class used to
-#|   tokenize source code such as C.
-#|
-#+----------------------------------------------------------------------------
-#|
-#| Copyright (c) 2010 Brad Elliott
-#|
-#+----------------------------------------------------------------------------
+"""
+This module contains the definition of a parser class used to tokenize source
+code segments such as C in order to syntax highlight them.
+"""
 import re
 
 from shorte_defines import *
 
 class shorte_source_code_tag_t(object):
+    """A simple object used to present a segment or
+       block of source code
+    """
+
     __slots__ = ['data', 'type', 'start']
+
     def __init__(self, type, data):
+        """The constructor for the source code segment"""
         self.data = data
         self.type = type
         self.start = None
 
-    #def __init__(self, type, data):
-    #    self.__dict__.update(locals())
-    #    del self.self
-
     def is_empty(self):
+        """Returns whether or not the source segment is blank or not"""
         if((len(self.data) == 0) and (self.type == 0)):
             return True
         return False
         
 
 class source_code_t:
+    """This class is used to manage parsing source code
+       segments within shorte documents in order to display
+       them as syntax highlighted code within output documents.
+       """
+    
     def __init__(self):
+        """The constructor for the source code parser"""
 
-        self.m_blah = 0
-
+        # The keywords dictionary is used to manage the keywords
+        # associated with each language.
         keywords = {
+            # The list of vera keywords
             "vera" : '''
  after       coverage_group join reg
  all         coverage_option little_endian repeat
@@ -71,7 +71,7 @@ class source_code_t:
  coverage_depth integer randcase with
  coverage_goal interface randseq
 ''',
-        
+            # The list of verilog keywords 
             "verilog" : '''
  always    end          ifnone       or         rpmos     tranif1
  and       endcase      initial      output     rtran     tri
@@ -91,7 +91,7 @@ class source_code_t:
  edge      highz1       notif0       repeat     tran      xnor
  else      if           notif1       rnmos      tranif0   xor
 ''',
-
+            # The list of bash keywords
             "bash" : '''
  alias     awk         break      builtin
  cal       case        cat        cd
@@ -141,7 +141,7 @@ class source_code_t:
  wc        whereis     which      while
  who       whoami      xargs      yes
 ''',
-
+            # The list of C/C++ keywords
             "c" : '''
  and          and_eq      asm         auto
  bitand       bitor       bool        break
@@ -167,7 +167,7 @@ class source_code_t:
  cs_status    cs_float    cs_boolean  cs_int16
  cs_int32     cs_int16
 ''',
-
+            # The list of python keywords
             "python" : '''
  and       del       from      not       while
  as        elif      global    or        with
@@ -177,9 +177,11 @@ class source_code_t:
  continue  finally   is        return 
  def       for       lambda    try
 ''',
+            # The list of shorte keywords
             "shorte" : '''
  @body
  @doctitle @docsubtitle @docversion @docnumber @docrevisions @docfilename
+ @doc.title @doc.subtitle @doc.version @doc.number @doc.revisions
  @h1 @h2 @h3 @h4 @h5 @h
  @text @p @pre
  @code @c @python @java @perl @tcl @d @vera @verilog @bash @xml @swift @go @javascript
@@ -199,10 +201,11 @@ class source_code_t:
  @imagemap
  @image
 ''',
+            # The list of common XML keywords
             "xml" : '''
  xml version
 ''',
-
+            # The list of perl keywords
             "perl" : '''
  chomp chop chr crypt hex index lc lcfirst length oct ord
  pack reverse rindex sprintf substr uc ucfirst
@@ -260,7 +263,7 @@ class source_code_t:
  
  gmtime localtime time times
 ''',
-
+            # The list of Java keywords
             "java" : '''
  abstract continue    for          new         switch
  assert   default     goto         package     synchronized
@@ -274,16 +277,20 @@ class source_code_t:
  const    float       native       super       while
             
 ''',
+            # The list of TCL keywords
             "tcl" : '''
  puts
 ''',
 
+            # The list of SQL keywords
             "sql" : '''
  CREATE TABLE INTEGER AUTO_INCREMENT
  TEXT DEFAULT PRIMARY KEY INSERT INTO VALUES WHERE LIKE
 ''',
+            # The list of GNU Plot keywords
             "gnuplot" : '''''',
             
+            # The list of Windows Batch keywords
             "batch" : '''
 call cd chdir cls copy del dir echo @echo exit for if md mkdir
 move rd rmdir readline ren rename set setlocal shift start title
@@ -391,6 +398,21 @@ onload onmouseup onmousedown onsubmit
 
 
     def get_keyword_list(self, language):
+        """This method is called to return the list of keywords
+           associated with the specified language.
+
+           @param language [I] - The source language
+
+           @return A dictionary containing the keywords associated
+                   with the target language. If the language is blank
+                   a blank dictionary will be returned
+        """
+
+        # If no language was specified with the ```...``` syntax
+        # then return an empty dictionary so that any syntax highlighting
+        # doesn't fail.
+        if(language == ""):
+            return {}
 
         if(language in ("c", "code")):
             return self.m_keywords["c"]
@@ -399,6 +421,19 @@ onload onmouseup onmousedown onsubmit
 
 
     def parse_source_code(self, type, source, source_file, source_line):
+        """This method is called to tokenize a block of source code in
+           order to include it in shorte documents
+
+           @param type        [I] - The language type of the source code
+           @param source      [I] - The source code to parse.
+           @param source_file [I] - The path to the source file containing
+                                    the source block.
+           @param source_line [I] - The line within the input document where
+                                    the source block started.
+
+           @return A list of tags of type shorte_source_code_tag_t that
+                   define the parsed source code segment.
+        """
         
         tags = []
         #print "BEFORE\n======\n%s" % source

@@ -75,9 +75,9 @@ class custom_styles(styles):
         custom_styles = string.Template('''
     <style:style style:name="shorte_standard" style:family="paragraph" style:parent-style-name="Standard">
       <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm" fo:margin-left="${standard_indent}cm"/>
-      <style:text-properties fo:color="#000000"/>
+      <style:text-properties style:font-name="Helvetica Neue" fo:color="#000000" fo:font-size="11.5pt"/>
     </style:style>
-    <style:style style:name="shorte_standard_indented" style:family="paragraph" style:parent-style-name="Standard">
+    <style:style style:name="shorte_standard_indented" style:family="paragraph" style:parent-style-name="shorte_standard">
       <style:paragraph-properties fo:margin-top="0.4cm" fo:margin-bottom="0.4cm" fo:margin-left="${standard_indented}cm"/>
       <style:text-properties fo:color="#000000"/>
     </style:style>

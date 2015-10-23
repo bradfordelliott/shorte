@@ -55,7 +55,7 @@ note_template = string.Template(
 
 quote_template = string.Template(
 """
-<div style='margin-left: 20px; margin-top:10px; margin-bottom:0px; margin-right:30px;border-left:2px solid #ccc;background:#e0e0e;border-radius:2px;-moz-border-radius:2px;-webkit-border-radius:2px;'>
+<div class='shorte_quote'>
 <div style="margin-left:10px;margin-top:0px;font-style:italic;">
 $contents
 </div>
@@ -274,8 +274,6 @@ class template_html_t(template_t):
         template_t.__init__(self, engine, indexer)
 
         self.m_contents = []
-        self.m_engine = engine
-        self.m_indexer = indexer
         self.m_template_dir = shorte_get_startup_path() + "/templates/"
         self.m_inline = False
         self.m_include_link = False
@@ -1763,7 +1761,7 @@ within an HTML document.
                     html += self.format_quote(tblock)
                 elif(indent > 0):
                     text = trim_leading_indent(text)
-                    html += "<div class='tb_code_%d'>" % indent + self.format_text(text, expand_equals_block=True) + "</div>\n"
+                    html += "<div class='shorte_indented_code_block'>" + self.format_text(text, expand_equals_block=True) + "</div>\n"
                 else:
                     if(standalone):
                         html += "<div class='tblkps' %s>" % style + self.format_text(text, expand_equals_block=True) + "</div>\n"
@@ -1855,13 +1853,14 @@ within an HTML document.
 
                     # Don't attempt to wikify or format the acronym name. Instead
                     # create a link to it
-                    if(col_index == 0):
+                    if(col_index == 0 or i == 0):
                         if(is_header or is_subheader):
                             text = col["text"]
                         else:
                             text = '<a name="%s"></a>%s' % (col["text"], col["text"])
                     else:
-                        text = self.format_text(col["text"])
+                        #text = self.format_text(col["text"])
+                        text = self.format_textblock(col["textblock"])
 
                     colspan = col["span"]
 
@@ -3296,6 +3295,9 @@ $href_end
             elif(tag == "pre"):
                 prefix += "<pre style='margin-left:10px;'>"
                 postfix += "</pre>"
+            elif(tag == "code"):
+                prefix += "<div class='shorte_indented_code_block'>"
+                postfix += "</div>"
             elif(tag in ("u", "ul", "underline")):
                 prefix += "<u>"
                 postfix += "</u>"
@@ -3375,7 +3377,7 @@ $href_end
 
         if(data == None):
             return
-
+        
         #data = data.replace("\[^\]", "\\");
 
         # Replace any \\ with a single \
@@ -3420,7 +3422,7 @@ $href_end
         data = self._format_links(data)
 
         # Covert code between single backticks to an inline code block
-        data = re.sub("`(.*?)`", "<span class='inline_code'>\\1</span>", data)
+        data = re.sub("`(.*?)`", "<span class='shorte_inline_code_span'>\\1</span>", data)
 
         # Then insert any images. Make sure to add
         # them to the list of images that need to be

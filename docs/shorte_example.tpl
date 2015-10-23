@@ -1,13 +1,13 @@
 # The document always starts with a heading. The heading
 # is anything before the body tag which starts the document
 # content.
-@doctitle An Example Document
-@docsubtitle A subtitle for this example
+@doc.title An Example Document
+@doc.subtitle A subtitle for this example
 
 # A version to associate with the document
-@docversion 1.0
+@doc.version 1.0
 
-@docrevisions:
+@doc.revisions:
 - Revision | Date          | Description
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
 
@@ -24,6 +24,7 @@ most common tag.
 You can also start new text blocks with the @text
 tag.
 
+@h2 Tables
 The @table tag creats a table:
 
 @table: title="An Example Table"
@@ -31,7 +32,31 @@ The @table tag creats a table:
 -s SubHeading 1 that Spans
 -  Column 1  | Column 2
 
-@h2 A Second Level Heading
-This heading could have an image:
+@h2 Lists
+@text
+You can create ordered lists using the @{bold,ol} tag:
 
-#@image: src="./my_image.png"
+@ol
+- one
+  - two
+    - three
+- four
+  - five
+      - six
+
+@text
+Or unorded lists using the @{bold,ul} tag:
+
+@ul
+- one
+  - two
+    - three
+- four
+  - five
+    - six
+
+@h2 Images
+You can insert images using the @image tag:
+
+@image: src="chapters/images/shorte.png" caption="The Shorte Logo"
+

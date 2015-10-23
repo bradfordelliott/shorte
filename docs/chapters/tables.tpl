@@ -1,5 +1,7 @@
 @body
 
+@h2 Tables
+
 @h3 @table
 The @table tag is used to create a table. The syntax is shown in the
 example below.

@@ -11,52 +11,53 @@ in the document before the @body tag. An example document header looks like:
 # contain metadata about the document.
 
 # The title of the document
-\@doctitle The Shorte Language
+\@doc.title The Shorte Language
 
 # The subtitle of the document
-\@docsubtitle Reference Manual
+\@doc.subtitle Reference Manual
 
 # A version number (can be overwritten from the command line)
-\@docversion 1.0
+\@doc.version 1.0
 
 # A number to assign to the document
-\@docnumber 34567
+\@doc.number 34567
 
-\@docrevisions:
+\@doc.revisions:
 - Revision | Date          | Description
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
 
 
-@h3 @doctitle
-The @doctitle defines the title associated with the document. Only the first instance of this
+@h3 [[TagDocTitle, @doc.title]]
+The TagDocTitle defines the title associated with the document. Only the first instance of this
 tag is used. If another instance is encountered parsing the document it will be
 ignored.
 
 @shorte
 # The document title
-\@doctitle The Shorte Language
+\@doc.title The Shorte Language
 
-@h3 @docsubtitle
-The @docsubtitle defines a subtitle for the document. Only the first instance of this
+@h3 [[TagDocSubtitle, @doc.subtitle]]
+The TagDocSubtitle defines a subtitle for the document. Only the first instance of this
 tag is used. If a second instance is encountered it will be ignored.
 
 @shorte
 # The document sub-title
-\@docsubtitle Reference Manual
+\@doc.subtitle Reference Manual
 
-@h3 @docversion
-The @docversion tag defines a version number for the document. This can be overridden
-at the command line.
+@h3 [[TagDocVersion, @doc.version]]
+The TagDocVersion tag defines a version string for the document. This can be overridden
+at the command line using the @{bold,-version} command line option.
 
-@h3 @docnumber
-The @docnumber tag defines a number to associate with the document.
+@h3 [[TagDocNumber, @doc.number]]
+The TagDocNumber tag defines a number to associate with the document. This is used in some
+output templates to uniquely identify the document.
 
-@h3 @docrevisions
-The @docrevisions tag defines a revision history for the document. It's
+@h3 [[TagDocRevisions, @doc.revisions]]
+The TagDocRevisions tag defines a revision history for the document. It's
 syntax is similar to the @table tag.
 
 @shorte
-\@docrevisions:
+\@doc.revisions:
 - Revision | Date          | Description
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
 - 1.0.1    | 09 July, 2013 | Another random update

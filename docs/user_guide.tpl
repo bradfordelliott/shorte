@@ -84,89 +84,15 @@ This is not a comment
 @text
 If you want to use the \# character elsewhere in the document it should normally
 be escaped with a \\\\ character. This is not necessary inside source code blocks
-such as @c, @java, @python, etc.
+such as @c, @java, @python or in markdown segments that start with @markdown.
 
 Multi-line comments use a format similar to HTML:
 
 @shorte
 \<!-- This is a multi-line comment -->
 
-@h2 Conditional Text
-The Shorte language supports two types of conditional text
-- PHP style inline blocks
-- conditionals using the if="xxx" attribute on tags
-
-@h3 PHP Style Code Blocks
-These blocks of code are similar to the inline PHP syntax. You use
-the \<\? ... \?\> syntax to inline a block of Python code. Any output
-must get assigned to a variable called *result* which gets returned in
-its expanded form. In this way you can conditionally generate text
-or use Python to create documentation.
-
-Variables can be passed to the interpreter using the *-m* command
-line parameter.
-
-@shorte
-\<\?
-result = ''
-if(1):
-    result += 'This is some *bold text* here'
-if(0):
-    result += 'But this line is not included' 
-\?\>
-
-@text
-When output you will see something like:
-
-<?
-result = ''
-if(1):
-    result += 'This is some *bold text* here'
-if(0):
-    result += 'But this line is not included' 
-?>
-
-@h3 Conditional Attributes
-Conditional text is also supported using the *if=* attribute on a tag.
-The if clause is interpreted as a block of Python code so you can make use
-of defines passed from the command line.
-
-For example:
-
-@shorte
-# Include this table
-\@table: if="1"
-- Col 1 | Col2
-- Data1 | Data 2
-
-# But not this table
-\@table: if="0"
-- Col 3  | col 4
-- Data 3 | Data 4
-
-@text
-will expand to:
-
-# Include this table
-@table: if="1"
-- Col 1 | Col2
-- Data1 | Data 2
-
-# But not this table
-@table: if="0"
-- Col 3  | col 4
-- Data 3 | Data 4
-
-@text
-As with inline code blocks you can specify variables to pass
-to the *if* text to evaluate using the *-m* command line paramter.
-
-@include
-chapters/includes.tpl
-
-@h2 Inline Formatting
-TBD: Add description of this section
-
+@include chapters/conditional_text.tpl
+@include chapters/includes.tpl
 
 @h2 Shorte Tags
 Shorte uses the @ character as a simple markup
@@ -180,11 +106,11 @@ supported by Shorte:
 @table: title="Shorte Supported Tags"
 - Tag | Description
 -& Document Metadata (only in document header)
-- @doctitle     | The title associated with the document
-- @docsubtitle  | The subtitle associated with the document
-- @docversion   | The version associatied with the document
-- @docnumber    | The number associated with the document
-- @docrevisions | The revision history associated with the document
+- TagDocTitle     | The title associated with the document
+- TagDocSubtitle  | The subtitle associated with the document
+- TagDocVersion   | The version associatied with the document
+- TagDocNumber    | The number associated with the document
+- TagDocRevisions | The revision history associated with the document
 
 -* Document Body
 -& Heading Tags
@@ -198,6 +124,7 @@ supported by Shorte:
 - @text      | A document text block
 - @p         | A paragraph similar to the *P* tag from HTML
 - @pre       | A block of unformatted test similar to the *PRE* tag from HTML
+- @markdonw  | A block of markdown text
 
 -& Includes
 - @include       | This tag is used to include another file (breaks conditional cascade)
@@ -207,9 +134,11 @@ supported by Shorte:
 - @image     | An inline image
 - @imagemap  | Include an HTML image map
 
--& Lists and Tables
+-& Lists
 - @ul        | An un-ordered list
 - @ol        | An ordered list
+
+-s Tables
 - @table     | A table
 
 -& Notes, TBDs and Questions
@@ -266,99 +195,10 @@ supported by Shorte:
 
 @include "chapters/tag_type_headings.tpl"
 
-@h2 Text Entry Tags
-
-@h3 @text
-The @text tag creates a text block that is automatically
-parsed for things like bullets, indentation, or blocks
-of code.
-
-You can insert lists:
-@shorte: exec=True
-- One
-  - Two
-    - Three
-
-@text
-Creating numbered lists can be done using the following syntax:
-@shorte
-1. One
-    1. Two
-        1. Three
-2. Blah
-
-@shorte
-blah blah blah
-
-- An multi-level list
-  - A second level in the list
-    - A third level in the list
-
-Another paragraph with @\{hl, some inlined styling\} and
-
-- A second list
-
-{{
-and a block of code
-}}
-
-@text
-When rendered we get something that looks like this:
-
-@text
-blah blah blah
-
-- An multi-level list
-  - A second level in the list
-    - A third level in the list
-
-Another paragraph with @{hl, some inlined styling} and
-
-- A second list
-
-{{
-and a block of code
-}}
-
-@include "chapters/inline_styling.tpl"
-
-
-@h3 @p
-The @p tag is used to create a paragraph. It is similar to the *P* tag
-in HTML. It does not attempt to parse the text block like the @text
-tag does in order to extract lists or indented code.
-
-@shorte
-\@p This is a paragraph in my document
-\@p This is another paragraph in my document
-
-@text
-This creates a two paragraphs that looks like:
-
-@p This is a paragraph in my document
-@p This is another paragraph in my document
-
-@h3 @pre
-The @pre tag creates a block of unformatted text:
-
-@shorte
-\@pre
-This is a test
-  this is a test
-    this is also a test
-
-@text
-When rendered it will look like:
-@pre
-This is a test
-  this is a test
-    this is also a test
-
-@include "chapters/includes.tpl"
+@include "chapters/tags/text.tpl"
 
 @include "chapters/images.tpl"
 
-@h2 Lists and Tables
 @include "chapters/lists.tpl"
 @include "chapters/tables.tpl"
 
@@ -477,41 +317,17 @@ A: This is the answer to the question with a lot
 Q: This is another question with some more information
 A: This is the answer to that question
 
-@h2 Structures and Functions
+@h2 Register Definitions
+@include "chapters/tags/register.tpl"
 
-@include "chapters/structs_and_vectors.tpl"
-
-@include "chapters/tag_type_registers.tpl"
-
-@h3 @define
-The @define is used to document a \#define structure in C.
-
-@h3 @enum
-The @enum tag is used to define an enumeration.
-
-@shorte
-\@enum: name="e_my_test" caption="This is a test enum" description="This is a test enum"
---values:
-- Name         | Value | Description
-- SUPPLY_1V_TX | 0x0   |  1V supply TX 
-- SUPPLY_1V_RX | 0x1   |  1V supply RX 
-- SUPPLY_2p5V  | 0xf   |  2.5V supply 
-
-@text
-This generates the following snippet:
-
-@enum: name="e_my_test" caption="This is a test enum" description="This is a test enum"
---values:
-- Name         | Value | Description
-- SUPPLY_1V_TX | 0x0   |  1V supply TX 
-- SUPPLY_1V_RX | 0x1   |  1V supply RX 
-- SUPPLY_2p5V  | 0xf   |  2.5V supply 
+@h2 Source Code Types
+@include "chapters/tags/define.tpl"
+@include "chapters/tags/enum.tpl"
+@include "chapters/tags/struct.tpl"
+@include "chapters/tags/functions.tpl"
 
 
-@include "chapters/functions.tpl"
-
-
-@h2 Source Code Tags
+@h2 Syntax Highlighting Code Segments
 Shorte was built with technical documentation in mind so it supports
 including a variety of source code snippets. These are described in the
 following section.
@@ -660,6 +476,8 @@ being expanded by shorte.
 </methodCall>
 
 
+@h2 Acronyms
+@include "chapters/tags/acronyms.tpl"
 
 
 
@@ -684,15 +502,6 @@ The @checklist tag creates a non-interactive checklist
 - three: checked="yes"
 - four
 
-
-@h3 @acronyms
-@acronyms
-- Acronym | Definition
-- EPT     | Egress Parser Table
-- EPC     | Egress Parser CAM
-
-
-
 @h3 @embed
 TBD - Add description of this tag
 
@@ -704,3 +513,5 @@ TBD - Add description of this tag
 @include "chapters/command_line.tpl"
 
 @include chapters/vim.tpl
+
+@include "chapters/documenting_source_code.tpl"
