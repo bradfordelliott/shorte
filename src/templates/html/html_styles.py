@@ -542,8 +542,11 @@ div.gallery
   .image_inline img
   {
       border:0px;
-      margin-left:20px;
       max-width:100%;
+      border:1px solid #ddd;
+      padding:10px;
+      margin:10px;
+      border-radius:3px;
   }
   /* Question and answer blocks */
   div.question
