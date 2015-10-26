@@ -124,7 +124,7 @@ supported by Shorte:
 - @text      | A document text block
 - @p         | A paragraph similar to the *P* tag from HTML
 - @pre       | A block of unformatted test similar to the *PRE* tag from HTML
-- @markdonw  | A block of markdown text
+- @markdown  | A block of markdown text
 
 -& Includes
 - @include       | This tag is used to include another file (breaks conditional cascade)
@@ -193,7 +193,7 @@ supported by Shorte:
 
 @h1 The Document Body
 
-@include "chapters/tag_type_headings.tpl"
+@include "chapters/tags/headings.tpl"
 
 @include "chapters/tags/text.tpl"
 
@@ -204,30 +204,7 @@ supported by Shorte:
 
 @h2 Notes, TBD and Questions
 
-@h3 @note
-The @note tag is used to create notes within a section. Here is an
-example:
-
-@shorte
-\@note
-This is a note here that I want to display
-
-- It has a list
-  - With some data
-
-And another paragraph.
-
-@text
-This renders to something like this:
-
-@note
-This is a note here that I want to display
-
-- It has a list
-  - With some data
-
-And another paragraph.
-
+@include "chapters/tags/note.tpl"
 
 @h3 @tbd
 The @tbd tag is used to highlight sections of a document

@@ -10,7 +10,8 @@ These blocks of code are similar to the inline PHP syntax. You use
 the `<\? ... \?\>` syntax to inline a block of Python code. Any output
 must get assigned to a variable called @{bold,result} which gets returned in
 its expanded form. In this way you can conditionally generate text
-or use Python to create documentation.
+or use Python to create documentation. The returned value should normally
+be a string value.
 
 Variables can be passed to the interpreter using the @{bold,-D} command
 line parameter similar to the GCC compiler.
@@ -34,6 +35,54 @@ if(1):
 if(0):
     result += 'But this line is not included' 
 ?>
+
+@h4 Short Open Tags
+Shorte also supports short open tags similar to PHP. In this
+case you can use the `<\?=...?>\` syntax to inline a block of Python code.
+In this case the @{b,result} variable is automatically created
+an any content is automatically assigned to it.
+
+@shorte
+\@text
+This is a paragraph with \<\?="some expanded text from a PHP style short open tag"?>
+
+@text
+When output you will see something like this:
+
+@text
+This is a paragraph with <?="some expanded text from a PHP style short open tag"?>
+
+
+@h4 Using Defines
+It is also possible to set defines within a shorte document rather than
+passing them at the command line with the @{b,-D} option.
+
+@note
+Defines created this way can only be used in the same document or any nested includes
+due to the way that expansion is implemented. Conditional PHP style blocks are evalulated up front
+instead of when they are encountered. This will change with future versions of shorte.
+
+@text
+The following shows an example of setting defines this way.
+
+@shorte
+\<\?
+shorte_engine.set_define("SHORTE_PARAM1", "This is a block of code that is dynamically expanded.")
+\?\>
+
+\@code
+\<\?=SHORTE_PARAM1\?\>
+
+@text
+When expanded this example will look like:
+
+<?
+shorte_engine.set_define("SHORTE_PARAM1", "This is a block of code that is dynamically expanded.")
+?>
+
+@code
+<?=SHORTE_PARAM1?>
+
 
 @h3 Conditional Attributes
 Conditional text is also supported using the @{bold,if=} attribute on a tag.

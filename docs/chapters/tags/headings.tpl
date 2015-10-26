@@ -15,7 +15,7 @@ This is some text for the example header
 
 # This header has some attributes associated with
 # it so the header starts on the next line. The
-# heading will included if MY_DEFINE is defined
+# heading will be included if MY_DEFINE is defined
 # at the shorte command line.
 \@h1: if="MY_DEFINE"
 This Header is Conditional
@@ -32,7 +32,7 @@ the @h1 tag. It is similar to the H2 tag from HTML.
 
 # An example second level header
 \@h2 This is a sub header
-This is some text related to the sub @h1 tag.
+This is some text related to the @h2 tag.
 
 @h3 @h3
 The @h3 tag is a hierarchial header directly beneath
