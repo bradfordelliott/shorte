@@ -22,7 +22,8 @@
                              the procedure to assign wikiwords to headings.
 - 1.0.67   | 23 Oct, 2014  | Cleanup of the shorte documentation in preparation
                              for publishing.
-- 1.0.74   | 9 Oct, 2015   | Overhaul of the user guide to bring it up to date
+- 1.0.74   | 26 Oct, 2015  | A partial cleanup of the user guide. More work to
+                             follow in version 1.0.75.
 
 # Shorte documents are split into a header and a body
 # similar to an HTML document. The body tag defines

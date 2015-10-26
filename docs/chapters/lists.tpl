@@ -1,6 +1,8 @@
 @body
 
-@h2 Lists
+@h2 Creating Lists
+The @ul and @ol tags are typically used to create lists. This mirrors
+the HTML constructs <UL> and <OL>.
 
 @h3 @ul
 The @ul tag is used to create an unordered list similar to the *ul* tag
