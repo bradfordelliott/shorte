@@ -23,13 +23,13 @@ To install from sources several prerequisites are required.
 They are shown in the following table:
 @table: title="Installation prerequisites"
 - Tool   | Tool Version        | Description
-- GCC    | \3.4 or later       | A compiler used to compile the cairo plugin for Python
-- Make   | \3.81 or later      | In order to run the makefile associated with the cairo plugin
-- Cairo  | \1.11 or later      | Cairo is required for generating images such as structure definitions
-                                or sequence diagrams.
-- SWIG   | \2.0 or later       | SWIG is required in order to build the cairo plugin for Python.
-- Python | \2.6 or 2.7         | Shorte is built in Python. Version 2.6 or later is required but 3.x
-                                is currently not supported.
+- GCC    | 3.4 or later        | A compiler used to compile the cairo plugin for Python
+- Make   | 3.81 or later       | In order to run the makefile associated with the cairo plugin
+- Cairo  | 1.11 or later       | Cairo is required for generating images such as structure definitions
+                                 or sequence diagrams.
+- SWIG   | 2.0 or later        | SWIG is required in order to build the cairo plugin for Python.
+- Python | 2.6 or 2.7          | Shorte is built in Python. Version 2.6 or later is required but 3.x
+                                 is currently not supported.
 - Py2exe | Version for Python  | This tool is used to generate
 
 @h2 Changing the Path to LibreOffice/OpenOffice
