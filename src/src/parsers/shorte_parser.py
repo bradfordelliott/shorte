@@ -343,6 +343,7 @@ class shorte_parser_t(parser_t):
                 header.template = tag.contents
                 name = tag.modifiers["name"]
                 self.m_engine.get_doc_info().add_template(name, tag.contents)
+
             elif(tag.name in ("outdir", "doc.outdir")):
                 header.outdir = tag.contents
                 self.m_engine.set_output_dir(header.outdir)
@@ -3125,12 +3126,37 @@ else:
         return tag_list
 
     def _evaluate_macros(self, matches):
+        """This method is called to evaluate PHP
+           style macros in the document that take either
+           the short form:
+
+               <?="my return string"?>
+
+           or long form:
+
+               <?
+                   result = "my return"
+                   result += "string"
+               ?>
+
+           @param matches [I] - The regular expression result.
+
+           @return The expanded result string.
+        """
 
         input = matches.groups()[0].strip()
+        
+        # This is a short form of PHP style tags
+        # that looks like <?=a string here?>
+        if(input.startswith("=")):
+            input = "result " + input
+
         macros = self.m_engine.get_macros()
         tmp_macros = {}
         for macro in macros:
             tmp_macros[macro] = macros[macro]
+
+        tmp_macros["shorte_engine"] = self.m_engine
 
         input = '''
 def exists(s):
@@ -3141,7 +3167,7 @@ def exists(s):
 %s
 ''' % input
 
-        #print "MACRO: [%s]" % input
+        #print "MACRO:\n[%s]" % input
 
         eval(compile(input, "example.py", "exec"), tmp_macros, tmp_macros)
 
@@ -3151,8 +3177,8 @@ def exists(s):
             if(tmp_macros.has_key("result")):
                 eval_result = tmp_macros["result"]
         except Exception,e:
-            WARNING("EXCEPTION: %s" % e)
-            do_nothing=1
+            #WARNING("EXCEPTION: %s" % e)
+            pass
 
         return eval_result
     
@@ -3224,6 +3250,11 @@ def exists(s):
         for macro in macros:
             tmp_macros[macro] = macros[macro]
         
+        # DEBUG BRAD: This needs to be moved so that
+        #             the macros are expanded as they are
+        #             parsed rather than up front. Parsing
+        #             them up front limits the way that they
+        #             can be used.
         expr = re.compile("<\?(.*?)\?>", re.DOTALL)
         input = expr.sub(self._evaluate_macros, input)
 

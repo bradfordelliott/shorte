@@ -652,6 +652,21 @@ class engine_t:
 
     def set_macros(self, macros):
         self.m_macros = macros
+    def set_define(self, name, value, override=False):
+        """This method is called to set the value of
+           a document define that can be used in variable
+           expansion. Once a define is set any future
+           attempts to set the define will be ignored unless
+           the override flag is set.
+        """
+        #print "Setting macro: %s = %s" % (name, value)
+
+        # If the macro is already set then don't update
+        # it unless the override flag is asserted.
+        if(self.m_macros.has_key(name) and override == False):
+            return
+
+        self.m_macros[name] = value
 
     def set_includes(self, includes):
         self.m_includes = includes

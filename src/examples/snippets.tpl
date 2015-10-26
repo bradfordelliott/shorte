@@ -5,11 +5,28 @@ This file is used to demonstrate the process of handling code
 snippets that can be used to simplify code segments by allowing
 substitutions
 
+# This is an example of how to set defines within a shorte
+# document so that they can be referenced elsewhere.
+# Keep in mind only the first instance will
+# be expanded. If a second instance is encountered it will
+# be ignored.
+#
+# I unfortunately can't put these in an include because
+# the macros get expanded before the include. I need
+# to figure out a way to fix this.
+<?
+shorte_engine.set_define("SHORTE_ONE",   "This is a block of code that was dynamically expanded.")
+shorte_engine.set_define("SHORTE_HELLO", "Hello Word!")
+?>
+
+@doc.version <?=SHORTE_HELLO?>
+
 @body
 
 # Include the snippet templates
 @include "examples/snippet_templates.tpl"
 @h1 Snippet Handling
+<?=SHORTE_ONE?>
 
 @h2 Snippet Template 1 
 This example demonstrates the use of templates and code execution. The
