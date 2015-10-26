@@ -50,3 +50,17 @@ int main(void)
 {
     return 0;
 }
+
+@text
+With a new paragraph and some @{b,bold} text
+and a list:
+
+- list
+  - list1
+  - list2
+
+and a table
+@{table,
+- One   | Two
+- Three | Four
+}

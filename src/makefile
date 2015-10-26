@@ -495,7 +495,7 @@ test_batch_files:
 	${python} shorte.py -f examples/batch.tpl -p html -o build-output/test_batch_files
 
 test_snippets:
-	${python} shorte.py -f "examples/snippets.tpl" -t ${THEME} -p html -o build-output/test_snippets
+	${python} shorte.py -f "examples/snippets.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_snippets
 
 test_cairo:
 	${python} shorte.py --ignore_errors -f "examples/cairo.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_cairo

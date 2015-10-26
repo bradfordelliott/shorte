@@ -963,7 +963,7 @@ class template_odt_t(template_t):
 
             elif(state == STATE_HYPERLINK):
 
-                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=")):
+                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=", "+")):
                     replacement += data[i]
                 else:
                     if(replacement.endswith(".")):
@@ -1168,8 +1168,8 @@ class template_odt_t(template_t):
 
         #print "width: %d" % width
         #print "height: %d" % height
-        max_width = 700 #460.0
-        max_height = 700 #640.0
+        max_width = 650
+        max_height = 650
 
         if(height > max_height):
             new_height = max_height

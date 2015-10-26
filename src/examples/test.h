@@ -147,14 +147,14 @@ struct handle_table_entry_tag * phead, * ptail;
  *
  * @param dummy [O] -
  *     Some other dumb variable.
- *
+ *     
  *     With a new paragraph and some @{b,bold} text
  *     and a list:
- *
+ *     
  *     - list
  *       - list1
  *       - list2
- *
+ *     
  *     and a table
  *     @{table,
  *     - One   | Two

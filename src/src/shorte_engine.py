@@ -1038,7 +1038,15 @@ class engine_t:
         return '\n'.join(output)
             
     def execute_code_block(self, tag):
+        """This method is called to excute a code block or snippet
+           and record the results.
+
+           @param tag [I] - The tag to execute
+        """   
         source = tag.source 
+
+        # Save the original source before any template expansion
+        original_source = source
 
         if(tag.has_modifier("exec")):
             exec_code = to_boolean(tag.get_modifier("exec"))
@@ -1047,6 +1055,8 @@ class engine_t:
         else:
             return
 
+        # If the tag has a template then perform any template
+        # expansion.
         if(tag.modifiers.has_key("template")):
             template = tag.modifiers["template"]
 
@@ -1072,6 +1082,17 @@ class engine_t:
         if(tag.modifiers.has_key("ignore_errors")):
             ignore_errors = to_boolean(tag.modifiers["ignore_errors"])
 
+        show_template = True
+        if(tag.modifiers.has_key("show_template")):
+            show_template = to_boolean(tag.modifiers["show_template"])
+
+        # If this code snippet is part of a template
+        # determine whether or not the full source should be
+        # shown or just the snippet itself
+        show_full_source = False
+        if(tag.modifiers.has_key("show_full_source")):
+            show_full_source = to_boolean(tag.modifiers["show_full_source"])
+
         executor = code_executor_t()
         result = executor.execute(tag.name, source, tag.modifiers)
         tag.result = result
@@ -1096,7 +1117,18 @@ class engine_t:
                 self.m_images.append(image)
 
         code = self.m_source_code_analyzer
+
+        full_source = source
+        if(not show_template):
+            source = original_source
+
         tag.contents = code.parse_source_code(tag.name, source, tag.file, tag.line)
+
+        # Show the full source if the user chose to display
+        # either it or the template data
+        if(show_full_source or show_template):
+            source = full_source
+
         tag.source = source
         
     def generate(self, package):

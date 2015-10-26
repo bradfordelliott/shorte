@@ -693,8 +693,8 @@ class template_html_t(template_t):
         html = ''
         if(allow_line_numbers == 2 and show_line_numbers):
             html = "<div class='snippet' style='white-space:pre;'>"
-            html += "<div style='width:5%;float:left;white-space:pre;color:#ccc;'>" + line_number_div + "</div>"
-            html += "<div style='width:94%;float:left;white-space:pre;'>" + output + "</div>"
+            html += "<div style='width:40px;float:left;white-space:pre;color:#ccc;'>" + line_number_div + "</div>"
+            html += "<div style='float:left;white-space:pre;'>" + output + "</div>"
             html += "<div style='clear:both;'></div>"
             html += "</div>"
         else:
@@ -2566,7 +2566,7 @@ within an HTML document.
 
             elif(state == STATE_HYPERLINK):
 
-                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=")):
+                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=", "+")):
                     replacement += data[i]
                 else:
                     if(replacement.endswith(".")):
