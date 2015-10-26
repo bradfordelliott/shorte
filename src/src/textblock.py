@@ -94,8 +94,17 @@ class list_item_t:
 
         return self.text.strip()
 
+    def __str__(self, indent=0):
 
-class textblock_t:
+        output = "%s%s\n" % (" "*indent, self.text)
+        if(self.children != None):
+            for child in self.children:
+                output += child.__str__(indent+4)
+            
+        return output
+
+
+class textblock_t(object):
     '''This class is intended to represent an blocks of
        text within a shorte document.
        
@@ -549,7 +558,7 @@ class textblock_t:
 
                 # If the line starts with a number followed by . then it
                 # must be the start of an ordered list
-                elif(i > 0 and (data[i-1] == "\n") and (data[i].isdigit()) and data[i+1] == "."):
+                elif((i == 0 or (data[i-1] == "\n") or (i == 0)) and (i < len(data)-1) and ((data[i].isdigit()) and data[i+1:i+3] == ". ")):
                     segments.append(segment)
                     segment = {}
                     segment["type"] = "orderedlist"
@@ -897,10 +906,16 @@ class textblock_t:
             ptype = paragraph["type"]
             output += "  paragraph:\n"
             output += "    type: %s\n" % self.translate_type(ptype)
+
             if(ptype in (textblock_t.TYPE_TEXT, textblock_t.TYPE_CODE, textblock_t.TYPE_QUOTE)):
                 lines = paragraph["text"].split("\n")
                 for line in lines:
                     output += "    [%s]\n" % line
+            elif(ptype == textblock_t.TYPE_ORDERED_LIST):
+                output += "    data:\n"
+                items = paragraph["text"]
+                for item in items:
+                    output += item.__str__(6)
 
         return output
 
@@ -908,6 +923,10 @@ class textblock_t:
 if __name__ == "__main__":
 
     text = """
+1. Part 1
+    2. Part 1A
+3. Part 2
+
 This is a block of text
 
     # This line is indented
@@ -917,6 +936,13 @@ This is a block of text
         so is this
 
 This is some more text
+
+And a new paragraph and a table:
+@{table,
+- One   | Two
+- Three | Four
+}
+
 """
     tb = textblock_t(text)
     print tb
