@@ -23,8 +23,15 @@ A new paragraph in a text block that has an unordered list:
 
 - a list
   - some data
+    @{code,A nested code block inside a list}
+  - another bullet point
     - some more data
+    @{table,
+- h1 | h2
+- d1 | d2
+}
   - two
+    @{quote, This is a quote block inside a bullet point}
 - three
 
 An inline table after a list

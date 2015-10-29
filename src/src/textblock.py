@@ -926,6 +926,14 @@ if __name__ == "__main__":
 1. Part 1
     2. Part 1A
 3. Part 2
+4. A
+5. B
+6. C
+7. D
+8. E
+9. F
+10. G
+11. H
 
 This is a block of text
 
