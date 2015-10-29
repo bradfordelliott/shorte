@@ -3,18 +3,18 @@
 # contain metadata about the document.
 
 # The title of the document
-@doctitle The Shorte Language
+@doc.title The Shorte Language
 
 # The subtitle of the document
-@docsubtitle Reference Manual
+@doc.subtitle Reference Manual
 
 # A version number (can be overwritten from the command line)
-@docversion 1.0.74
+@doc.version 1.0.74
 
 # A number to assign to the document
-@docnumber 34567
+@doc.number 34567
 
-@docrevisions:
+@doc.revisions:
 - Revision | Date          | Description
 - 1.0.0    | 08 July, 2013 | Initial draft of the Shorte Reference Manual
 - 1.0.58   | 15 Oct, 2013  | Updated the documentation to describe preliminary
@@ -59,8 +59,8 @@ Shorte documents generally end with a .tpl extension and follow the format:
 
 @shorte
 # Document heading here
-\@doctitle My Title
-\@docsubtitle My Subtitle
+\@doc.title My Title
+\@doc.subtitle My Subtitle
 ...
 
 # The beginning of the body
@@ -90,7 +90,9 @@ such as @c, @java, @python or in markdown segments that start with @markdown.
 Multi-line comments use a format similar to HTML:
 
 @shorte
-\<!-- This is a multi-line comment -->
+\<!-- This is a multi-line
+      comment that wraps across
+      multiple lines -->
 
 @include chapters/conditional_text.tpl
 @include chapters/includes.tpl

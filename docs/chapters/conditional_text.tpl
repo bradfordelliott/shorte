@@ -18,7 +18,8 @@ line parameter similar to the GCC compiler.
 
 @shorte
 \<\?
-result = ''
+import os
+result = '@pre' + os.linesep
 if(1):
     result += 'This is some *bold text* here'
 if(0):
@@ -29,7 +30,8 @@ if(0):
 When output you will see something like:
 
 <?
-result = ''
+import os
+result = '@pre' + os.linesep
 if(1):
     result += 'This is some *bold text* here'
 if(0):
@@ -40,16 +42,16 @@ if(0):
 Shorte also supports short open tags similar to PHP. In this
 case you can use the `<\?=...?>\` syntax to inline a block of Python code.
 In this case the @{b,result} variable is automatically created
-an any content is automatically assigned to it.
+and any content is automatically assigned to it.
 
 @shorte
-\@text
+\@code
 This is a paragraph with \<\?="some expanded text from a PHP style short open tag"?>
 
 @text
 When output you will see something like this:
 
-@text
+@code
 This is a paragraph with <?="some expanded text from a PHP style short open tag"?>
 
 
