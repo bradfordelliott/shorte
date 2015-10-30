@@ -22,6 +22,11 @@ This Header is Conditional
 
 The text for this heading starts here.
 
+\@h2: if="MY_DEFINE2"
+[[WikiHeader, A Conditional Header with a Wikiword]]
+
+This is the start of the @h2 header
+
 
 @h3 @h2
 The @h2 tag is a hierarchial header directly beneath

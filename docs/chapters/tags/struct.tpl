@@ -10,9 +10,6 @@ definition.
 An example is shown below:
 
 @shorte: exec=True
-\@text
-The generated output from this example will look like:
-
 \@struct: diagram="show:yes,align:128,bitorder:decrement"
 --name:
 struct1
@@ -53,21 +50,10 @@ This is my note here}
 #- 4     | some_number   | Some random 4 byte number
 
 @text
-Another example:
+Here is another example that generates a structure without a picture:
 
-@shorte
+@shorte: exec=True
 \@struct: name="struct2" caption="blah blah"
---fields:
-- Field | Name          | Description
-- 8x8   | serial_number | The serial number of the device
-                          with some more description
-- 8x12  | part_number   | The part number of the device
-- 4     | some_number   | Some random 4 byte number
-
-@text
-Will generate a structure without a picture:
-
-@struct: name="struct2" caption="This is a caption. It is currently in the wrong place"
 --fields:
 - Field | Name          | Description
 - 8x8   | serial_number | The serial number of the device
@@ -78,7 +64,7 @@ Will generate a structure without a picture:
 @text
 The bit order can also be reversed and the alignment can be changed:
 
-@shorte
+@shorte: exec=True
 \@struct: name="struct3" caption="This is a caption. It is currently in the wrong place" diagram="show:yes,align:64,bitorder:increment"
 --fields:
 - Field | Name          | Description
@@ -87,10 +73,3 @@ The bit order can also be reversed and the alignment can be changed:
 - 8x12  | part_number   | The part number of the device
 - 4     | some_number   | Some random 4 byte number
 
-@struct: name="struct3" caption="This is a caption. It is currently in the wrong place" diagram="show:yes,align:64,bitorder:increment"
---fields:
-- Field | Name          | Description
-- 8x8   | serial_number | The serial number of the device
-                          with some more description
-- 8x12  | part_number   | The part number of the device
-- 4     | some_number   | Some random 4 byte number

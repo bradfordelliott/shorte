@@ -8,7 +8,7 @@ the HTML constructs <UL> and <OL>.
 The @ul tag is used to create an unordered list similar to the *ul* tag
 in HTML. Lists can currently be indented 5 levels deep.
 
-@shorte
+@shorte: exec=True
 \@ul
 - Item 1
   - Subitem a
@@ -17,20 +17,35 @@ in HTML. Lists can currently be indented 5 levels deep.
   - Subitem b
 
 @text
-This generates the following output
+Using inline styling you can also insert things things like notes or
+tables inside each list item:
 
-@ul
+@shorte: exec=True
+\@ul
 - Item 1
-  - Subitem a
-    - Sub-subitem y
+  @{table,
+- H1 | H1
+- C1 | C1
+}
+    - Child 1
+      @{quote, This is some random quote about this item}
 - Item 2
-  - Subitem b
+    - Child 2
+      - Child 3
+        @{note, A note about child 3}
+      - Child 4
+        @{warning, A warning about child 4}
+      - Child 5
+        @{code,
+Some code associated with Child 5
+that is split across multiple lines
+}
 
 @h3 @ol
 The @ol tag is used to create an unordered list similar to the *ol* tag
 in HTML. Lists can currently be indented 5 levels deep.
 
-@shorte
+@shorte: exec=True
 \@ol
 - Item 1
   - Subitem a
@@ -38,12 +53,3 @@ in HTML. Lists can currently be indented 5 levels deep.
 - Item 2
   - Subitem b
 
-@text
-This generates the following output
-
-@ol
-- Item 1
-  - Subitem a
-    - Sub-subitem y
-- Item 2
-  - Subitem b

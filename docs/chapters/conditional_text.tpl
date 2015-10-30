@@ -128,17 +128,20 @@ An example is shown below:
 \@h1: if="DEBUG=='1'"
 Random Debug
 
+\@h2: if="DEBUG2=='1'"
+[[wikiHeader, A Subheading]]
+
 @text
 The @{bold,Random Debug} header can be turned on as follows:
 
 ```
-shorte -f example.tpl -DDEBUG=1
+shorte -f example.tpl -D "DEBUG=1;DEBUG2=1;"
 ```
 
 or turned off like this:
 
 ```
-shorte -f example.tpl -DDEBUG=0
+shorte -f example.tpl
 ```
 
 @text

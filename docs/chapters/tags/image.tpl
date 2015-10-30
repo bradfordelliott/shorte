@@ -1,7 +1,17 @@
 @h2 Images and Image Maps
 @h3 @image
 The @image tag is used to include an image. Recommended image formats
-currently included .jpg or .png.
+currently included .jpg or .png. The image tag takes the
+following format
+
+@shorte: exec=True
+\@image: src="chapters/images/shorte.png" caption="The shorte logo" width="100px"
+
+@text
+You can also scale images. The following example shows the image scaled to 50% of it's actual width:
+
+@shorte: exec=True
+\@image: src="chapters/images/shorte.png" caption="The shorte logo" width="50%"
 
 @h3 @imagemap
 This tag is used to generate an Image map. It currently only works in the
