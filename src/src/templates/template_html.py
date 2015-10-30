@@ -641,7 +641,7 @@ class template_html_t(template_t):
             #print "SOURCE: %s" % source
         
             # Convert any inline styling blocks
-            if(convert_inline_styling):
+            if(convert_inline_styling and (language != "shorte")):
                 expr = re.compile("@\{(.*?)\}", re.DOTALL)
                 source = expr.sub(self.parse_inline_styling, source)
 
@@ -3301,7 +3301,7 @@ $href_end
             elif(tag in ("u", "ul", "underline")):
                 prefix += "<u>"
                 postfix += "</u>"
-            elif(tag == "i"):
+            elif(tag in ("i", "italic", "italics")):
                 prefix += "<i>"
                 postfix += "</i>"
             elif(tag == "br"):

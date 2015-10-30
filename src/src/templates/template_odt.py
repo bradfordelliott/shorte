@@ -1283,7 +1283,7 @@ class template_odt_t(template_t):
             elif(tag in ("u", "ul", "underline")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["underline"]
                 postfix += "</text:span>"
-            elif(tag == "i"):
+            elif(tag in ("i", "italic", "italics")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["italic"]
                 postfix += "</text:span>"
             elif(tag == "br"):
