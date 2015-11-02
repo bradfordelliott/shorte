@@ -248,33 +248,13 @@ adding the machine="xxx" and port="xxx" parameters.
 This tag is used to embed bash code directly into the document and
 highlight it appropriately.
 
-@h3 @perl
-This tag is used to embed Perl code directly into the document and
-highlight it appropriately.
+@include "chapters/tags/perl.tpl"
 
-@h3 @shorte
-This tag is used to embed Shorte code directly into the document and
-highlight it appropriately.
-
-@h3 @d
-This tag is used to embed D code directly into the document and
-highlight it appropriately.
-
-@h3 @sql
-This tag is used to embed SQL code directly into the document and
-highlight it appropriately.
-
-@h3 @java
-This tag is used to embed Java code directly into the document and
-highlight it appropriately.
-
-@h3 @tcl
-This tag is used to embed TCL code directly into the document and
-highlight it appropriately.
-
-@h3 @vera
-This tag is used to embed Vera code directly into the document and
-highlight it appropriately.
+@include "chapters/tags/shorte.tpl"
+@include "chapters/tags/d.tpl"
+@include "chapters/tags/sql.tpl"
+@include "chapters/tags/java.tpl"
+@include "chapters/tags/tcl.tpl"
 
 @h3 @code
 If the language is not supported by Shorte the @code tag can be
