@@ -1,6 +1,7 @@
 import platform
 import os
 import sys
+import string
 
 # Track the number of warnings or errors
 # encountered during processing
@@ -994,6 +995,13 @@ def shorte_get_config(section, key, expand_os=False):
         val = g_config.get(section, key)
     except:
         val = None
+
+    # Expand any shorte variables in the config file
+    if(val != None and ("$" in val)):
+        vars = {}
+        vars["SHORTE_STARTUP_DIR"] = shorte_get_startup_path()
+        val = string.Template(val)
+        val = val.substitute(vars)
 
     #print "  %s.%s = %s" % (section, key, val)
     return val
