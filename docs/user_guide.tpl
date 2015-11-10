@@ -153,7 +153,7 @@ supported by Shorte:
 -& Structures and Functions
 - @define    | A C style \#define
 - @enum      | An enumeration
-- @vector    | Similar to @struct but generates a bitfield
+#- @vector    | Similar to @struct but generates a bitfield
 - @struct    | A C style structure
 - @prototype | C function prototypes
 - @functionsummary | A function summary
@@ -161,13 +161,13 @@ supported by Shorte:
 
 -& Source Code Tags
 - @c      | A block of C code
-- @d      | A block of D code
+#- @d      | A block of D code
 - @bash   | A block of bash code
 - @python | A block of python code
-- @sql    | A block of SQL code
+#- @sql    | A block of SQL code
 - @java   | A block of Java code
 - @tcl    | A block of TCL code
-- @vera   | A block of Vera code
+#- @vera   | A block of Vera code
 - @perl   | A block of Perl code
 - @code   | A block of unknown source code
 - @shorte | A block of shorte code
@@ -188,7 +188,8 @@ supported by Shorte:
 - @testcase        | A test case description
 - @testcasesummary | A test case summary
 
-@include "chapters/installation_instructions.tpl"
+# DEBUG BRAD: These need to be updated to really be useful
+#@include "chapters/installation_instructions.tpl"
 
 @include "chapters/example_document.tpl"
 
@@ -352,4 +353,5 @@ TBD - Add description of this tag
 
 @include chapters/vim.tpl
 
+@include "chapters/mergefiles.tpl"
 @include "chapters/documenting_source_code.tpl"

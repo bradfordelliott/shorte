@@ -26,8 +26,9 @@ source code.
 
 @h3 Creating Headings
 It is possible to insert headings and the like into source
-code snippets by placing shorte tags in either the module header
-or a module block comment.
+code snippets by placing shorte tags in either the file header
+or in a source code comment associated with a source code object
+such as a define, struct or prototype.
 
 @c
 /**

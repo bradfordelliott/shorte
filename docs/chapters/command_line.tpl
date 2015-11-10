@@ -1,47 +1,18 @@
 
 @h1 The Command Line
+Here is the shorte command line
 @bash
-$ shorte.py -h
-Usage: shorte.py [options]
+<?
+import subprocess
+phandle = subprocess.Popen(["../src/shorte", "-h"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+phandle.wait()
+result = phandle.stdout.read()
+result += phandle.stderr.read()
+?>
 
-Options:
-  -h, --help            show this help message and exit
-  -f FILES, --files=FILES
-                        The list of files to generate
-  -l FILE_LIST, --list=FILE_LIST
-                        The list of files to generate in an input file
-  -o OUTPUT_DIR, --output=OUTPUT_DIR
-                        The directory where output is generated
-  -v VERSION, --version=VERSION
-                        The version of the document
-  -t THEME, --theme=THEME
-                        The output theme
-  -n NAME, --name=NAME  The document name or title
-  -p PACKAGE, --package=PACKAGE
-                        The output package. Supported types are html, odt,
-                        word, and pdf
-  -b OUTPUT_FORMAT, --output_format=OUTPUT_FORMAT
-                        Set the output format in C generated code: bitfields,
-                        byte_array, or defines
-  -y, --diagnostic_code
-                        Generate diagnostic code in generate code
-  -c CONFIG, --config=CONFIG
-                        The config file to load
-  -s SETTINGS, --settings=SETTINGS
-                        A list of settings to use that overrides the standard
-                        config file
-  -x PARSER, --parser=PARSER
-                        The parser to use
-  -a, --about           About this program
-  -m MACROS, --macros=MACROS
-                        Macro substitution
-  -d DEFINE, --define=DEFINE
-                        Macro substitution
-  -r REPLACE, --search_and_replace=REPLACE
-                        An input search and replace module that is loaded to
-                        pre-process input files and replace any references
 
-@h2 Some Command Line Examples
+@h2: if=0
+Some Command Line Examples
 
 Parse a list of source files defined by source_file_list.py and generate
 Shorte modules describing each of the source files.
@@ -73,7 +44,4 @@ if(SKU == 'CS4343'):
     result += '''
 modules/kran/cs4224_kran.c
 '''
-
-@h2 Creating a Merge File
-A merge file re-assembles a Shorte document into a single file
 
