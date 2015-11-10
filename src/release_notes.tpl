@@ -17,7 +17,7 @@ This is a known issue with LibreOffice and is a harmless note echoed by a subcom
 Please see this bug for information on this issue.
 [[http://lists.freedesktop.org/archives/libreoffice-bugs/2015-July/289309.html]]
 
-@h3 Version 1.0.74 (Oct 20, 2015)
+@h3 Version 1.0.74 (Nov 10, 2015)
 - Parsers
     - Shorte Parser
         - Cleanup to the register, structure and table parsing
