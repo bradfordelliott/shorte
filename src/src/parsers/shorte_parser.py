@@ -1453,7 +1453,9 @@ a C/C++ like define that looks like:
             ftype = matches.groups()[0] 
             fnum  = int(matches.groups()[1]) 
 
-        if(ftype in ("char", "unsigned char", "int8_t", "uint8_t", "cs_uint8", "cs_int8", "boolean", "cs_boolean")):
+        ftype = ftype.strip()
+
+        if(ftype in ("char", "unsigned char", "int8_t", "uint8_t", "cs_uint8", "cs_int8", "boolean", "cs_boolean", "_Bool", "bool")):
             width = 8
         elif(ftype in ("unsigned short", "short", "int16_t", "uint16_t", "cs_uint16", "cs_int16")):
             width = 16
