@@ -14,6 +14,7 @@
  */
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "test.h"
 
@@ -350,7 +351,10 @@ int test_dot_c_my_test21(int blah)
  *
  * @param dummy [O] - Some other dumb variable.
  *
- * @return TRUE on success, FALSE on failure.
+ * @return
+ *   This method returns:
+ *   - TRUE on success
+ *   - FALSE on failure.
  *
  * @example
  *     0         1         2         3         4         5         6         7
@@ -410,11 +414,14 @@ int test_dot_c_my_private_function(void)
  * This method has a requirement associated
  * with it.
  *
+ * @param arg1 [I] - This is a random argument value.
+ *
  * @requires
  *   This method is only defined if PC_FLAG == 1
  */
-void test_func_with_requirements(void)
+bool test_func_with_requirements(bool arg1)
 {
+    return false;
 }
 
 int main(void)

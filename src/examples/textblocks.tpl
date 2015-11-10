@@ -8,6 +8,8 @@
 This is a test of a text block. I've added some quotes like '
 and " to ensure they get translated correctly in the PDF file.
 
+Make sure arrays[4] don't get hyperlinked.
+
 What about special characters in a like this: [[http://www.cortina-systems.com, link with <> and ' and "]].
 
 Text blocks can have tables declared in them with the following

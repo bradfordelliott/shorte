@@ -1,7 +1,7 @@
 
 /* The clang parser should be able to find mytypes.h in the platform
  * directory in order to parse the standard types */
-#include "mytypes.h"
+#include "platform/mytypes.h"
 
 /**
  * @h2 Checking stdint.h

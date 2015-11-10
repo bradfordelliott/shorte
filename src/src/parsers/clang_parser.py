@@ -418,7 +418,7 @@ class clang_parser_t(shorte_parser_t):
         args = []
         
         # Fetch the command line arguments to pass to clang
-        clang_args = shorte_get_config("clang", "args")
+        clang_args = shorte_get_config("clang", "args", expand_os=True)
         if(len(clang_args) > 0):
             args = clang_args.split(' ')
         else:
@@ -740,6 +740,8 @@ class clang_parser_t(shorte_parser_t):
                         parameters = []
                         for arg in args:
                             arg_type = arg.type.spelling
+                            if(arg_type.startswith("_Bool")):
+                                arg_type = arg_type.replace("_Bool", "bool")
                             arg_name = arg.spelling
                             arg_list.append("%s %s" % (arg_type, arg_name))
 
@@ -770,7 +772,11 @@ class clang_parser_t(shorte_parser_t):
 
                         prototype.set_params(parameters)
 
-                        ptype = "    %s %s(" % (cursor.result_type.spelling, cursor.spelling) + ', '.join(arg_list) + ");"
+                        result_type = cursor.result_type.spelling
+                        if(result_type.startswith("_Bool")):
+                            result_type = result_type.replace("_Bool", "bool")
+
+                        ptype = "    %s %s(" % (result_type, cursor.spelling) + ', '.join(arg_list) + ");"
                         prototype.set_prototype(ptype,
                                 self.m_engine.m_source_code_analyzer, "c")
 
@@ -970,7 +976,11 @@ class clang_parser_t(shorte_parser_t):
                         for child in children:
                             #print "child:", child
                             bits = child.type.spelling
-                            name = child.spelling  
+                            if(bits.startswith("_Bool")):
+                                #FATAL("DO I GET HERE?")
+                                bits = bits.replace("_Bool", "bool")
+                            
+                            name = child.spelling
                         
                             #print "Parsing field %s, bits: %s" % (name,bits)
                             if(name == None):

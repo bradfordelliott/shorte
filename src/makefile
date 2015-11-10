@@ -391,8 +391,8 @@ test_graphing:
 # assembles a list of shorte files into a single document. This is useful for diffing things
 # in one assembly rather than trying to diff the output.
 test_mergefile:
-	${python} shorte.py -f "examples/images.tpl examples/headings.tpl" -t "${THEME}" -p mergefile -o build-output/mergefile
-	${python} shorte.py -f "build-output/mergefile/book.tpl" -t "${THEME}" -p "${html_pdf}" -o build-output/mergefile
+	${python} shorte.py -f "examples/images.tpl examples/headings.tpl" -t "${THEME}" -p mergefile -o build-output/test_mergefile --of=mergefile.tpl
+	${python} shorte.py -f "build-output/test_mergefile/mergefile.tpl" -t "${THEME}" -p "${html_pdf}" -o build-output/test_mergefile
 
 test_sql:
 	${python} shorte.py -f "examples/test.c examples/test.h" -t "${THEME}" -x cpp -o build-output/sql -p "sql"
@@ -536,8 +536,10 @@ exe:
 tarball:
 	
 
+user_guide: docs
+userguide: docs
 docs:
-	cd ../docs && make pdf
+	make -C ../docs TARGET="`pwd`/build-output/userguide" docs
 
 # This target is used to package up shorte into a tarball
 # for distribution

@@ -694,7 +694,7 @@ class template_html_t(template_t):
         if(allow_line_numbers == 2 and show_line_numbers):
             html = "<div class='snippet' style='white-space:pre;'>"
             html += "<div style='width:40px;float:left;white-space:pre;color:#ccc;'>" + line_number_div + "</div>"
-            html += "<div style='float:left;white-space:pre;'>" + output + "</div>"
+            html += "<div style='float:left;white-space:pre;width:600px;'>" + output + "</div>"
             html += "<div style='clear:both;'></div>"
             html += "</div>"
         else:
@@ -2596,12 +2596,11 @@ within an HTML document.
                     i += 1
 
             elif(state == STATE_OPEN_BRACKET):
-                if(data[i-1] == "]"):
+                if(data[i] == "]"):
                     states.pop()
-
-                    if(data[i] == "("):
+                    if(data[i:i+2] == "]("):
+                        i += 1
                         url = ""
-
                         if(replacement.startswith("![")):
                             states.append(STATE_MARKDOWN_IMAGE)
                             label = replacement[2:-1]
@@ -2610,6 +2609,7 @@ within an HTML document.
                             label = replacement[1:-1]
                         replacement = ""
                     else:
+                        replacement += data[i]
                         output += replacement
                         replacement = ""
                 else:

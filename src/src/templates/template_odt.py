@@ -993,10 +993,11 @@ class template_odt_t(template_t):
                     i += 1
 
             elif(state == STATE_OPEN_BRACKET):
-                if(data[i-1] == "]"):
+                if(data[i] == "]"):
                     states.pop()
 
-                    if(data[i] == "("):
+                    if(data[i:i+2] == "]("):
+                        i += 1
                         url = ""
 
                         if(replacement.startswith("![")):
@@ -1007,6 +1008,7 @@ class template_odt_t(template_t):
                             label = replacement[1:-1]
                         replacement = ""
                     else:
+                        replacement += data[i]
                         output += replacement
                         replacement = ""
                 else:

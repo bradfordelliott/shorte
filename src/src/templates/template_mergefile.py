@@ -39,6 +39,20 @@ class template_mergefile_t(template_t):
         self.m_num_structs = 0
         self.m_num_enums = 0
     
+    def get_index_name(self):
+        '''This method is called to fetch the name to associate
+           with the index file.
+
+           @return The name of the index file which is something
+                   like index.tpl
+        '''
+
+        if(self.m_engine.has_output_file()):
+            index_name = self.m_engine.get_output_file()
+            return index_name
+
+        return "index.tpl"
+    
     def generate(self, theme, version, package):
 
         # Format the output pages
@@ -84,7 +98,7 @@ class template_mergefile_t(template_t):
                         source += "\n" + tag.get_source() + "\n\n"
 
         
-        file = open(self.m_engine.m_output_directory + "/book.tpl", "w")
+        file = open(self.m_engine.m_output_directory + os.sep + self.get_index_name(), "w")
         file.write(source)
         file.close()
 

@@ -48,10 +48,14 @@ from src.shorte_engine import *
 
 
 
-parser = argparse.ArgumentParser()
+parser = argparse.ArgumentParser(description="""Shorte is a
+shorthand documentation generation tool similar to formats
+like markdown or RST.""")
 parser.add_argument("-f", "--files",
                   action="store", dest="files",
-                  help="The list of files to generate")
+                  help="""The list of files to analyze separated by comma or semicolon.
+Spaces can currently be used but they will eventually be deprecated
+to allow for installation paths that have spaces""")
 parser.add_argument("-l", "--list",
                   action="store", dest="file_list",
                   help="The list of files to generate in an input file")
@@ -389,7 +393,10 @@ print "  - See %s for more detail" % shorte_get_log_file_path()
 
 # Before we exit make sure we cleanup the scratch directory
 if(os.path.exists(scratchdir)):
-    shutil.rmtree(scratchdir)
+    try:
+        shutil.rmtree(scratchdir)
+    except:
+        print "Failed removing scratchdir %s" % scratchdir
    
 if(error_on_exit):
     sys.exit(-1)

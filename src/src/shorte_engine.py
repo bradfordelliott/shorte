@@ -1380,7 +1380,7 @@ def exists(s):
         else:
             if(files == None):
                 return
-            files = files.split(" ")
+            files = re.split("[ ,]", files)
             for file in files:
                 rgx = re.compile("(\.tpl|\.txt|\.ste)")
                 output = rgx.sub(".html", file)
