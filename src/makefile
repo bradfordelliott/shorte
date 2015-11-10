@@ -68,6 +68,10 @@ cairo_plugin:
 clang_plugin_rh6:
 	cd 3rdparty/clang && cp linux/rh6/* .
 	cd 3rdparty/clang/linux && cp rh6/* .
+clang_plugin_Linux:
+clang_plugin_rh5:
+	cd 3rdparty/clang && cp linux/rh5/* .
+	cd 3rdparty/clang/linux && cp rh5/* .
 
 clang_plugin_windows32:
 	
