@@ -464,9 +464,11 @@ onload onmouseup onmousedown onsubmit
                     i += 1
                     if(len(line) > length):
                         if(check == 'warn'):
-                            WARNING("Source line %d is too long (%d chars) in %s.%d\n  [%s]" % (i, len(line), source_file, source_line, line))
+                            WARNING("Source line %d is too long (%d chars) in %s.%d\n  [%s]\n"
+                                    "You can disable this warning by setting -s \"shorte.validate_line_length=ignore;\" at the shorte command line" % (i, len(line), source_file, source_line, line))
                         else:
-                            ERROR("Source line %d is too long (%d chars) in %s.%d\n  [%s]" % (i, len(line), source_file, source_line, line))
+                            ERROR("Source line %d is too long (%d chars) in %s.%d\n  [%s]\n"
+                                  "You can disable this warning by setting -s \"shorte.validate_line_length=ignore;\" at the shorte command line" % (i, len(line), source_file, source_line, line))
 
         source = trim_blank_lines(source)
 

@@ -1464,7 +1464,8 @@ a C/C++ like define that looks like:
         elif(ftype in ("unsigned long long", "int64_t", "uint64_t", "cs_uint64", "cs_int64")):
             width = 64
         else:
-            WARNING("Cannot process this field type [%s]" % ftype)
+            # DEBUG BRAD: Turn off this warning for now
+            #WARNING("Cannot process this field type [%s]" % ftype)
             width = 0
 
         return (fnum * width)
