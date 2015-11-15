@@ -1453,6 +1453,9 @@ class template_odt_t(template_t):
 
     def format_text(self, data, allow_wikify=True, exclude_wikiwords=[], expand_equals_block=False):
 
+        #print "Text: [%s]" % data
+        #allow_wikify=False
+
         # Trim leading and trailing whitespace
         data = data.strip()
         #data = re.sub("->", "#", data)
@@ -1515,9 +1518,7 @@ class template_odt_t(template_t):
         
         if(allow_wikify):
             data = self.wikify(data)
-        #print "FINAL: [%s]" % data
-
-
+        
         return data
     
     def format_questions(self, tag):    
@@ -3636,6 +3637,25 @@ ${desc}
         return None
 
     #def update_attribute(self, xml, name, block, attribute):
+    
+    def save_xml(self, input, fname):
+        return
+        pxml = input
+        try:
+            import xml.dom.minidom as dom
+            pxml = dom.parseString(pxml)
+            pxml = pxml.toprettyxml()
+        except:
+            pass
+        lines = pxml.split("\n")
+        pout = []
+        for line in lines:
+            tline = line.strip()
+            if(len(tline) > 0):
+                pout.append(line)
+        h = open(fname, "wt")
+        h.write("\n".join(pout))
+        h.close()
 
     def generate_index(self, title, theme, version):
 
@@ -3648,6 +3668,7 @@ ${desc}
         unzip_file_into_dir("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme), scratchdir + "/odt")
 
         os.unlink("%s/odt/%s.odt" % (scratchdir, self.m_engine.m_theme))
+
 
         handle = open("%s/odt/content.xml" % scratchdir)
         xml = handle.read()
@@ -3682,24 +3703,33 @@ ${desc}
         start = pos
         end = pos + len(str)
         tmp = xml[0:start]
+
+        #print pages
         tmp += pages
         tmp += xml[end:len(xml)]
         xml = tmp
+
+        self.save_xml(xml, "one.xml")
 
         # Search for the styles to strip. The expression looks like this:
         #   re.sub("<text:p.*?>\[\[STYLES.TEMPLATES.START\]\].*?\[\[STYLES.TEMPLATES.END\]\]</text:p>", "", xml)
         start = xml.find("[[STYLES.TEMPLATES.START]]", 0)
         #print "START: %d" % start
-        start = xml.find("<text:p", start - 100)
+        start = xml.rfind("<text:p", 0, start)
+        #print "START: %d" % start
         end = xml.find("[[STYLES.TEMPLATES.END]]", start)
         end = xml.find("</text:p>", end)
         #print "END: %d" % end
         end += 9
+        block = xml[start:end]
+        self.save_xml(block, "tmp_styles.xml")
 
         tmp = xml[0:start]
         tmp += xml[end:]
 
         xml = tmp
+
+        self.save_xml(xml, "two.xml")
 
         #print "TEMPLATE"
         #print xml
@@ -4030,7 +4060,19 @@ ${desc}
             # If the output file doesn't exist then generate a failure since the macro failed
             path_output = path_input.replace("odt", "pdf")
             if(not os.path.exists(path_output)):
-                FATAL("Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n" % path_output)
+                scratchdir = shorte_get_config("shorte", "scratchdir")
+                handle = open("%s/odt/content.xml" % scratchdir)
+                content = handle.read()
+                handle.close()
+
+                import xml.dom.minidom
+                error_string = ""
+                try:
+                    xml.dom.minidom.parseString(content)
+                except xml.parsers.expat.ExpatError as e:
+                    error_string = e.__str__()
+
+                FATAL("Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n  [%s in content.xml]\n\n" % (path_output, error_string))
             
             return path_output
     

@@ -1001,7 +1001,7 @@ def shorte_get_config(section, key, expand_os=False):
         vars = {}
         vars["SHORTE_STARTUP_DIR"] = shorte_get_startup_path()
         val = string.Template(val)
-        val = val.substitute(vars)
+        val = val.safe_substitute(vars)
 
     #print "  %s.%s = %s" % (section, key, val)
     return val

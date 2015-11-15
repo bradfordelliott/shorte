@@ -54,6 +54,9 @@ env:
 all:
 	make package
 
+clean:
+	rm -rf build-output
+
 build_full: checkout_vendor_templates clang_plugin cairo_plugin package exe
 build: cairo_plugin clang_plugin
 
@@ -259,6 +262,7 @@ test_comments:
 	${python} shorte.py -f examples/comments.tpl -t "${THEME}" -p "${html_pdf}" -o build-output/comments
 
 test_textblocks:
+	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock --info=wikiwords
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock -p "${html_pdf}"
 	${python} shorte.py -f examples/textblocks.tpl -t "${THEME}" -o build-output/textblock_inline -p "${html_inline_pdf}"
 test_textblocks_quick:
