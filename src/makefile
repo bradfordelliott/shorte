@@ -531,6 +531,9 @@ test_acronyms:
 test_lists:
 	${python} shorte.py -f "examples/test_lists.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_lists
 
+test_wkpdf:
+	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "html_inline+wpdf" --output_file="wkpdf.html" -o build-output/test_wpdf
+
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python
 exe:

@@ -23,6 +23,8 @@ Please see this bug for information on this issue.
     - Cleaned up some installation issues on RH5.
     - Fixed up the ODT template to try to catch malformatted XML errors
       when generating PDFs.
+- Added support for wkhtmltopdf. Currently only works with the inline HTML
+  template by using the "html_inline+wpdf" package.
 
 @h3 Version 1.0.74 (Nov 10, 2015)
 - Parsers

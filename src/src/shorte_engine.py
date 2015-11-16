@@ -32,6 +32,7 @@ from src.templates.template_sql import template_sql_t
 from src.templates.template_mediawiki import template_mediawiki_t
 from src.templates.template_revealjs import template_revealjs_t
 from src.templates.template_markdown import template_markdown_t
+from src.templates.template_wkpdf import template_wkpdf_t
 
 class document_info_t:
     '''This class is used to manage the attributes associated
@@ -1408,22 +1409,25 @@ def exists(s):
         for package in package_list:
             if(package in ("html", "reveal.js")):
                 packages.append(package)
-                if('pdf' in package_list):
+                if("pdf" in package_list):
                     include_link = True
-                    include_link_type = 'pdf'
-                elif('txt' in package_list):
+                    include_link_type = "pdf"
+                elif("txt" in package_list):
                     include_link = True
-                    include_link_type = 'txt'
+                    include_link_type = "txt"
         
             elif(package == "html_inline"):
                 inline = True
                 packages.append("html_inline")
-                if('pdf' in package_list):
+                if("wpdf" in package_list):
                     include_link = True
-                    include_link_type = 'pdf'
-                elif('txt' in package_list):
+                    include_link_type = "pdf"
+                elif("pdf" in package_list):
                     include_link = True
-                    include_link_type = 'txt'
+                    include_link_type = "pdf"
+                elif("txt" in package_list):
+                    include_link = True
+                    include_link_type = "txt"
         
             else:
                 packages.append(package)
@@ -1455,6 +1459,8 @@ def exists(s):
                 template = template_odt_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_PDF):
                 template = template_odt_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_WKPDF):
+                template = template_wkpdf_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_TEXT):
                 template = template_text_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_TWIKI):
