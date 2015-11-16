@@ -49,6 +49,10 @@ class template_wkpdf_t(template_t):
         path_html = "%s" % (self.m_engine.get_output_dir() + os.sep + index_name)
         path_output = "%s" % (self.m_engine.get_output_dir() + os.sep + self.get_index_name())
 
+        # If the output file already exists then make sure to remove it first
+        if(os.path.exists(path_output)):
+            os.unlink(path_output)
+
         # Convert HTML to PDF to generate the output document
         wkhtmltopdf = shorte_get_config("wkhtmltopdf", "args", expand_os=True)
         cmd_convert = [wkhtmltopdf, path_html, path_output]
