@@ -53,14 +53,20 @@ class template_wkpdf_t(template_t):
         if(os.path.exists(path_output)):
             os.unlink(path_output)
 
+        print "CONVERTING VIA WPDF"
+
         # Convert HTML to PDF to generate the output document
         wkhtmltopdf = shorte_get_config("wkhtmltopdf", "args", expand_os=True)
         cmd_convert = [wkhtmltopdf, path_html, path_output]
         try:
-            phandle = subprocess.Popen(cmd_convert, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            result = phandle.stdout.read()
-            result += phandle.stderr.read()
-            phandle.wait()
+            phandle = subprocess.Popen(cmd_convert, stdout=subprocess.PIPE) #, stderr=subprocess.PIPE)
+
+            while(phandle.poll() is None):
+                result = phandle.stdout.read(1)
+                time.sleep(1)
+
+            print "Process complete"
+            
             rc = phandle.returncode
         except:
             FATAL("Failed coverting document using wkhtmltpdf")
