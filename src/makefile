@@ -86,8 +86,7 @@ clang_plugin:
 checkout_vendor_templates:
 	rm -rf vendor_templates
 	mkdir vendor_templates
-	cd vendor_templates && wget -O 3rdparty.zip http://sw.inphi-corp.local/gitblit/zip/?r=3rdparty.git&p=shorte/templates&h=master&format=zip
-extract_vendor_templates:
+	cd vendor_templates && wget -O 3rdparty.zip http://sw.inphi-corp.local/gitblit/zip/?r=3rdparty.git&p=shorte/templates&h=master&format=zip && wait
 	cd vendor_templates && unzip 3rdparty.zip
 	cp -rf vendor_templates/shorte/templates/* templates/.
 
