@@ -17,7 +17,7 @@ This is a known issue with LibreOffice and is a harmless note echoed by a subcom
 Please see this bug for information on this issue.
 [[http://lists.freedesktop.org/archives/libreoffice-bugs/2015-July/289309.html]]
 
-@h3 Version 1.0.75 (???, 2015)
+@h3 Version 1.0.75 (Nov 16, 2015)
 - Bug Fixes
     - Fixed an issue with the shorte_get_config not expanding correctly.
     - Cleaned up some installation issues on RH5.
