@@ -213,6 +213,7 @@ tests:
 	make test_document_header
 	make test_acronyms
 	make test_lists
+	make test_wkpdf
 	${python} shorte.py --build_index=build-output -p html_inline -t ${THEME}
 
 THEME:=shorte
@@ -530,8 +531,13 @@ test_acronyms:
 test_lists:
 	${python} shorte.py -f "examples/test_lists.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_lists
 
+# This tested is used to verify integration of the wkhtmltopdf tool used to convert
+# HTML output to PDF documents.
 test_wkpdf:
-	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "html_inline+wpdf" --output_file="wkpdf.html" -o build-output/test_wpdf
+	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "html_inline+wpdf" --output_file="wkpdf.html" -o build-output/test_wkpdf/inline_html_pdf
+    # Can't currently specify the --output_file parameter here because the input to wkhtmltopdf will be wrong
+	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "wpdf" -o build-output/test_wkpdf/pdf_only
+	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "html+wpdf" --output_file="wkpdf.html" -o build-output/test_wkpdf/html_pdf
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python

@@ -17,6 +17,12 @@ This is a known issue with LibreOffice and is a harmless note echoed by a subcom
 Please see this bug for information on this issue.
 [[http://lists.freedesktop.org/archives/libreoffice-bugs/2015-July/289309.html]]
 
+@h3 Version 1.0.76 (Nov 16, 2015)
+- Bug Fixes
+    - More simplifications for the linux install process.
+    - Improvements to the wkhtmltopdf integration to allow html+wpdf
+      targets and fix stall issues under Windows.
+
 @h3 Version 1.0.75 (Nov 16, 2015)
 - Bug Fixes
     - Fixed an issue with the shorte_get_config not expanding correctly.

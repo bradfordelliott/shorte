@@ -1408,17 +1408,6 @@ def exists(s):
         # a PDF link in the HTML documentation.
         for package in package_list:
             if(package in ("html", "reveal.js")):
-                packages.append(package)
-                if("pdf" in package_list):
-                    include_link = True
-                    include_link_type = "pdf"
-                elif("txt" in package_list):
-                    include_link = True
-                    include_link_type = "txt"
-        
-            elif(package == "html_inline"):
-                inline = True
-                packages.append("html_inline")
                 if("wpdf" in package_list):
                     include_link = True
                     include_link_type = "pdf"
@@ -1428,12 +1417,44 @@ def exists(s):
                 elif("txt" in package_list):
                     include_link = True
                     include_link_type = "txt"
+
+                pkg = {"name" : package, "inline" : False, "include_link" : include_link, "include_link_type" : include_link_type}
+                packages.append(pkg)
+        
+            elif(package == "html_inline"):
+                inline = True
+                if("wpdf" in package_list):
+                    include_link = True
+                    include_link_type = "pdf"
+                elif("pdf" in package_list):
+                    include_link = True
+                    include_link_type = "pdf"
+                elif("txt" in package_list):
+                    include_link = True
+                    include_link_type = "txt"
+                
+                pkg = {"name" : package, "inline" : True, "include_link" : include_link, "include_link_type" : include_link_type}
+                packages.append(pkg)
         
             else:
-                packages.append(package)
+                # If we're generating via wpdf then we need to force generation of the inline HTML target
+                if(package == "wpdf"):
+                    pkg = {"name" : "html_inline", "inline" : True, "include_link" : False, "include_link_type" : "pdf"}
+                    packages.insert(0, pkg)
+                    pkg = {"name" : package, "inline" : False, "include_link_type" : "", "include_link" : False}
+                    packages.insert(1, pkg)
+                else:
+                    pkg = {"name" : package, "inline" : False, "include_link_type" : "", "include_link" : False}
+                    packages.append(pkg)
     
         for pkg in packages:
-            self.set_package(pkg)
+            name = pkg["name"]
+            inline = pkg["inline"]
+            include_link = pkg["include_link"]
+            include_link_type = pkg["include_link_type"]
+
+            pkg = name
+            self.set_package(name)
 
             if("=" in theme_list):
                 theme = theme_list
