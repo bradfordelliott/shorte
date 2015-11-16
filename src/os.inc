@@ -8,6 +8,7 @@ echo       := echo
 mkdir      := mkdir
 archive    := tar -czf shorte.linux64.${version}.tar.gz *
 libdir     := libs/unix
+wait       := wait
 
 ifeq ("$(uname)", "Darwin")
     SHELL      := /bin/bash
@@ -48,6 +49,7 @@ ifeq ("$(uname)", "windows32")
 	mkdir      := gmkdir
 	archive    := zip -R shorte.win32.${version}.zip *
     libdir     := libs/win32
+    wait       := ${echo} "Waiting for completion"
 endif
 
 python:=python
