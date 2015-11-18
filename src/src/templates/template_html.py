@@ -3337,6 +3337,7 @@ $href_end
                 #print replace
                 #print "===================="
                 table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['|','!'])
+                self.inline_styling_match = True
                 return self.format_table(replace, table)
 
             # Embed an inline note. This is useful when documenting
@@ -3363,13 +3364,15 @@ $href_end
                     label = "Quote"
                     img = "note.png"
 
+                self.inline_styling_match = True
                 return self.format_note(textblock, label, img)
 
             elif(tag == "quote"):
                 textblock = textblock_t(replace)
+                self.inline_styling_match = True
                 return self.format_quote(textblock)
 
-
+        self.inline_styling_match = True
         return prefix + replace + postfix
 
 
@@ -3401,6 +3404,7 @@ $href_end
 
         # Replace any \n's with a <br>
         data = re.sub("\\\\n", "<br/>", data)
+        
 
         if(expand_equals_block):
             data = re.sub("===+", "<div class='hr'></div>", data)
@@ -3449,11 +3453,12 @@ $href_end
 
         # Convert any inline styling blocks
         expr = re.compile("@\{(.*?)\}", re.DOTALL)
+        self.inline_styling_match = False
         data = expr.sub(self.parse_inline_styling, data)
         
-        if(allow_wikify):
+        if(not self.inline_styling_match and allow_wikify):
             data = self.wikify(data)
-
+        
         return data
     
     def format_text_links(self, data):
@@ -4180,7 +4185,8 @@ $href_end
                         language,
                         tags,
                         convert_inline_styling=False,
-                        tag_line_numbers=True)
+                        tag_line_numbers=True,
+                        show_line_numbers=True)
 
         template = string.Template(self._load_template("index.html"))
 

@@ -1435,6 +1435,11 @@ class define_t(type_t):
         self.value = ""
         self.type = "define"
 
+    def has_value(self):
+        return True
+    def get_value(self):
+        return self.value
+
     def __str__(self):
         output = '''Define
   name:  %s

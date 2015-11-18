@@ -215,8 +215,8 @@ class template_t:
                 #        break
                 if(check_excluded):
                     if(excluded.has_key(word)):
-                        excluded_word = True
-
+                        exclude_word = True
+            
                 is_bookmark = False
 
                 if(not exclude_word):
