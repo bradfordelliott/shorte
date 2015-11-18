@@ -331,10 +331,10 @@ class indexer_t:
                 duplicate_headers = shorte_get_config("shorte", "duplicate_headers")
                 if(duplicate_headers == "error"):
                     ERROR("A topic with the name '%s' already exists in %s on line %d.\n"
-                          "Change the shorte.duplicate_headers to change this behavior." % (data, tag.file, tag.line))
+                          "You can disable this error by passing -s \"shorte.duplicate_headers=ignore;\" at the shorte command line." % (data, tag.file, tag.line))
                 elif(duplicate_headers == "warn"):
                     WARNING("A topic with the name '%s' already exists in %s on line %d.\n"
-                          "Change the shorte.duplicate_headers to change this behavior." % (data, tag.file, tag.line))
+                          "You can disable this warning by passing -s \"shorte.duplicate_headers=ignore;\" at the shorte command line." % (data, tag.file, tag.line))
 
 
             topics.append(topic)
