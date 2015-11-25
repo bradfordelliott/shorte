@@ -199,6 +199,7 @@ tests:
 	make test_registers
 	make test_comments
 	make test_classes
+	make test_class_parser
 	make test_code_execution
 	make test_gallery
 	make test_show_tags
@@ -328,9 +329,11 @@ test_clang_cygwin:
 	${python} -mtrace --trace shorte.py -f "examples/test.h" -t "${THEME}" -x clang -p "${html_pdf}" -o build-output/clang_c
 
 test_classes:
-	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args=-xc++" -t "${THEME}" -o build-output/class_parser -p "shorte"
-	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args=-xc++" -t "${THEME}" -o build-output/class_parser -p "html"
 	${python} shorte.py -f "examples/classes.tpl" -t "${THEME}" -o build-output/classes -p "html"
+
+test_class_parser:
+	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args.*=-xc++" -t "${THEME}" -o build-output/test_class_parser -p "shorte"
+	${python} shorte.py -f "examples/classes.cpp" -x clang -s "clang.args.*=-xc++" -t "${THEME}" -o build-output/test_class_parser -p "html"
 
 test_doxygen:
 	doxygen -s examples/doxy.cfg
@@ -538,6 +541,10 @@ test_wkpdf:
     # Can't currently specify the --output_file parameter here because the input to wkhtmltopdf will be wrong
 	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "wpdf" -o build-output/test_wkpdf/pdf_only
 	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "html+wpdf" --output_file="wkpdf.html" -o build-output/test_wkpdf/html_pdf
+
+test_docbook:
+	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "docbook" -o build-output/test_docbook
+
 
 # This target builds shorte as an executable that can be distributed
 # under Windows so that it is not necessary to re-distribute python

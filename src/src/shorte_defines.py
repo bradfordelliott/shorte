@@ -715,6 +715,7 @@ PACKAGE_TYPE_ODT         = "odt"
 PACKAGE_TYPE_WORD        = "word"
 PACKAGE_TYPE_PDF         = "pdf"
 PACKAGE_TYPE_WKPDF       = "wpdf"
+PACKAGE_TYPE_DOCBOOK     = "docbook"
 PACKAGE_TYPE_TEXT        = "txt"
 PACKAGE_TYPE_TWIKI       = "twiki"
 PACKAGE_TYPE_MEDIAWIKI   = "mediawiki"
@@ -983,11 +984,12 @@ def shorte_get_config(section, key, expand_os=False):
     # to append the OS to get the correct
     # path
     if(section == "paths" or True == expand_os):
-        if(platform.system() == "Linux"):
+        pname = platform.system()
+        if(pname == "Linux"):
             key += ".linux"
-        elif("CYGWIN" in platform.system()):
+        elif("CYGWIN" in pname):
             key += ".linux"
-        elif(platform.system() == "Darwin"):
+        elif(pname == "Darwin"):
             key += ".osx"
         else:
             key += ".win32"
@@ -1021,13 +1023,24 @@ def shorte_set_config(section, key, val):
     # to append the OS to get the correct
     # path
     if(section == "paths"):
-        if(platform.system == "Linux"):
+        pname = platform.system()
+        if(pname == "Linux"):
             key += ".linux"
+        elif(pname == "Darwin"):
+            key += ".osx"
         else:
             key += ".win32"
 
     #print "  %s.%s = %s" % (section, key, val)
-        
+
+    if(key.endswith("*")):
+        pname = platform.system()
+        if(pname == "Linux"):
+            key = key.replace("*", "linux")
+        elif(pname == "Darwin"):
+            key = key.replace("*", "osx")
+        else:
+            key = key.replace("*", "win32")
     g_config.set(section, key, val)
     #config.write(shorte_get_startup_path() + "/shorte.cfg")
 

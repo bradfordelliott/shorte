@@ -10,6 +10,13 @@ and " to ensure they get translated correctly in the PDF file.
 
 Make sure arrays[4] don't get hyperlinked.
 
+This is some inline pre text
+@{pre,
+This is some pre text
+that wraps across multiple
+lines
+}
+
 What about special characters in a like this: [[http://www.cortina-systems.com, link with <> and ' and "]].
 
 Text blocks can have tables declared in them with the following
@@ -59,6 +66,8 @@ int main(void)
 {
     return 0;
 }
+
+@h1 Another section
 
 @text
 With a new paragraph and some @{b,bold} text

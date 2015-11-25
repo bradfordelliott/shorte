@@ -17,6 +17,11 @@ This is a known issue with LibreOffice and is a harmless note echoed by a subcom
 Please see this bug for information on this issue.
 [[http://lists.freedesktop.org/archives/libreoffice-bugs/2015-July/289309.html]]
 
+@h3 Version 1.0.77 ()
+- Introduced docbook for PDF generation
+- Updated the clang parser to improve the class parsing in C++ files
+  like Qt.
+
 @h3 Version 1.0.76 (Nov 16, 2015)
 - Bug Fixes
     - More simplifications for the linux install process.

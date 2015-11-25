@@ -503,7 +503,182 @@ class clang_parser_t(shorte_parser_t):
         #tu = index.parse(source_file)
 
         return tu
+                            
+    def dump_cursor(self, cursor, prefix=""):
+        """This is a helper object that is used to print out a clang
+           cursor object into something readable for debugging purposes.
+
+           @param cursor [I] - The cursor to dump
+           @param prefix [I] - A prefix string to prefix to every line
+                               of output.
+
+           @return Ignored
+        """
+        print "%sCursor Object:" % prefix
+        print "%s==============" % prefix
+        try:
+            print "%s  kind:          [%s]" % (prefix, cursor.kind)
+            print "%s  displayname:   [%s]" % (prefix, cursor.displayname)
+            print "%s  spelling:      [%s]" % (prefix, cursor.spelling)
+            print ""
+            print "%s  semantic_parent" % prefix
+            print "%s    spelling:    [%s]" % (prefix, cursor.semantic_parent.spelling)
+            print "%s    displayname: [%s]" % (prefix, cursor.semantic_parent.displayname)
+            print ""
+            print "%s  lexical_parent" % prefix
+            print "%s    spelling:    [%s]" % (prefix, cursor.lexical_parent.spelling)
+            print "%s    displayname: [%s]" % (prefix, cursor.lexical_parent.displayname)
+            print ""
+            print "%s  location" % prefix
+            print "%s    file:        [%s]" % (prefix, cursor.location.file)
+            print "%s    line:        [%s]" % (prefix, cursor.location.line)
+
+            for child in cursor.get_children():
+                self.dump_cursor(child, prefix+"    ")
+
+        except Exception as e:
+            print e
+            FATAL("Failed dumping cursor")
+
+    def parse_prototype(self, object_name, comment, cursor):
+        """This method is used to parse a prototype definition
+           encounted when parsing the source C/C++ source code
+           file
+
+           @param object_name [I] - The prototype/function name
+           @param comment     [I] - The comment associated with the prototype. If it
+                                    None this method will attempt to query it from the
+                                    cursor.
+           @param cursor      [I] - The cursor object containing the prototype
+
+           @return The prototype object or None if it could not
+                   be parsed properly or had no documentation comment.
+        """
+
+        if(comment == None):
+            try:
+                comment = self.query_comment(cursor)
+            except Exception as e:
+                print e
+                FATAL("Failed querying comment")
+            except:
+                FATAL("Failed querying comment")
+
+        if(comment == None):
+            return None
+
+        prototype = prototype_t()
+        object_data = prototype
+        prototype.set_name(object_name)
+        prototype.set_returns(comment.returns)
+        prototype.set_description(comment.desc, textblock=False)
+        prototype.set_description(comment.description, textblock=True)
+
+        if(comment.has_pseudocode()):
+            prototype.set_pseudocode(
+                comment.get_pseudocode(),
+                self.m_engine.m_source_code_analyzer, "c")
+
+        prototype.set_see_also(comment.see_also)
+            
+        if(comment.has_since()):
+            prototype.set_since(textblock_t(comment.since))
+        if(comment.has_requirements()):
+            prototype.set_requirements(textblock_t(comment.get_requirements()))
+
+        prototype.set_private(comment.private)
+        prototype.set_deprecated(comment.deprecated)
+
+        prototype.set_line(cursor.location.line)
+        prototype.set_file(self.m_source_file)
+
+
+        #print '@prototype: language="c" file=%s line=%d' % (file, line)
+        #print '--function: %s' % cursor.spelling
+        #print "--prototype:"
+
+        ptype = ''
+        args = cursor.get_arguments()
         
+        arg_list = []
+        parameters = []
+        for arg in args:
+            arg_type = arg.type.spelling
+            if(arg_type.startswith("_Bool")):
+                arg_type = arg_type.replace("_Bool", "bool")
+            arg_name = arg.spelling
+            arg_list.append("%s %s" % (arg_type, arg_name))
+
+            #print "ARG.START = %d" % arg.extent.start.offset
+            #print "CODE: [%s]" % self.m_file_src[cursor.extent.start.offset:arg.extent.start.offset]
+            
+            acmt = self.query_comment_before(cursor.extent.start.offset, arg.extent.start.offset)
+            
+            param = param_t()
+
+            if(acmt != None):
+                desc = acmt.desc.strip()
+                matches = re.search('^(\[(.*?)\]\s*-\s*)', desc)
+                if(matches != None):
+                    io = matches.groups()[1]
+                    match = matches.groups()[0]
+                    desc = desc.replace(match, '')
+                    param.set_io(io)
+
+            param.set_name(arg_name)
+            param.set_type(arg_type)
+
+            if(acmt != None):
+                param.set_description(desc, textblock=False)
+                param.set_description(textblock_t(desc), textblock=True)
+
+            parameters.append(param)
+
+        prototype.set_params(parameters)
+
+        result_type = cursor.result_type.spelling
+        if(result_type.startswith("_Bool")):
+            result_type = result_type.replace("_Bool", "bool")
+
+        ptype = "    %s %s(" % (result_type, cursor.spelling) + ', '.join(arg_list) + ");"
+        prototype.set_prototype(ptype,
+                self.m_engine.m_source_code_analyzer, "c")
+
+        for param in comment.params:
+            data = comment.params[param]
+            name = param
+            io   = data.get_io()
+            #print data
+
+            for i in range(0, len(parameters)):
+                p = parameters[i]
+                if(p.name == name):
+                    p.set_description(data.get_description(False), textblock=False)
+                    p.set_description(data.get_description(True),  textblock=True)
+                    p.set_io(io)
+
+        prototype.validate_params()
+        
+        if(cursor.kind in (clang.cindex.CursorKind.CXX_METHOD, clang.cindex.CursorKind.CONSTRUCTOR)):
+            # Get the name of the class that this belongs to
+            #self.dump_cursor(cursor)
+            cname = cursor.semantic_parent.spelling
+            cls = self.m_engine.class_get(cname)
+            prototype.set_class(cls)
+            
+            # access_specifier is only available in newer versions of clang (> 3.4)
+            # so we'll trap the error here.
+            try:
+                access = cursor.access_specifier
+                prototype.set_access_spec(access)
+            except:
+                WARNING("This version of clang is too old, can't get access specifiers")
+
+            cls.prototype_add(prototype)
+            
+        return prototype
+        
+
     def parse_buffer_impl(self, page, path, top, tu):
 
         functions = {}
@@ -701,115 +876,9 @@ class clang_parser_t(shorte_parser_t):
                     elif(cursor.kind in (clang.cindex.CursorKind.FUNCTION_DECL,
                                          clang.cindex.CursorKind.CXX_METHOD,
                                          clang.cindex.CursorKind.CONSTRUCTOR)):
-
-                        prototype = prototype_t()
+                        
+                        prototype = self.parse_prototype(object_name, comment, cursor)
                         object_data = prototype
-                        prototype.set_name(object_name)
-                        prototype.set_returns(comment.returns)
-                        prototype.set_description(comment.desc, textblock=False)
-                        prototype.set_description(comment.description, textblock=True)
-
-
-                        if(comment.has_pseudocode()):
-                            prototype.set_pseudocode(
-                                comment.get_pseudocode(),
-                                self.m_engine.m_source_code_analyzer, "c")
-
-                        prototype.set_see_also(comment.see_also)
-                            
-                        if(comment.has_since()):
-                            prototype.set_since(textblock_t(comment.since))
-                        if(comment.has_requirements()):
-                            prototype.set_requirements(textblock_t(comment.get_requirements()))
-
-                        prototype.set_private(comment.private)
-                        prototype.set_deprecated(comment.deprecated)
-
-                        prototype.set_line(cursor.location.line)
-                        prototype.set_file(self.m_source_file)
-
-
-                        #print '@prototype: language="c" file=%s line=%d' % (file, line)
-                        #print '--function: %s' % cursor.spelling
-                        #print "--prototype:"
-
-                        ptype = ''
-                        args = cursor.get_arguments()
-                        
-                        arg_list = []
-                        parameters = []
-                        for arg in args:
-                            arg_type = arg.type.spelling
-                            if(arg_type.startswith("_Bool")):
-                                arg_type = arg_type.replace("_Bool", "bool")
-                            arg_name = arg.spelling
-                            arg_list.append("%s %s" % (arg_type, arg_name))
-
-                            #print "ARG.START = %d" % arg.extent.start.offset
-                            #print "CODE: [%s]" % self.m_file_src[cursor.extent.start.offset:arg.extent.start.offset]
-                            
-                            acmt = self.query_comment_before(cursor.extent.start.offset, arg.extent.start.offset)
-                            
-                            param = param_t()
-
-                            if(acmt != None):
-                                desc = acmt.desc.strip()
-                                matches = re.search('^(\[(.*?)\]\s*-\s*)', desc)
-                                if(matches != None):
-                                    io = matches.groups()[1]
-                                    match = matches.groups()[0]
-                                    desc = desc.replace(match, '')
-                                    param.set_io(io)
-
-                            param.set_name(arg_name)
-                            param.set_type(arg_type)
-
-                            if(acmt != None):
-                                param.set_description(desc, textblock=False)
-                                param.set_description(textblock_t(desc), textblock=True)
-
-                            parameters.append(param)
-
-                        prototype.set_params(parameters)
-
-                        result_type = cursor.result_type.spelling
-                        if(result_type.startswith("_Bool")):
-                            result_type = result_type.replace("_Bool", "bool")
-
-                        ptype = "    %s %s(" % (result_type, cursor.spelling) + ', '.join(arg_list) + ");"
-                        prototype.set_prototype(ptype,
-                                self.m_engine.m_source_code_analyzer, "c")
-
-                        for param in comment.params:
-                            data = comment.params[param]
-                            name = param
-                            io   = data.get_io()
-                            #print data
-
-                            for i in range(0, len(parameters)):
-                                p = parameters[i]
-                                if(p.name == name):
-                                    p.set_description(data.get_description(False), textblock=False)
-                                    p.set_description(data.get_description(True),  textblock=True)
-                                    p.set_io(io)
-
-                        prototype.validate_params()
-                        
-                        if(cursor.kind in (clang.cindex.CursorKind.CXX_METHOD, clang.cindex.CursorKind.CONSTRUCTOR)):
-                            # Get the name of the class that this belongs to
-                            cname = cursor.lexical_parent.displayname
-                            cls = self.m_engine.class_get(cname)
-                            prototype.set_class(cls)
-                            
-                            # access_specifier is only available in newer versions of clang (> 3.4)
-                            # so we'll trap the error here.
-                            try:
-                                access = cursor.access_specifier
-                                prototype.set_access_spec(access)
-                            except:
-                                WARNING("This version of clang is too old, can't get access specifiers")
-
-                            cls.prototype_add(prototype)
 
                         tag = tag_t()
                         tag.name = "prototype"
@@ -1098,6 +1167,15 @@ class clang_parser_t(shorte_parser_t):
                         if(comment.has_since()):
                             cls.set_since(textblock_t(comment.since))
 
+                        # Check to see if the class has children
+                        #self.dump_cursor(cursor)
+                        prototypes = []
+                        for child in cursor.get_children():
+                            if(child.kind == clang.cindex.CursorKind.CXX_METHOD):
+                                prototype = self.parse_prototype(object_name, None, child)
+                                if(prototype != None):
+                                    prototypes.append(prototype)
+
                         #print "@class: file=%s line=%d" % (file, line)
                         #print "--name: " , cursor.type.spelling
                         #print "--description:"
@@ -1111,8 +1189,16 @@ class clang_parser_t(shorte_parser_t):
                         tag.modifiers = {}
                         page["tags"].append(tag)
 
-                        pass
-    
+                        for prototype in prototypes:
+                            tag = tag_t()
+                            tag.name = "prototype"
+                            tag.contents = prototype
+                            tag.line = prototype.line
+                            tag.file = prototype.file
+                            tag.source = "" #prototype.source
+                            tag.modifiers = {}
+                            page["tags"].append(tag)
+
                     #print ''
                     if(comment.has_example()):
                         object_data.set_example(
