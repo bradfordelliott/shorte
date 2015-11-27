@@ -14,24 +14,31 @@ from src.parsers.shorte_parser import *
 
 import platform
 osname = platform.system().lower()
-# On Cygwin use the built-in clang libraries
-if("cygwin" in osname):
-    import clang.cindex
-# Otherwise use the one provided in the 3rdparty directory
-else:
-    #print "OSNAME: %s" % osname
-    if(osname == "darwin"):
-        osname = "osx"
-    elif("cygwin" in osname):
-        osname = "cygwin"
-    clang_path = os.path.normpath(shorte_get_startup_path() + '/3rdparty/clang/%s' % osname)
 
-    sys.path.insert(0, clang_path)
-    #WARNING("CLANG FILE:")
-    #print clang.__file__
-    #WARNING("CLANG_PATH: %s" % clang_path)
-    import clang.cindex
-    clang.cindex.Config.set_library_path(clang_path)
+clang_enabled = True
+# On Cygwin use the built-in clang libraries
+try:
+    if("cygwin" in osname):
+        import clang.cindex
+    # Otherwise use the one provided in the 3rdparty directory
+    else:
+        #print "OSNAME: %s" % osname
+        if(osname == "darwin"):
+            osname = "osx"
+        elif("cygwin" in osname):
+            osname = "cygwin"
+        clang_path = os.path.normpath(shorte_get_startup_path() + os.sep + "3rdparty" + os.sep + "clang" + os.sep + osname)
+    
+        sys.path.insert(0, clang_path)
+        #WARNING("CLANG FILE:")
+        #print clang.__file__
+        #WARNING("CLANG_PATH: %s" % clang_path)
+        import clang.cindex
+        clang.cindex.Config.set_library_path(clang_path)
+except:
+    WARNING("Clang plugin was not found or could not be loaded, source parsing will not function")
+    clang_enabled = False
+
 
 def get_rtokens(tu, extent):
     '''Helper method to return all tokens in an extent. This method could be
@@ -1158,6 +1165,39 @@ class clang_parser_t(shorte_parser_t):
         self.page["tags"].extend(tags)
 
     def parse_buffer(self, input, source_file):
+
+        if(not clang_enabled):
+            self.page = {}
+            self.page["title"] = source_file
+            self.page["tags"] = []
+            self.page["source_file"] = source_file
+            self.page["links"] = []
+            self.page["file_brief"]  = "Clang parser not enabled"
+            self.page["file_author"] = "Clang parser not enabled" 
+                        
+            tag = tag_t()
+            tag.name = "h1"
+            tag.contents = "Clang Parser could not be loaded"
+            tag.source = ""
+            tag.file = "N/A"
+            tag.line = 0
+            tag.modifiers = {}
+            
+            self.page["tags"].append(tag)
+            
+            tag = tag_t()
+            tag.name = "text"
+            tag.contents = textblock_t("There was an error loading the clang parser.")
+            tag.source = ""
+            tag.file = "N/A"
+            tag.line = 0
+            tag.modifiers = {}
+        
+            self.page["tags"].append(tag)
+            
+            self.m_pages.append(self.page)
+
+            return self.page
          
         self.m_source_file = source_file
 
