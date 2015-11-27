@@ -13,7 +13,12 @@ int test(void)
 
 
 /**
- * This is my example class
+ * This is my example class with an inline
+ * list:
+ *
+ * - one
+ *     - two
+ * - three
  */
 class my_class
 {
@@ -23,11 +28,31 @@ public:
 
     int func1(void);
 
-    /** This is func2 */
-    int func2(void);
+    /**
+     * This is func2
+     * 
+     * @param arg1 [I] - This is the first argument
+     *                   and it contains a nested list
+     *                   - a
+     *                       - b
+     *                   - c
+     *
+     * @return
+     *     It returns some random data
+     *     with a list
+     *     - one
+     *     - two
+     */
+    int func2(int arg1);
 
 private:
-    /** This is my private function */
+    /**
+     * This is my private function
+     *
+     * @private
+     *     Shorte can't always extract private methods properly
+     *     so need to manually mark it private for now.
+     */
     void priv_func1(void);
 
     /** Private member */

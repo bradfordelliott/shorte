@@ -1,0 +1,101 @@
+<!doctype html>
+
+<title>CodeMirror: Shorte mode</title>
+<meta charset="utf-8"/>
+<link rel=stylesheet href="../../doc/docs.css">
+
+<link rel="stylesheet" href="../../lib/codemirror.css">
+<script src="../../lib/codemirror.js"></script>
+<script src="../../addon/mode/simple.js"></script>
+<script src="shorte.js"></script>
+<style>.CodeMirror {border-top: 1px solid black; border-bottom: 1px solid black;}</style>
+<div id=nav>
+  <a href="http://codemirror.net"><h1>CodeMirror</h1><img id=logo src="../../doc/logo.png"></a>
+
+  <ul>
+    <li><a href="../../index.html">Home</a>
+    <li><a href="../../doc/manual.html">Manual</a>
+    <li><a href="https://github.com/codemirror/codemirror">Code</a>
+  </ul>
+  <ul>
+    <li><a href="../index.html">Language modes</a>
+    <li><a class=active href="#">Shorte</a>
+  </ul>
+</div>
+
+<article>
+<h2>Shorte mode</h2>
+<form><textarea id="code" name="code">
+@doc.title Document Title
+@doc.subtitle Document Subtitle
+@doc.revisions
+- Number | Date         | Author | Description
+- 1.0    | Nov 27, 2015 | BE     | First revision of the codemirror lexer for shorte
+
+@body
+# This is a comment regarding this heading
+# This is also a comment
+@h1 Heading 1
+Hello, this is some random data regarding this heading.
+
+@c: exec=1
+#include <stdio.h>
+#include <stdlib.h>
+int main(void)
+{
+    printf("Hello world!\n");
+    return EXIT_SUCCESS;
+}
+
+@text
+This is another code segment
+
+@c
+#include <stdio.h>
+#include <stdlib.h>
+int main(void)
+{
+    printf("Hello world!\n");
+    return EXIT_SUCCESS;
+}
+
+@h2 Heading 2
+This is a random paragraph here that contains some
+shorte text and a "string" with another 'string'
+
+@table
+- One   | Two
+- Three | Four
+
+@text: if="0"
+This is some @{b,bold} text with some more random
+data and another line of text
+
+@note
+This is a note.
+
+@define
+--name:
+MY_DEFINE
+--description:
+This is a description of my define
+
+
+<!--
+This is a block comment
+that contains multiple lines
+-->
+
+<?="This is a block of PHP like text"?>
+
+</textarea></form>
+    <script>
+      var editor = CodeMirror.fromTextArea(document.getElementById("code"), {
+        mode: "text/shorte",
+        matchBrackets: true
+      });
+    </script>
+
+    <p><strong>MIME types defined:</strong> <code>text/shorte</code>.</p>
+
+  </article>

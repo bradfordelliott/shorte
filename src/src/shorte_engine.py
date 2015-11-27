@@ -33,6 +33,7 @@ from src.templates.template_mediawiki import template_mediawiki_t
 from src.templates.template_revealjs import template_revealjs_t
 from src.templates.template_markdown import template_markdown_t
 from src.templates.template_wkpdf import template_wkpdf_t
+from src.templates.template_docbook import template_docbook_t
 
 class document_info_t:
     '''This class is used to manage the attributes associated
@@ -277,6 +278,13 @@ class engine_t:
 
     def get_date(self):
         return self.m_date
+
+    def get_year(self):
+        """This method returns the current year
+
+           @return The current year
+        """
+        return datetime.date.today().year + 1
 
     def get_output_dir(self):
         return self.m_output_directory
@@ -1482,6 +1490,8 @@ def exists(s):
                 template = template_odt_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_WKPDF):
                 template = template_wkpdf_t(self, indexer)
+            elif(pkg == PACKAGE_TYPE_DOCBOOK):
+                template = template_docbook_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_TEXT):
                 template = template_text_t(self, indexer)
             elif(pkg == PACKAGE_TYPE_TWIKI):

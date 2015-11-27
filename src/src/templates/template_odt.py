@@ -1069,7 +1069,7 @@ class template_odt_t(template_t):
 
         return xml
     
-    def format_object_construct(self, obj, construct, format_as_table_row=False, show_title=True):
+    def format_object_construct(self, obj, construct, format_as_table_row=False, show_title=True, col_span=4):
         xml = ''
         title = construct.title()
 
@@ -1105,6 +1105,10 @@ class template_odt_t(template_t):
                 style = self.m_styles["para"]["prototype"]["param"]
                 xml = '<text:p text:style-name="%s">%s</text:p>' % (style, self.format_text(obj.get_see_also()))
 
+        elif(construct == "value"):
+            if(obj.has_value()):
+                xml = self.format_textblock(obj.get_value())
+
         elif(construct == 'description'):
             if(obj.has_description()):
                 xml = self.format_textblock(obj.get_description())
@@ -1114,7 +1118,7 @@ class template_odt_t(template_t):
             if(show_title):
                 xml_title = string.Template('''
         <table:table-row table:style-name="${row_style}">
-          <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="4" office:value-type="string">
+          <table:table-cell table:style-name="${cell_style}" table:number-columns-spanned="${col_span}" office:value-type="string">
             <text:p text:style-name="${section_style}">${title}:</text:p>
           </table:table-cell>
           <table:covered-table-cell/>
@@ -1124,7 +1128,8 @@ class template_odt_t(template_t):
 ''').substitute({"row_style" : self.m_styles["table"]["row"]["prototype_section"],
                  "cell_style" : self.m_styles["table"]["cell"]["prototype_section"],
                  "section_style" : self.m_styles["table"]["cell"]["prototype_section_text"],
-                 "title" : title})
+                 "title" : title,
+                 "col_span" : col_span})
 
             xml = string.Template('''
         ${xml_title}
@@ -1296,6 +1301,7 @@ class template_odt_t(template_t):
                 output = "</text:p>"
                 output += self.format_pre(replace, "pre")
                 output += "<text:p text:style-name='shorte_standard'>"
+                self.inline_styling_match = True
                 return output
             # Indented code blocks using the @{code,...} syntax
             elif(tag == "code"):
@@ -1304,13 +1310,16 @@ class template_odt_t(template_t):
                 output = "</text:p>"
                 output += '''<text:p text:style-name="shorte_indented_code_block">%s</text:p>''' % (self.format_text(replace))
                 output += "<text:p text:style-name='shorte_standard'>"
+                self.inline_styling_match = True
                 return output
             elif(tag == "color"):
                 color = qualifier
                 self.m_styles_extra += self.create_style_color(color)
+                self.inline_styling_match = True
                 return "<text:span text:style-name=\"%s\">%s</text:span>" % ("shorte_span_color_%s" % color, replace)
             # Don't fully support span yet, need to figure out a way to support it
             elif(tag == "span"):
+                self.inline_styling_match = True
                 return "<text:span>%s</text:span>" % (replace)
             elif(tag in ("hl", "hilite", "highlight")):
                 prefix += "<text:span text:style-name=\"%s\">" % self.m_styles["highlight"]
@@ -1326,6 +1335,7 @@ class template_odt_t(template_t):
                 
             elif(tag in ("img", "image")):
                 xml = self.format_inline_image_str(replace)
+                self.inline_styling_match = True
                 return xml
                 
             elif(tag == "table"):
@@ -1344,6 +1354,7 @@ class template_odt_t(template_t):
                 xml += '''</draw:frame>'''
 
                 #xml += "<text:p text:style-name=\"shorte_standard\">"
+                self.inline_styling_match = True
                 return xml
 
             # Embed an inline note. This is useful when documenting
@@ -1372,6 +1383,7 @@ class template_odt_t(template_t):
                 xml += self.format_note(textblock, type=tag, label=label, image=img)
 
                 xml += "<text:p text:style-name=\"shorte_standard\">"
+                self.inline_styling_match = True
                 return xml
             elif(tag == "quote"):
                 textblock = textblock_t(replace)
@@ -1379,10 +1391,10 @@ class template_odt_t(template_t):
                 xml += self.format_quote(textblock, nest_level=0)
                 xml += "<text:p text:style-name=\"shorte_standard\">"
 
+                self.inline_styling_match = True
                 return xml
 
-
-
+        self.inline_styling_match = True
         return prefix + replace + postfix
 
     def xmlize(self, data):
@@ -1456,6 +1468,10 @@ class template_odt_t(template_t):
         #print "Text: [%s]" % data
         #allow_wikify=False
 
+        #print "INPUT TEXT: [%s]" % data
+        if(data == None):
+            return
+
         # Trim leading and trailing whitespace
         data = data.strip()
         #data = re.sub("->", "#", data)
@@ -1472,23 +1488,8 @@ class template_odt_t(template_t):
             #data = re.sub("==+", "<text:line-break/><text:span>========================</text:span>", data)
             data = re.sub("===+", "</text:p><text:p text:style-name='Horizontal_20_Line'/><text:p text:style-name='shorte_standard'>", data)
         
-        #data = data.replace("\n", " ")
-        
-        ## Hilite any text between **** **** 
-        #hiliter = re.compile("\*\*\*\*(.*?)\*\*\*\*", re.DOTALL)
-        #data = hiliter.sub("\\1", data)
-
-        ## Underline anything in <<<>>> brackets
-        #hiliter = re.compile("\<\<\<(.*?)\>\>\>", re.DOTALL)
-        #data = hiliter.sub("\\1", data)
-        
-
         # Collapse multiple spaces
         data = re.sub("  +", " ", data)
-        
-        # Now convert any [[[phrase]]] to highlighted text
-        #highlight = re.compile("\[\[\[(.*?)\]\]\]", re.DOTALL)
-        #data = highlight.sub("<w:rPr><w:b/><w:highlight w:val=\"yellow\"/></w:rPr><w:t>\\1</w:t></w:r><w:r><w:t>", data)
         
         # First convert any underlines
         underline = re.compile("__(.*?)__")
@@ -1507,6 +1508,7 @@ class template_odt_t(template_t):
         
         # Convert any inline styling blocks
         expr = re.compile("@\{(.*?)\}", re.DOTALL)
+        self.inline_styling_match = False
         data = expr.sub(self.parse_inline_styling, data)
         data = re.sub(' *<text:line-break/> *', '<text:line-break/>', data)
         
@@ -1516,7 +1518,9 @@ class template_odt_t(template_t):
         # Covert code between single backticks to an inline code block
         data = re.sub("`(.*?)`", "<text:span text:style-name='shorte_inline_code_span'>\\1</text:span>", data)
         
-        if(allow_wikify):
+        # If we had any inline styling hits then don't continue
+        # with wikification as it could result in nested wiki words
+        if(not self.inline_styling_match and allow_wikify):
             data = self.wikify(data)
         
         return data
@@ -1779,7 +1783,7 @@ class template_odt_t(template_t):
 
         return xml
 
-    def add_column_styles(self, widths, title):
+    def add_column_styles(self, widths, title, table_style=None):
         '''This method is used to create new custom column styles
            to be added to the custom stylesheet
 
@@ -1791,6 +1795,10 @@ class template_odt_t(template_t):
         total_width = 0
         for width in widths:
             total_width += width
+
+        if(table_style == None):
+            table_style = self.m_styles["table"]["style"]
+
         
         #print "Total width: %f" % total_width
 
@@ -1821,7 +1829,7 @@ class template_odt_t(template_t):
 <table:table table:name="shorte_table_%d" table:style-name="%s">
 %s
 %s
-''' % (self.m_table_id, self.m_styles["table"]["style"], output, title)
+''' % (self.m_table_id, table_style, output, title)
 
         return xml
 
@@ -1965,6 +1973,14 @@ class template_odt_t(template_t):
         return xml
     
     def format_define(self, tag):
+        """This method is called to format a #define macro into a block
+           of open office text.
+
+           @param self [I] - The class instance
+           @param tag  [I] - THe tag containing the define object
+
+           @return The XML defining the macro
+        """
 
         define = tag.contents
 
@@ -1974,46 +1990,38 @@ class template_odt_t(template_t):
         table.rows = []
         table.widths = [40,60]
         
+        # get the style information associated with the style name
+        table.table_style_name = "default"
+        
         name   = self.format_text(define.name)
         value  = define.value
         desc   = define.get_description(textblock=True)
+        
+        title = self.__table_format_title(table)
+        xml = '''
+<table:table table:name="shorte_table_%d" table:style-name="%s">
+<table:table-column table:style-name="%s"/>
+%s
+''' % (self.m_table_id, "shorte_table_prototype",
+       "shorte_struct_col1",
+       title)
+        self.m_table_id += 1
 
-        style = "shorte_table.normal.cell"
+        xml += self.format_object_construct(define, "description", True, show_title=False)
+        xml += self.format_object_construct(define, "value", True)
+        xml += self.format_object_construct(define, "example", True) 
+        xml += self.format_object_construct(define, "see", True) 
+        xml += self.format_object_construct(define, "since", True) 
+        xml += self.format_object_construct(define, "deprecated", True) 
+        xml += self.format_object_construct(define, "requires", True) 
+        
+        xml += "</table:table>"
+        
+        # Add a blank paragraph after the table so that tables don't run into
+        # one another. Should really style this so that it doesn't consume too much space
+        xml += "<text:p></text:p>"
 
-        cols = []
-        cols.append({"span":2, 'text': "Description:", "style": "shorte_table.header.cell", "text-style": self.m_styles["para"]["bold"]})
-        row = self._table_row()
-        row["cols"] = cols
-        table.rows.append(row)
-        
-        cols = []
-        cols.append({"span":2, 'textblock': desc, "style": style, "text-style": "shorte_indent_0"})
-        row = self._table_row()
-        row["cols"] = cols
-        table.rows.append(row)
-        
-        cols = []
-        cols.append({"span":2, 'text': "Value:", "style": "shorte_table.header.cell", "text-style": self.m_styles["para"]["bold"]})
-        row = self._table_row()
-        row["cols"] = cols
-        table.rows.append(row)
-        
-        cols = []
-        cols.append({"span":2, 'textblock': value, "style": style, "text-style": "shorte_indent_0"})
-        row = self._table_row()
-        row["cols"] = cols
-        table.rows.append(row)
-        
-        extra_rows = ''
-        
-        obj_see_also = self.format_object_construct(define, 'see', True)
-        if(len(obj_see_also) > 0):
-            extra_rows += obj_see_also
-        obj_since = self.format_object_construct(define, 'since', True)
-        if(len(obj_since) > 0):
-            extra_rows += obj_since
-
-        return self.__format_table("", table, True, table_style_name='shorte_table_prototype', extra_rows=extra_rows)
+        return xml
 
         
 
@@ -2152,115 +2160,94 @@ ${desc}
         
         if(shorte_get_config("shorte", "show_enum_values") == "1"):
             show_enum_vals = True
-            max_cols = enum.max_cols
+            col_span = enum.max_cols
         else:
             show_enum_vals = False
-            max_cols = enum.max_cols - 1
+            col_span = enum.max_cols - 1
 
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
         table = table_t()
         table.title = "Enum: " + enum.name
-        table.max_cols = enum.max_cols
-        table.table_style_name = style_name
+        table.max_cols = col_span
+        table.table_style_name = "default"
 
         title = self.__table_format_title(table)
         
         xml = ''
 
-        xml += self.format_textblock(enum.description)
 
         if(show_enum_vals):
             table.widths = [30,10,50]
 
-            xml += self.add_column_styles(table.get_widths(), title)
+            xml += self.add_column_styles(table.get_widths(), title, table_style="shorte_table_prototype")
+            xml += self.format_object_construct(enum, "description", True, show_title=False, col_span=col_span)
+            xml += self.format_object_section_title("Values")
+
             xml += '''<table:table-row>'''
-            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Enum")
-            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Value")
-            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
+            xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Enum")
+            xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Value")
+            xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Description")
             xml += "</table:table-row>\n"
 
         else:
             table.widths = [30,70]
-            xml += self.add_column_styles(table.get_widths(), title)
+            xml += self.add_column_styles(table.get_widths(), title, table_style="shorte_table_prototype")
+            xml += self.format_object_construct(enum, "description", True, show_title=False, col_span=col_span)
+            xml += self.format_object_section_title("Values")
 
             xml += '''<table:table-row>'''
-            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Enum")
-            xml += self.__format_table_cell({"span" : 1}, style, "is_header", "Description")
+            xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Enum")
+            xml += self.__format_table_cell({"span" : 1}, style, "code.header", "Description")
             xml += "</table:table-row>\n"
 
         self.m_table_id += 1
-
-        i = 0
         
+        i = 0
 
         for row in enum.values:
-            
-            # If this is the first row and it is a header
-            # then skip it as it is likely just the table
-            # header.
-            if(i == 0 and row["is_header"]):
-                i+=1
-                continue
-            
             xml += '''
     <table:table-row>
 '''
             col_index = 0
 
-            for col in row["cols"]:
+            if((i & 1) == 1):
+                theme = "code.cell"
+            else:
+                theme = "alternate.code.cell"
 
-                is_header = True
+            enum_name  = row["cols"][0]
+            enum_value = row["cols"][1]
+            enum_desc  = row["cols"][2]
 
-                # Normally we want to include the paragraph frame
-                # around the cell text. However, if the text is a textblock
-                # then we don't want to include this.
-                frame_paragraph = True
-            
-
-                # Don't attempt to wikify or format the acronym name. Instead
-                # create a link to it
-                if(col_index == 0):
-                    if(row["is_header"] or row["is_subheader"]):
-                        text = self.xmlize(col["text"])
-                    else:
-                        word = self.xmlize(col["text"])
-                        text = '''
+            # Create a link target from the enum name
+            word = self.xmlize(enum_name["text"])
+            enum_name = '''
 <text:bookmark-start text:name="%s"/>
     <text:a xlink:type="simple" xlink:href="" office:name="%s">%s</text:a>
 <text:bookmark-end text:name="%s"/>''' % (word, word, word, word)
-                        #text = '<a name="%s"></a>%s' % (col["text"], col["text"])
-                else:
-                    if(col.has_key("textblock")):
-                        text = self.format_textblock(col["textblock"])
-                        frame_paragraph = False
-                    else:
-                        text = self.format_text(col["text"])
 
-                if(col_index == 1 and (not show_enum_vals)):
-                    col_index += 1
-                    continue
+            enum_value = self.format_text(enum_value["text"])
+            enum_desc  = self.format_textblock(enum_desc["textblock"])
 
-                colspan = col["span"]
-                
-                if(row["is_header"]):
-                    xml += self.__format_table_cell(col, style, "is_header", text)
+            xml += self.__format_table_cell({"span" : 1}, style, theme, enum_name, frame_paragraph=True)
+            if(show_enum_vals):
+                xml += self.__format_table_cell({"span" : 1}, style, theme, enum_value, frame_paragraph=True)
+            xml += self.__format_table_cell({"span" : 1}, style, theme, enum_desc, frame_paragraph=False)
 
-                elif(row["is_subheader"]):
-                    xml += self.__format_table_cell(col, style, "is_subheader", text)
-                else:   
-                    xml += self.__format_table_cell(col, style, "default", text, frame_paragraph)
-
-                col_index += 1
-            
             xml += "</table:table-row>\n"
 
             i+=1
+        
+        xml += self.format_object_construct(enum, "example",    format_as_table_row=True, col_span=col_span) 
+        xml += self.format_object_construct(enum, "see",        format_as_table_row=True, col_span=col_span) 
+        xml += self.format_object_construct(enum, "since",      format_as_table_row=True, col_span=col_span) 
+        xml += self.format_object_construct(enum, "deprecated", format_as_table_row=True, col_span=col_span) 
+        xml += self.format_object_construct(enum, "requires",   format_as_table_row=True, col_span=col_span) 
 
         xml += "</table:table>"
-        
-        
+
         return xml
 
 
@@ -3021,12 +3008,15 @@ ${desc}
         function["style_col3"] = self.m_styles["table"]["columns"]["prototype"][3]
 
         # Format the description
+        #allow_wikify = self.m_wikify
+        #self.m_wikify = False
         function["desc"] = self.format_textblock(prototype2.get_description())
+        #self.m_wikify = allow_wikify
 
         if(prototype2.has_prototype()):
             language = prototype2.get_prototype().get_language()
             example  = prototype2.get_prototype().get_parsed()
-            function["prototype"] = self.format_source_code(language, example, wikiwords, False, False)
+            function["prototype"] = self.format_source_code(language=language, tags=example, exclude_wikiwords=wikiwords, show_line_numbers=False, show_frame=False)
 
         if(prototype2.has_params()):
             params = prototype2.get_params()
@@ -4061,7 +4051,8 @@ ${desc}
             path_output = path_input.replace("odt", "pdf")
             if(not os.path.exists(path_output)):
                 scratchdir = shorte_get_config("shorte", "scratchdir")
-                handle = open("%s/odt/content.xml" % scratchdir)
+                path_to_content_xml = "%s/odt/content.xml" % scratchdir
+                handle = open(path_to_content_xml)
                 content = handle.read()
                 handle.close()
 
@@ -4072,7 +4063,7 @@ ${desc}
                 except xml.parsers.expat.ExpatError as e:
                     error_string = e.__str__()
 
-                FATAL("Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n  [%s in content.xml]\n\n" % (path_output, error_string))
+                FATAL("Failed converting document to [%s], try manually opening the ODT file to see if there was a corruption\n\n  [%s in %s]\n\n" % (path_output, error_string, path_to_content_xml))
             
             return path_output
     
