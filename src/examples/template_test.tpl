@@ -58,13 +58,28 @@ This is an ordered list:
     - Three
 - Four
 
+@text
+This is a block of source code:
+
 @c
 int main(void)
 {
     printf("Hello world!\n");
 }
 
-@struct: name="my_struct" description="This is a description of my struct"
+@text
+Followed by a structure definition
+
+@struct: name="my_struct"
+-- description:
+    This is a description of my struct right here that
+    wraps across multiple lines and has a list in it
+
+    - one
+        - two
+    - three
+
+    and some additional data.
 -- fields:
 - Field | Name          | Description
 - 8x8   | serial_number | The serial number of the device
@@ -73,6 +88,9 @@ int main(void)
 - 4     | some_number   | Some random 4 byte number
 -- see:
 This is some other information about the structure here.
+
+@text
+And an enumeration
 
 @enum: name="e_loopback" description='''
 The loopback interface point
@@ -84,6 +102,8 @@ The loopback interface point
 - LOOPBK_DIGITAL_FAR_DATA  | 0x2        | Digital Far data loopback. Deprecated, replaced by CS4224_LOOPBK_DUPLEX_FAR_DATA
 - LOOPBK_DUPLEX_FAR_DATA   | 0x2        | Duplex Far data loopback
 
+@text
+And a function prototype
 
 @prototype: language="c"
 -- function: my_function()
@@ -157,17 +177,18 @@ The loopback interface point
 -- see also:
     THis is a test
 
+@text
+Finally we have a quote
 
 @quote
 This is a random quote from somebody. It might contain an embedded list:
 - one
   - two
     - three
--
 
 or perhaps even an embedded table:
 @{table,
-- One ! Two
+- One   ! Two
 - Three ! Four
 }
 

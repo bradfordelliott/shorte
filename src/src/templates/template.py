@@ -15,6 +15,11 @@ HEADING6 = 6
 class template_t:
    
     def __init__(self, engine, indexer):
+        """Constructor for the template object.
+
+           @param engine  [I] - The shorte engine instance
+           @param indexer [I] - The indexer used to track page numbers
+        """
         
         #print "Constructing template"
         
@@ -151,7 +156,34 @@ class template_t:
 
         return row
     
-    
+    def strip_redundant_blank_lines(self, cnts):
+        """This is a generic method that can be used to strip
+           redundant blank lines from a generated document.
+
+           @param cnts [I] - The buffer to search for redundant
+                             blank lines.
+
+           @return The return array with redundant blank lines removed.
+        """
+
+        # Strip any redundant blank lines that don't need to be part
+        # of the output document
+        lines = cnts.split("\n")
+        blank_line_count = 0
+        output = []
+        for line in lines:
+            if(len(line.strip()) == 0):
+                blank_line_count += 1
+                if(blank_line_count >= 2):
+                    continue
+            else:
+                blank_line_count = 0
+
+            output.append(line)
+
+        return "\n".join(output)
+
+
     def wikify(self, data, exclude = [], debug=False):
 
         if(not self.m_wikify):

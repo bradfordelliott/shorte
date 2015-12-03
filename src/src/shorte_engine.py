@@ -284,7 +284,7 @@ class engine_t:
 
            @return The current year
         """
-        return datetime.date.today().year + 1
+        return datetime.date.today().year
 
     def get_output_dir(self):
         return self.m_output_directory
@@ -1419,6 +1419,9 @@ def exists(s):
                 if("wpdf" in package_list):
                     include_link = True
                     include_link_type = "pdf"
+                elif("dpdf" in package_list):
+                    include_link = True
+                    include_link_type = "pdf"
                 elif("pdf" in package_list):
                     include_link = True
                     include_link_type = "pdf"
@@ -1435,6 +1438,9 @@ def exists(s):
                     include_link = True
                     include_link_type = "pdf"
                 elif("pdf" in package_list):
+                    include_link = True
+                    include_link_type = "pdf"
+                elif("dpdf" in package_list):
                     include_link = True
                     include_link_type = "pdf"
                 elif("txt" in package_list):
@@ -1462,6 +1468,10 @@ def exists(s):
             include_link_type = pkg["include_link_type"]
 
             pkg = name
+
+            if(pkg == "dpdf"):
+                pkg = PACKAGE_TYPE_DOCBOOK
+
             self.set_package(name)
 
             if("=" in theme_list):

@@ -630,6 +630,14 @@ onload onmouseup onmousedown onsubmit
                     tag = shorte_source_code_tag_t(TAG_TYPE_STRING, source[i:i+3])
                     tag.start = source[i:i+3]
                     i += 2
+
+                # Check for code segments
+                elif(source[i:i+3] == "```"):
+                    states.append(STATE_CODE_BLOCK)
+                    if(not tag.is_empty()):
+                        tags.append(tag)
+                    tag = shorte_source_code_tag_t(TAG_TYPE_STRING, source[i:i+3])
+                    i += 2
                 
                 # Treat " as a string in shorte
                 elif(source_lang == "shorte" and source[i] == '"'):
@@ -709,6 +717,17 @@ onload onmouseup onmousedown onsubmit
                     tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
                     states.pop()
 
+                else:
+                    tag.data += source[i]
+
+            elif(state == STATE_CODE_BLOCK):
+                if(source[i:i+3] == "```"):
+                    tag.data += source[i:i+3]
+                    tags.append(tag)
+                    i += 2 
+                    
+                    tag = shorte_source_code_tag_t(TAG_TYPE_CODE, '')
+                    states.pop()
                 else:
                     tag.data += source[i]
 

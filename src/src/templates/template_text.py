@@ -420,6 +420,8 @@ ${fields}+----------------------------------------------------------------------
             source += self.format_list_child(elem, 0, ordered, start)
             start += 1
 
+        source += "\n"
+
         return source
     
     
@@ -459,7 +461,7 @@ ${fields}+----------------------------------------------------------------------
                 output += self.format_list(text)
             else:
                 output += self.format_text(text)
-            output += "\n"
+            output += "\n\n"
 
         while(output.startswith("\n")):
             output = output[1:]
@@ -954,16 +956,10 @@ Table of Contents
         if(self.m_inline == True):
             cnts += "\n\n" + self.get_contents()
 
-        #contents = html.substitute(
-        #    {"title" : title,
-        #     "contents" : cnts,
-        #     "rightmenu" : "",
-        #     "src" : "",
-        #     "date" : datetime.date.today(),
-        #     "version" : version,
-        #     "css" : self.get_css()})
-        #
-        
+        # Strip any redundant blank lines that don't need to be part
+        # of the output document
+        cnts = self.strip_redundant_blank_lines(cnts)
+
         file = open(self.m_engine.m_output_directory + "/%s" % self.get_index_name(), "wt")
         file.write(cnts)
         file.close()

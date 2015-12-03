@@ -21,6 +21,13 @@ Please see this bug for information on this issue.
 - Introduced docbook for PDF generation
 - Updated the clang parser to improve the class parsing in C++ files
   like Qt.
+- Updated the markdown template to handle @define, @struct, @enum and @prototype
+  objects.
+- Bug Fixes
+    - Fixed the alignment of the x and y axis in line graphs
+    - Fixed the default colors for graphs
+    - Fixed the parsing of the ``` for code blocks in the source code parser
+    - Fixed the handling of """ and ''' for multi-line modifiers when parsing shorte files
 
 @h3 Version 1.0.76 (Nov 16, 2015)
 - Bug Fixes

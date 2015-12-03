@@ -561,12 +561,6 @@ class template_odt_t(template_t):
         <style:text-properties fo:color="#000000" style:font-name="Courier New" fo:font-size="9pt" style:font-size-asian="10pt" style:font-size-complex="9pt"/>
     </style:style>
     
-    <style:style style:name="shorte_para_pre" style:family="paragraph" style:parent-style-name="Standard">
-      <style:paragraph-properties fo:margin-top="0cm" fo:margin-left="0.25cm" fo:margin-bottom="0cm" style:shadow="none"/>
-        <style:text-properties fo:color="#000000" style:font-name="Courier New" fo:font-size="9pt" style:font-size-asian="10pt" style:font-size-complex="9pt"/>
-    </style:style>
-
-
     <style:style style:name="shorte_underline" style:family="text">
         <style:text-properties style:text-underline-style="solid" style:text-underline-width="auto" style:text-underline-color="font-color"/>
     </style:style>
@@ -2418,39 +2412,14 @@ ${desc}
     
     def format_pre(self, source, style="pre"):
 
-        # Trim any trailing blank lines
-        i = len(source) - 1
-        while(i >= 0):
-            if(source[i] == ' ' or
-               source[i] == '\n' or
-               source[i] == '\r'):
-                i -= 1
-            else:
-                break
-
-        end = i + 1
-        i = 0
-
-
         text = ''
 
-        #while i < end:
-        #    if(source[i] == "\n"):
-        #        #output += '</text:span></text:p><text:p text:style-name="%s"><text:span>' % (
-        #        #        self.m_styles["para"][style])
-        #        text += '<text:line-break/>'
-        #    else:
-        #        text += source[i]
-        #    i += 1
-        
         text = self.xmlize(source)
-        #text = source
         text = self.wikify(text)
         text = text.replace("\n", "<text:line-break/>")
         
-        output = '<text:p text:style-name="%s"><text:span text:style-name="%s">' % (
-                self.m_styles["para"][style],
-                self.m_styles["span"][style])
+        output = '<text:p text:style-name="%s"><text:span>' % (
+                self.m_styles["para"][style])
         output += text
         output += '</text:span>'
         output += '</text:p>'

@@ -474,7 +474,7 @@ class styles():
     def get_source_code_styles(self):
         return string.Template('''
     <!-- Source code styling -->
-    <style:style style:name="shorte_code3" style:family="paragraph" style:parent-style-name="Standard" style:master-page-name="">
+    <style:style style:name="shorte_code3" style:family="paragraph" style:parent-style-name="shorte_standard" style:master-page-name="">
         <style:paragraph-properties fo:margin-left="${code_indent}cm"
             fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" fo:line-height="100%" fo:text-indent="0cm"
             style:auto-text-indent="false" style:page-number="auto" fo:background-color="#f2f2f2" fo:keep-with-next="auto">
@@ -503,6 +503,12 @@ class styles():
     </style:style>
     <style:style style:name="code_keyword" style:display-name="code_keyword" style:family="text">
         <style:text-properties fo:color="#0000ff" style:font-name="${font_family}" fo:font-size="${font_size}" style:font-size-asian="${font_size}" style:font-size-complex="${font_size}"/>
+    </style:style>
+    
+    <!-- This style is used for formatting pre blocks -->
+    <style:style style:name="shorte_para_pre" style:family="paragraph" style:parent-style-name="shorte_standard_indented">
+      <style:paragraph-properties fo:margin-top="0cm" fo:margin-left="${code_indent}cm" fo:margin-bottom="0cm"/>
+        <style:text-properties style:font-name="Courier New" fo:font-size="9pt"/>
     </style:style>
     ''').substitute({"font_family" : "Courier New",
                      "font_size"   : "8.5pt",

@@ -5,12 +5,18 @@ from string import Template
 
 from src.shorte_defines import *
 from template_text import *
+import template_html
 
 class template_markdown_t(template_text_t):
     def __init__(self, engine, indexer):
         template_text_t.__init__(self, engine, indexer)
 
-        self.list_indent_per_level=2
+        # Instantiante the HTML template so that we can
+        # format advanced objects like structures in a pass-thru
+        # fashion
+        self.html_template = template_html.template_html_t(engine, indexer)
+        
+        self.list_indent_per_level=4
         self.m_contents = ''
     
     
@@ -50,11 +56,15 @@ class template_markdown_t(template_text_t):
                 prefix = "**"
                 postfix = "**"
             elif(tag in ("i", "italic")):
+                replace = replace.strip()
                 prefix = "*"
                 postfix = "*"
-
                 #, "pre", "u", "i", "color", "span", "cross", "strike", "hl", "hilite", "highlight", "done", "complete", "star", "starred")):
                 #pass
+            elif(tag == "pre"):
+                prefix = "\n\n\n```"
+                postfix = "```"
+
             elif(tag == "strike"):
                 prefix = "~~"
                 postfix = "~~"
@@ -67,6 +77,16 @@ class template_markdown_t(template_text_t):
                 output = output.replace("\n", "<br/>")
                 output = output.replace(" ", "&nbsp;")
                 return output
+
+            elif(tag == "quote"):
+                textblock = textblock_t(replace)
+                tag = tag_t()
+                tag.contents = textblock
+                return self.format_quote(tag)
+                #lines = replace.split("\n")
+                #prefix = "\\n"
+                #replace = "> ".join(lines)
+                #postfix = "\\n"
 
             ## Embed an inline note. This is useful when documenting
             ## source code.
@@ -90,6 +110,48 @@ class template_markdown_t(template_text_t):
 
         return prefix + replace + postfix
     
+    def format_define(self, tag):
+        html = self.html_template.format_define(tag)
+        return """
+        
+<div>
+%s
+</div>
+
+""" % (html)
+
+    def format_enum(self, tag):
+        html = self.html_template.format_enum(tag)
+        return """
+        
+<div>
+%s
+</div>
+
+""" % (html)
+
+    def format_prototype(self, tag):
+        prototype = tag.contents
+        html = self.html_template.format_prototype(tag)
+
+        return """
+
+<div>
+%s
+</div>
+
+""" % (html)
+
+    def format_struct(self, tag):
+        html = self.html_template.format_struct(tag)
+        return """
+
+<div>
+%s
+</div>
+
+""" % (html)
+    
     def format_text(self, data):
 
         if(data == None):
@@ -105,10 +167,14 @@ class template_markdown_t(template_text_t):
         data = expr.sub(self.parse_inline_styling, data)
 
         # Collapse multiple spaces
-        data = re.sub('\n+', "\n", data)
+        #data = re.sub('\n+', "\n", data)
         data = re.sub('<br/>', "\n", data)
         data = re.sub(" +", " ", data)
         data = re.sub("&nbsp;", " ", data)
+
+        # Escape < and >
+        #data = re.sub("<", "\\<", data)
+        #data = re.sub(">", "\\>", data)
 
         # Need to escape @ signs since they have special meaning
         # on github
@@ -165,6 +231,12 @@ class template_markdown_t(template_text_t):
             is_header = row["is_header"]
             is_subheader = row["is_subheader"]
             is_reserved = row["is_reserved"]
+            is_title     = False
+            if(row.has_key("is_title")):
+                is_title = row["is_title"]
+
+            if(is_title):
+                continue
 
             if(row["is_caption"]):
                 #html += "      Caption: %s\n" % (row["cols"][0])
@@ -178,7 +250,7 @@ class template_markdown_t(template_text_t):
                     txt = self.format_text(col["text"])
                     txt = txt.replace("\n", " ")
                     
-                    if(is_subheader):
+                    if(is_subheader or is_header):
                         cells.append(("%-" + "%d" % (col_widths[col_num] + 3) + "s") % (txt))
                     else:
                         cells.append((" %-" + "%d" % (col_widths[col_num] + 2) + "s") % (txt))
@@ -212,7 +284,54 @@ class template_markdown_t(template_text_t):
         #if("caption" in table):
         #    html += "      <tr class='caption'><td colspan='%d' class='caption' style='border:0px;text-align:center;'><b>Caption: %s</b></td></tr>\n" % (table["max_cols"], table["caption"])
         
+        html += "\n"
+
         return html
+
+    def format_note(self, tag):
+        content = "\n**%s:**\n\n" % tag.name.title()
+
+        lines = tag.source.split("\n")
+        for line in lines:
+            content += "> " + line + "\n"
+
+        content += "\n"
+
+        return content
+
+    def format_image(self, tag):
+        image = tag.contents
+
+        if(image.has_key("height") or image.has_key("width")):
+            (image,height,width) = self.m_engine.scale_image(image)
+
+        name = image["name"] + image["ext"]
+
+        caption = name
+        if(image.has_key("caption")):
+            caption = image["caption"]
+
+        src = os.path.realpath(image["src"])
+
+        content = "\n![%s](%s)\n\n" % (caption,src)
+
+        return content
+
+    def format_quote(self, tag):
+
+        output = "\n"
+
+        tblock = self.format_textblock(tag.contents)
+        
+        lines = tblock.split("\n")
+        for line in lines:
+            output += "> %s\n" % line
+
+        output += "\n"
+
+        return output
+
+
 
     def append_header(self, tag, file):
 
@@ -223,17 +342,17 @@ class template_markdown_t(template_text_t):
         label = data.strip()
 
         if(tag.name == "h1"):
-            tmp = '''# %s\n''' % label
+            tmp = '''# %s\n\n''' % label
         elif(tag.name == "h2"):
-            tmp = '''## %s\n''' % label
+            tmp = '''## %s\n\n''' % label
         elif(tag.name == "h3"):
-            tmp = '''### %s\n''' % label
+            tmp = '''### %s\n\n''' % label
         elif(tag.name == "h4"):
-            tmp = '''#### %s\n''' % label
+            tmp = '''#### %s\n\n''' % label
         elif(tag.name == "h5"):
-            tmp = '''##### %s\n''' % label
+            tmp = '''##### %s\n\n''' % label
         elif(tag.name in ("h","h6")):
-            tmp = '''###### %s\n''' % label
+            tmp = '''**%s**\n\n''' % label
 
         self.m_contents += tmp
     
@@ -254,22 +373,36 @@ class template_markdown_t(template_text_t):
 
         if(name == "#"):
             return
+        elif(name == "define"):
+            self.m_contents += self.format_define(tag)
+        elif(name == "enum"):
+            self.m_contents += self.format_enum(tag)
+        elif(name == "image"):
+            self.m_contents += self.format_image(tag)
+        elif(name in ("note", "tbd", "warning", "question")):
+            self.m_contents += self.format_note(tag)
+        elif(name == "ol"):
+            self.m_contents += self.format_list(tag.contents, True)
         elif(name in "p"):
             self.m_contents += self.format_text(tag.contents) + "\n\n"
+        elif(name == "prototype"):
+            self.m_contents += self.format_prototype(tag)
+        elif(name == "quote"):
+            self.m_contents += self.format_quote(tag)
+        elif(name == "struct"):
+            self.m_contents += self.format_struct(tag)
+        elif(name == "table"):
+            self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name == "text"):
             self.m_contents += self.format_textblock(tag)
         elif(name == "ul"):
             self.m_contents += self.format_list(tag.contents, False)
-        elif(name == "ol"):
-            self.m_contents += self.format_list(tag.contents, True)
-        elif(name == "table"):
-            self.m_contents += self.format_table(tag.source, tag.contents)
         else:
             WARNING("Unsupported tag %s" % name)
     
     def get_index_name(self):
         name = self.m_engine.get_document_name()
-        return "%s.markdown.txt" % name
+        return "%s.md" % name
 
     def generate_index(self, title, theme, version):
         
@@ -304,6 +437,10 @@ class template_markdown_t(template_text_t):
             cnts += "\n\n"
 
         cnts += self.get_contents()
+        
+        # Strip any redundant blank lines that don't need to be part
+        # of the output document
+        cnts = self.strip_redundant_blank_lines(cnts)
         
         file = open(self.m_engine.m_output_directory + "/%s" % self.get_index_name(), "wt")
         file.write(cnts)

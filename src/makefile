@@ -520,10 +520,14 @@ test_imagemap:
 	${python} shorte.py -f "examples/imagemap.tpl" -t ${THEME} -p ${html_pdf} -o build-output/imagemap
 
 test_markdown:
-	${python} shorte.py -f "examples/markdown.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_markdown
-
-test_markdown_parser:
-	${python} shorte.py -f "examples/example.markdown" -xmarkdown -t ${THEME} -p html -o build-output/test_markdown/parser
+#	${python} shorte.py -f "examples/markdown.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_markdown/shorte
+#	${python} shorte.py -f "examples/example.markdown" -xmarkdown -t ${THEME} -p html -o build-output/test_markdown/parser
+	${python} shorte.py -f examples/template_test.tpl -p "markdown" -o build-output/test_markdown/markdown.template
+	${python} shorte.py -f examples/template_test.tpl -p "html_inline" -o build-output/test_markdown/markdown.template
+	${python} shorte.py -f examples/template_test.tpl -p "txt" -o build-output/test_markdown/markdown.template
+	/opt/local/bin/pandoc -f markdown_github -t html5 build-output/test_markdown/markdown.template/template_tester.md -s -c markdown.css -o build-output/test_markdown/markdown.template/template_test.html
+	cp templates/markdown/markdown.css build-output/test_markdown/markdown.template/.
+#	${python} shorte.py -f examples/template_test.tpl -p "markdown" -o build-output/test_markdown/markdown.template
 
 test_document_header:
 	${python} shorte.py -f "examples/test_document_header.tpl" -t ${THEME} -p ${html_pdf} -o build-output/test_document_header
@@ -543,7 +547,15 @@ test_wkpdf:
 	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "html+wpdf" --output_file="wkpdf.html" -o build-output/test_wkpdf/html_pdf
 
 test_docbook:
-	${python} shorte.py -f "examples/textblocks.tpl" -t ${THEME} -p "docbook" -o build-output/test_docbook
+#	${python} shorte.py -f "examples/textblocks.tpl"    -t ${THEME} -p "html+dpdf" -o build-output/test_docbook/textblocks
+#	${python} shorte.py -f "examples/test_docbook.tpl"  -t ${THEME} -p "docbook" -o build-output/test_docbook/inphi
+#	${python} shorte.py -f "examples/api_reference.tpl" -t ${THEME} -p "html+dpdf" -o build-output/test_docbook/api_reference
+#	${python} shorte.py -f "examples/define.tpl" -t ${THEME} -p "html+dpdf" -o build-output/test_docbook/defines
+#	${python} shorte.py -f "examples/enums.tpl" -t ${THEME} -p "html+dpdf" -o build-output/test_docbook/enums
+	${python} shorte.py -f "examples/functions.tpl" -t ${THEME} -p "html+dpdf" -o build-output/test_docbook/functions
+#	${python} shorte.py -f "examples/test_docbook.tpl" -t ${THEME} -p html_inline -i c2html -o build-output/test_docbook
+#	${python} shorte.py -f "examples/test_docbook2.tpl" -t ${THEME} -p "docbook" -o build-output/test_docbook
+#	${python} shorte.py -f "examples/test_docbook2.tpl" -t ${THEME} -p "html_inline" --of="pamx_b0.html" -o build-output/test_docbook
 
 
 # This target builds shorte as an executable that can be distributed

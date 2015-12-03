@@ -86,10 +86,13 @@ class line_graph_t(graph_t):
                             font_size = 8,
                             text     = "%.2f" % label)
         
+        label = self.yaxis["label"]
+        (twidth, theight) = graph.text_extents(label)
+
         graph.draw_text(x = left - 60,
-                        y = top + (bottom - top)/2,
+                        y = top + (bottom - top)/2 + (twidth/2),
                         font_color = "#000000",
-                        text       = self.yaxis["label"],
+                        text       = label,
                         text_orientation = "vertical")
    
     def draw_xaxis(self):
@@ -157,11 +160,13 @@ class line_graph_t(graph_t):
                             text = label,
                             font_family="Helvetica")
 
-         
-        graph.draw_text(x = (left + (right - left)/2),
+        label = self.xaxis["label"]
+        (twidth, theight) = graph.text_extents(label)
+
+        graph.draw_text(x = (left + (right - left)/2) - (twidth/2) ,
                         y = bottom + 35,
                         font_color = "#000000",
-                        text       = self.xaxis["label"])
+                        text       = label)
     
     def draw_data(self):
         max_x = self.get_max_xcoordinate()

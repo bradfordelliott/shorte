@@ -1055,6 +1055,7 @@ STATE_MODIFIER = 6
 STATE_INLINE_STYLING = 7
 STATE_XMLCOMMENT = 8
 STATE_PREPROCESSOR = 9
+STATE_CODE_BLOCK   = 10
 
 def zipper(dir, zip_file):
     import zipfile, os
@@ -1370,12 +1371,11 @@ def shorte_parse_modifiers(modifiers):
                 #print "building tag: %s" % tag
         
         elif(state == STATE_TRIPLE_QUOTES):
-            FATAL("Ooops, can I ever get here?")
             if((modifiers[i:i+3] == start_sequence) and modifiers[i-1] != '\\'):
                 states.pop()
                 i += 2
             else:
-                string.append(modifers[i])
+                string.append(modifiers[i])
 
         elif(state == STATE_STRING):
             
@@ -1392,7 +1392,6 @@ def shorte_parse_modifiers(modifiers):
 
             
             if(modifiers[i:i+3] in ("'''", '"""')):
-                FATAL("Ooops, can I ever get here?")
                 states.append(STATE_TRIPLE_QUOTES)
                 start_sequence = modifiers[i:i+3]
                 i += 2

@@ -169,6 +169,7 @@ class shorte_parser_t(parser_t):
             "docauthor"       : True,
             "csource"         : True,
             "docrevisions"    : True,
+            "doc.revisions"   : True,
             "docversion"      : True,
             "doc.version"     : True,
             "docfilename"     : True,
@@ -384,6 +385,7 @@ class shorte_parser_t(parser_t):
         STATE_MCOMMENT   = 2
         STATE_MODIFIER   = 3
         STATE_MULTILINE_STRING = 4
+        STATE_MULTILINE_QUOTES = 5
 
         states = []
         states.append(STATE_NORMAL)
@@ -457,12 +459,25 @@ class shorte_parser_t(parser_t):
                 
                 if(input[i] == '\n'):
                     states.pop()
-                elif(input[i:i+3] == "'''"):
-                    #print "DO I GET HERE?"
-                    tag_modifier.append('"')
-                    states.append(STATE_MULTILINE_STRING )
+                elif(input[i:i+3] == '"""'):
+                    tag_modifier.append('"""')
+                    states.append(STATE_MULTILINE_QUOTES)
                     i = i + 3
                     continue
+                elif(input[i:i+3] == "'''"):
+                    tag_modifier.append("'''")
+                    states.append(STATE_MULTILINE_STRING)
+                    i = i + 3
+                    continue
+                else:
+                    tag_modifier.append(input[i])
+            
+            elif(state == STATE_MULTILINE_QUOTES):
+                if(input[i:i+3] == '"""'):
+                    states.pop()
+                    i = i + 2 
+                    #print "MODIFIER: [%s]" % tag_modifier
+                    tag_modifier.append('"""')
                 else:
                     tag_modifier.append(input[i])
 
@@ -470,8 +485,7 @@ class shorte_parser_t(parser_t):
                 if(input[i:i+3] == "'''"):
                     states.pop()
                     i = i + 2
-                    #print "MODIFIER: [%s]" % tag_modifier
-                    tag_modifier.append('"')
+                    tag_modifier.append("'''")
                 else:
                     tag_modifier.append(input[i])
 
@@ -1274,6 +1288,19 @@ a C/C++ like define that looks like:
             frame = to_boolean(modifiers["frame"]) 
         if(modifiers.has_key("filled")):
             filled = to_boolean(modifiers["filled"])
+
+
+        caption = ""
+        if(modifiers.has_key("caption")):
+            caption = modifiers["caption"]
+        
+        xaxis_title = "X-Axis"
+        yaxis_title = "Y-Axis"
+
+        if(modifiers.has_key("xaxis_title")):
+            xaxis_title = modifiers["xaxis_title"]
+        if(modifiers.has_key("xaxis_title")):
+            yaxis_title = modifiers["yaxis_title"]
         
         for section in sections:
 
@@ -1298,19 +1325,23 @@ a C/C++ like define that looks like:
                 #        y = float(parts[1])
                 #        image["data"][x] = y
 
+            elif(section.startswith("caption:")):
+                caption = section[8,len(section)]
+                caption = caption.strip()
+
         if(graph_type == "line"):
             import src.graphing.linegraph as linegraph
             graph = linegraph.line_graph_t(width,height,bg_color,bg_color)
             graph.set_title(title, subtitle)
-            graph.set_xaxis("X-Axis", "red", 0, max_x, 1)
-            graph.set_yaxis("Y-Axis", "red", 0, max_y, 1)
+            graph.set_xaxis(xaxis_title, "red", 0, max_x, 1)
+            graph.set_yaxis(yaxis_title, "red", 0, max_y, 1)
             graph.set_filled(filled)
         elif(graph_type == "bar"):
             import src.graphing.bargraph as bargraph
             graph = bargraph.bar_graph_t(width,height,bg_color,bg_color)
             graph.set_title(title, subtitle)
-            graph.set_xaxis("X-Axis", "red", 0, max_x, 1)
-            graph.set_yaxis("Y-Axis", "red", 0, max_y, 1)
+            graph.set_xaxis(xaxis_title, "red", 0, max_x, 1)
+            graph.set_yaxis(yaxis_title, "red", 0, max_y, 1)
         elif(graph_type == "pie"):
             import src.graphing.piegraph as piegraph
             graph = piegraph.pie_graph_t(width,height,bg_color,bg_color)
@@ -1323,8 +1354,8 @@ a C/C++ like define that looks like:
             import src.graphing.timeline as timeline
             graph = timeline.timeline_graph_t(width,height)
             graph.set_title(title, subtitle)
-            graph.set_xaxis("X-Axis", "red", 0, 10, 1)
-            graph.set_yaxis("Y-Axis", "red", 0, 10, 1)
+            graph.set_xaxis(xaxis_title, "red", 0, 10, 1)
+            graph.set_yaxis(yaxis_title, "red", 0, 10, 1)
 
         graph.show_frame(frame)
             
@@ -1335,7 +1366,7 @@ a C/C++ like define that looks like:
         image["name"] = image["name"]
         image["ext"] = ".png"
         image["src"] = scratchdir + "/" + image["name"] + image["ext"]
-        image["caption"] = "This is a random caption"
+        image["caption"] = caption
         
         graph.draw_graph(image["src"])
         self.m_engine.m_images.append(image["src"])

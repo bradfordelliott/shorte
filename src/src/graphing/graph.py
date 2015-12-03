@@ -664,11 +664,10 @@ class graph_t:
         
         # The standard color map
         self.m_colors = []
-        self.m_colors.append("#FF0000")
-        self.m_colors.append("#00FF00")
-        self.m_colors.append("#0000FF")
-        self.m_colors.append("#FF00FF")
-        self.m_colors.append("#FFFF00")
+        self.m_colors.append("#FF0000") # red
+        self.m_colors.append("#00FF00") # green
+        self.m_colors.append("#0000FF") # blue
+        self.m_colors.append("#FF00FF") # purple
         self.m_colors.append("#00FFFF")
         self.m_colors.append("#22FF98")
         self.m_colors.append("#008080") # teal
@@ -695,6 +694,7 @@ class graph_t:
         self.m_colors.append("#FF0000")
         self.m_colors.append("#00FF00")
         self.m_colors.append("#0000FF")
+        self.m_colors.append("#FFFF00") 
 
         self.m_legend_title = "Legend:"
 

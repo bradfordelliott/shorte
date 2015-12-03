@@ -4,12 +4,12 @@
 @docfilename blah_blah
 
 @docrevisions
-- Version | Date           | Description
-- 1.0     | 04 March, 2011 | Blah blah blah, this is something here describing the revision
-- 1.4.0   | 05 March, 2011 | Something else
-- 1.4.4   | 06 March, 2011 | This is a really long description of the version
-                             change here and what changed in the document. It doesn't
-                             match the format of the document but whatever.
+- Version | Date           | Author | Description
+- 1.0     | 04 March, 2011 | BE     | Blah blah blah, this is something here describing the revision
+- 1.4.0   | 05 March, 2011 | BE     | Something else
+- 1.4.4   | 06 March, 2011 | BE     | This is a really long description of the version
+                                      change here and what changed in the document. It doesn't
+                                      match the format of the document but whatever.
 
 @include "examples/snippet_templates.tpl"
 

@@ -30,7 +30,7 @@
     }
 
 --value:
-  1
+  (xx < 10) && yy
 --since:
   Introduced in release 1.0
 --see:
