@@ -30,8 +30,8 @@ class custom_styles(docbook_styles):
     <productnumber>${doc_number}</productnumber>
     ${revision_history}
     <mediaobject>
-      <imageobject space-before.minimum="2in" space-after.minumum="4in">
-        <imagedata fileref="${logo}" space-before.minumum="2in" width="4in" format="PNG"/>
+      <imageobject>
+        <imagedata fileref="${logo}" width="5in" format="PNG"/>
       </imageobject>
     </mediaobject>
 </bookinfo>

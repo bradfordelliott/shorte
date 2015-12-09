@@ -1,5 +1,9 @@
-@doctitle Table Tests
-@docsubtitle Test Cases
+@doc.title Table Tests
+@doc.subtitle Test Cases
+
+@doc.revisions
+- Version | Date         | Author | Description
+- 0.1     | Dec 6, 2015  | BE     | Random description
 
 @body
 @h1: wikiword=TestHeader

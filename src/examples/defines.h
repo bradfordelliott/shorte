@@ -32,8 +32,21 @@
  * This define has a couple of characters
  * like & and < that should be escaped if
  * things work correctly.
+ *
+ * This is a new paragraph in the define and
+ * it contains a list:
+ *
+ * - One
+ *     - Two
+ * 
+ * And another line.
+ *
+ * @{note, This is a nested note
+ *         with some information inside it.}
  */
-#define DEFINE_WITH_SPECIAL_CHARS ((1 << 23) & 0xFF)
+#define DEFINE_WITH_SPECIAL_CHARS ((1 << 23) \
+    & 0xFF \
+    || 0x2)
 
 /**
  * A private define

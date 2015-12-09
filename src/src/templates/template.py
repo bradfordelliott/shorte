@@ -1,4 +1,6 @@
 # -*- coding: iso-8859-15 -*-
+"""This is the base class for all output templates"""
+
 import os
 import re
 import string
@@ -12,7 +14,9 @@ HEADING4 = 4
 HEADING5 = 5
 HEADING6 = 6
 
-class template_t:
+class template_t(object):
+    """The base class template. All other output templates
+       are derived from this class"""
    
     def __init__(self, engine, indexer):
         """Constructor for the template object.
@@ -47,6 +51,159 @@ class template_t:
 
     def allow_wikify_comments(self):
         return self.m_wikify_comments
+    
+    def format_links(self, data):
+        """This method is called from format_text() to format shorte or
+           markdown links
+
+           @param data [I] - The text to parse to replace links.
+
+           @return The formatted string with links replaced.
+        """
+
+        output = ""
+        start = 0
+        end = len(data)
+
+        STATE_NORMAL = 0
+        STATE_HYPERLINK = 1
+        STATE_SHORTE_LINK = 2
+        STATE_MARKDOWN_LINK = 3
+        STATE_MARKDOWN_IMAGE = 4
+        STATE_OPEN_BRACKET = 5
+
+        states = []
+        states.append(STATE_NORMAL)
+
+        i = start
+        output = ""
+
+        replacement = "" 
+
+        while(i < end):
+            state = states[-1]
+
+            segment = data[i:i+8]
+
+            #print "STATE: %d" % state
+            #print "segment: [%s]" % segment
+
+            if(state == STATE_NORMAL):
+                if(data[i:i+2] == "[["):
+                    replacement = ""
+                    states.append(STATE_SHORTE_LINK)
+                    i += 2
+                elif(data[i] == "["):
+                    replacement = "["
+                    states.append(STATE_OPEN_BRACKET)
+                    i += 1
+                elif(data[i:i+2] == "!["):
+                    replacement = "!["
+                    states.append(STATE_OPEN_BRACKET)
+                    i += 2
+                elif(segment.startswith("http://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+7]
+                    i += 7
+                elif(segment.startswith("https://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+8]
+                    i += 8
+                elif(segment.startswith("mailto://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+9]
+                    i += 9
+                elif(segment.startswith("ftp://")):
+                    states.append(STATE_HYPERLINK)
+                    replacement = data[i:i+6]
+                    i += 6
+                else:
+                    output += data[i]
+                    i += 1
+
+            elif(state == STATE_HYPERLINK):
+
+                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=", "+")):
+                    replacement += data[i]
+                else:
+                    if(replacement.endswith(".")):
+                        replacement = replacement[0:-1]
+                        output += self.format_link(replacement, replacement) + "."
+                    else:
+                        output += self.format_link(replacement, replacement)
+                    replacement = ""
+
+                    states.pop()
+                    output += data[i]
+
+                i += 1
+
+            elif(state == STATE_SHORTE_LINK):
+                if(data[i:i+2] == "]]"):
+                    if("," in replacement):
+                        parts = replacement.split(",")
+                        output += self.format_link(parts[0], parts[1])
+                    else:
+                        output += self.format_link(replacement, replacement)
+                    replacement = ""
+                    i += 2
+                    states.pop()
+                else:
+                    replacement += data[i]
+                    i += 1
+
+            elif(state == STATE_OPEN_BRACKET):
+                if(data[i] == "]"):
+                    states.pop()
+                    if(data[i:i+2] == "]("):
+                        i += 1
+                        url = ""
+                        if(replacement.startswith("![")):
+                            states.append(STATE_MARKDOWN_IMAGE)
+                            label = replacement[2:]
+                        else:
+                            states.append(STATE_MARKDOWN_LINK)
+                            label = replacement[1:]
+                        replacement = ""
+                    else:
+                        replacement += data[i]
+                        output += replacement
+                        replacement = ""
+                else:
+                    replacement += data[i]
+
+                i += 1
+
+            elif(state == STATE_MARKDOWN_LINK):
+                if(data[i] == ")"):
+                    output += self.format_link(url, label)
+                    states.pop()
+                else:
+                    url += data[i]
+
+                i += 1
+            
+            elif(state == STATE_MARKDOWN_IMAGE):
+                if(data[i] == ")"):
+                    tag = {}
+                    tag["src"] = url
+                    tag["caption"] = label
+                    image = self.m_engine.m_parser.parse_image(tag)
+                    output += self.format_image(image)
+                    states.pop()
+                else:
+                    url += data[i]
+
+                i += 1
+
+        if(replacement != ""):
+            if(replacement.endswith(".")):
+                replacement = replacement[0:-1]
+                output += self.format_link(replacement, replacement) + "."
+            else:
+                output += self.format_link(replacement, replacement)
+
+        return output
     
     def format_python(self, input_source, modifiers):
         self.m_contents += ""
@@ -280,7 +437,6 @@ class template_t:
                     output += word
 
         return output
-
 
     def xmlize(self, data):
 

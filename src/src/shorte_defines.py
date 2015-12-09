@@ -198,6 +198,9 @@ def shorte_get_startup_path():
 
     return g_startup_path
 
+def shorte_get_startup_dir():
+    return shorte_get_startup_path()
+
 def shorte_get_scratch_path():
     scratch_dir = shorte_get_config("shorte", "scratchdir")
     scratch_dir = os.path.abspath(scratch_dir)
@@ -206,6 +209,9 @@ def shorte_get_scratch_path():
         os.mkdir(scratch_dir)
 
     return scratch_dir
+
+def shorte_get_scratch_dir():
+    return shorte_get_scratch_path()
 
 
 def shorte_get_tool_path(tool):
@@ -763,6 +769,12 @@ def trim_leading_blank_lines(source):
 
     # Find the index of the last non-blank line
     end = len(lines)-1
+
+    for i in xrange(end, start, -1):
+        tmp = lines[i].strip()
+        if(tmp != ""):
+            break
+        end -= 1
 
     #print "End = %d" % end
 

@@ -3429,7 +3429,7 @@ ${desc}
         elif(name == "class"):
             WARNING("Classes not supported in OTD documents yet")
         # These tags are not supported in OTD documents
-        elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns", "gallery", "quote")):
+        elif(name in ("imagemap", "embed", "input", "columns", "column", "endcolumns", "gallery", "quote", "vl")):
             #print "WARNING: %s tag not supported in ODT documents" % name
             pass
         else:

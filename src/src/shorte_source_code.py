@@ -827,6 +827,8 @@ class type_t:
         return False
     def has_params(self):
         return False
+    def has_prototype(self):
+        return False
 
     def get_name(self):
         return self.name

@@ -330,7 +330,16 @@ class template_markdown_t(template_text_t):
         output += "\n"
 
         return output
+            
+    def format_variable_list(self, tag):
+        html = self.html_template.format_variable_list(tag)
+        return """
 
+<div>
+%s
+</div>
+
+""" % html
 
 
     def append_header(self, tag, file):
@@ -397,6 +406,8 @@ class template_markdown_t(template_text_t):
             self.m_contents += self.format_textblock(tag)
         elif(name == "ul"):
             self.m_contents += self.format_list(tag.contents, False)
+        elif(name == "vl"):
+            self.m_contents += self.format_variable_list(tag)
         else:
             WARNING("Unsupported tag %s" % name)
     

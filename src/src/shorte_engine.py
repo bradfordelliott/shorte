@@ -52,6 +52,10 @@ class document_info_t:
         self.m_footer_subtitle = None
         self.m_templates = {}
 
+        # The document status used to mark a document as 'draft',
+        # 'review', 'final'
+        self.m_status = None
+
     def version(self):
         if(self.m_docversion == None):
             return "N/A"
@@ -135,6 +139,15 @@ class document_info_t:
 
     def get_template(self, key):
         return self.m_templates[key]
+
+    def set_status(self, status):
+        self.m_status = status
+    def has_status(self):
+        if(self.m_status != None):
+            return True
+        return False
+    def get_status(self):
+        return self.m_status
 
 
 #+------------------------------------------------------------------------------

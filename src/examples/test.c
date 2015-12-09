@@ -213,6 +213,8 @@ typedef struct
  *
  * Some @{i, italic text} and some @{b, bold text}.
  *
+ * This note doesn't work properly:
+ *
  * @{note,
  *     This should be a note
  *     with a list inside of it but it probably doesn't
@@ -221,6 +223,18 @@ typedef struct
  *     - one
  *     - two
  *     - three
+ * }
+ *
+ * This note does work properly:
+ *
+ * @{note,
+ * This should be a note
+ * with a list inside of it but it probably doesn't
+ * work.
+ * 
+ * - one
+ * - two
+ * - three
  * }
  */
 typedef enum

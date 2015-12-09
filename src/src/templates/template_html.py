@@ -1,18 +1,9 @@
 # -*- coding: iso-8859-15 -*-
-#+----------------------------------------------------------------------------
-#|
-#| SCRIPT:
-#|   html_template.py
-#|
-#| DESCRIPTION:
-#|   This module contains the definition of a template class that is used
-#|   to generate HTML documents from a Shorte template.
-#|
-#+----------------------------------------------------------------------------
-#|
-#| Copyright (c) 2010 Brad Elliott
-#|
-#+----------------------------------------------------------------------------
+"""
+This module contains the definition of a template class that is used
+to generate HTML documents from a Shorte template.
+"""
+
 import re
 import os
 import string
@@ -653,7 +644,7 @@ class template_html_t(template_t):
                     #output += '<span>%s</span>' % source
                     output += '%s' % source
             elif(type in (TAG_TYPE_COMMENT, TAG_TYPE_MCOMMENT, TAG_TYPE_XMLCOMMENT)):
-                source = self._format_links(source)
+                source = self.format_links(source)
                 
                 # Convert any doxygen tags
                 source = re.sub("(@[^ \t\n]+)", "<span class='cmttg'>\\1</span>", source)
@@ -664,7 +655,7 @@ class template_html_t(template_t):
                 output += '<span class="cmt">%s</span>' % source
 
             elif(type == TAG_TYPE_PREPROCESSOR):
-                source = self._format_links(source)
+                source = self.format_links(source)
                 if(self.allow_wikify_comments()):
                     source = self.wikify(source, exclude_wikiwords)
                 output += '<span class="def">%s</span>' % source
@@ -1697,8 +1688,6 @@ within an HTML document.
         else:
             textblock = tag
 
-        #print textblock
-
         html = ''
 
         if(isinstance(textblock, textblock_t)):
@@ -2501,153 +2490,11 @@ within an HTML document.
         (source, label, external) = self._process_link(matches)
 
         return "<a name='%s'>%s</a>" % (source, label)
+                        
     
-    def _format_links(self, data):
-
-        output = ""
-        start = 0
-        end = len(data)
-
-        STATE_NORMAL = 0
-        STATE_HYPERLINK = 1
-        STATE_SHORTE_LINK = 2
-        STATE_MARKDOWN_LINK = 3
-        STATE_MARKDOWN_IMAGE = 4
-        STATE_OPEN_BRACKET = 5
-
-        states = []
-        states.append(STATE_NORMAL)
-
-        i = start
-        output = ""
-
-        replacement = "" 
-
-        while(i < end):
-            state = states[-1]
-
-            segment = data[i:i+8]
-
-            #print "STATE: %d" % state
-            #print "segment: [%s]" % segment
-
-            if(state == STATE_NORMAL):
-                if(data[i:i+2] == "[["):
-                    replacement = ""
-                    states.append(STATE_SHORTE_LINK)
-                    i += 2
-                elif(data[i] == "["):
-                    replacement = "["
-                    states.append(STATE_OPEN_BRACKET)
-                    i += 1
-                elif(data[i:i+2] == "!["):
-                    replacement = "!["
-                    states.append(STATE_OPEN_BRACKET)
-                    i += 2
-                elif(segment.startswith("http://")):
-                    states.append(STATE_HYPERLINK)
-                    replacement = data[i:i+7]
-                    i += 7
-                elif(segment.startswith("https://")):
-                    states.append(STATE_HYPERLINK)
-                    replacement = data[i:i+8]
-                    i += 8
-                elif(segment.startswith("mailto://")):
-                    states.append(STATE_HYPERLINK)
-                    replacement = data[i:i+9]
-                    i += 9
-                elif(segment.startswith("ftp://")):
-                    states.append(STATE_HYPERLINK)
-                    replacement = data[i:i+6]
-                    i += 6
-                else:
-                    output += data[i]
-                    i += 1
-
-            elif(state == STATE_HYPERLINK):
-
-                if(data[i].isalpha() or data[i].isdigit() or data[i] in ("-", "%", ".", "_", "/", "?", "=", "+")):
-                    replacement += data[i]
-                else:
-                    if(replacement.endswith(".")):
-                        replacement = replacement[0:-1]
-                        output += "<a href='%s'>%s</a>." % (replacement, replacement)
-                    else:
-                        output += "<a href='%s'>%s</a>" % (replacement, replacement) 
-                    replacement = ""
-
-                    states.pop()
-                    output += data[i]
-
-                i += 1
-
-            elif(state == STATE_SHORTE_LINK):
-                if(data[i:i+2] == "]]"):
-                    if("," in replacement):
-                        parts = replacement.split(",")
-                        output += "<a href='%s'>%s</a>" % (parts[0], parts[1])
-                    else:
-                        output += "<a href='%s'>%s</a>" % (replacement, replacement)
-                    replacement = ""
-                    i += 2
-                    states.pop()
-                else:
-                    replacement += data[i]
-                    i += 1
-
-            elif(state == STATE_OPEN_BRACKET):
-                if(data[i] == "]"):
-                    states.pop()
-                    if(data[i:i+2] == "]("):
-                        i += 1
-                        url = ""
-                        if(replacement.startswith("![")):
-                            states.append(STATE_MARKDOWN_IMAGE)
-                            label = replacement[2:-1]
-                        else:
-                            states.append(STATE_MARKDOWN_LINK)
-                            label = replacement[1:-1]
-                        replacement = ""
-                    else:
-                        replacement += data[i]
-                        output += replacement
-                        replacement = ""
-                else:
-                    replacement += data[i]
-
-                i += 1
-
-            elif(state == STATE_MARKDOWN_LINK):
-                if(data[i] == ")"):
-                    output += "<a href='%s'>%s</a>" % (url, label)
-                    states.pop()
-                else:
-                    url += data[i]
-
-                i += 1
-            
-            elif(state == STATE_MARKDOWN_IMAGE):
-                if(data[i] == ")"):
-                    tag = {}
-                    tag["src"] = url
-                    tag["caption"] = label
-                    image = self.m_engine.m_parser.parse_image(tag)
-                    output += self.format_image(image)
-                    states.pop()
-                else:
-                    url += data[i]
-
-                i += 1
-
-        if(replacement != ""):
-            if(replacement.endswith(".")):
-                replacement = replacement[0:-1]
-                output += "<a href='%s'>%s</a>." % (replacement, replacement)
-            else:
-                output += "<a href='%s'>%s</a>" % (replacement, replacement) 
-
-        return output
-
+    def format_link(self, url, label):
+        return "<a href='%s'>%s</a>" % (url, label)
+    
     def parse_style(self, data):
         data = style.strip()
         matches = re.search("style=\"(.*?)\"", data)
@@ -3270,7 +3117,7 @@ $href_end
             replace = ''.join(parts[1:])
 
         replace = trim_leading_blank_lines(replace)
-        #print "TAG: %s, REPLACE: %s" % (tag,replace)
+        replace = trim_leading_indent(replace, True)
         
         if(-1 != tag.find("+")):
             tags = tag.split("+")
@@ -3423,7 +3270,7 @@ $href_end
         #     data = hiliter.sub("<u>\\1</u>", data)
         
         # First make any links or references
-        data = self._format_links(data)
+        data = self.format_links(data)
 
         # Covert code between single backticks to an inline code block
         data = re.sub("`(.*?)`", "<span class='shorte_inline_code_span'>\\1</span>", data)
@@ -3467,7 +3314,7 @@ $href_end
         data = re.sub("\\\\n", "<br>", data)
 
         # First make any links
-        data = self._format_links(data)
+        data = self.format_links(data)
         data = self.wikify(data)
 
         return data
@@ -3575,6 +3422,23 @@ $href_end
             result = ""
 
         return result
+            
+    
+    def format_variable_list(self, tag):
+        vlist = tag.contents
+
+        html = "<div class='shorte_variable_list'>"
+        for item in vlist.get_items():
+            name = item.get_name()
+            value = item.get_value()
+
+            html += "<div class='var_name'>%s</div>" % name
+            html += "<div class='var_def'>%s</div>" % self.format_textblock(value)
+
+        html += "</div>"
+
+        return html
+            
      
 
     def append_source_code(self, tag):
@@ -3711,6 +3575,8 @@ $href_end
             pass
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
+        elif(name == "vl"):
+            self.m_contents.append(self.format_variable_list(tag))
         elif(name in "doctitle", "docsubtitle"):
             FATAL("Undefined tag: %s [%s], did you forget the @body tag" % (name, tag.source))
         else:

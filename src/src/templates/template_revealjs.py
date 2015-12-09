@@ -74,6 +74,21 @@ class template_revealjs_t(template_html_t):
         source += end_tag
 
         return source
+
+    def format_variable_list(self, tag):
+        vlist = tag.contents
+
+        html = "<div class='shorte_variable_list'>"
+        for item in vlist.get_items():
+            name = item.get_name()
+            value = item.get_value()
+
+            html += "<div class='var_name'>%s</div>" % name
+            html += "<div class='var_def'>%s</div>" % self.format_textblock(value)
+
+        html += "</div>"
+
+        return html
     
     def append_header(self, tag, data, file):
 
@@ -216,6 +231,8 @@ class template_revealjs_t(template_html_t):
             pass
         elif(name == "input"):
             self.m_contents.append(self.format_input(tag))
+        elif(name == "vl"):
+            self.m_contents.append(self.format_variable_list(tag))
         elif(name in ('class', "quote")):
             WARNING("This tag [%s] is not supported yet" % name)
         else:

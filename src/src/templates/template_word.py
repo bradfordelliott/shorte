@@ -1118,7 +1118,7 @@ $box_end
         elif(name == "acronyms"):
             print "WARNING: Skipping acronyms for now"
         # These tags not supported in word documents
-        elif(name in ("input", "columns", "column", "endcolumns", "imagemap")):
+        elif(name in ("input", "columns", "column", "endcolumns", "imagemap", "vl")):
             pass
         elif(name == "questions"):
             print "WARNING: Skipping questions for now"

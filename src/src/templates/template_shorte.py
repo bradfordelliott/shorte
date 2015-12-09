@@ -1,18 +1,9 @@
-#+----------------------------------------------------------------------------
-#|
-#| SCRIPT:
-#|   shorte_template.py
-#|
-#| DESCRIPTION:
-#|   This module contains the definition of a template class that is used
-#|   to generate shorte documents from another input form such as a
-#|   C source file.
-#|
-#+----------------------------------------------------------------------------
-#|
-#| Copyright (c) 2010 Brad Elliott
-#|
-#+----------------------------------------------------------------------------
+"""
+This module contains the definition of a template class that is used
+to generate shorte documents from another input form such as a
+C source file.
+"""
+
 import re
 import os
 import string
@@ -111,6 +102,8 @@ class template_shorte_t(template_t):
                 else:
                     txt += text
 
+                txt += "\n\n"
+
                 #if(is_code):
                 #    style = "margin-left:%dpx;background-color:#eee;border:1px solid #ccc;" % (30 )
                 #else:
@@ -125,7 +118,9 @@ class template_shorte_t(template_t):
         else:
             txt = input_data
 
-        return txt
+        txt = trim_leading_blank_lines(txt)
+        
+        return txt.strip()
 
     def format_object_section(self, obj, section):
         
@@ -289,6 +284,8 @@ ${description}${example}${see_also}${since}${deprecated}${requires}
          
         val = self.format_textblock(define.value)
         val = re.sub("\|", "\\\\\\|", val)
+        val = val.strip()
+
         vars["value"] = escape_string(val)
         vars["private"] = define.private
         vars["file"] = define.get_file()
@@ -641,7 +638,13 @@ $class
         self.m_num_structs = 0
         self.m_num_enums = 0
 
-        return template.substitute(vars)
+        cnts = template.substitute(vars)
+        
+        # Strip any redundant blank lines that don't need to be part
+        # of the output document
+        cnts = self.strip_redundant_blank_lines(cnts)
+        
+        return cnts
 
     
     def generate(self, theme, version, package):

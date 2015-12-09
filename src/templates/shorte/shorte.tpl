@@ -1,5 +1,5 @@
-@doctitle ${title}
-@docsubtitle ${subtitle}
+@doc.title ${title}
+@doc.subtitle ${subtitle}
 
 @body
 

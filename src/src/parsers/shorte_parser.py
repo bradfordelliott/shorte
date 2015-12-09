@@ -25,6 +25,8 @@ from src.textblock import textblock_t
 import src.graphing.sequence_diagram as sequence_diagram
 import src.shorte_defines
 
+import src.shorte_types
+
 from libs.records import *
 
 #class cell_t():
@@ -121,6 +123,11 @@ class shorte_parser_t(parser_t):
             "imagemap"        : True,
             "quote"           : True,
 
+            # Variable lists
+            "vl"              : True,
+            "vlist"           : True,
+            "variablelist"    : True,
+
             "java"            : True,
             "verilog"         : True,
             "tcl"             : True,
@@ -184,6 +191,9 @@ class shorte_parser_t(parser_t):
 
             "doc.footer.title" : True,
             "doc.footer.subtitle" : True,
+
+            # Document status
+            "doc.status"      : True,
 
             # Layout tags
             "columns"         : True,
@@ -361,6 +371,9 @@ class shorte_parser_t(parser_t):
                 (section,key) = parts[0].split(".")
                 val = parts[1]
                 shorte_set_config(section, key, val)
+            elif(tag.name == "doc.status"):
+                header.status = tag.contents
+                self.m_engine.get_doc_info().set_status(tag.contents)
             else:
                 FATAL("Unknown tag %s" % tag)
 
@@ -857,7 +870,7 @@ class shorte_parser_t(parser_t):
         if(source.startswith("--")):
             FATAL("Can't parse this table yet!")
 
-        rows = self._parse_rows(source)
+        rows = self._parse_rows(source, col_separators)
 
         row_num = 0
 
@@ -1502,7 +1515,7 @@ a C/C++ like define that looks like:
         return (fnum * width)
 
 
-    def _parse_rows(self, source):
+    def _parse_rows(self, source, col_separators=['|']):
 
         rows = []
         buffer = ''
@@ -1513,7 +1526,7 @@ a C/C++ like define that looks like:
         for i in range(0, len(source)):
             if(source[i] == '-' and (i == 0 or source[i-1] == '\n')):
                 if(buffer.strip() != ''):
-                    row = self._parse_columns(buffer)
+                    row = self._parse_columns(buffer, col_separators)
                     #print row
                     rows.append(row)
                     buffer = ''
@@ -1521,7 +1534,7 @@ a C/C++ like define that looks like:
                 buffer += source[i]
 
         if(buffer.strip() != ''):
-            row = self._parse_columns(buffer)
+            row = self._parse_columns(buffer, col_separators)
             #print row
             rows.append(row)
         
@@ -2449,7 +2462,22 @@ a C/C++ like define that looks like:
 
         return image
 
-    
+    def parse_variable_list(self, source, modifiers):
+        table = self.parse_table(source, modifiers)
+        rows = table.rows
+        vlist = src.shorte_types.variable_list_t()
+
+        for row in table.get_rows():
+            cols = row["cols"]
+
+            name  = cols[0]["text"]
+            value = cols[1]["textblock"]
+
+            vlist.add(name, value)
+
+        return vlist
+
+
     def expand_snippet(self, matches):
 
         name = matches.groups()[0]
@@ -2914,6 +2942,10 @@ else:
         elif(name in ("text", "note", "warning", "question", "tbd", "quote")):
             tag.source = tag.contents
             tag.contents = textblock_t(tag.source)
+
+        elif(name in ("vl", "variablelist", "vlist")):
+            tag.name = "vl"
+            tag.contents = self.parse_variable_list(data, modifiers)
 
         if(visible):
             tags.append(tag)

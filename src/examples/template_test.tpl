@@ -59,6 +59,13 @@ This is an ordered list:
 - Four
 
 @text
+This is a variable list
+
+@vl
+- A,B | This is the definition of A,B
+- Two | This is the definition of Two
+
+@text
 This is a block of source code:
 
 @c

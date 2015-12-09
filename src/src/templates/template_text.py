@@ -782,6 +782,22 @@ ${fields}+----------------------------------------------------------------------
 
         return output
 
+    def format_variable_list(self, tag):
+
+        vlist = tag.contents
+
+        text = "\n"
+        for item in vlist.get_items():
+            name  = item.get_name()
+            value = item.get_value()
+
+            text += "%s:\n" % name
+            text += "%s\n" % ("-"*len(name))
+            text += self.format_textblock(value, "    ")
+
+        text += "\n"
+
+        return text
 
     def append_header(self, tag, data, file):
 
@@ -877,6 +893,10 @@ ${fields}+----------------------------------------------------------------------
             self.m_contents += self.format_prototype(tag)
         elif(name == "functionsummary"):
             self.m_contents += self.format_function_summary(tag)
+
+        elif(name == "vl"):
+            self.m_contents += self.format_variable_list(tag)
+
         elif(name in ("typesummary")):
             WARNING("Unsupported tag %s" % name)
         elif(name in ("struct", "prototype")):

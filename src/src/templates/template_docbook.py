@@ -1,4 +1,9 @@
 # -*- coding: iso-8859-15 -*-
+"""
+This module contains the definition of a template class that is used
+to generate docbook documents.
+"""
+
 import re
 import os
 import string
@@ -9,13 +14,32 @@ from src.shorte_defines import *
 from template_markdown import *
 
 class template_docbook_t(template_t):
+    """This class generates docbook output files"""
+
     def __init__(self, engine, indexer):
+        """The constructor for the docbook template
+           
+           @param engine [I] - The instance of the shorte engine.
+           @param indexer [I] - An indexer object.
+
+           @return None
+        """
         template_t.__init__(self, engine, indexer)
 
         self.list_indent_per_level=4
         self.m_contents = ''
+
+        # The list of generated cross references to avoid duplication
+        self.m_cross_references = {}
     
     def append(self, tag):
+        """This method is used to append a tag to the output
+           document
+
+           @param tag [I] - The tag to append to the output document
+           
+           @return None
+        """
         name = tag.name
 
         if(name == "#"):
@@ -28,6 +52,8 @@ class template_docbook_t(template_t):
             self.m_contents += self.format_list(tag.contents, False)
         elif(name == "ol"):
             self.m_contents += self.format_list(tag.contents, True)
+        elif(name == "pre"):
+            self.m_contents += self.format_pre(tag)
         elif(name == "table"):
             self.m_contents += self.format_table(tag.source, tag.contents)
         elif(name in ("note", "tbd", "warning", "question")):
@@ -44,6 +70,8 @@ class template_docbook_t(template_t):
             self.m_contents += self.format_struct(tag)
         elif(name == "prototype"):
             self.m_contents += self.format_prototype(tag)
+        elif(name == "vl"):
+            self.m_contents += self.format_variable_list(tag)
         else:
             WARNING("Unsupported tag %s" % name)
     
@@ -53,7 +81,8 @@ class template_docbook_t(template_t):
     
     def parse_inline_styling(self, matches):
         data = matches.groups()[0].strip()
-        #print "DATA: [%s]" % data
+        #print "parse_inline_styling"
+        #print "  DATA: [%s]" % data
         #print "data: %s" % data
         parts = data.split(",")
         if(len(parts) == 1):
@@ -93,6 +122,10 @@ class template_docbook_t(template_t):
                 postfix = self.xml("</emphasis>")
                 #, "pre", "u", "i", "color", "span", "cross", "strike", "hl", "hilite", "highlight", "done", "complete", "star", "starred")):
                 #pass
+            elif(tag in ("img", "image")):
+                prefix = ''
+                replace = self.format_inline_image_str(replace)
+                postfix = ''
             elif(tag == "pre"):
                 return self.format_pre(replace)
             elif(tag == "strike"):
@@ -148,7 +181,7 @@ class template_docbook_t(template_t):
 
         xml = self.xml(string.Template("""
 <informaltable frame="all" rowsep="0">
-<?dbfo keep-together="always"?>
+<!--<?dbfo keep-together="always"?>-->
 <tgroup cols='1'>
     <tbody>
         <row>
@@ -171,6 +204,13 @@ class template_docbook_t(template_t):
         return xml
 
     def format_enum(self, tag):
+        """This method is called to format an enumeration into docbook
+           format
+
+           @param tag [I] - The shorte tag containing the enumeration.
+
+           @return The enumeration formatted for docbook output.
+        """
         enum = tag.contents
         
         if(enum.is_deprecated()):
@@ -208,19 +248,35 @@ class template_docbook_t(template_t):
             col_index = 0
 
             for col in row["cols"]:
-                if((not show_enum_vals) and col_index == 1):
-                    col_index += 1
-                    continue
+                # Don't attempt to wikify or format the enum name. Instead
+                # create a link or cross reference to it
+                if(col_index == 0):
+                    link = col["text"]
+                    if(link in self.m_cross_references):
+                        WARNING("Duplicate cross reference detected on enumerated value %s" % col["text"])
+                        values += self.xml("<entry><para>") + self.xmlize(self.format_for_zero_breaks(col["text"])) + \
+                                  self.xml("</para></entry>")
+                    else:
+                        self.m_cross_references[link] = True
+                        values += self.xml("<entry><para id='%s' xreflabel='%s'>" % (self.xmlize(col["text"]), self.xmlize(col["text"]))) + \
+                                  self.xmlize(self.format_for_zero_breaks(col["text"])) + \
+                                  self.xml("</para></entry>")
+                
                 else:
-                    col_index += 1
-                values += self.xml("<entry>") + self.format_textblock(col["textblock"]) + self.xml("</entry>")
+                    if((not show_enum_vals) and col_index == 1):
+                        col_index += 1
+                        continue
+
+                    values += self.xml("<entry>") + self.format_textblock(col["textblock"]) + self.xml("</entry>")
+
+                col_index += 1
             values += "</row>"
 
         values += self.xml("</tbody></tgroup><tgroup cols='1'><tbody>")
 
         xml = self.xml(string.Template("""
 <informaltable frame="all" rowsep="0">
-<?dbfo keep-together="always"?>
+<!--<?dbfo keep-together="always"?>-->
 <tgroup cols='1'>
     <tbody>
         <row>
@@ -237,14 +293,146 @@ class template_docbook_t(template_t):
                  "common" : self.format_object_common_sections(enum)}))
 
         return xml
+
+    def format_for_zero_breaks(self, txt):
+        """This is a first pass at dealing with table wrapping.
+           Not sure if there is a better way of dealing with this.
+
+           @param txt [I] - The text to insert zero width break
+                            characters into so that tables wrap
+                            cleanly.
+           
+           @return The text with wrap characters inserted.
+        """
+        chars = list(txt)
+
+        output = []
+        count = 0
+        for c in chars:
+            if(c in (' ', '\t', '\r', '-', '.', ',', ';')):
+                count = 0
+            if(c == '_'):
+                output.append(c)
+                output.append('@8203;')
+                count = 0 
+                continue
+            elif(count > 10):
+                output.append('@8203;')
+                count = 0
+            output.append(c)
+            count += 1
+
+        return ''.join(output)
+
+    def format_image(self, tag):
+
+        if(isinstance(tag, tag_t)):
+            image = tag.contents
+        else:
+            image = tag
+
+        # Due to a bug in Apache fop some PNGs seem to crash.
+        # Always converting them to the Image library seems
+        # to fix the issue.
+        #image.has_key("height") or image.has_key("width")):
+        if(True):
+            (image,height,width) = self.m_engine.scale_image(image)
+
+        name = image["name"] + image["ext"]
+
+        caption = name
+        if(image.has_key("caption")):
+            caption = image["caption"]
+
+        src = os.path.realpath(image["src"])
+
+        img_format = image["ext"]
+        img_format = img_format.replace(".", "")
+        img_format = img_format.upper()
+        
+        max_width = 650
+        max_height = 650
+
+        if(height > max_height):
+            new_height = max_height
+            new_width = (max_height/(1.0*height)) * width
+            
+            height = new_height
+            width = new_width
+        
+        if(width > max_width):
+            new_width = max_width
+            new_height = (max_width/(1.0*width)) * height
+            height = new_height
+            width = new_width
+        
+        dpi = 96.0
+        width = "%fin" % (width/dpi)
+        height = "%fin" % (height/dpi)
+
+        #contents = re.sub("<imagedata", '<imagedata scalefit="1" width="100%"', contents)
+
+        xml = self.xml(string.Template("""
+<mediaobject>
+<imageobject>
+    <imagedata fileref="${path}" format="${format}" width="${width}" height="${height}"/>
+</imageobject>
+${caption}
+</mediaobject>
+""").substitute({"path" : src, "format" : img_format, "caption" : "", "width" : width, "height" : height}))
+
+        # DEBUG: Temporary debug for the K2 user guide
+        #xml = ''
+        return xml
+
+    def format_inline_image_str(self, data):
+        image = self.m_engine.m_parser.parse_inline_image_str(data)
+        return self.format_image(image)
+
+    def format_link(self, url, label):
+        """This is a callback method used by the format_links() method in template.py
+           used to format hyperlinks
+
+           @param url   [I] - The target URL
+           @param label [I] - The label associated with the URL
+        """
+        return self.xml("<ulink url='%s'>%s</ulink>" % (self.xmlize(url), self.xmlize(label)))
     
     def format_prototype(self, tag):
+        """This method is called to convert a prototype declaration
+           into a docbook construct.
+
+           @param tag [I] - The shorte tag to convert.
+
+           @return The docbook XML containing the prototype declaration
+        """
         prototype = tag.contents
         
         if(prototype.is_deprecated()):
             func_name = self.xmlize(prototype.get_name()) + self.xml("<emphasis>  (THIS FUNCTION IS DEPRECATED)</emphasis>")
         else:
             func_name = self.xmlize(prototype.get_name())
+
+        xml_prototype = ''
+        if(prototype.has_prototype()):
+            exclude_wikiwords = []
+            exclude_wikiwords.append(prototype.get_name())
+
+            language = prototype.get_prototype().get_language()
+            example  = prototype.get_prototype().get_parsed()
+            
+            tmp = self.format_source_code(language, example, exclude_wikiwords, False)
+            xml_prototype = self.xml('''
+
+<row>
+<entry>
+<programlisting linenumbering='numbered' language='%s'>''' % language) + tmp + \
+            self.xml('''
+</programlisting>
+</entry>
+</row>
+
+''')
 
         xml = self.xml(string.Template("""
 <informaltable frame="all" rowsep="0">
@@ -298,8 +486,8 @@ class template_docbook_t(template_t):
             if(findex & 1):
                 fields += '<?dbfo bgcolor="#f7f7f7"?>'
             findex += 1
-            fdesc = self.xmlify(self.format_textblock(field.get_description()))
-            fname = self.xmlify(field.get_name())
+            fdesc = self.format_textblock(field.get_description())
+            fname = self.format_text(field.get_name())
             ftype = self.format_text(field.get_type())
 
             fields += self.xml("<entry>") + ftype + self.xml("</entry>")
@@ -312,7 +500,7 @@ class template_docbook_t(template_t):
 
         xml = self.xml(string.Template("""
 <informaltable frame="all" rowsep="0">
-<?dbfo keep-together="always"?>
+<!--<?dbfo keep-together="always"?>-->
 <tgroup cols='1'>
     <tbody>
         <row>
@@ -331,24 +519,32 @@ class template_docbook_t(template_t):
         return xml
 
     
-    def format_text(self, data):
+    def format_text(self, data, allow_wikify=True, exclue_wikify=[]):
 
         if(data == None):
             return
-        
+                    
         data = re.sub('<br/>', "\n", data)
-
-        # Escape any XML characters
-        data = self.xmlify(data)
         
+        #data = self.format_for_zero_breaks(data)
+
         # Now convert any *phrase* to bold
         bold = re.compile("\*(.*?)\*", re.DOTALL)
         data = bold.sub("\\1", data)
+        
+        # First make any links or references
+        data = self.format_links(data)
 
         # Convert any inline styling blocks
         # DEBUG BRAD: Disable inline styling for now
         expr = re.compile("@\{(.*?)\}", re.DOTALL)
         data = expr.sub(self.parse_inline_styling, data)
+        
+        if(allow_wikify):
+            data = self.wikify(data)
+        
+        # Escape any XML characters
+        data = self.xmlize(data)
 
         # Collapse multiple spaces
         #data = re.sub('\n+', "\n", data)
@@ -373,6 +569,9 @@ class template_docbook_t(template_t):
     def xml(self, data):
         data = data.replace("<", "@lt;")
         data = data.replace(">", "@gt;")
+        data = data.replace('"', "@quot;")
+        data = data.replace("'", "@apos;")
+        data = data.replace("&", "@amp;")
 
         return data
     
@@ -438,7 +637,6 @@ class template_docbook_t(template_t):
         return output
     
     def format_list(self, list, ordered=False):
-
         xml = self.xml("\n<div>\n")
         
         if(ordered):
@@ -471,7 +669,7 @@ class template_docbook_t(template_t):
         if(ordered):
             if(elem.children != None):
 
-                xml += prefix + self.xml("<para>") + self.format_textblock(text) + self.xml("</para>")
+                xml += prefix + self.xml("<para>") + self.format_text(text) + self.xml("</para>")
                 num_children = len(elem.children)
                 
                 xml += prefix + self.xml("<orderedlist>\n")
@@ -505,29 +703,104 @@ class template_docbook_t(template_t):
         
         xml = ""
         xml += self.format_object_section(obj, 'description')
+        xml += self.format_object_section(obj, 'prototype')
+        xml += self.format_object_section(obj, 'params')
         xml += self.format_object_section(obj, 'example')
         xml += self.format_object_section(obj, 'deprecated')
         xml += self.format_object_section(obj, 'since')
         xml += self.format_object_section(obj, 'see')
         xml += self.format_object_section(obj, 'requires')
+        xml += self.format_object_section(obj, 'returns')
 
         return xml
 
     def format_object_section(self, obj, section):
 
-        if(section == "since"):
-            if(not obj.has_since()):
-                return ''
-
-            title = "Introduced In:"
-            paragraph = self.format_textblock(obj.get_since())
-
-        elif(section == 'deprecated'):
+        if(section == 'deprecated'):
             if(not obj.is_deprecated()):
                 return ''
 
             title = 'Deprecated:'
             paragraph = self.format_textblock(obj.get_deprecated())
+        
+        elif(section == "description"):
+            if(not obj.has_description()):
+                return ''
+
+            title = "Description:"
+            paragraph = self.format_textblock(obj.get_description())
+        
+        elif(section == 'example'):
+            if(not obj.has_example()):
+                return ''
+            
+            exclude_wikiwords = [obj.get_name()]
+            language = obj.get_example().get_language()
+            example  = obj.get_example().get_parsed()
+            source = self.format_source_code(language, example, exclude_wikiwords, False)
+
+            title = "Example:"
+            paragraph = self.xml("<para>The following example demonstrates the use of this method:</para><programlisting linenumbering='numbered' language='%s'>" % language) + source + self.xml("</programlisting>")
+
+        elif(section == "params"):
+            if(not obj.has_params()):
+                return ''
+            
+            params = obj.get_params()
+            paragraph = self.xml("""<para><informaltable frame="topbot" colsep="0">
+<tgroup cols="4">
+   <colspec colnum="1" colname="col1" colwidth="2*"/>
+   <colspec colnum="2" colname="col2" colwidth="1*"/>
+   <colspec colnum="3" colname="col3" colwidth="0.5*"/>
+   <colspec colnum="4" colname="col4" colwidth="4*"/>
+<tbody>
+  <row>
+    <?dbfo bgcolor='#e0e0e0'?>
+    <entry><emphasis role='strong'>Name</emphasis></entry>
+    <entry><emphasis role='strong'>Type</emphasis></entry>
+    <entry><emphasis role='strong'>I/O</emphasis></entry>
+    <entry><emphasis role='strong'>Description</emphasis></entry>
+  </row>
+""")
+            pindex = 0
+            for param in params:
+                pname = self.xmlize(param.get_name())
+                ptype = ''
+                if(param.has_type()):
+                    ptype = self.xmlize(param.get_type())
+                
+                pio = ''
+                if(param.has_io()):
+                    pio = self.xmlize(param.get_io())
+
+                paragraph += self.xml("  <row>\n")
+                if(pindex & 1):
+                    paragraph += self.xml("    <?dbfo bgcolor='#f7f7f7'?>\n")
+
+                paragraph += self.xml("    <entry>") + pname + self.xml("</entry>\n")
+                paragraph += self.xml("    <entry>") + ptype + self.xml("</entry>\n")
+                paragraph += self.xml("    <entry>") + pio + self.xml("</entry>\n")
+                paragraph += self.xml("    <entry>") + self.format_textblock(param.get_description()) + self.xml("</entry>\n")
+                
+                paragraph += self.xml("  </row>\n")
+
+                pindex += 1
+
+            paragraph += self.xml("</tbody>\n</tgroup>\n</informaltable></para>\n")
+
+            title = "Params:"
+
+        elif(section == "prototype"):
+            if(not obj.has_prototype()):
+                return ''
+            
+            exclude_wikiwords = [obj.get_name()]
+            language = obj.get_prototype().get_language()
+            example  = obj.get_prototype().get_parsed()
+            source = self.format_source_code(language, example, exclude_wikiwords, False)
+
+            title = "Prototype:"
+            paragraph = self.xml("<programlisting linenumbering='numbered' language='%s'>" % language) + source + self.xml("</programlisting>")
         
         elif(section == 'requires'):
             if(not obj.has_requirements()):
@@ -536,12 +809,12 @@ class template_docbook_t(template_t):
             title = 'Requirements:'
             paragraph = self.format_textblock(obj.get_requirements())
 
-        elif(section == "description"):
-            if(not obj.has_description()):
+        elif(section == 'returns'):
+            if(not obj.has_returns()):
                 return ''
-
-            title = "Description:"
-            paragraph = self.format_textblock(obj.get_description())
+            
+            title = "Returns:"
+            paragraph = self.format_text(obj.get_returns())
 
         elif(section == 'see'):
             if(not obj.has_see_also()):
@@ -550,60 +823,13 @@ class template_docbook_t(template_t):
             title = "See Also:"
             paragraph = self.format_text(obj.get_see_also())
 
-        elif(section == 'example'):
-            if(not obj.has_example()):
+        elif(section == "since"):
+            if(not obj.has_since()):
                 return ''
 
-            return ""
+            title = "Introduced In:"
+            paragraph = self.format_textblock(obj.get_since())
 
-            template_example = string.Template('''
-<div>
-    <div class='cb_title'>Example:</div>
-    <div style="margin-left: 10px; margin-top: 5px;margin-bottom:0px;">
-    The following example demonstrates the use of this ${type}:<br>
-    </div>
-    ${example}
-</div>
-''');
-            example  = obj.example.get_parsed()
-            language = obj.example.get_language()
-
-            if(self.m_show_code_headers["example"]):
-                snippet_id = self.m_snippet_id
-                self.m_snippet_id += 1
-                code_header = self.m_template_code_header.substitute(
-                    {"id" : snippet_id,
-                     "style" : "margin-left:10px;margin-top:2px;"})
-                source = html_styles.template_source.substitute({
-                                "id":     snippet_id,
-                                "source": self.format_source_code_no_lines(language, example)})
-            else:
-                code_header = ""
-                source = ""
-                        
-            example = self.format_source_code(language, example)
-
-            example_result = ""
-
-            if(obj.has_example_result()):
-                result = obj.get_example_result()
-                if(result.has_compile_result()):
-                    rc  = result.get_compile_rc()
-                    val = result.get_compile_result()
-                    example_result += self.format_code_result(val, rc, "Compile:", "cb_title", "code2")
-                if(result.has_run_result()):
-                    rc = result.get_run_rc()
-                    val = result.get_run_result()
-                    example_result += self.format_code_result(val, rc, "Result:", "cb_title", "code2")
-                
-            code = template_code.substitute(
-                       {"contents" : example,
-                        "source"   : source,
-                        "code_header" : code_header,
-                        "template" : "code2",
-                        "result"   : example_result})
-
-            return template_example.substitute({"example" : code, "type" : obj.type})
 
         else:
             FATAL("Unsupported section: %s" % construct)
@@ -619,7 +845,7 @@ class template_docbook_t(template_t):
         
         return template_section.substitute({"title" : title, "paragraph" : paragraph})
     
-
+    
     def format_note(self, tag):
 
         xml_tag = "note"
@@ -643,7 +869,7 @@ ${content}
 </div>
 """)).substitute({"tag"     : xml_tag,
                  "title"   : tag.name.title(),
-                 "content" : self.xmlify(tag.source)})
+                 "content" : self.format_textblock(tag.contents)})
 
         return xml
     
@@ -654,7 +880,9 @@ ${content}
         if(history != None):
 
             # Error out if the revision history is not formatted correctly for docbook
-            if(history.max_cols != 4):
+            expected_columns = int(shorte_get_config("docbook", "revision_history_cols"))
+
+            if(history.max_cols != expected_columns):
                 FATAL("""The revision history for docbook templates must be formatted as follows:
 
     @doc.revisions
@@ -662,6 +890,8 @@ ${content}
     - 1.0     | 04 March, 2011 | BE     | Blah blah blah, this is something here describing the revision
     - 1.4.0   | 05 March, 2011 | BE     | Something else
 
+You can disable this error by passing -s \"docbook.revision_history_cols=3;\" at the shorte command line.
+This will skip the author column which is missing in some legacy documents.
 """)
 
             rows = history.rows
@@ -669,19 +899,34 @@ ${content}
             rindex = 0
             for row in rows:
                 cols = row["cols"]
+
+                if(history.max_cols == 3):
+                    rev_number = self.format_text(cols[0]["text"])
+                    rev_date   = self.format_text(cols[1]["text"])
+                    rev_author = ""
+                    rev_desc   = self.format_textblock(cols[2]["textblock"])
+                elif(history.max_cols == 4):
+                    rev_number = self.format_text(cols[0]["text"])
+                    rev_date   = self.format_text(cols[1]["text"])
+                    rev_author = self.format_text(cols[2]["text"])
+                    rev_desc   = self.format_textblock(cols[3]["textblock"])
+
                 if(rindex == 0):
                     xml += "<revision>"
-                    xml += '<revnumber><emphasis role="strong">%s</emphasis></revnumber>' % cols[0]["text"]
-                    xml += '<date><emphasis role="strong">%s</emphasis></date>' % cols[1]["text"]
-                    xml += '<authorinitials><emphasis role="strong">%s</emphasis></authorinitials>' % cols[2]["text"]
-                    xml += '<revremark><emphasis role="strong">%s</emphasis></revremark>' % cols[3]["text"]
+                    xml += "<?dbfo bgcolor='#e0e0e0'?>"
+                    xml += '<revnumber><emphasis role="strong">%s</emphasis></revnumber>' % rev_number
+                    xml += '<date><emphasis role="strong">%s</emphasis></date>' % rev_date
+                    if(history.max_cols == 4):
+                        xml += '<authorinitials><emphasis role="strong">%s</emphasis></authorinitials>' % rev_author
+                    xml += '<revremark><emphasis role="strong">%s</emphasis></revremark>' % rev_desc
                     xml += "</revision>"
                 elif(rindex > 0):
                     xml += "<revision>"
-                    xml += '<revnumber>%s</revnumber>' % cols[0]["text"]
-                    xml += "<date>%s</date>" % cols[1]["text"]
-                    xml += "<authorinitials>%s</authorinitials>" % cols[2]["text"]
-                    xml += "<revremark>%s</revremark>" % cols[3]["text"]
+                    xml += '<revnumber>%s</revnumber>' % rev_number
+                    xml += "<date>%s</date>" % rev_date
+                    if(history.max_cols == 4):
+                        xml += "<authorinitials>%s</authorinitials>" % rev_author
+                    xml += "<revremark>%s</revremark>" % rev_desc
                     xml += "</revision>"
                 rindex += 1
 
@@ -696,35 +941,55 @@ ${content}
     
     def format_table(self, source, table):
 
-        xml = self.xml("<table>\n")
+        xml = self.xml("<informaltable>\n")
         
-        if(table.has_title()):
-            xml += self.xml("<title>") + self.xmlize(table.get_title()) + self.xml("</title>\n")
-        if(table.has_caption()):
-            xml += self.xml("<caption><para><emphasis role='strong'>Caption:</emphasis></para>") + self.format_textblock(table.get_caption()) + self.xml("</caption>")
-
         num_cols = table.get_max_cols()
         col_widths = []
 
-        # First walk through the text and figure out the
-        # maximum width of each column
-        for i in range(0, num_cols):
-            col_widths.append(0)
+        col_num_check = 0
+        for row in table.get_rows():
+            
+            if(len(row["cols"]) > col_num_check):
+                col_num_check = len(row["cols"])
+
+        if(num_cols != col_num_check):
+            FATAL("Number of columns doesn't line up!")
 
         xml += self.xml("  <tgroup cols=\"%d\">\n" % num_cols)
+        
+        if(table.has_widths()):
+            widths = table.get_widths()
 
-        max_width = 0
-        for row in table.get_rows():
-            j = 0;
-            for col in row["cols"]:
+            if(len(widths) != num_cols):
+                FATAL("Column widths doesn't line up")
+            cindex = 0
+            
+            smallest_width = 100
+            for width in widths:
+                if(width < smallest_width):
+                    smallest_width = width
+
+            for width in widths:
                 
-                if(len(col["text"]) > col_widths[j]):
-                    col_widths[j] = len(col["text"])
-                    max_width += col_widths[j]
-                j += 1
+                # For some reason the columns widths need to be specified backwards
+                # Not sure if this is a bug in my table generation or a bug in the version
+                # of docbook I'm using.
+                #width = width/(1.0*smallest_width)
+                width = smallest_width/(1.0*width)
 
-        body_started = False
+                xml += self.xml('  <colspec colnum="%d" colname="col%d" colwidth="%.1f*"/>\n' % (cindex, cindex, width))
+                cindex += 1
+        else:
+            for cindex in xrange(0, num_cols):
+                xml += self.xml('  <colspec colnum="%d" colname="col%d"/>\n' % (cindex, cindex))
 
+        xml += self.xml("  <tbody>\n")
+
+        # If the table has a title then output it now
+        if(table.has_title()):
+            colspec = " namest='col%d' nameend='col%d' " % (0, table.get_max_cols()-1)
+            xml += self.xml("<row><?dbfo bgcolor='#909090'?><entry %s><emphasis role='strong'>" % colspec) + self.xmlize(table.get_title()) + self.xml("</emphasis></entry></row>\n")
+        
         for row in table.get_rows():
 
             is_header = row["is_header"]
@@ -741,64 +1006,45 @@ ${content}
                 #html += "      Caption: %s\n" % (row["cols"][0])
                 pass
             else: 
-                col_num = 0
-
-                if(is_header):
-                    xml += self.xml("    <thead>\n")
-                elif(not body_started):
-                    xml += self.xml("    <tbody>\n")
-                    body_started = True
-
+                
                 xml += self.xml("      <row>\n")
 
-                cells = []
+                if(is_header):
+                    xml += self.xml('<?dbfo bgcolor="#b0b0b0"?>')
+                elif(is_subheader):
+                    xml += self.xml('<?dbfo bgcolor="#d0d0d0"?>')
+
+                col_index = 0
                 for col in row["cols"]:
 
-                    txt = self.format_text(col["text"])
-                    txt = txt.replace("\n", " ")
+                    #txt = self.format_for_zero_breaks(col["text"])
+                    txt = self.format_textblock(col["textblock"])
+                    span = col["span"]
 
-                    xml += self.xml("        <entry>") + txt + self.xml("</entry>\n")
+                    if(span > 1):
+                        if((col_index + span - 1) > (num_cols-1)):
+                            FATAL("Failed parsing this table")
+                        span_spec = " namest='col%d' nameend='col%d'" % (col_index, col_index+span-1)
+                    else:
+                        span_spec = ''
+
+                    if(is_header or is_subheader):
+                        xml += self.xml("        <entry%s><emphasis role='strong'>" % span_spec) + txt + self.xml("</emphasis></entry>\n")
+                    else:
+                        xml += self.xml("        <entry%s>" % span_spec) + txt + self.xml("</entry>\n")
                     
-                    #if(is_subheader or is_header):
-                    #    cells.append(("%-" + "%d" % (col_widths[col_num] + 3) + "s") % (txt))
-                    #else:
-                    #    cells.append((" %-" + "%d" % (col_widths[col_num] + 2) + "s") % (txt))
-
-                #html += " |".join(cells)
-
-                col_num += 1
+                    col_index += 1
 
                 xml += self.xml("      </row>\n")
 
-                if(is_header):
-                    xml += self.xml("    </thead>\n")
-                    body_started = False
+        # If the table has a title then output it now
+        if(table.has_caption()):
+            colspec = " namest='col%d' nameend='col%d' " % (0, table.get_max_cols()-1)
+            xml += self.xml("<row><?dbfo bgcolor='#909090'?><entry %s><emphasis role='strong'>Caption:</emphasis>" % colspec) + self.format_textblock(table.get_caption()) + self.xml("</entry></row>\n")
 
-                #if(is_header):
-                #    col_num = 0
-                #    html += "\n"
-
-                #    cells = []
-                #    for col in row["cols"]:
-                #        text = ""
-                #        for k in range(0, col_widths[col_num] + 3):
-                #            text += "-"
-
-                #        for p in range(0, col_num+1):
-                #            text += "-"
-
-                #        col_num += 1
-
-                #        cells.append(text)
-
-                #    xml += "|".join(cells)
-
-
-
-        
         xml += self.xml("    </tbody>\n")
         xml += self.xml("  </tgroup>\n")
-        xml += self.xml("</table>\n")
+        xml += self.xml("</informaltable>\n")
 
         return xml
     
@@ -848,27 +1094,23 @@ ${content}
         '''This method is called to format a wikiword. It is called by
            the wikify method in the template base class'''
 
-        return wikiword.label
+        # If the document is being inlined then need to get
+        # rid of the link prefix and just use a local link
+        if(1): #self.is_inline()):
+            output = "<xref linkend='%s'>%s</xref>" % (wikiword.wikiword, wikiword.label)
+        else:
+            if(0): #self.m_wikiword_path_prefix):
+                output = "<ulink url='%s#%s'>%s</ulink>" % (self.get_output_path(wikiword.link), wikiword.wikiword, wikiword.label)
+            else:
+                output = "<ulink href='%s'>%s</ulink>" % (wikiword.wikiword, wikiword.label)
 
-        ## If the document is being inlined then need to get
-        ## rid of the link prefix and just use a local link
-        #if(self.is_inline()):
-        #    output = "<a href='#%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
-        #else:
-        #    if(self.m_wikiword_path_prefix):
-        #        output = "<a href='%s#%s'>%s</a>" % (self.get_output_path(wikiword.link), wikiword.wikiword, wikiword.label)
-        #    else:
-        #        output = "<a href='%s'>%s</a>" % (wikiword.wikiword, wikiword.label)
-
-        #return output
-    
-    
+        return self.xml(output)
 
     def format_pre(self, tag):
         xml = self.xml("""\n\n<div>
 <programlisting linenumbering='numbered'>""")
         if(isinstance(tag, tag_t)):
-            xml += self.format_textblock(tag.content)
+            xml += self.format_text(tag.contents)
         else:
             xml += self.format_text(tag)
 
@@ -885,7 +1127,7 @@ ${content}
         for tag in tags:
 
             type = tag.type
-            source = self.xmlify(tag.data)
+            source = self.xmlize(tag.data)
             #source = re.sub("( +)", self.__replace_whitespace, source)
 
             if(type == TAG_TYPE_CODE):
@@ -909,6 +1151,23 @@ ${content}
                 #    output += '<text:span text:style-name="%s">%03d </text:span>' % (self.m_styles["span"]["code_line_numbers"], line)
             
         return output
+        
+    def format_variable_list(self, tag):
+        vlist = tag.contents
+
+        xml = self.xml("<variablelist>\n")
+        xml += self.xml("<?dbfo list-presentation=\"blocks\" term-presentation=\"bold\"?>\n")
+        for item in vlist.get_items():
+            name = item.get_name()
+            value = item.get_value()
+
+            xml += self.xml("<varlistentry><term><emphasis role='strong'>") + self.xmlize(name) + self.xml("</emphasis></term>")
+            xml += self.xml("<listitem>") + self.format_textblock(value) + self.xml("</listitem>")
+            xml += self.xml("</varlistentry>")
+
+        xml += self.xml("</variablelist>")
+
+        return xml
 
     def append_source_code(self, tag):
                 
@@ -924,15 +1183,18 @@ ${content}
 ''')
 
     def generate_index(self, title, theme, version):
-        
-        module = "inphi"
-        import_str = "from templates.docbook.%s import *" % module
+
+        import_str = "from templates.docbook.%s import *" % theme
         exec(import_str)
         custom_styles = custom_styles()
         
         cnts = self.get_contents()
         cnts = cnts.replace("@lt;", "<")
         cnts = cnts.replace("@gt;", ">")
+        cnts = cnts.replace("@quot;", '"')
+        cnts = cnts.replace("@amp;", '&')
+        cnts = cnts.replace("@apos;", "'")
+        cnts = cnts.replace("@8203;", "&#8203;")
 
         index_name = self.get_index_name()
         index_name = index_name.replace("/", "_")
@@ -940,31 +1202,16 @@ ${content}
         markdown_file = output_file + ".md"
         docbook_file  = output_file + ".xml"
         pdf_file      = output_file + ".pdf"
-        xsl_file = "templates/docbook/inphi/inphi_modified.xsl"
-        xsl_template_file = "templates/docbook/inphi/inphi.xsl"
+        xsl_file = shorte_get_scratch_dir() + "/docbook.xsl"
 
-        # Open the XSL file
-        handle = open(shorte_get_startup_path() + os.sep + xsl_template_file)
-        xsl = handle.read()
-        handle.close()
+        status = ""
+        if(self.m_engine.get_doc_info().has_status()):
+            status = self.m_engine.get_doc_info().get_status()
 
-        xsl = xsl.replace("<!--SHORTE_DOCBOOK_STYLES-->", custom_styles.get_template())
-        handle = open(shorte_get_startup_path() + os.sep + xsl_file, "wb")
+        xsl = custom_styles.get_template(status)
+        handle = open(xsl_file, "wb")
         handle.write(xsl)
         handle.close()
-
-        if(1):
-            file = open(markdown_file, "wb")
-            file.write(cnts)
-            file.close()
-
-            # Now use pandoc to convert to docbook
-            cmd = ["/usr/local/bin/pandoc", "-s", "--chapters", "-f", "markdown_strict+pipe_tables", "-t", "docbook", markdown_file, "-o", docbook_file + ".markdown"]
-
-            phandle = subprocess.Popen(cmd, stdout=subprocess.PIPE) #, stderr=subprocess.PIPE)
-            result = phandle.stdout.read()
-            #result += phandle.stderr.read()
-            phandle.wait()
 
         file = open(docbook_file, "wb")
         header = """<?xml version="1.0" encoding="utf-8" ?>
@@ -981,7 +1228,15 @@ ${content}
   
         doc_info = self.m_engine.get_doc_info()
 
-        title_page = custom_styles.format_title_page(self.m_engine, doc_info, self.format_revision_history())
+        revhistory = self.format_revision_history()
+        revhistory = revhistory.replace("@lt;", "<")
+        revhistory = revhistory.replace("@gt;", ">")
+        revhistory = revhistory.replace("@quot;", '"')
+        revhistory = revhistory.replace("@amp;", '&')
+        revhistory = revhistory.replace("@apos;", "'")
+        revhistory = revhistory.replace("@8203;", "&#8203;")
+
+        title_page = custom_styles.format_title_page(self.m_engine, doc_info, revhistory)
         
         handle = open(docbook_file, "rt")
         contents = handle.read()
@@ -990,7 +1245,6 @@ ${content}
         handle = open(docbook_file, "w")
         contents = re.sub("<article>", "<book>", contents)
         contents = re.sub("DOCTYPE article", "DOCTYPE book", contents)
-        contents = re.sub("<imagedata", '<imagedata scalefit="1" width="100%"', contents)
         contents = re.sub("""<articleinfo>
     <title></title>
   </articleinfo>
@@ -1013,11 +1267,13 @@ ${content}
         handle.write(contents)
         handle.close()
 
-        
-        cmd = ["/Users/belliott/fop/fop-2.0/fop", "-c", "/Users/belliott/fop/fop-2.0/conf/fop.xconf",
+        path_fop = shorte_get_config("docbook", "path.fop", True)
+        path_fop_xconf = shorte_get_config("docbook", "path.fop.xconf", True)
+
+        cmd = [path_fop, "-c", path_fop_xconf,
                 "-param", "template_path", shorte_get_startup_path() + "/templates/docbook",
-                "-param", "header.image.filename", "/Users/belliott/Dropbox/shorte/src/templates/docbook/inphi/inphi_banner.png",
-                "-param", "draft.watermark.image", "/Users/belliott/Dropbox/shorte/src/templates/shared/draft.png",
+                "-param", "header.image.filename", shorte_get_startup_path() + "/templates/docbook/%s/%s_banner.png" % (theme,theme),
+                "-param", "draft.watermark.image", shorte_get_startup_path() + "/templates/shared/draft.png",
                 "-xml", docbook_file,
                 "-xsl", xsl_file, "-pdf", pdf_file]
         phandle = subprocess.Popen(cmd, stdout=subprocess.PIPE) #, stderr=subprocess.PIPE)
@@ -1049,7 +1305,7 @@ ${content}
             output_file = re.sub(".tpl", ".markdown", source_file)
             path = self.m_engine.get_output_dir() + "/" + output_file
 
-            print "PAGE: %s" % page["source_file"]
+            #print "PAGE: %s" % page["source_file"]
             
             for tag in tags:
 
@@ -1060,8 +1316,7 @@ ${content}
                     # 2 headings.
                     tagname = tag.name
                     if(tagname == "h"):
-                        FATAL("DO I GET HERE?")
-                        level = 6
+                        level = 5
                     else:
                         level = int(tag.name[1:]) - 1
 
@@ -1084,17 +1339,31 @@ ${content}
                         else:
                             break
 
-                    heading_label = self.format_text(tag.contents)
+                    heading_label = self.format_text(tag.contents, allow_wikify=False)
+
+                    link = tag.contents.strip()
+                    if(tag.has_modifiers()):
+                        modifiers = tag.get_modifiers()
+                        if("wikiword" in modifiers):
+                            link = modifiers["wikiword"]
+
+                    if(link in self.m_cross_references):
+                        link = ""
+                    else:
+                        self.m_cross_references[link] = True
+                        link = " id='%s' xreflabel='%s' " % (link, heading_label)
+
                     headings.append({"level" : level, "name" : heading_label})
 
                     #print "%sOpening level %d (%s)" % ("    "*level, level, heading_label)
                     #print "%s>Headings:" % ("    "*(level+3))
                     #for heading in headings:
                     #    print "%s> - %s" % ("    "*(level+3),heading["name"])
+
                     if(level == 0):
-                        self.m_contents += self.xml("\n<chapter>\n<title>") + heading_label + self.xml("</title>\n\n")
+                        self.m_contents += self.xml("\n<chapter %s>\n<title>" % link) + heading_label + self.xml("</title>\n\n")
                     else:
-                        self.m_contents += self.xml("\n<sect%d>\n<title>" % level) + heading_label + self.xml("</title>\n\n")
+                        self.m_contents += self.xml("\n<sect%d %s>\n<title>" % (level, link)) + heading_label + self.xml("</title>\n\n")
 
                 elif(self.m_engine.tag_is_source_code(tag.name)):
                     self.append_source_code(tag)
@@ -1102,17 +1371,17 @@ ${content}
                 else:
                     self.append(tag)
 
-            # Close any heading blocks
-            while(len(headings) > 0):
-                level = headings.pop()
-                #print "%sClosing level %d (%s)" % ("    "*level["level"],level["level"], level["name"])#, headings
-                #print "%s>Headings:" % ("    "*(level["level"]+3))
-                #for heading in headings:
-                #    print "%s> - %s" % ("    "*(level["level"]+3),heading["name"])
-                if(level["level"] == 0):
-                    self.m_contents += self.xml("</chapter>\n\n")
-                else:
-                    self.m_contents += self.xml("</sect%d>\n\n" % level["level"])
+        # Close any heading blocks
+        while(len(headings) > 0):
+            level = headings.pop()
+            #print "%sClosing level %d (%s)" % ("    "*level["level"],level["level"], level["name"])#, headings
+            #print "%s>Headings:" % ("    "*(level["level"]+3))
+            #for heading in headings:
+            #    print "%s> - %s" % ("    "*(level["level"]+3),heading["name"])
+            if(level["level"] == 0):
+                self.m_contents += self.xml("</chapter>\n\n")
+            else:
+                self.m_contents += self.xml("</sect%d>\n\n" % level["level"])
 
         # Now generate the document index
         self.generate_index(self.m_engine.get_title(), self.m_engine.get_theme(), version)
@@ -1127,12 +1396,4 @@ ${content}
         #        shutil.copy(image, self.m_engine.get_output_dir() + "/" + image)
 
         INFO("Generating docbook document")
-    
-    
-    def xmlify(self, source):
-        source = source.replace("&", "&amp;")
-        source = source.replace("<", "&lt;")
-        source = source.replace(">", "&gt;")
-        source = source.replace("'", "&apos;")
-        source = source.replace('"', "&quot;")
-        return source
+

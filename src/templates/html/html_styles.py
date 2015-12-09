@@ -432,7 +432,7 @@ div.gallery
       margin:10px;
       margin-left:20px;
       background-color:white;
-      border: solid #ccc 4px;
+      border: solid #ccc 2px;
       -moz-border-radius: 6px;
       -webkit-border-radius: 6px;
       border-radius: 6px;
@@ -692,6 +692,16 @@ div.gallery
   
   /* Indented code blocks inside text blocks */
   div.shorte_indented_code_block {margin:0px;padding:5px;margin-top:5px;margin-bottom:5px;margin-left:20px;white-space:pre;font-family:monospace;background-color:#eee;border:1px solid #ccc;border-radius:2px;}
+
+  /* Variable Lists */
+  div.shorte_variable_list
+  {
+    margin-left:20px;
+    padding:0px;
+  }
+  div.shorte_variable_list .var_name{font-weight:bold;background-color:#f7f7f7;padding:5px;border-bottom:1px solid #eee;}
+  div.shorte_variable_list .var_def{margin-left:20px;}
+
   ''').substitute({"priority"              : "$priority",
                    "star"                  : "$star",
                    "headings"              : headings,

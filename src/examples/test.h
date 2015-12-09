@@ -64,7 +64,7 @@ typedef enum
  *
  * @brief
  * This is a description of my public enum
- *
+ * 
  * A second paragraph
  *
  * @example: exec=True
@@ -157,8 +157,8 @@ struct handle_table_entry_tag * phead, * ptail;
  *     
  *     and a table
  *     @{table,
- *     - One   | Two
- *     - Three | Four
+ *     - One   ! Two
+ *     - Three ! Four
  *     }
  *
  * @example
@@ -211,10 +211,10 @@ typedef struct {
     int  ireg_data;    /**< Current values of the interrupt register */
     int  ereg_data;    /**< Current values of the enable register */
     int  sreg_data;    /**< Current values of the status register,
-                         *   Will be 0 when there is no status
-                         *   register for a node */
+                         * Will be 0 when there is no status
+                         * register for a node */
     int  slice;        /**< For interrupts with multiple instances,
-                         *   which instance has interrupted. */
+                         * which instance has interrupted. */
     int  xxx;
 } irq_handler_data_t;
 
