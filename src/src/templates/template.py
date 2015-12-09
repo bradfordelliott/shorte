@@ -443,11 +443,11 @@ class template_t(object):
         # Convert an < and > characters
         data = re.sub("&", "&amp;", data)
         data = re.sub("'", "&apos;", data)
-        data = re.sub("’", "&apos;", data)
         data = re.sub("<", "&lt;", data)
         data = re.sub(">", "&gt;", data)
 
-        data = re.sub("®", "&#174;", data)
+        #data = re.sub("’", "&apos;", data)
+        #data = re.sub("®", "&#174;", data)
 
         return data
 

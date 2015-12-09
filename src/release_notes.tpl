@@ -17,8 +17,12 @@ This is a known issue with LibreOffice and is a harmless note echoed by a subcom
 Please see this bug for information on this issue.
 [[http://lists.freedesktop.org/archives/libreoffice-bugs/2015-July/289309.html]]
 
-@h3 Version 1.0.77 ()
+@h3 Version 1.0.77 (Dec 9, 2015)
 - Introduced docbook for PDF generation
+- Added support for variable lists like docbook with the @vl or @vlist tags
+- Added support for the document status with the @doc.status tag in the header. This
+  currenly only does anything in the docbook template but other templates will
+  eventually be supported.
 - Updated the clang parser to improve the class parsing in C++ files
   like Qt.
 - Updated the markdown template to handle @define, @struct, @enum and @prototype
@@ -28,6 +32,8 @@ Please see this bug for information on this issue.
     - Fixed the default colors for graphs
     - Fixed the parsing of the ``` for code blocks in the source code parser
     - Fixed the handling of """ and ''' for multi-line modifiers when parsing shorte files
+    - Fixed the column separators for nested tables so they can use ! as a column
+      separator again.
 
 @h3 Version 1.0.76 (Nov 16, 2015)
 - Bug Fixes

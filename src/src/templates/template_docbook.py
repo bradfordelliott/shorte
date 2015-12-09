@@ -55,9 +55,9 @@ class template_docbook_t(template_t):
         elif(name == "pre"):
             self.m_contents += self.format_pre(tag)
         elif(name == "table"):
-            self.m_contents += self.format_table(tag.source, tag.contents)
+            self.m_contents += self.format_table(tag)
         elif(name in ("note", "tbd", "warning", "question")):
-            self.m_contents += self.format_note(tag)
+            self.m_contents += self.format_note(tag, name)
         elif(name == "quote"):
             self.m_contents += self.format_quote(tag)
         elif(name == "image"):
@@ -93,6 +93,7 @@ class template_docbook_t(template_t):
             replace = ''.join(parts[1:])
 
         replace = trim_leading_blank_lines(replace)
+                
         #print "TAG: %s, REPLACE: %s" % (tag,replace)
         
         if(-1 != tag.find("+")):
@@ -136,7 +137,7 @@ class template_docbook_t(template_t):
                 postfix += "\n"
             elif(tag in "table"):
                 table = self.m_engine.m_parser.parse_table(replace, {}, col_separators=['|','!'])
-                output = self.format_table(replace, table)
+                output = self.format_table(table)
                 #output = output.replace("\n", "<br/>")
                 #output = output.replace(" ", "&nbsp;")
                 return output
@@ -150,23 +151,15 @@ class template_docbook_t(template_t):
 
             ## Embed an inline note. This is useful when documenting
             ## source code.
-            #elif(tag in ("note", "warning", "tbd", "question")):
-            #    # We've already converted breaks so we need to unconvert them
-            #    # to format the note properly.
-            #    replace = replace.replace("<br/>", "\n")
-            #    replace = replace.replace(" ", "&nbsp;")
-            #    textblock = textblock_t(replace)
+            elif(tag in ("note", "warning", "tbd", "question")):
+                replace = replace.replace("'", "@apos;")
+                replace = replace.replace('"', "@quot;")
+                replace = replace.replace('<', "@lt;")
+                replace = replace.replace('>', "@gt;")
+                replace = replace.replace('&', "@amp;")
 
-            #    if(tag == "note"):
-            #        label = "Note"
-            #    elif(tag == "warning"):
-            #        label = "Warning"
-            #    elif(tag == "tbd"):
-            #        label = "TBD"
-            #    elif(tag == "question"):
-            #        label = "Question"
-
-            #    return self.format_note(textblock, label)
+                textblock = textblock_t(replace)
+                return self.format_note(textblock, tag)
 
         return prefix + replace + postfix
     
@@ -218,61 +211,6 @@ class template_docbook_t(template_t):
         else:
             enum_name = self.xmlize(enum.get_name())
 
-        values = self.xml("""
-    <row>
-        <?dbfo bgcolor="#e0e0e0"?>
-        <entry><emphasis role='code_object_section_title'>Values:</emphasis></entry>
-    </row>
-</tbody>
-</tgroup>
-<tgroup cols='2'>
-   <colspec colnum="1" colname="col1" colwidth="1*"/>
-   <colspec colnum="2" colname="col2" colwidth="2*"/>
-   <tbody>
-        <row>
-            <?dbfo bgcolor="#f0f0f0"?>
-            <entry><emphasis role='strong'>Name</emphasis></entry>
-            <entry><emphasis role='strong'>Description</emphasis></entry>
-        </row>
-""")
-
-        show_enum_vals = False
-
-        rindex = 0
-        for row in enum.values:
-            values += "<row>"
-            if(rindex & 1):
-                values += '<?dbfo bgcolor="#f7f7f7"?>'
-            rindex += 1
-
-            col_index = 0
-
-            for col in row["cols"]:
-                # Don't attempt to wikify or format the enum name. Instead
-                # create a link or cross reference to it
-                if(col_index == 0):
-                    link = col["text"]
-                    if(link in self.m_cross_references):
-                        WARNING("Duplicate cross reference detected on enumerated value %s" % col["text"])
-                        values += self.xml("<entry><para>") + self.xmlize(self.format_for_zero_breaks(col["text"])) + \
-                                  self.xml("</para></entry>")
-                    else:
-                        self.m_cross_references[link] = True
-                        values += self.xml("<entry><para id='%s' xreflabel='%s'>" % (self.xmlize(col["text"]), self.xmlize(col["text"]))) + \
-                                  self.xmlize(self.format_for_zero_breaks(col["text"])) + \
-                                  self.xml("</para></entry>")
-                
-                else:
-                    if((not show_enum_vals) and col_index == 1):
-                        col_index += 1
-                        continue
-
-                    values += self.xml("<entry>") + self.format_textblock(col["textblock"]) + self.xml("</entry>")
-
-                col_index += 1
-            values += "</row>"
-
-        values += self.xml("</tbody></tgroup><tgroup cols='1'><tbody>")
 
         xml = self.xml(string.Template("""
 <informaltable frame="all" rowsep="0">
@@ -283,13 +221,11 @@ class template_docbook_t(template_t):
             <?dbfo bgcolor="#d0d0d0"?>
             <entry><emphasis role='code_object_title'>Enum:</emphasis> ${name}</entry>
         </row>
-        ${values}
         ${common}
     </tbody>
 </tgroup>
 </informaltable>
 """).substitute({"name"   : enum_name,
-                 "values" : values,
                  "common" : self.format_object_common_sections(enum)}))
 
         return xml
@@ -704,6 +640,7 @@ ${caption}
         xml = ""
         xml += self.format_object_section(obj, 'description')
         xml += self.format_object_section(obj, 'prototype')
+        xml += self.format_object_section(obj, 'values')
         xml += self.format_object_section(obj, 'params')
         xml += self.format_object_section(obj, 'example')
         xml += self.format_object_section(obj, 'deprecated')
@@ -740,7 +677,7 @@ ${caption}
             source = self.format_source_code(language, example, exclude_wikiwords, False)
 
             title = "Example:"
-            paragraph = self.xml("<para>The following example demonstrates the use of this method:</para><programlisting linenumbering='numbered' language='%s'>" % language) + source + self.xml("</programlisting>")
+            paragraph = self.xml("<para>The following is an example:</para><programlisting linenumbering='numbered' language='%s'>" % language) + source + self.xml("</programlisting>")
 
         elif(section == "params"):
             if(not obj.has_params()):
@@ -780,7 +717,12 @@ ${caption}
                 paragraph += self.xml("    <entry>") + pname + self.xml("</entry>\n")
                 paragraph += self.xml("    <entry>") + ptype + self.xml("</entry>\n")
                 paragraph += self.xml("    <entry>") + pio + self.xml("</entry>\n")
-                paragraph += self.xml("    <entry>") + self.format_textblock(param.get_description()) + self.xml("</entry>\n")
+
+                if(param.has_description()):
+                    pdesc = self.format_textblock(param.get_description())
+                else:
+                    pdesc = ""
+                paragraph += self.xml("    <entry>") + pdesc + self.xml("</entry>\n")
                 
                 paragraph += self.xml("  </row>\n")
 
@@ -830,6 +772,63 @@ ${caption}
             title = "Introduced In:"
             paragraph = self.format_textblock(obj.get_since())
 
+        elif(section == "values"):
+            if(not obj.has_values()):
+                return ''
+
+            title = "Values:"
+        
+            values = self.xml("""
+<informaltable frame="none">
+<tgroup cols='2'>
+   <colspec colnum="1" colname="col1" colwidth="1*"/>
+   <colspec colnum="2" colname="col2" colwidth="2*"/>
+   <tbody>
+        <row>
+            <?dbfo bgcolor="#f0f0f0"?>
+            <entry><emphasis role='strong'>Name</emphasis></entry>
+            <entry><emphasis role='strong'>Description</emphasis></entry>
+        </row>
+""")
+
+            show_enum_vals = False
+
+            rindex = 0
+            for row in obj.get_values():
+                values += "<row>"
+                if(rindex & 1):
+                    values += '<?dbfo bgcolor="#f7f7f7"?>'
+                rindex += 1
+
+                col_index = 0
+
+                for col in row["cols"]:
+                    # Don't attempt to wikify or format the enum name. Instead
+                    # create a link or cross reference to it
+                    if(col_index == 0):
+                        link = col["text"]
+                        if(link in self.m_cross_references):
+                            WARNING("Duplicate cross reference detected on value %s" % col["text"])
+                            values += self.xml("<entry><para>") + self.xmlize(self.format_for_zero_breaks(col["text"])) + \
+                                      self.xml("</para></entry>")
+                        else:
+                            self.m_cross_references[link] = True
+                            values += self.xml("<entry><para id='%s' xreflabel='%s'>" % (self.xmlize(col["text"]), self.xmlize(col["text"]))) + \
+                                      self.xmlize(self.format_for_zero_breaks(col["text"])) + \
+                                      self.xml("</para></entry>")
+                    
+                    else:
+                        if((not show_enum_vals) and col_index == 1):
+                            col_index += 1
+                            continue
+
+                        values += self.xml("<entry>") + self.format_textblock(col["textblock"]) + self.xml("</entry>")
+
+                    col_index += 1
+                values += "</row>"
+
+            values += self.xml("</tbody></tgroup></informaltable>")
+            paragraph = values
 
         else:
             FATAL("Unsupported section: %s" % construct)
@@ -846,15 +845,24 @@ ${caption}
         return template_section.substitute({"title" : title, "paragraph" : paragraph})
     
     
-    def format_note(self, tag):
+    def format_note(self, tag, label):
+        
+        if(isinstance(tag, tag_t)):
+            note = tag.contents
+        else:
+            note = tag
 
         xml_tag = "note"
 
-        title = tag.name.title()
-        if(tag.name == "tbd"):
+        if(label == "note"):
+            title = "Note"
+        elif(label == "tbd"):
             title = "TBD"
-        elif(tag.name == "warning"):
+        elif(label == "warning"):
+            title = "Warning"
             xml_tag = "warning"
+        elif(label == "question"):
+            title = "Question"
         
         xml = string.Template(self.xml("""
 <div>
@@ -867,9 +875,9 @@ ${content}
 </${tag}>
 <para></para>
 </div>
-""")).substitute({"tag"     : xml_tag,
-                 "title"   : tag.name.title(),
-                 "content" : self.format_textblock(tag.contents)})
+""")).substitute({"tag"    : xml_tag,
+                 "title"   : title,
+                 "content" : self.format_textblock(note)})
 
         return xml
     
@@ -939,7 +947,12 @@ This will skip the author column which is missing in some legacy documents.
         return xml
     
     
-    def format_table(self, source, table):
+    def format_table(self, tag):
+
+        if(isinstance(tag, tag_t)):
+            table = tag.contents
+        else:
+            table = tag
 
         xml = self.xml("<informaltable>\n")
         
@@ -948,12 +961,15 @@ This will skip the author column which is missing in some legacy documents.
 
         col_num_check = 0
         for row in table.get_rows():
-            
-            if(len(row["cols"]) > col_num_check):
-                col_num_check = len(row["cols"])
+            cols = 0
+            for col in row["cols"]:
+                cols += col["span"]
 
-        if(num_cols != col_num_check):
-            FATAL("Number of columns doesn't line up!")
+            if(cols > col_num_check):
+                col_num_check = cols
+
+        #if(num_cols != col_num_check):
+        #    FATAL("Number of columns doesn't line up parsing the table\n\nNumber of columns: %d, Calculated columns: %d\n\n[%s]" % (num_cols, col_num_check, table.source))
 
         xml += self.xml("  <tgroup cols=\"%d\">\n" % num_cols)
         
@@ -1097,7 +1113,7 @@ This will skip the author column which is missing in some legacy documents.
         # If the document is being inlined then need to get
         # rid of the link prefix and just use a local link
         if(1): #self.is_inline()):
-            output = "<xref linkend='%s'>%s</xref>" % (wikiword.wikiword, wikiword.label)
+            output = "<xref linkend='%s'>%s</xref>" % (self.xmlize(wikiword.wikiword), self.xmlize(wikiword.label))
         else:
             if(0): #self.m_wikiword_path_prefix):
                 output = "<ulink url='%s#%s'>%s</ulink>" % (self.get_output_path(wikiword.link), wikiword.wikiword, wikiword.label)
@@ -1278,8 +1294,13 @@ This will skip the author column which is missing in some legacy documents.
                 "-xsl", xsl_file, "-pdf", pdf_file]
         phandle = subprocess.Popen(cmd, stdout=subprocess.PIPE) #, stderr=subprocess.PIPE)
         result = phandle.stdout.read()
+        
         #result += phandle.stderr.read()
         phandle.wait()
+        
+        rc = phandle.returncode
+        if(rc != 0):
+            FATAL("Failed generating docbook PDF")
 
         #print result
 
@@ -1351,7 +1372,7 @@ This will skip the author column which is missing in some legacy documents.
                         link = ""
                     else:
                         self.m_cross_references[link] = True
-                        link = " id='%s' xreflabel='%s' " % (link, heading_label)
+                        link = " id='%s' xreflabel='%s' " % (self.xmlize(link), heading_label)
 
                     headings.append({"level" : level, "name" : heading_label})
 

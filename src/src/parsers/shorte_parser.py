@@ -823,7 +823,8 @@ class shorte_parser_t(parser_t):
            declaration
         '''
 
-        table2 = table_t()
+        table2 = src.shorte_types.table_t()
+        table2.set_source(source)
 
         for modifier in modifiers:
             if(modifier in ("caption", "description")):

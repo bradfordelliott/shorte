@@ -597,75 +597,6 @@ class checklist_t(object):
         self.items = items
 
 
-
-class table_t:
-    def __init__(self):
-        self.rows = []
-        self.modifiers = {}
-        self.max_cols = 1
-        self.widths = None
-        self.width = None
-        self.title = None
-        self.caption = None
-
-        # Attributes primarily for ODT
-        self.table_style_name = None
-        self.column_styles = None
-
-        self.style = None
-
-        pass
-
-    def get_title(self):
-        return self.title
-    def has_title(self):
-        if(self.title != None and len(self.title) > 0):
-            return True
-        return False
-
-    def get_widths(self):
-        return self.widths
-    def has_widths(self):
-        if(self.widths != None and len(self.widths) > 0):
-            return True
-        return False
-
-    def has_style(self):
-        if(self.style != None):
-            return True
-        return False
-    def get_style(self):
-        return self.style
-
-    def get_max_cols(self):
-        return self.max_cols
-
-    def set_caption(self, caption):
-        self.caption = caption
-    def get_caption(self):
-        return self.caption
-    def has_caption(self):
-        if(self.caption != None):
-            return True
-        return False
-
-    def add_row(self, row):
-        self.rows.append(row)
-
-    def get_rows(self):
-        return self.rows
-    def get_num_rows(self):
-        return len(self.rows)
-
-    def has_column_styles(self):
-        if(self.column_styles != None):
-            return True
-        return False
-
-    def get_column_styles(self):
-        return self.column_styles
-
-
 g_images  = []
 index = []
 
@@ -882,6 +813,13 @@ def trim_leading_indent(source, allow_second_line_indent_check=True):
     while i < len(lines[0]) and lines[0][i] == " ":
         leading_indent += lines[0][i]
         i += 1
+
+    # If the first line is part of a list then don't
+    # allow the second line indent check because it may
+    # break lists
+    first_line = lines[0].strip()
+    if(first_line.startswith("-")):
+        allow_second_line_indent_check=False
 
     #print "Source: [%s]" % source
     

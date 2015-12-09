@@ -3117,7 +3117,6 @@ $href_end
             replace = ''.join(parts[1:])
 
         replace = trim_leading_blank_lines(replace)
-        replace = trim_leading_indent(replace, True)
         
         if(-1 != tag.find("+")):
             tags = tag.split("+")

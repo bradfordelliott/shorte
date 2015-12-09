@@ -31,6 +31,7 @@ except:
     WARNING("Failed to load Image library. Try installing it using the command 'pip install Pillow'")
 
 from src.shorte_defines import *
+import src.shorte_types
 from template import *
 
 EOL = "\r\n"
@@ -1978,7 +1979,7 @@ class template_odt_t(template_t):
 
         define = tag.contents
 
-        table = table_t()
+        table = src.shorte_types.table_t()
         table.max_cols = 2
         table.title = "Define: %s" % define.name
         table.rows = []
@@ -2068,7 +2069,7 @@ ${desc}
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        table = table_t()
+        table = src.shorte_types.table_t()
         table.title = "Structure: %s" % struct.get_name()
         table.max_cols = struct.get_max_cols()
         table.table_style_name = style_name
@@ -2162,7 +2163,7 @@ ${desc}
         # get the style information associated with the style name
         style = self.__table_get_style(style_name)
 
-        table = table_t()
+        table = src.shorte_types.table_t()
         table.title = "Enum: " + enum.name
         table.max_cols = col_span
         table.table_style_name = "default"
@@ -2743,7 +2744,7 @@ ${desc}
                           "shorte_type_summary_col2",
                           "shorte_type_summary_col2"]
         
-        table = table_t()
+        table = src.shorte_types.table_t()
         table.max_cols = max_cols
         table.column_styles = col_styles
         table.rows = []
@@ -2889,7 +2890,7 @@ ${desc}
     def format_testcase(self, tag):
 
         testcase = tag.contents
-        table = table_t()
+        table = src.shorte_types.table_t()
         table.max_cols = 2
         table.column_styles = ["shorte_func_summary_col1", "shorte_func_summary_col2"]
         table.rows = []
