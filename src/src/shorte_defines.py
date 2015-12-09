@@ -1384,3 +1384,15 @@ For more information refer to:
     https://github.com/bradfordelliott/shorte
 ''' % version
 
+def shorte_path_to_url(path):
+    """This method is called to convert a local file path into
+       a URL/URI which is used for tools like docbook
+    """
+    path = path.replace("/cygdrive/c", "")
+    path = path.replace("C:", "")
+    path = path.replace("\\", "/")
+
+    if(not path.startswith("/")):
+        path = "/" + path
+    
+    return "file://%s" % path

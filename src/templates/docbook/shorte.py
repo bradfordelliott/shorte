@@ -13,6 +13,8 @@ class custom_styles(docbook_styles):
         self.footer_middle_text = "https://github.com/bradfordelliott/shorte"
 
     def format_title_page(self, engine, doc_info, revision_history):
+        logo = shorte_path_to_url(shorte_get_startup_path() + "/templates/docbook/shorte/shorte.png")
+
         return string.Template('''
 <bookinfo>
     <title>${title_long}</title>
@@ -43,7 +45,7 @@ class custom_styles(docbook_styles):
                  "doc_number"  : doc_info.number(),
                  "doc_version" : doc_info.version(),
                  "revision_history" : revision_history,
-                 "logo"        : shorte_get_startup_path() + os.sep + "templates" + os.sep + "docbook" + os.sep + "shorte" + os.sep + "shorte.png"})
+                 "logo"        : logo})
 
     
     def format_last_page(self):
@@ -52,6 +54,9 @@ class custom_styles(docbook_styles):
            
            @return The contents of the final page
         """
+        
+        logo = shorte_path_to_url(shorte_get_startup_path() + "/templates/docbook/shorte/shorte.png")
+
         return string.Template("""
 <colophon id="END_OF_DOCUMENT">
 <title></title>
@@ -67,6 +72,6 @@ class custom_styles(docbook_styles):
 <para></para>
 <para align="center"><ulink url="https://github.com/bradfordelliott/shorte">https://github.com/bradfordelliott/shorte</ulink></para>
 </colophon>
-""").substitute({"logo" : shorte_get_startup_path() + os.sep + "templates" + os.sep + "docbook" + os.sep + "shorte" + os.sep + "shorte.png"})
+""").substitute({"logo" : logo})
 
 

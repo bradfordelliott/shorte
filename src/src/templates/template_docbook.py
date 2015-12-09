@@ -306,6 +306,8 @@ class template_docbook_t(template_t):
         width = "%fin" % (width/dpi)
         height = "%fin" % (height/dpi)
 
+        src = shorte_path_to_url(src)
+
         #contents = re.sub("<imagedata", '<imagedata scalefit="1" width="100%"', contents)
 
         xml = self.xml(string.Template("""
@@ -1219,7 +1221,7 @@ This will skip the author column which is missing in some legacy documents.
         docbook_file  = output_file + ".xml"
         pdf_file      = output_file + ".pdf"
         xsl_file = shorte_get_scratch_dir() + "/docbook.xsl"
-
+        
         status = ""
         if(self.m_engine.get_doc_info().has_status()):
             status = self.m_engine.get_doc_info().get_status()
@@ -1286,21 +1288,37 @@ This will skip the author column which is missing in some legacy documents.
         path_fop = shorte_get_config("docbook", "path.fop", True)
         path_fop_xconf = shorte_get_config("docbook", "path.fop.xconf", True)
 
+        startup_path = shorte_get_startup_path()
+        if(sys.platform in ("cygwin")):
+            path_fop       = path_fop.replace("C:/", "/cygdrive/c/")
+            xsl_file = xsl_file.replace("/cygdrive/c/", "C:/")
+            docbook_file = docbook_file.replace("/cygdrive/c/", "C:/")
+            pdf_file = pdf_file.replace("/cygdrive/c/", "C:/")
+
+        startup_path = os.path.normpath(startup_path)
+        banner_image  = shorte_path_to_url(startup_path + "/templates/docbook/%s/%s_banner.png" % (theme,theme))
+        draft_image   = shorte_path_to_url(startup_path + "/templates/shared/draft.png")
+        template_path = shorte_path_to_url(startup_path + "/templates/docbook")
+
         cmd = [path_fop, "-c", path_fop_xconf,
-                "-param", "template_path", shorte_get_startup_path() + "/templates/docbook",
-                "-param", "header.image.filename", shorte_get_startup_path() + "/templates/docbook/%s/%s_banner.png" % (theme,theme),
-                "-param", "draft.watermark.image", shorte_get_startup_path() + "/templates/shared/draft.png",
+                "-param", "template_path", template_path,
+                "-param", "header.image.filename", banner_image, 
+                "-param", "draft.watermark.image", draft_image,
                 "-xml", docbook_file,
                 "-xsl", xsl_file, "-pdf", pdf_file]
-        phandle = subprocess.Popen(cmd, stdout=subprocess.PIPE) #, stderr=subprocess.PIPE)
-        result = phandle.stdout.read()
-        
-        #result += phandle.stderr.read()
-        phandle.wait()
-        
-        rc = phandle.returncode
-        if(rc != 0):
-            FATAL("Failed generating docbook PDF")
+
+        try:
+            phandle = subprocess.Popen(cmd, stdout=subprocess.PIPE) #, stderr=subprocess.PIPE)
+            result = phandle.stdout.read()
+            #result += phandle.stderr.read()
+            phandle.wait()
+            
+            rc = phandle.returncode
+            if(rc != 0):
+                FATAL("Failed generating docbook PDF")
+        except Exception as e:
+            print " ".join(cmd)
+            FATAL(e.__str__())
 
         #print result
 

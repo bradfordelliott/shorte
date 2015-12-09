@@ -25,7 +25,8 @@ class docbook_styles(object):
 
     def format_admonition_styles(self):
     
-        graphics_path = shorte_get_startup_path() + "/templates/shared/"
+        graphics_path = shorte_path_to_url(shorte_get_startup_path() + "/templates/shared/")
+
         return string.Template("""
 <!-- Turn on admonition graphics -->
 <xsl:param name="admon.graphics">1</xsl:param>
@@ -619,6 +620,7 @@ class docbook_styles(object):
         xml += self.format_titlepage_styles()
 
         xsl_title_page = shorte_get_startup_path() + "/templates/docbook/titlepage.xsl"
+        xsl_title_page = shorte_path_to_url(xsl_title_page)
 
         xml_status = ""
         if(status == "draft"):
